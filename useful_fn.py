@@ -37,7 +37,15 @@ def ma(data,period):
 def ema(data,period):
     avg = data.ewm(halflife=period).mean()
     return avg
+def calc_var_RT(prev_var,fut,fut0):
+	ret = fut / fut0 - 1
+	return ret**2 + var**2
 
+def ema_RT(prev_ema, data,period):
+	alpha =  1 - math.exp(math.log(0.5) / halflife)
+    avg = data * alpha + prev_ema* (1-alpha)
+    return avg
+    
 def convert_time(timestamp):
     try:
         d = pd.to_datetime(timestamp,infer_datetime_format=True)
