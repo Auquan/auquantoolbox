@@ -5,9 +5,20 @@ from datetime import date
 from datetime import datetime
 import numpy as np
 import constants
+import useful_fn as utils
+
 
 def getStrikePriceFromInstrumentId(instrumentId, instrumentPrefix):
-    return 0.0 # TODO
+    return int(instrumentId[len(instrumentPrefix):-3]) / 100
+
+
+def getPriceFromInstrument(optionInstrument):
+    # TODO: Fix this. use all book data lines
+    firstBookData = optionInstrument.bookData[0]
+    return utils.get_vwap(firstBookData['bidVol'],
+                          firstBookData['bidPrice'],
+                          firstBookData['askPrice'],
+                          firstBookData['askVol'])
 
 #=========================================================================
 # CLASS OPTION
@@ -16,21 +27,20 @@ class Option:
     """
     This class will group the different black-shcoles calculations for an opion
     """
-    def __init__(self, futurePrice, optionInstrument, exp_date, instrumentPrefix, rf=0.01, vol=0.3, div=0):
+    def __init__(self, futurePrice, instrumentId, exp_date, instrumentPrefix, eval_date, rf=0.01, vol=0.3, div=0):
         self.s = futurePrice
-        self.k = getStrikePriceFromInstrumentId(optionInstrument.instrumentId, instrumentPrefix)
+        self.k = getStrikePriceFromInstrumentId(instrumentId, instrumentPrefix)
         self.rf = rf
         self.vol = vol
-        self.eval_date = optionInstrument.time # TODO: should be eval_time
+        self.eval_date = eval_date
         self.exp_date = exp_date
         self.t = self.calculate_t
         if self.t == 0:
             self.t = 0.000001  # Case valuation in expiration date
-        self.price = price
+        self.price = 0 # TODO Set from given vol and s
         self.div = div
-        # TODO: change type to enum constants instead
-        self.type = "C" if (optionInstrument.getTypeOfOption == constants.OPTION_TYPE_CALL) else "P"
-        self.instrumentId = optionInstrument.instrumentId
+        self.type = "C" if (instrumentId.endsWith("003")) else "P"
+        self.instrumentId = instrumentId
 
     def convert_time(self, timestamp):
         try:

@@ -6,8 +6,6 @@ import numpy as np
 import greeks
 import datascraper as ds
 import os
-import future
-import instrument
 import option
 
 
@@ -90,7 +88,7 @@ class UnderlyingProcessor:
     # returns dictionary of instrumentId -> Option class object
     def getAllCurrentOptions(self):
         toRtn = {}
-        for instrumentId in self.histOptions
+        for instrumentId in self.histOptions:
             toRtn[instrumentId] = self.histOptions[instrumentId][-1]
         return toRtn
 
@@ -103,7 +101,7 @@ class UnderlyingProcessor:
         if instrumentId not in self.histOptions:
             self.histOptions[instrumentId] = []
 
-    def addNewOption(opt):
+    def addNewOption(self, opt):
         self.ensureInstrumentId(opt.instrumentId)
         self.histOptions[opt.instrumentId].append(opt)
 
@@ -111,20 +109,27 @@ class UnderlyingProcessor:
         filename = '%s/%s/data' % (FILE_PATH, self.trade_date)
         exp_date = get_exp_date(self.trade_date, self.names)
         instrumentsToProcess = ds.loadData(filename)  # TODO
-        data = pd.DataFrame(index=[], columns=['Future', 'Vol',
-                                               'Mkt_Straddle', 'Theo_Straddle'])
+        data = pd.DataFrame(index=[], columns=['Future', 'Vol'])
         for instrument in instrumentsToProcess:
             if instrument.isFuture():
-                self.futures.append(currentFuture)
+                self.futures.append(instrument)
                 # todo: update price of options
+                # 1. update current future value
+                # 2. opt.s = opt.s + futureValue - lastFutureValue
+                # 3. calculate Vol (do not change opt.vol) 
+                # 3.1 update opt.vol
             else:
                 opt = option.Option(futurePrice=self.getCurrentFuture().futureVal,
                                     optionInstrument=instrument,
                                     exp_date=exp_date,
                                     instrumentPrefix=SAMPLE_OPTION_INSTRUMENT_PREFIX,
                                     rf=0.14)
-                self.addNewOption(opt)
-                # todo: update future value store it in data
+                self.addNewOption(instrument)
+                # todo: update new vol
+                # 1. update option.price
+                # 2. update option.vol
+                # 3. calculate Vol
+
 
 
 
