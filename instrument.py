@@ -1,4 +1,5 @@
 import constants
+import useful_fn as utils
 
 class Instrument:
 
@@ -22,3 +23,12 @@ class Instrument:
             return constants.OPTION_TYPE_CALL
         print("Error: cant figure out type of option from instrument: " + self.instrumentId)
         return constants.OPTION_TYPE_UNDEFINED
+
+    def getVwap(self):
+        firstBookData = self.bookData[0]
+        # TODO: change to floats?
+        # TODO: use all book data
+        return utils.get_vwap(firstBookData['bidVol'],
+                              firstBookData['bidPrice'],
+                              firstBookData['askPrice'],
+                              firstBookData['askVol'])
