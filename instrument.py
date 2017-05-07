@@ -8,8 +8,7 @@ class Instrument:
     bookData: array of line option data. Dictionary with keys bidVol, bidPrice, askVol, askPrice
     '''
     def __init__(self, time, date, instrumentId, bookData):
-        self.time = time
-        self.date = date
+        self.time = date + ' ' + time # TODO: standardize this please
         self.instrumentId = instrumentId
         self.bookData = bookData
 
@@ -25,10 +24,7 @@ class Instrument:
         return constants.OPTION_TYPE_UNDEFINED
 
     def getVwap(self):
-        firstBookData = self.bookData[0]
-        # TODO: change to floats?
-        # TODO: use all book data
-        return utils.get_vwap(firstBookData['bidVol'],
-                              firstBookData['bidPrice'],
-                              firstBookData['askPrice'],
-                              firstBookData['askVol'])
+        return utils.get_vwap(self.bookData['bidVol'],
+                              self.bookData['bidPrice'],
+                              self.bookData['askPrice'],
+                              self.bookData['askVol'])

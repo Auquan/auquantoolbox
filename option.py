@@ -10,14 +10,13 @@ import useful_fn as utils
 def getStrikePriceFromInstrumentId(instrumentId, instrumentPrefix):
     return int(instrumentId[len(instrumentPrefix):-3])
 
+def get_index_val(fut, roll):
+    # rf = opt_arr[0].rf
+    # t = opt_arr[0].t
+    # s1 = opt_arr[1].price - opt_arr[0].price + opt_arr[0].k * math.exp(-rf * t)
+    # s2 = opt_arr[3].price - opt_arr[2].price + opt_arr[2].k * math.exp(-rf * t)
+    return fut - roll
 
-def getPriceFromInstrument(optionInstrument):
-    # TODO: Fix this. use all book data lines
-    firstBookData = optionInstrument.bookData[0]
-    return utils.get_vwap(firstBookData['bidVol'],
-                          firstBookData['bidPrice'],
-                          firstBookData['askPrice'],
-                          firstBookData['askVol'])
 #=========================================================================
 # CLASS OPTION
 #=========================================================================
@@ -32,23 +31,21 @@ class Option:
         self.vol = vol
         self.eval_date = eval_date # TODO: should be eval_time
         self.exp_date = exp_date
-        self.t = self.calculate_t
+        self.t = self.calculate_t()
         if self.t == 0:
             self.t = 0.000001  # Case valuation in expiration date
         self.price = 0 # TODO: Set from given vol and s
         self.div = div
         # TODO: change type to enum constants instead
-        self.type = "C" if (instrumentId.endsWith("003")) else "P"
-        self.instrumentId = optionInstrument.instrumentId
+        self.type = "C" if (instrumentId.endswith("003")) else "P"
+        self.instrumentId = instrumentId
 
-    def updateWithInstrument(self, optionInstrument):
+    def updateWithInstrument(self, optionInstrument, currentFutureVal):
         self.eval_date = optionInstrument.time
+        self.s = get_index_val(currentFutureVal, constants.ROLL)
         self.price = optionInstrument.getVwap()
-        # TODO: recalculate vol?
+        self.vol = self.get_impl_vol()
 
-    def updateWithFutureDelta(self, delta):
-        self.s += delta
-        # TODO: recalculate vol?
 
     def convert_time(self, timestamp):
         try:
@@ -91,9 +88,6 @@ class Option:
             d1 = (math.log(self.s / self.k) + (self.rf + self.div +
                                                math.pow(self.vol, 2) / 2) * self.t) / (self.vol * math.sqrt(self.t))
         except:
-            print(math.log(self.s / self.k))
-            print(math.pow(self.vol, 2))
-            print(self.t)
             print(math.sqrt(self.t))
         d2 = d1 - self.vol * math.sqrt(self.t)
         if self.type == 'C':
