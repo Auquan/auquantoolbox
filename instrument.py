@@ -1,4 +1,5 @@
 import constants
+import useful_fn as utils
 
 class Instrument:
 
@@ -7,8 +8,7 @@ class Instrument:
     bookData: array of line option data. Dictionary with keys bidVol, bidPrice, askVol, askPrice
     '''
     def __init__(self, time, date, instrumentId, bookData):
-        self.time = time
-        self.date = date
+        self.time = date + ' ' + time # TODO: standardize this please
         self.instrumentId = instrumentId
         self.bookData = bookData
 
@@ -22,3 +22,9 @@ class Instrument:
             return constants.OPTION_TYPE_CALL
         print("Error: cant figure out type of option from instrument: " + self.instrumentId)
         return constants.OPTION_TYPE_UNDEFINED
+
+    def getVwap(self):
+        return utils.get_vwap(self.bookData['bidVol'],
+                              self.bookData['bidPrice'],
+                              self.bookData['askPrice'],
+                              self.bookData['askVol'])

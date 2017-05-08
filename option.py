@@ -7,18 +7,15 @@ import numpy as np
 import constants
 import useful_fn as utils
 
-
 def getStrikePriceFromInstrumentId(instrumentId, instrumentPrefix):
-    return int(instrumentId[len(instrumentPrefix):-3]) / 100
+    return int(instrumentId[len(instrumentPrefix):-3])
 
-
-def getPriceFromInstrument(optionInstrument):
-    # TODO: Fix this. use all book data lines
-    firstBookData = optionInstrument.bookData[0]
-    return utils.get_vwap(firstBookData['bidVol'],
-                          firstBookData['bidPrice'],
-                          firstBookData['askPrice'],
-                          firstBookData['askVol'])
+def get_index_val(fut, roll):
+    # rf = opt_arr[0].rf
+    # t = opt_arr[0].t
+    # s1 = opt_arr[1].price - opt_arr[0].price + opt_arr[0].k * math.exp(-rf * t)
+    # s2 = opt_arr[3].price - opt_arr[2].price + opt_arr[2].k * math.exp(-rf * t)
+    return fut - roll
 
 #=========================================================================
 # CLASS OPTION
@@ -32,15 +29,23 @@ class Option:
         self.k = getStrikePriceFromInstrumentId(instrumentId, instrumentPrefix)
         self.rf = rf
         self.vol = vol
-        self.eval_date = eval_date
+        self.eval_date = eval_date # TODO: should be eval_time
         self.exp_date = exp_date
-        self.t = self.calculate_t
+        self.t = self.calculate_t()
         if self.t == 0:
             self.t = 0.000001  # Case valuation in expiration date
-        self.price = 0 # TODO Set from given vol and s
+        self.price = 0 # TODO: Set from given vol and s
         self.div = div
-        self.type = "C" if (instrumentId.endsWith("003")) else "P"
+        # TODO: change type to enum constants instead
+        self.type = "C" if (instrumentId.endswith("003")) else "P"
         self.instrumentId = instrumentId
+
+    def updateWithInstrument(self, optionInstrument, currentFutureVal):
+        self.eval_date = optionInstrument.time
+        self.s = get_index_val(currentFutureVal, constants.ROLL)
+        self.price = optionInstrument.getVwap()
+        self.vol = self.get_impl_vol()
+
 
     def convert_time(self, timestamp):
         try:
@@ -83,9 +88,6 @@ class Option:
             d1 = (math.log(self.s / self.k) + (self.rf + self.div +
                                                math.pow(self.vol, 2) / 2) * self.t) / (self.vol * math.sqrt(self.t))
         except:
-            print(math.log(self.s / self.k))
-            print(math.pow(self.vol, 2))
-            print(self.t)
             print(math.sqrt(self.t))
         d2 = d1 - self.vol * math.sqrt(self.t)
         if self.type == 'C':
@@ -141,11 +143,11 @@ class Option:
         """
         This function will iterate until finding the implied volatility
         """
-        ITERATIONS = 100
-        ACCURACY = 0.05
+        ITERATIONS = 500
+        ACCURACY = 0.001
         low_vol = 0
         high_vol = 1
-        self.vol = guess  # It will try mid point and then choose new interval
+        self.vol = guess  ## It will try mid point and then choose new interval
         self.get_price_delta()
         for i in range(ITERATIONS):
             if self.calc_price > self.price + ACCURACY:
@@ -154,17 +156,17 @@ class Option:
                 low_vol = self.vol
             else:
                 break
-            self.vol = low_vol + (high_vol - low_vol) / 2.0
+            self.vol = low_vol + (high_vol - low_vol)/2.0
             #print(low_vol,high_vol,self.vol, self.price, self.calc_price)
             self.get_price_delta()
-
+ 
         return self.vol
 
     def get_price_by_binomial_tree(self):
         """
         This function will make the same calculation but by Binomial Tree
         """
-        n = 30
+        n = 100
         deltaT = self.t / n
         u = math.exp(self.vol * math.sqrt(deltaT))
         d = 1.0 / u
@@ -267,82 +269,82 @@ class Options_strategy:
 
 
 if __name__ == '__main__':
-
-    #=========================================================================
+ 
+ 
+    #===========================================================================
     # TO CHECK OPTION CALCULATIONS
-    #=========================================================================
-    s = 21969
-    k = 22000
-    exp_date = '20170427 15:30:00'
-    eval_date = '20170425 14:43:59'
-    rf = .0635
+    #===========================================================================
+    s = 22307
+    k = 22300   
+    exp_date = '20170504 15:30:00'
+    eval_date = datetime.now()
+    rf = .064
     vol = 0.155
     div = 0
     type = 'C'
     opt = Option(s=s, k=k, eval_date=eval_date, exp_date=exp_date, rf=rf, vol=vol, type=type,
-                 div=div)
+                 div = div)
+    # price, delta, theta, gamma = opt.get_all()
+    # print "-------------- FIRST OPTION -------------------"
+    # print "Price CALL: " + str(price)  # 2.97869320042
+    # print "Delta CALL: " + str(delta)  # 0.664877358932
+    # print "Theta CALL: " + str(theta)  # 0.000645545628288
+    # print "Gamma CALL:" + str(gamma)   # 0.021127937082
+ 
+
+    #===========================================================================
+    # TO CHECK OPTION IMPLIED VOLATILITY CALCULATION 
+    #===========================================================================
+    bid_vol, bid_price, ask_price, ask_vol = [120 ,  69.40 ,  70.00   ,3560  ]
+    vwap_price = (float(bid_price) * float(ask_vol) + float(ask_price) * float(bid_vol))/float(bid_vol+ask_vol) 
+    opt = Option(s=s, k=k, eval_date=eval_date, exp_date=exp_date, rf=rf, price=vwap_price, type=type)
+    ivol = opt.get_impl_vol(vol)
     price, delta, theta, gamma = opt.get_all()
     print "-------------- FIRST OPTION -------------------"
-    print "Price CALL: " + str(price)  # 2.97869320042
-    print "Delta CALL: " + str(delta)  # 0.664877358932
-    print "Theta CALL: " + str(theta)  # 0.000645545628288
-    print "Gamma CALL:" + str(gamma)   # 0.021127937082
-
+    print "VWAP Price: " + str(vwap_price)
+    print "Implied Volatility: " + str(ivol)
+    print "Price CALL: " + str(price)
     price = opt.get_price_by_binomial_tree()
     print "Price by BT:" + str(price)
-    #=========================================================================
-    # TO CHECK OPTION IMPLIED VOLATILITY CALCULATION
-    #=========================================================================
-    bid_vol, bid_price, ask_price, ask_vol = [120, 74.55, 75.05, 80]
-    price = (bid_price * ask_vol + ask_price *
-             bid_vol) / float(bid_vol + ask_vol)
-    opt = Option(s=s, k=k, eval_date=eval_date,
-                 exp_date=exp_date, rf=rf, price=price, type=type)
-    ivol = opt.get_impl_vol(vol)
-    print "-------------- FIRST OPTION -------------------"
-    print "VWAP Price: " + str(price)
-    print "Implied Volatility: " + str(ivol)
 
-    k = 22000
+
+    k = 22300
     type = 'P'
-    opt = Option(s=s, k=k, eval_date=eval_date,
-                 exp_date=exp_date, rf=rf, vol=vol, type=type)
-    price, delta, theta, gamma = opt.get_all()
-    print "-------------- SECOND OPTION -------------------"
-    print "Price CALL: " + str(price)   # 7.02049813137
-    print "Delta CALL: " + str(delta)   # 0.53837898036
-    print "Theta CALL: " + str(theta)   # -0.00699852931575
-    print "Gamma CALL:" + str(gamma)    # 0.0230279263655
+    opt = Option(s=s, k=k, eval_date=eval_date, exp_date=exp_date, rf=rf, vol=vol, type=type)
+    # price, delta, theta, gamma = opt.get_all()
+    # print "-------------- SECOND OPTION -------------------"
+    # print "Price CALL: " + str(price)   # 7.02049813137
+    # print "Delta CALL: " + str(delta)   # 0.53837898036
+    # print "Theta CALL: " + str(theta)   # -0.00699852931575
+    # print "Gamma CALL:" + str(gamma)    # 0.0230279263655
 
-    #=========================================================================
-    # TO CHECK OPTION IMPLIED VOLATILITY CALCULATION
-    #=========================================================================
-    bid_vol, bid_price, ask_price, ask_vol = [120, 103.05, 104.10, 80]
-    price = (bid_price * ask_vol + ask_price * bid_vol) / \
-        float(bid_vol + ask_vol)  # Calculated for a vol = 0.12353
-    opt = Option(s=s, k=k, eval_date=eval_date,
-                 exp_date=exp_date, rf=rf, price=price, type=type)
+    #===========================================================================
+    # TO CHECK OPTION IMPLIED VOLATILITY CALCULATION 
+    #===========================================================================
+    bid_vol, bid_price, ask_price, ask_vol = [960 ,65.10 ,  65.65  , 200]  
+    vwap_price =0.8# (float(bid_price) * float(ask_vol) + float(ask_price) * float(bid_vol))/float(bid_vol+ask_vol)  ## Calculated for a vol = 0.12353
+    opt = Option(s=s, k=k, eval_date=eval_date, exp_date=exp_date, rf=rf, price=vwap_price, type=type)
     ivol = opt.get_impl_vol(vol)
-    opt.vol = ivol
     price, delta, theta, gamma = opt.get_all()
     print "-------------- SECOND OPTION -------------------"
-    print "VWAP Price: " + str(price)
+    print "VWAP Price: " + str(vwap_price)
     print "Implied Volatility: " + str(ivol)
-    print "Price CALL: " + str(price)   # 7.02049813137
-    print "Delta CALL: " + str(delta)   # 0.53837898036
-    print "Theta CALL: " + str(theta)   # -0.00699852931575
-    print "Gamma CALL:" + str(gamma)    # 0.0230279263655
+    print "Price: " + str(price)   # 7.02049813137
+    price = opt.get_price_by_binomial_tree()
+    print "Price by BT:" + str(price)
 
-    #=========================================================================
+
+
+    #===========================================================================
     # TO CHECK OPTIONS STRATEGIES CALCULATIONS
-    #=========================================================================
-    # d_option1 = {'m_secType': 'OPT', 'm_expiry': '20150116', 'm_type': 'C', 'm_symbol': 'TLT', 'm_strike': '115',
+    #===========================================================================
+    # d_option1 = {'m_secType': 'OPT', 'm_expiry': '20150116', 'm_type': 'C', 'm_symbol': 'TLT', 'm_strike': '115', 
     #              'm_multiplier': '100', 'position': '-2', 'trade_price': '3.69', 'comission': '0',
     #              'eval_date': '20140422', 'interest': '0.01', 'volatility': '0.12353', 'underlying_price': '109.96'}
-    # d_option2 = {'m_secType': 'OPT', 'm_expiry': '20150116', 'm_type': 'C', 'm_symbol': 'TLT', 'm_strike': '135',
+    # d_option2 = {'m_secType': 'OPT', 'm_expiry': '20150116', 'm_type': 'C', 'm_symbol': 'TLT', 'm_strike': '135', 
     #              'm_multiplier': '100', 'position': '2', 'trade_price': '0.86', 'comission': '0',
     #              'eval_date': '20140422', 'interest': '0.01', 'volatility': '0.12353', 'underlying_price': '109.96'}
-
+ 
     # df_options = pd.DataFrame([d_option1, d_option2])
     # opt_strat = Options_strategy(df_options)
     # delta, gamma, theta = opt_strat.get_greeks()
