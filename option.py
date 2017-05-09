@@ -5,6 +5,7 @@ from datetime import date
 from datetime import datetime
 import numpy as np
 import constants
+from scipy.optimize import fsolve
 import useful_fn as utils
 
 def getStrikePriceFromInstrumentId(instrumentId, instrumentPrefix):
@@ -44,7 +45,7 @@ class Option:
         self.eval_date = optionInstrument.time
         self.s = get_index_val(currentFutureVal, constants.ROLL)
         self.price = optionInstrument.getVwap()
-        self.vol = self.get_impl_vol()
+        #self.vol = self.get_impl_vol() TOo slow right now to do at every update
 
 
     def convert_time(self, timestamp):
@@ -84,6 +85,7 @@ class Option:
         return days
 
     def get_price_delta(self):
+        d1 = 0.0 # TODO?
         try:
             d1 = (math.log(self.s / self.k) + (self.rf + self.div +
                                                math.pow(self.vol, 2) / 2) * self.t) / (self.vol * math.sqrt(self.t))
@@ -139,7 +141,40 @@ class Option:
         self.get_gamma()
         return self.calc_price, self.delta, self.theta, self.gamma
 
+    def get_price_diff(self, vol):
+        self.vol = vol
+        self.get_price_delta()
+        return self.calc_price - self.price
+ 
     def get_impl_vol(self, guess=0.16):
+        """
+        This function will iterate until finding the implied volatility
+        """
+        
+        ITERATIONS = 100
+        ACCURACY = 0.001
+        
+        roots = fsolve(self.get_price_diff, guess, xtol = ACCURACY, maxfev = ITERATIONS)
+        roots = filter(lambda x: x > 0, roots)
+        self.vol = 0 if len(roots) == 0 else roots[0]
+        # low_vol = 0
+        # high_vol = 1
+        # ## It will try mid point and then choose new interval
+        # self.get_price_delta()
+        # for i in range(ITERATIONS):
+        #     if self.calc_price > self.price + ACCURACY:
+        #         high_vol = self.vol
+        #     elif self.calc_price < self.price - ACCURACY:
+        #         low_vol = self.vol
+        #     else:
+        #         break
+        #     self.vol = low_vol + (high_vol - low_vol)/2.0
+        #     print(low_vol,high_vol,self.vol, self.price, self.calc_price)
+        self.get_price_delta()
+        #print(self.vol, self.price, self.calc_price) 
+        return self.vol
+
+    def get_impl_vol_slow(self, guess=0.16):
         """
         This function will iterate until finding the implied volatility
         """

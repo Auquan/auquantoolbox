@@ -58,6 +58,8 @@ class UnderlyingProcessor:
                                 vol=optionData['vol'],
                                 rf=RF)
             self.currentOptions[instrumentId] = opt
+        self.totalTimeUpdating = 0
+        self.totalIter = 0
         self.printCurrentState()
 
     def serializeCurrentState(self):
@@ -78,6 +80,7 @@ class UnderlyingProcessor:
         print '\n\n\n\n\n'
         print 'Time: ' + str(currentState['time'])
         print 'Future Value: ' + str(currentState['futureVal'])
+        print 'Average Time for update: ' + str(0 if self.totalIter == 0 else self.totalTimeUpdating/self.totalIter)
         print '----------Market Data----------'
         print currentState['marketData']
         print '----------Feature Data---------'
@@ -88,18 +91,30 @@ class UnderlyingProcessor:
     def saveCurrentState(self):
         np.save(CONTINUOS_SAVE_STATE_FILE, self.serializeCurrentState())
 
-    def updateFeatures(self, time):
-        convertedTime = utils.convert_time(time)
+    # updates features at regular intervals only
+    def updateFeatures(self, timeOfUpdate):
+        convertedTime = utils.convert_time(timeOfUpdate)
         if (convertedTime < self.lastTimeSaved + timedelta(0, 1)):
             return
+
+        # tracking perf
+        start = time.time()
+        # updating vol for each option first
+        for instrumentId in self.currentOptions:
+            opt = self.currentOptions[instrumentId]
+            opt.get_impl_vol_slow()
         marketDataDf, featureDf = getFeaturesDf(
-            time, self.currentFuture, self.currentOptions, self.marketData[-1], self.features[-1])
+            timeOfUpdate, self.currentFuture, self.currentOptions, self.marketData[-1], self.features[-1])
         if marketDataDf is not None:
             self.marketData.append(marketDataDf)
         if featureDf is not None:
             self.features.append(featureDf)
         self.lastTimeSaved = convertedTime
         self.saveCurrentState()
+        end = time.time()
+        diffms = (end - start) * 1000
+        self.totalTimeUpdating = self.totalTimeUpdating + diffms
+        self.totalIter = self.totalIter + 1
         self.printCurrentState()
 
     def updateWithNewFutureInstrument(self, futureInstrument):

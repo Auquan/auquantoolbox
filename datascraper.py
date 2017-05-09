@@ -238,17 +238,17 @@ class Dataparser:
             if (lineItemType == TYPE_LINE_BOOK_DATA):
                 if self.currentInstrumentId is not None:
                     inst = instrument.Instrument(time=self.currentTime,
-                                             date=self.currentDate,
-                                             instrumentId=self.currentInstrumentId,
-                                             bookData=self.currentBookData)
+                                                 date=self.currentDate,
+                                                 instrumentId=self.currentInstrumentId,
+                                                 bookData=pd.DataFrame(self.currentBookData, columns=['bidVol', 'bidPrice', 'askPrice', 'askVol']))
                     accumulatedInstruments.append(inst)
                 self.currentDate = lineItems[0]
                 self.currentTime = lineItems[1]
                 self.currentInstrumentId = lineItems[4]
-                self.currentBookData = pd.DataFrame(columns=['bidVol', 'bidPrice', 'askPrice', 'askVol'])
+                self.currentBookData = []
             elif(lineItemType == TYPE_LINE_BOOK_OPTION):
                 parsedOption = parseBookDataOptionLine(lineItems)
-                self.currentBookData.loc[len(self.currentBookData)] = parsedOption
+                self.currentBookData.append(parsedOption)
         return accumulatedInstruments
 
 if __name__ == '__main__':
