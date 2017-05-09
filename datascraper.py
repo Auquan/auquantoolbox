@@ -63,7 +63,7 @@ def parseSymbolFromBookDataLineItems(lineItems):
 def parseTimestampFromBookDataLineItems(lineItems):
     exactTimestampStr = lineItems[1]
     tsComponents = exactTimestampStr.split(':')
-    return tsComponents[0] + ':' + tsComponents[1] + ':00:000000'
+    return tsComponents[0] + ':' + tsComponents[1] + ':' + tsComponents[2] + ':000000'
 
 
 def parseBookDataOptionLine(lineItems):
