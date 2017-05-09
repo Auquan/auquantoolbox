@@ -4,6 +4,7 @@ OPTION_TYPE_UNDEFINED = -1
 
 
 # Constants for running
+TIME_INTERVAL_FOR_UPDATES = 5 #  in seconds
 ROLL = 45
 RF = 0.065
 STARTING_FUTURE_VAL = 22800.0

@@ -94,7 +94,7 @@ class UnderlyingProcessor:
     # updates features at regular intervals only
     def updateFeatures(self, timeOfUpdate):
         convertedTime = utils.convert_time(timeOfUpdate)
-        if (convertedTime < self.lastTimeSaved + timedelta(0, 1)):
+        if (convertedTime < self.lastTimeSaved + timedelta(0, TIME_INTERVAL_FOR_UPDATES)):
             return
 
         # tracking perf
