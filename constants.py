@@ -23,8 +23,10 @@ STARTING_OPTIONS_DATA = {
     'BANKNIFTY117837540022300004': {'vol': 0.4},
 }
 START_MARKET_DATA = {'Future': STARTING_FUTURE_VAL,
+					 'R Vol': 0,
                      'Vol': 0,
-                     'Mkt_Straddle': 0,
+                     'Mkt_Straddle_low': 0,
+                     'Mkt_Straddle_high': 0,
                      'Theo_Straddle': 0}
 START_FEATURES_DATA = {'HL AVol': 0,
                        'HL RVol': 0,

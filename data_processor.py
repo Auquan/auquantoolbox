@@ -75,9 +75,20 @@ class UnderlyingProcessor:
         stateToSave['options'] = optionDataToSave
         return stateToSave
 
-    def printCurrentState(self):
+    def printCurrentState(self, isVerbose=False):
         currentState = self.serializeCurrentState()
-        print '\n\n\n\n\n'
+        timeToPrint = currentState['time'].strftime('%H:%M:%S')
+        futureValToPrint = '%.2f' % currentState['futureVal']
+        volToPrint = '%.2f' % (currentState['marketData']['Vol'] * 100)
+        rvolToPrint = '%.2f' % (currentState['marketData']['R Vol'] * 100)
+        mktLowToPrint = '%.2f' % (currentState['marketData']['Mkt_Straddle_low'] * 100)
+        mktHighToPrint = '%.2f' % (currentState['marketData']['Mkt_Straddle_high'] * 100)
+        hlavolToPrint = '%.2f' % (currentState['featureData']['HL AVol'] * 100)
+        hlrvolToPrint = '%.2f' % (currentState['featureData']['HL RVol'] * 100)
+        #print '\n\n\n\n\n'
+        print '%s %s %s %s %s %s %s %s' % (timeToPrint, futureValToPrint, volToPrint, rvolToPrint, mktLowToPrint, mktHighToPrint, hlavolToPrint, hlrvolToPrint)
+        if not isVerbose:
+            return
         print 'Time: ' + str(currentState['time'])
         print 'Future Value: ' + str(currentState['futureVal'])
         print 'Average Time for update: ' + str(0 if self.totalIter == 0 else self.totalTimeUpdating/self.totalIter)
@@ -225,7 +236,7 @@ def getFeaturesDf(eval_date, future, opt_dict, lastMarketDataDf, lastFeaturesDf)
 
             # Calculate Features
             hl_iv = 360
-            hl_rv = 360
+            hl_rv = 360 * 3
             temp_f['HL AVol'] = utils.ema_RT(
                 lastFeaturesDf['HL AVol'], temp_df['Vol'], hl_iv)
             temp_f['HL RVol'] = utils.ema_RT(
@@ -300,7 +311,7 @@ def startStrategyContinuous(up):
 
 def startStrategyHistory(historyFilePath):
     up = UnderlyingProcessor(
-        STARTING_FUTURE_VAL, STARTING_OPTIONS_DATA, START_MARKET_DATA, START_FEATURES_DATA)
+        STARTING_FUTURE_VAL, STARTING_OPTIONS_DATA, START_MARKET_DATA, START_FEATURES_DATA, START_TIME)
     dataParser = ds.Dataparser()
     with open(historyFilePath) as f:
         for line in f:
