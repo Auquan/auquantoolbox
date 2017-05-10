@@ -33,7 +33,7 @@ class Option:
         self.eval_date = eval_date # TODO: should be eval_time
         self.exp_date = exp_date
         self.t = self.calculate_t()
-        if self.t == 0:
+        if self.t <= 0:
             self.t = 0.000001  # Case valuation in expiration date
         self.price = 0 # TODO: Set from given vol and s
         self.div = div
@@ -156,7 +156,7 @@ class Option:
         
         roots = fsolve(self.get_price_diff, guess, xtol = ACCURACY, maxfev = ITERATIONS)
         roots = filter(lambda x: x > 0, roots)
-        self.vol = 0 if len(roots) == 0 else roots[0]
+        self.vol = 0.00001 if len(roots) == 0 else roots[0]
         # low_vol = 0
         # high_vol = 1
         # ## It will try mid point and then choose new interval

@@ -22,6 +22,10 @@ def atm_vol(x, y, order):
     return atmvol
 
 
+def shouldUpdateOption(opt, currentFutureVal):
+    return (np.abs(opt.k - currentFutureVal) < 300)
+
+
 def straddle(opt_arr, s):
     lowS = int(math.floor(s / 100.0)) * 100
     highS = int(math.ceil(s / 100.0)) * 100
@@ -111,9 +115,11 @@ class UnderlyingProcessor:
         # tracking perf
         start = time.time()
         # updating vol for each option first
+        currentFutureVal = self.currentFuture.getFutureVal()
         for instrumentId in self.currentOptions:
             opt = self.currentOptions[instrumentId]
-            opt.get_impl_vol_slow()
+            if shouldUpdateOption(opt, currentFutureVal):
+                opt.get_impl_vol()
         marketDataDf, featureDf = getFeaturesDf(
             timeOfUpdate, self.currentFuture, self.currentOptions, self.marketData[-1], self.features[-1])
         if marketDataDf is not None:
@@ -208,6 +214,8 @@ def getFeaturesDf(eval_date, future, opt_dict, lastMarketDataDf, lastFeaturesDf)
             # Loop over all options and get implied vol for each option
             for instrumentId in opt_dict:
                 opt = opt_dict[instrumentId]
+                if not shouldUpdateOption(opt, fut):
+                    continue
                 opt.get_price_delta()
                 price, delta = opt.calc_price, opt.delta
                 if abs(delta) < 0.75:
@@ -350,3 +358,4 @@ def startStrategyHistory(historyFilePath):
 
 startStrategyFromConstants(True) # False if two files.
 #startStrategyFromSavedFile(True) # False if two files
+#startStrategyHistory('data_0505')
