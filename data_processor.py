@@ -257,7 +257,7 @@ def getFeaturesDf(eval_date, future, opt_dict, lastMarketDataDf, lastFeaturesDf)
             return None, None
 
 
-def follow(futureFile, optionFile):
+def followTwoFiles(futureFile, optionFile):
     futureFile.seek(0, 2)
     optionFile.seek(0, 2)
     while True:
@@ -272,27 +272,58 @@ def follow(futureFile, optionFile):
             yield ('o', optionLine)
 
 
-def startStrategyFromConstants():
+def follow(logFile):
+    logFile.seek(0, 2)
+    while True:
+        logLine = logFile.readline()
+        if not logLine:
+            time.sleep(0.1)
+            continue
+        yield(logLine)
+
+
+def startStrategyFromConstants(isTwoFiles=False):
     up = UnderlyingProcessor(STARTING_FUTURE_VAL, STARTING_OPTIONS_DATA,
                              START_MARKET_DATA, START_FEATURES_DATA, START_TIME)
-    startStrategyContinuous(up)
+    if isTwoFiles:
+        startStrategyContinuous(up)
+    else:
+        startStrategyContinuousFromTwoFiles(up)
 
 
-def startStrategyFromSavedFile():
+def startStrategyFromSavedFile(isTwoFiles=False):
     stateSaved = np.load(CONTINUOS_SAVE_STATE_FILE).item()
     up = UnderlyingProcessor(stateSaved['futureVal'], stateSaved['options'], stateSaved[
                              'marketData'], stateSaved['featureData'], stateSaved['time'])
-    startStrategyContinuous(up)
+    if isTwoFiles:
+        startStrategyContinuous(up)
+    else:
+        startStrategyContinuousFromTwoFiles(up)
 
 
 def startStrategyContinuous(up):
+    instrumentsDataparser = ds.Dataparser()
+
+    logFile = open(OPTIONS_LOG_FILE_PATH, "r")
+
+    lines = follow(logFile)
+
+    for line in lines:
+        lineContent = line.strip()
+        if len(lineContent) == 0:
+            continue
+        instrumentsToProcess = instrumentsDataparser.processLines([lineContent])
+        up.processData(instrumentsToProcess)
+
+
+def startStrategyContinuousFromTwoFiles(up):
     futureDataparser = ds.Dataparser()
     optionsDataparser = ds.Dataparser()
 
     futureFile = open(FUTURE_LOG_FILE_PATH, "r")
     optionFile = open(OPTIONS_LOG_FILE_PATH, "r")
 
-    lines = follow(futureFile, optionFile)
+    lines = followTwoFiles(futureFile, optionFile)
 
     for line in lines:
         (t, lineContent) = line
@@ -308,7 +339,6 @@ def startStrategyContinuous(up):
                                                                         lineContent])
             up.processData(optionInstrumentsToProcess)
 
-
 def startStrategyHistory(historyFilePath):
     up = UnderlyingProcessor(
         STARTING_FUTURE_VAL, STARTING_OPTIONS_DATA, START_MARKET_DATA, START_FEATURES_DATA, START_TIME)
@@ -318,5 +348,5 @@ def startStrategyHistory(historyFilePath):
             instrumentsToProcess = dataParser.processLines([line])
             up.processData(instrumentsToProcess)
 
-startStrategyFromConstants()
-#startStrategyFromSavedFile()
+startStrategyFromConstants(True) # False if two files.
+#startStrategyFromSavedFile(True) # False if two files
