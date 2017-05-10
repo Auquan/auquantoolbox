@@ -232,7 +232,7 @@ def getFeaturesDf(eval_date, future, opt_dict, lastMarketDataDf, lastFeaturesDf)
                 lastFeaturesDf['Var'], fut, lastMarketDataDf['Future'])
             temp_f['Var'] = var
             temp_df['R Vol'] = np.sqrt(
-                252 * var / (1 - utils.calculate_t(eval_date, utils.convert_time(eval_date).date() + timedelta(15, 30, 00))))
+                252 * var / (1 - utils.calculate_t_days(eval_date, utils.convert_time(eval_date).date() + timedelta(hours = 15, minutes = 30))))
 
             # Calculate Features
             hl_iv = 360
