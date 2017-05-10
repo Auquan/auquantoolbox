@@ -26,6 +26,16 @@ def shouldUpdateOption(opt, currentFutureVal):
     return (np.abs(opt.k - currentFutureVal) < 300)
 
 
+def getContinuousSaveStateFilename():
+    d = utils.convert_time(START_TIME).date()
+    return CONTINUOS_SAVE_STATE_FILE_PREFIX + SAMPLE_OPTION_INSTRUMENT_PREFIX + '_' + str(d) + '.npy'
+
+
+def getHistoryCsvFilename():
+    d = utils.convert_time(START_TIME).date()
+    return HISTORY_CSV_FILE_PREFIX + SAMPLE_OPTION_INSTRUMENT_PREFIX + '_' + str(d) + '.csv'
+
+
 def straddle(opt_arr, s):
     lowS = int(math.floor(s / 100.0)) * 100
     highS = int(math.ceil(s / 100.0)) * 100
@@ -103,8 +113,28 @@ class UnderlyingProcessor:
         print '---------Options---------------'
         print currentState['options']
 
+
     def saveCurrentState(self):
-        np.save(CONTINUOS_SAVE_STATE_FILE, self.serializeCurrentState())
+        serializedState = self.serializeCurrentState()
+        # save last
+        np.save(getContinuousSaveStateFilename(), serializedState)
+        # save in history
+        # TODO: Save other values in csv also
+        historyCsvFilename = getHistoryCsvFilename()
+        stateDataArray = [serializedState['time'].strftime('%H:%M:%S')]
+        stateDataArray.append(serializedState['futureVal'])
+        stateDataArray.append(serializedState['marketData']['Vol'] * 100)
+        stateDataArray.append(serializedState['marketData']['R Vol'] * 100)
+        stateDataArray.append(serializedState['marketData']['Mkt_Straddle_low'] * 100)
+        stateDataArray.append(serializedState['marketData']['Mkt_Straddle_high'] * 100)
+        stateDataArray.append(serializedState['featureData']['HL AVol'] * 100)
+        stateDataArray.append(serializedState['featureData']['HL RVol'] * 100)
+        csvRow = ','.join(map(str, stateDataArray)) + '\n' 
+        fd = open(historyCsvFilename,'a')
+        fd.write(csvRow)
+        fd.close()
+
+
 
     # updates features at regular intervals only
     def updateFeatures(self, timeOfUpdate):
@@ -290,7 +320,16 @@ def follow(logFile):
         yield(logLine)
 
 
+def createHistoryCsvFileIfNeeded():
+    historyCsvFilename = getHistoryCsvFilename()
+    fd = open(historyCsvFilename, 'a')
+    headers = ['time', 'future', 'vol', 'r_vol', 'straddle_low', 'straddle_high', 'a_vol', 'r_vol']
+    fd.write(','.join(map(str, headers)) + '\n')
+    fd.close()
+
+
 def startStrategyFromConstants(isTwoFiles=False):
+    createHistoryCsvFileIfNeeded()
     up = UnderlyingProcessor(STARTING_FUTURE_VAL, STARTING_OPTIONS_DATA,
                              START_MARKET_DATA, START_FEATURES_DATA, START_TIME)
     if isTwoFiles:
@@ -300,7 +339,8 @@ def startStrategyFromConstants(isTwoFiles=False):
 
 
 def startStrategyFromSavedFile(isTwoFiles=False):
-    stateSaved = np.load(CONTINUOS_SAVE_STATE_FILE).item()
+    stateSaved = np.load(getContinuousSaveStateFilename()).item()
+    createHistoryCsvFileIfNeeded()
     up = UnderlyingProcessor(stateSaved['futureVal'], stateSaved['options'], stateSaved[
                              'marketData'], stateSaved['featureData'], stateSaved['time'])
     if isTwoFiles:
@@ -348,6 +388,7 @@ def startStrategyContinuousFromTwoFiles(up):
             up.processData(optionInstrumentsToProcess)
 
 def startStrategyHistory(historyFilePath):
+    createHistoryCsvFileIfNeeded()
     up = UnderlyingProcessor(
         STARTING_FUTURE_VAL, STARTING_OPTIONS_DATA, START_MARKET_DATA, START_FEATURES_DATA, START_TIME)
     dataParser = ds.Dataparser()
