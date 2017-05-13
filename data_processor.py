@@ -297,6 +297,7 @@ def getFeaturesDf(eval_date, future, opt_dict, lastMarketDataDf, lastFeaturesDf)
 def followFiles(files):
     for f in files:
         f.seek(0, 2)
+    unfinishedLines = [''] * len(files)
     while True:
         readLines = list(map(lambda x: x.readline(), files))
         readOneLine = False
@@ -304,7 +305,10 @@ def followFiles(files):
         for readLine in readLines:
             if readLine:
                 readOneLine = True
-                yield(i, readLine)
+                unfinishedLines[i] = unfinishedLines[i] + readLine
+                if unfinishedLines[i].endswith('\n'):
+                    yield(i, unfinishedLines[i])
+                    unfinishedLines[i] = ''
 
         if not readOneLine:
             time.sleep(0.1)
@@ -352,14 +356,12 @@ def startStrategyContinuous():
     lines = followFiles([logFile])
     for line in lines:
         (t, lineContent) = line
-        lineContent = lineContent.strip()
-        print lineContent
         if len(lineContent) == 0:
             continue
         if t == 0:
             optionInstrumentsToProcess = instrumentsDataparser.processLines([
                 lineContent])
-            #up.processData(optionInstrumentsToProcess)
+            up.processData(optionInstrumentsToProcess)
 
 
 def startStrategyHistory(historyFilePath):
