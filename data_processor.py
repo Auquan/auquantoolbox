@@ -1,5 +1,4 @@
 import math
-import pandas as pd
 from datetime import timedelta
 import numpy as np
 import datascraper as ds
@@ -8,7 +7,7 @@ import future
 from constants import *
 import useful_fn as utils
 import time
-import json
+import os
 
 
 def atm_vol(x, y, order):
@@ -95,24 +94,25 @@ class UnderlyingProcessor:
         futureValToPrint = '%.2f' % currentState['futureVal']
         volToPrint = '%.2f' % (currentState['marketData']['Vol'] * 100)
         rvolToPrint = '%.2f' % (currentState['marketData']['R Vol'] * 100)
-        mktLowToPrint = '%.2f' % (currentState['marketData']['Mkt_Straddle_low'] * 100)
-        mktHighToPrint = '%.2f' % (currentState['marketData']['Mkt_Straddle_high'] * 100)
+        mktLowToPrint = '%.2f' % (currentState['marketData'][
+                                  'Mkt_Straddle_low'] * 100)
+        mktHighToPrint = '%.2f' % (currentState['marketData'][
+                                   'Mkt_Straddle_high'] * 100)
         hlavolToPrint = '%.2f' % (currentState['featureData']['HL AVol'] * 100)
         hlrvolToPrint = '%.2f' % (currentState['featureData']['HL RVol'] * 100)
-        #print '\n\n\n\n\n'
+        # print '\n\n\n\n\n'
         print '%s %s %s %s %s %s %s %s' % (timeToPrint, futureValToPrint, volToPrint, rvolToPrint, mktLowToPrint, mktHighToPrint, hlavolToPrint, hlrvolToPrint)
         if not isVerbose:
             return
         print 'Time: ' + str(currentState['time'])
         print 'Future Value: ' + str(currentState['futureVal'])
-        print 'Average Time for update: ' + str(0 if self.totalIter == 0 else self.totalTimeUpdating/self.totalIter)
+        print 'Average Time for update: ' + str(0 if self.totalIter == 0 else self.totalTimeUpdating / self.totalIter)
         print '----------Market Data----------'
         print currentState['marketData']
         print '----------Feature Data---------'
         print currentState['featureData']
         print '---------Options---------------'
         print currentState['options']
-
 
     def saveCurrentState(self):
         serializedState = self.serializeCurrentState()
@@ -125,16 +125,16 @@ class UnderlyingProcessor:
         stateDataArray.append(serializedState['futureVal'])
         stateDataArray.append(serializedState['marketData']['Vol'] * 100)
         stateDataArray.append(serializedState['marketData']['R Vol'] * 100)
-        stateDataArray.append(serializedState['marketData']['Mkt_Straddle_low'] * 100)
-        stateDataArray.append(serializedState['marketData']['Mkt_Straddle_high'] * 100)
+        stateDataArray.append(serializedState['marketData'][
+                              'Mkt_Straddle_low'] * 100)
+        stateDataArray.append(serializedState['marketData'][
+                              'Mkt_Straddle_high'] * 100)
         stateDataArray.append(serializedState['featureData']['HL AVol'] * 100)
         stateDataArray.append(serializedState['featureData']['HL RVol'] * 100)
-        csvRow = ','.join(map(str, stateDataArray)) + '\n' 
-        fd = open(historyCsvFilename,'a')
+        csvRow = ','.join(map(str, stateDataArray)) + '\n'
+        fd = open(historyCsvFilename, 'a')
         fd.write(csvRow)
         fd.close()
-
-
 
     # updates features at regular intervals only
     def updateFeatures(self, timeOfUpdate):
@@ -270,7 +270,7 @@ def getFeaturesDf(eval_date, future, opt_dict, lastMarketDataDf, lastFeaturesDf)
                 lastFeaturesDf['Var'], fut, lastMarketDataDf['Future'])
             temp_f['Var'] = var
             temp_df['R Vol'] = np.sqrt(
-                252 * var / (1 - utils.calculate_t_days(eval_date, utils.convert_time(eval_date).date() + timedelta(hours = 15, minutes = 30))))
+                252 * var / (1 - utils.calculate_t_days(eval_date, utils.convert_time(eval_date).date() + timedelta(hours=15, minutes=30))))
 
             # Calculate Features
             hl_iv = 360
@@ -286,7 +286,6 @@ def getFeaturesDf(eval_date, future, opt_dict, lastMarketDataDf, lastFeaturesDf)
             temp_f['Pred'] = temp_f['HL AVol'] + temp_f['HL RVol'] + \
                 temp_df['Future'] / temp_f['HL Future'] - 1
 
-
             # append data
             return temp_df, temp_f
 
@@ -295,19 +294,20 @@ def getFeaturesDf(eval_date, future, opt_dict, lastMarketDataDf, lastFeaturesDf)
             return None, None
 
 
-def followTwoFiles(futureFile, optionFile):
-    futureFile.seek(0, 2)
-    optionFile.seek(0, 2)
+def followFiles(files):
+    for f in files:
+        f.seek(0, 2)
     while True:
-        futureLine = futureFile.readline()
-        optionLine = optionFile.readline()
-        if not futureLine and not optionLine:
+        readLines = list(map(lambda x: x.readline(), files))
+        readOneLine = False
+        i = 0
+        for readLine in readLines:
+            if readLine:
+                readOneLine = True
+                yield(i, readLine)
+
+        if not readOneLine:
             time.sleep(0.1)
-            continue
-        if futureLine:
-            yield ('f', futureLine)
-        if optionLine:
-            yield ('o', optionLine)
 
 
 def follow(logFile):
@@ -322,70 +322,45 @@ def follow(logFile):
 
 def createHistoryCsvFileIfNeeded():
     historyCsvFilename = getHistoryCsvFilename()
+    if os.path.isfile(historyCsvFilename):
+        return
     fd = open(historyCsvFilename, 'a')
-    headers = ['time', 'future', 'vol', 'r_vol', 'straddle_low', 'straddle_high', 'a_vol', 'r_vol']
+    headers = ['time', 'future', 'vol', 'r_vol',
+               'straddle_low', 'straddle_high', 'a_vol', 'r_vol']
     fd.write(','.join(map(str, headers)) + '\n')
     fd.close()
 
 
-def startStrategyFromConstants(isTwoFiles=False):
+# Follows log files continuously and runs the strategy.
+# Saves state continuously. if State has been saved runs from the last saved state
+# else runs from constants.py
+def startStrategyContinuous():
     createHistoryCsvFileIfNeeded()
-    up = UnderlyingProcessor(STARTING_FUTURE_VAL, STARTING_OPTIONS_DATA,
-                             START_MARKET_DATA, START_FEATURES_DATA, START_TIME)
-    if isTwoFiles:
-        startStrategyContinuous(up)
+    up = None
+    if os.path.isfile(getContinuousSaveStateFilename()):
+        print 'Reading from saved state'
+        stateSaved = np.load(getContinuousSaveStateFilename()).item()
+        up = UnderlyingProcessor(stateSaved['futureVal'], stateSaved['options'], stateSaved[
+            'marketData'], stateSaved['featureData'], stateSaved['time'])
     else:
-        startStrategyContinuousFromTwoFiles(up)
+        print 'Reading from constants'
+        up = UnderlyingProcessor(STARTING_FUTURE_VAL, STARTING_OPTIONS_DATA,
+                                 START_MARKET_DATA, START_FEATURES_DATA, START_TIME)
 
-
-def startStrategyFromSavedFile(isTwoFiles=False):
-    stateSaved = np.load(getContinuousSaveStateFilename()).item()
-    createHistoryCsvFileIfNeeded()
-    up = UnderlyingProcessor(stateSaved['futureVal'], stateSaved['options'], stateSaved[
-                             'marketData'], stateSaved['featureData'], stateSaved['time'])
-    if isTwoFiles:
-        startStrategyContinuous(up)
-    else:
-        startStrategyContinuousFromTwoFiles(up)
-
-
-def startStrategyContinuous(up):
     instrumentsDataparser = ds.Dataparser()
-
     logFile = open(OPTIONS_LOG_FILE_PATH, "r")
-
-    lines = follow(logFile)
-
-    for line in lines:
-        lineContent = line.strip()
-        if len(lineContent) == 0:
-            continue
-        instrumentsToProcess = instrumentsDataparser.processLines([lineContent])
-        up.processData(instrumentsToProcess)
-
-
-def startStrategyContinuousFromTwoFiles(up):
-    futureDataparser = ds.Dataparser()
-    optionsDataparser = ds.Dataparser()
-
-    futureFile = open(FUTURE_LOG_FILE_PATH, "r")
-    optionFile = open(OPTIONS_LOG_FILE_PATH, "r")
-
-    lines = followTwoFiles(futureFile, optionFile)
-
+    lines = followFiles([logFile])
     for line in lines:
         (t, lineContent) = line
         lineContent = lineContent.strip()
+        print lineContent
         if len(lineContent) == 0:
             continue
-        if t == 'f':
-            futureInstrumentsToProcess = futureDataparser.processLines([
-                                                                       lineContent])
-            up.processData(futureInstrumentsToProcess)
-        else:
-            optionInstrumentsToProcess = optionsDataparser.processLines([
-                                                                        lineContent])
-            up.processData(optionInstrumentsToProcess)
+        if t == 0:
+            optionInstrumentsToProcess = instrumentsDataparser.processLines([
+                lineContent])
+            #up.processData(optionInstrumentsToProcess)
+
 
 def startStrategyHistory(historyFilePath):
     createHistoryCsvFileIfNeeded()
@@ -397,6 +372,5 @@ def startStrategyHistory(historyFilePath):
             instrumentsToProcess = dataParser.processLines([line])
             up.processData(instrumentsToProcess)
 
-startStrategyFromConstants(True) # False if two files.
-#startStrategyFromSavedFile(True) # False if two files
-#startStrategyHistory('data_0505')
+startStrategyContinuous()
+# startStrategyHistory('data_0505')
