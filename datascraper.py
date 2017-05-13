@@ -2,6 +2,7 @@ import math
 from datetime import datetime
 import instrument
 import pandas as pd
+import order
 
 TYPE_LINE_UNDEFINED = 0
 TYPE_LINE_BOOK_DATA = 1
@@ -250,6 +251,26 @@ class Dataparser:
                 parsedOption = parseBookDataOptionLine(lineItems)
                 self.currentBookData.append(parsedOption)
         return accumulatedInstruments
+
+
+class OrdersParser:
+
+    def parseOrderFromLineItems(self, lineItems):
+        # TODO: Kanav
+        optionId = 'Option11313'
+        vol = 40
+        price = 2390
+        time = '5/3/2017 09:25:00'
+        return order.Order(optionId=optionId, price=price, vol=vol, time=time)
+
+    def processLines(self, lines):
+        accumulatedOrders = []
+        for line in lines:
+            lineItems = line.split()
+            parsedOrder = self.parseOrderFromLineItems(lineItems)
+            accumulatedOrders.append(parsedOrder)
+        return accumulatedOrders
+
 
 if __name__ == '__main__':
     d = loadData("test.txt")

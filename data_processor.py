@@ -168,8 +168,7 @@ class UnderlyingProcessor:
         # self.histFutureInstruments.append(instrument)  # just for storing
         self.currentFuture.updateWithNewInstrument(futureInstrument)
         self.updateFeatures(futureInstrument.time)
-        # TODO: Calculate new features and update
-        # TODO: check if we are sending the right data[-1]
+
 
     def updateWithNewOptionInstrument(self, optionInstrument):
         # self.addNewOption(optionInstrument)  # just for storing
@@ -177,13 +176,17 @@ class UnderlyingProcessor:
         changedOption.updateWithInstrument(
             optionInstrument, self.currentFuture.getFutureVal())
         self.updateFeatures(optionInstrument.time)
-        # TODO: Calculate new features and update
+
+    def updateWithNewOrder(self, order):
+        changedOption = self.currentOptions[order.optionId]
+        changedOption.updateWithOrder(order)
+        self.updateFeatures(order.time)
 
     '''
-    For storing stuff
+    ------------------------------------------------------
+    ----------- For storing stuff ------------------------
+    ------------------------------------------------------
     '''
-    # returns Future class object
-
     def getCurrentFuture(self):
         return self.histFutureInstruments[-1]
 
@@ -208,23 +211,23 @@ class UnderlyingProcessor:
         self.ensureInstrumentId(opt.instrumentId)
         self.histOptionInstruments[opt.instrumentId].append(opt)
 
+    '''
+    ------------------------------------------------------
+    ----------- Process new data -------------------------
+    ------------------------------------------------------
+    '''
     def processData(self, instrumentsToProcess):
         for instrument in instrumentsToProcess:
             if instrument.isFuture():
                 self.updateWithNewFutureInstrument(instrument)
-                # todo: update price of options
-                # 1. update current future value
-                # 2. opt.s = opt.s + futureValue - lastFutureValue
-                # 3. calculate Vol (do not change opt.vol)
-                # 3.1 update opt.vol
             else:
                 self.updateWithNewOptionInstrument(instrument)
-                # todo: update new vol
-                # 1. update option.price
-                # 2. update option.vol
-                # 3. calculate Vol
-                # Update s and vol
-                # todo: update future value store it in data
+
+    def processOrders(self, ordersToProcess):
+        for order in ordersToProcess:
+            self.updateWithNewOrder(order)
+
+
 
 
 def getFeaturesDf(eval_date, future, opt_dict, lastMarketDataDf, lastFeaturesDf):
@@ -352,8 +355,10 @@ def startStrategyContinuous():
                                  START_MARKET_DATA, START_FEATURES_DATA, START_TIME)
 
     instrumentsDataparser = ds.Dataparser()
+    positionsDataparser = ds.OrdersParser()
     logFile = open(OPTIONS_LOG_FILE_PATH, "r")
-    lines = followFiles([logFile])
+    ordersFile = open(Orders_LOG_FILE_PATH, "r")
+    lines = followFiles([logFile, ordersFile])
     for line in lines:
         (t, lineContent) = line
         if len(lineContent) == 0:
@@ -362,6 +367,9 @@ def startStrategyContinuous():
             optionInstrumentsToProcess = instrumentsDataparser.processLines([
                 lineContent])
             up.processData(optionInstrumentsToProcess)
+        elif t == 1:
+            ordersToProcess = positionsDataparser.processLines([lineContent])
+            up.processOrders(ordersToProcess)
 
 
 def startStrategyHistory(historyFilePath):

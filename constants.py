@@ -34,6 +34,7 @@ START_FEATURES_DATA = {'HL AVol': 0,
                        'Pred': 0,
                        'Var': 0}
 OPTIONS_LOG_FILE_PATH = 'OptionLogFile1.txt'
+Orders_LOG_FILE_PATH = 'OrdersLogFile.txt'
 SAMPLE_OPTION_INSTRUMENT_PREFIX = 'BANKNIFTY1178375400'
 EXP_DATE = '5/10/2017 15:30:00'
 START_TIME = '5/3/2017 09:25:00'

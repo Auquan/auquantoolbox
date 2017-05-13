@@ -47,6 +47,9 @@ class Option:
         self.price = optionInstrument.getVwap()
         #self.vol = self.get_impl_vol() TOo slow right now to do at every update
 
+    def updateWithOrder(self, order):
+        # TODO: Chandini
+        return
 
     def convert_time(self, timestamp):
         try:
