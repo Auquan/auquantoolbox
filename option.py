@@ -50,7 +50,7 @@ class Option:
         #self.vol = self.get_impl_vol() TOo slow right now to do at every update
 
     def updateWithOrder(self, order):
-        
+        #changes position, price and fees of corresponding option
         self.position += order.position
         self.price = order.trade_price
         self.fees = order.fees

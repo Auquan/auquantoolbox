@@ -54,7 +54,7 @@ def straddle(opt_arr, s):
 
 
 class UnderlyingProcessor:
-    def __init__(self, futureVal, optionsData, startMarketData, startFeaturesData, startTime):
+    def __init__(self, futureVal, optionsData, startMarketData, startFeaturesData, startTime):#TODO ,startPositionData):
         self.histFutureInstruments = []  # for storing history of future instruments
         self.histOptionInstruments = {}  # for storing history of option instruments
         # secondsInterval = pd.date_range(start=START_DATE, end=END_DATE, freq='1S')
@@ -78,6 +78,7 @@ class UnderlyingProcessor:
             self.currentOptions[instrumentId] = opt
         self.totalTimeUpdating = 0
         self.totalIter = 0
+        #TODO self.position = [startPositionData]
         self.printCurrentState()
 
     def serializeCurrentState(self):
@@ -155,8 +156,11 @@ class UnderlyingProcessor:
             opt = self.currentOptions[instrumentId]
             if shouldUpdateOption(opt, currentFutureVal):
                 opt.get_impl_vol()
-        #TODO: Kanav Call getPositionDf on options with position!=0 and future
-
+        # TODO: Kanav Call getPositionDf on options with position!=0 and future
+        # positionDF will have these keys: value, delta, gamma, theta, fees
+        # positionDf = getPositionDf(options_arr)
+        # if positionDf is not None:
+        #     self.positionData.append(positionDf)
         marketDataDf, featureDf = getFeaturesDf(
             timeOfUpdate, self.currentFuture, self.currentOptions, self.marketData[-1], self.features[-1])
         if marketDataDf is not None:
@@ -185,7 +189,7 @@ class UnderlyingProcessor:
         self.updateFeatures(optionInstrument.time)
 
     def updateWithNewOrder(self, order):
-        changedOption = self.currentOptions[order.optionId]
+        changedOption = self.currentOptions[order.instrumentId]
         changedOption.updateWithOrder(order)
         self.updateFeatures(order.time)
 
@@ -232,6 +236,7 @@ class UnderlyingProcessor:
 
     def processOrders(self, ordersToProcess):
         for order in ordersToProcess:
+            #TODO: Kanav order will have self.instrumentId, self.trade_price, self.position, self.fees
             self.updateWithNewOrder(order)
 
 
