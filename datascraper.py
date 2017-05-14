@@ -256,17 +256,21 @@ class Dataparser:
 class OrdersParser:
 
     def parseOrderFromLineItems(self, lineItems):
-        # TODO: Kanav
-        optionId = 'Option11313'
-        vol = 40
-        price = 2390
-        time = '5/3/2017 09:25:00'
-        return order.Order(optionId=optionId, price=price, vol=vol, time=time)
+        type = lineItems[15]
+        volume = float(lineItems[6])
+        volume = volume if type == 'BUY' else -volume
+        instrumentId = lineItems[13]
+        tradePrice = float(lineItems[8])
+        time = str(datetime.now())
+        fees = 0.001 * tradePrice
+        return order.Order(instrumentId=instrumentId, tradePrice=tradePrice, vol=volume, time=time, fees=fees)
 
     def processLines(self, lines):
         accumulatedOrders = []
         for line in lines:
             lineItems = line.split()
+            if len(lineItems) < 10:
+                continue
             parsedOrder = self.parseOrderFromLineItems(lineItems)
             accumulatedOrders.append(parsedOrder)
         return accumulatedOrders

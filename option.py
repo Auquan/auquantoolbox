@@ -25,7 +25,7 @@ class Option:
     """
     This class will group the different black-shcoles calculations for an opion
     """
-    def __init__(self, futurePrice, instrumentId, exp_date, instrumentPrefix, eval_date, rf=0.01, vol=0.3, div=0,position=0,fees=0):
+    def __init__(self, futurePrice, instrumentId, exp_date, instrumentPrefix, eval_date, rf=0.01, vol=0.3, div=0,position=0):
         self.s = futurePrice
         self.k = getStrikePriceFromInstrumentId(instrumentId, instrumentPrefix)
         self.rf = rf
@@ -41,7 +41,6 @@ class Option:
         self.type = "C" if (instrumentId.endswith("003")) else "P"
         self.instrumentId = instrumentId
         self.position = position
-        self.fees = fees
 
     def updateWithInstrument(self, optionInstrument, currentFutureVal):
         self.eval_date = optionInstrument.time
@@ -50,12 +49,8 @@ class Option:
         #self.vol = self.get_impl_vol() TOo slow right now to do at every update
 
     def updateWithOrder(self, order):
-        #changes position, price and fees of corresponding option
-        self.position += order.position
-        self.price = order.trade_price
-        self.fees = order.fees
-        #TODO: Kanav : fees needs to be reset to zero if there is no new order
-        return
+        self.position += order.volume
+        self.price = order.tradePrice
 
     def convert_time(self, timestamp):
         try:

@@ -4,7 +4,7 @@ OPTION_TYPE_UNDEFINED = -1
 
 
 # Constants for running
-TIME_INTERVAL_FOR_UPDATES = 5 #  in seconds
+TIME_INTERVAL_FOR_UPDATES = 5  # in seconds
 ROLL = 45
 RF = 0.065
 STARTING_FUTURE_VAL = 22800.0
@@ -23,7 +23,7 @@ STARTING_OPTIONS_DATA = {
     'BANKNIFTY117837540022300004': {'vol': 0.4},
 }
 START_MARKET_DATA = {'Future': STARTING_FUTURE_VAL,
-					 'R Vol': 0,
+                     'R Vol': 0,
                      'Vol': 0,
                      'Mkt_Straddle_low': 0,
                      'Mkt_Straddle_high': 0,
@@ -33,6 +33,9 @@ START_FEATURES_DATA = {'HL AVol': 0,
                        'HL Future': 0,
                        'Pred': 0,
                        'Var': 0}
+START_POSITON_DATA = {'delta': 0,
+                      'theta': 0,
+                      'gamma': 0}
 OPTIONS_LOG_FILE_PATH = 'OptionLogFile1.txt'
 Orders_LOG_FILE_PATH = 'OrdersLogFile.txt'
 SAMPLE_OPTION_INSTRUMENT_PREFIX = 'BANKNIFTY1178375400'

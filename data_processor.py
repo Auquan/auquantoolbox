@@ -22,12 +22,7 @@ def atm_vol(x, y, order):
 
 
 def shouldUpdateOption(opt, currentFutureVal):
-    if currentFutureVal==0 or opt.price ==0:
-        return False
-    elif opt.position !=0:
-        return True
-    else:
-        return (np.abs(opt.k - currentFutureVal) < 300)
+    return (np.abs(opt.k - currentFutureVal) < 300)
 
 def getContinuousSaveStateFilename():
     d = utils.convert_time(START_TIME).date()
@@ -54,7 +49,7 @@ def straddle(opt_arr, s):
 
 
 class UnderlyingProcessor:
-    def __init__(self, futureVal, optionsData, startMarketData, startFeaturesData, startTime):#TODO ,startPositionData):
+    def __init__(self, futureVal, optionsData, startMarketData, startFeaturesData, startPositionData, startTime):
         self.histFutureInstruments = []  # for storing history of future instruments
         self.histOptionInstruments = {}  # for storing history of option instruments
         # secondsInterval = pd.date_range(start=START_DATE, end=END_DATE, freq='1S')
@@ -65,6 +60,7 @@ class UnderlyingProcessor:
         self.lastTimeSaved = utils.convert_time(startTime)
         self.currentFuture = future.Future(futureVal, startTime)
         self.currentOptions = {}
+        self.positionData = [startPositionData]
         for instrumentId in optionsData:
             optionData = optionsData[instrumentId]
             opt = option.Option(futurePrice=futureVal,
@@ -74,11 +70,10 @@ class UnderlyingProcessor:
                                 eval_date=startTime,
                                 vol=optionData['vol'],
                                 rf=RF,
-                                position=optionData['position'])
+                                position=optionData['position'] if 'position' in optionData else 0) 
             self.currentOptions[instrumentId] = opt
         self.totalTimeUpdating = 0
         self.totalIter = 0
-        #TODO self.position = [startPositionData]
         self.printCurrentState()
 
     def serializeCurrentState(self):
@@ -90,8 +85,10 @@ class UnderlyingProcessor:
         optionDataToSave = {}
         for instrumentId in self.currentOptions:
             optionDataToSave[instrumentId] = {
-                'vol': self.currentOptions[instrumentId].vol}
+                'vol': self.currentOptions[instrumentId].vol,
+                'position': self.currentOptions[instrumentId].position}
         stateToSave['options'] = optionDataToSave
+        stateToSave['positionData'] = self.positionData[-1]
         return stateToSave
 
     def printCurrentState(self, isVerbose=False):
@@ -106,8 +103,11 @@ class UnderlyingProcessor:
                                    'Mkt_Straddle_high'] * 100)
         hlavolToPrint = '%.2f' % (currentState['featureData']['HL AVol'] * 100)
         hlrvolToPrint = '%.2f' % (currentState['featureData']['HL RVol'] * 100)
+        positionDelta = '%.2f' % currentState['positionData']['delta']
+        positionGamma = '%.2f' % currentState['positionData']['gamma']
+        positionTheta = '%.2f' % currentState['positionData']['theta']
         # print '\n\n\n\n\n'
-        print '%s %s %s %s %s %s %s %s' % (timeToPrint, futureValToPrint, volToPrint, rvolToPrint, mktLowToPrint, mktHighToPrint, hlavolToPrint, hlrvolToPrint)
+        print '%s %s %s %s %s %s %s %s %s %s %s' % (timeToPrint, futureValToPrint, volToPrint, rvolToPrint, mktLowToPrint, mktHighToPrint, hlavolToPrint, hlrvolToPrint, positionDelta, positionGamma, positionTheta)
         if not isVerbose:
             return
         print 'Time: ' + str(currentState['time'])
@@ -137,6 +137,9 @@ class UnderlyingProcessor:
                               'Mkt_Straddle_high'] * 100)
         stateDataArray.append(serializedState['featureData']['HL AVol'] * 100)
         stateDataArray.append(serializedState['featureData']['HL RVol'] * 100)
+        stateDataArray.append(serializedState['positionData']['delta'])
+        stateDataArray.append(serializedState['positionData']['gamma'])
+        stateDataArray.append(serializedState['positionData']['theta'])
         csvRow = ','.join(map(str, stateDataArray)) + '\n'
         fd = open(historyCsvFilename, 'a')
         fd.write(csvRow)
@@ -167,6 +170,9 @@ class UnderlyingProcessor:
             self.marketData.append(marketDataDf)
         if featureDf is not None:
             self.features.append(featureDf)
+        positionsDf = getPositionDf(self.currentFuture, self.currentOptions)
+        if positionsDf is not None:
+            self.positionData.append(positionsDf)
         self.lastTimeSaved = convertedTime
         self.saveCurrentState()
         end = time.time()
@@ -180,7 +186,6 @@ class UnderlyingProcessor:
         self.currentFuture.updateWithNewInstrument(futureInstrument)
         self.updateFeatures(futureInstrument.time)
 
-
     def updateWithNewOptionInstrument(self, optionInstrument):
         # self.addNewOption(optionInstrument)  # just for storing
         changedOption = self.currentOptions[optionInstrument.instrumentId]
@@ -189,8 +194,11 @@ class UnderlyingProcessor:
         self.updateFeatures(optionInstrument.time)
 
     def updateWithNewOrder(self, order):
-        changedOption = self.currentOptions[order.instrumentId]
-        changedOption.updateWithOrder(order)
+        if order.isFuture():
+            self.currentFuture.updateWithOrder(order)
+        else:
+            changedOption = self.currentOptions[order.instrumentId]
+            changedOption.updateWithOrder(order)
         self.updateFeatures(order.time)
 
     '''
@@ -236,40 +244,31 @@ class UnderlyingProcessor:
 
     def processOrders(self, ordersToProcess):
         for order in ordersToProcess:
-            #TODO: Kanav order will have self.instrumentId, self.trade_price, self.position, self.fees
             self.updateWithNewOrder(order)
 
 
-def getPositionDf(options_arr)
+def getPositionDf(future, opt_dict):
+    options_arr = []
+    for instrumentId in opt_dict:
+        if opt_dict[instrumentId].position != 0:
+            options_arr.append(opt_dict[instrumentId])
+
     temp_positiondf = {}
-    temp_positiondf['value'] = 0
     temp_positiondf['delta'] = 0
     temp_positiondf['gamma'] = 0
     temp_positiondf['theta'] = 0
-    temp_positiondf['fees'] = 0
-    try:
-        for opt in options_arr:
-            ## Case stock or future
-            if opt.type=='FUT':
-                temp_positiondf['delta'] += float(opt.position) * 1
-                temp_positiondf['value'] += float(opt.position) * opt.price
-                temp_positiondf['fees'] += float(opt.position) * opt.fees
 
-            ## Case option
-            elif (opt.type=='C') or (opt.type=='P') :    
-                price, delta, theta, gamma = opt.get_all()
+    if future.position != 0:
+        temp_positiondf['delta'] += float(opt.position) * 1
 
-                temp_positiondf['value'] += float(opt.position) * price
-                temp_positiondf['delta'] += float(opt.position) * delta
-                temp_positiondf['gamma'] += float(opt.position) * gamma
-                temp_positiondf['theta'] += float(opt.position) * theta
-                temp_positiondf['fees'] += float(opt.position) * opt.fees
+    for opt in options_arr:
+        price, delta, theta, gamma = opt.get_all()
+        temp_positiondf['delta'] += float(opt.position) * delta
+        temp_positiondf['gamma'] += float(opt.position) * gamma
+        temp_positiondf['theta'] += float(opt.position) * theta
 
-        temp_positiondf['value'] = temp_positiondf['value'] - temp_positiondf['fees'] 
-        return temp_positiondf
-    except:
-        raise
-        return None
+    return temp_positiondf
+
 
 def getFeaturesDf(eval_date, future, opt_dict, lastMarketDataDf, lastFeaturesDf):
     fut = future.getFutureVal()
@@ -353,6 +352,7 @@ def followFiles(files):
                 if unfinishedLines[i].endswith('\n'):
                     yield(i, unfinishedLines[i])
                     unfinishedLines[i] = ''
+            i = i + 1
 
         if not readOneLine:
             time.sleep(0.1)
@@ -374,7 +374,7 @@ def createHistoryCsvFileIfNeeded():
         return
     fd = open(historyCsvFilename, 'a')
     headers = ['time', 'future', 'vol', 'r_vol',
-               'straddle_low', 'straddle_high', 'a_vol', 'r_vol']
+               'straddle_low', 'straddle_high', 'a_vol', 'r_vol', 'position_delta', 'position_gamma', 'position_theta']
     fd.write(','.join(map(str, headers)) + '\n')
     fd.close()
 
@@ -389,11 +389,11 @@ def startStrategyContinuous():
         print 'Reading from saved state'
         stateSaved = np.load(getContinuousSaveStateFilename()).item()
         up = UnderlyingProcessor(stateSaved['futureVal'], stateSaved['options'], stateSaved[
-            'marketData'], stateSaved['featureData'], stateSaved['time'])
+            'marketData'], stateSaved['featureData'], stateSaved['positionData'], stateSaved['time'])
     else:
         print 'Reading from constants'
         up = UnderlyingProcessor(STARTING_FUTURE_VAL, STARTING_OPTIONS_DATA,
-                                 START_MARKET_DATA, START_FEATURES_DATA, START_TIME)
+                                 START_MARKET_DATA, START_FEATURES_DATA, START_POSITON_DATA, START_TIME)
 
     instrumentsDataparser = ds.Dataparser()
     positionsDataparser = ds.OrdersParser()
@@ -416,7 +416,7 @@ def startStrategyContinuous():
 def startStrategyHistory(historyFilePath):
     createHistoryCsvFileIfNeeded()
     up = UnderlyingProcessor(
-        STARTING_FUTURE_VAL, STARTING_OPTIONS_DATA, START_MARKET_DATA, START_FEATURES_DATA, START_TIME)
+        STARTING_FUTURE_VAL, STARTING_OPTIONS_DATA, START_MARKET_DATA, START_FEATURES_DATA, START_POSITON_DATA, START_TIME)
     dataParser = ds.Dataparser()
     with open(historyFilePath) as f:
         for line in f:
