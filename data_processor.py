@@ -22,8 +22,12 @@ def atm_vol(x, y, order):
 
 
 def shouldUpdateOption(opt, currentFutureVal):
-    return (np.abs(opt.k - currentFutureVal) < 300)
-
+    if currentFutureVal==0 or opt.price ==0:
+        return False
+    elif opt.position !=0:
+        return True
+    else:
+        return (np.abs(opt.k - currentFutureVal) < 300)
 
 def getContinuousSaveStateFilename():
     d = utils.convert_time(START_TIME).date()
@@ -69,7 +73,8 @@ class UnderlyingProcessor:
                                 instrumentPrefix=SAMPLE_OPTION_INSTRUMENT_PREFIX,
                                 eval_date=startTime,
                                 vol=optionData['vol'],
-                                rf=RF)
+                                rf=RF,
+                                position=optionData['position'])
             self.currentOptions[instrumentId] = opt
         self.totalTimeUpdating = 0
         self.totalIter = 0
@@ -150,6 +155,8 @@ class UnderlyingProcessor:
             opt = self.currentOptions[instrumentId]
             if shouldUpdateOption(opt, currentFutureVal):
                 opt.get_impl_vol()
+        #TODO: Kanav Call getPositionDf on options with position!=0 and future
+
         marketDataDf, featureDf = getFeaturesDf(
             timeOfUpdate, self.currentFuture, self.currentOptions, self.marketData[-1], self.features[-1])
         if marketDataDf is not None:
@@ -228,7 +235,36 @@ class UnderlyingProcessor:
             self.updateWithNewOrder(order)
 
 
+def getPositionDf(options_arr)
+    temp_positiondf = {}
+    temp_positiondf['value'] = 0
+    temp_positiondf['delta'] = 0
+    temp_positiondf['gamma'] = 0
+    temp_positiondf['theta'] = 0
+    temp_positiondf['fees'] = 0
+    try:
+        for opt in options_arr:
+            ## Case stock or future
+            if opt.type=='FUT':
+                temp_positiondf['delta'] += float(opt.position) * 1
+                temp_positiondf['value'] += float(opt.position) * opt.price
+                temp_positiondf['fees'] += float(opt.position) * opt.fees
 
+            ## Case option
+            elif (opt.type=='C') or (opt.type=='P') :    
+                price, delta, theta, gamma = opt.get_all()
+
+                temp_positiondf['value'] += float(opt.position) * price
+                temp_positiondf['delta'] += float(opt.position) * delta
+                temp_positiondf['gamma'] += float(opt.position) * gamma
+                temp_positiondf['theta'] += float(opt.position) * theta
+                temp_positiondf['fees'] += float(opt.position) * opt.fees
+
+        temp_positiondf['value'] = temp_positiondf['value'] - temp_positiondf['fees'] 
+        return temp_positiondf
+    except:
+        raise
+        return None
 
 def getFeaturesDf(eval_date, future, opt_dict, lastMarketDataDf, lastFeaturesDf):
     fut = future.getFutureVal()
