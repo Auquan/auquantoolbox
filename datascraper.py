@@ -228,7 +228,7 @@ class Dataparser:
         self.currentTime = ''
         self.currentDate = ''
         self.currentInstrumentId = None
-        self.currentBookData = {}
+        self.currentBookData = []
 
     def processLines(self, lines):
         accumulatedInstruments = []
