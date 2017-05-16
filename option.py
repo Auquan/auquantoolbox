@@ -26,7 +26,7 @@ class Option:
     This class will group the different black-shcoles calculations for an opion
     """
     def __init__(self, futurePrice, instrumentId, exp_date, instrumentPrefix, eval_date, rf=0.01, vol=0.3, div=0,position=0):
-        self.s = futurePrice
+        self.s = get_index_val(futurePrice, constants.ROLL)
         self.k = getStrikePriceFromInstrumentId(instrumentId, instrumentPrefix)
         self.rf = rf
         self.vol = vol
@@ -44,6 +44,9 @@ class Option:
 
     def updateWithInstrument(self, optionInstrument, currentFutureVal):
         self.eval_date = optionInstrument.time
+        self.t = self.calculate_t()
+        if self.t <= 0:
+            self.t = 0.000001  # Case valuation in expiration date
         self.s = get_index_val(currentFutureVal, constants.ROLL)
         self.price = optionInstrument.getVwap()
         #self.vol = self.get_impl_vol() TOo slow right now to do at every update
@@ -154,7 +157,11 @@ class Option:
         """
         This function will iterate until finding the implied volatility
         """
-        
+        # if no price revert to the vol which is there right now, since no new update to price.
+        if self.price == 0:
+            self.get_price_delta()
+            return self.vol
+
         ITERATIONS = 100
         ACCURACY = 0.001
         
