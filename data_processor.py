@@ -198,9 +198,6 @@ class UnderlyingProcessor:
             self.marketData.append(marketDataDf)
         if featureDf is not None:
             self.features.append(featureDf)
-        positionsDf = getPositionDf(self.currentFuture, self.currentOptions)
-        if positionsDf is not None:
-            self.positionData.append(positionsDf)
 
         # executing predictor
         predictions = executePredictor(self.currentFuture, self.currentOptions, self.marketData[-1], self.features[-1], self.positionData[-1])
@@ -223,7 +220,10 @@ class UnderlyingProcessor:
             orderToProcess = order.Order(instrumentId=instrumentId, tradePrice=tradePrice, vol=volume, time=timeOfUpdate, fees=fees)
             self.updateWithNewOrder(orderToProcess)
 
-        #TODO: Should we calculate position data now or before
+        # Calculating updates position data
+        positionsDf = getPositionDf(self.currentFuture, self.currentOptions)
+        if positionsDf is not None:
+            self.positionData.append(positionsDf)
 
         # Calculating PNL
         pnlDf = calculatePnl(self.currentFuture, self.currentOptions, self.marketData[-1], self.features[-1], self.positionData[-1], self.pnlData[-1])
