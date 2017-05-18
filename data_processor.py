@@ -8,6 +8,7 @@ from constants import *
 import useful_fn as utils
 import time
 import os
+import order
 
 
 def atm_vol(x, y, order):
@@ -48,6 +49,34 @@ def straddle(opt_arr, s):
     return std1, std2, d1, d2
 
 
+# optionsDict - dictionary of options with instrumentId as key, and value as option class
+# marketData - dictionary 
+# featureData - dictionary
+# positionData - has delta, theta, gamma
+# returns an array of dictionary of predictions. A prediction looks like this
+# {instrumentId: 'OptionName',               name of option, or name of future
+#  volume: 5,                                lots you need to buy or sell
+#  type: 'BUY'}                               BUY or SELL                            
+def executePredictor(future, optionsDict, marketData, featureData, positionData):
+    # TODO CHADINI:
+    futureVal =  future.getFutureVal()
+    predictions = []
+    for instrumentId in optionsDict:
+        if (1==1):# if you should trade this option, change this
+            prediction = {'instrumentId': instrumentId,
+                          'volume': 1,
+                          'type': 'SELL'}
+            predictions.append(prediction)
+
+    return predictions
+
+
+# Return: a Dictionary. You can add more keys if you want
+def calculatePnl(future, optionsDict, marketData, featureData, positionData, previousPnl):
+    # TODO CHADINI:
+    futureVal =  future.getFutureVal()
+    return {'pnl': 0}
+
 class UnderlyingProcessor:
     def __init__(self, futureVal, optionsData, startMarketData, startFeaturesData, startPositionData, startTime):
         self.histFutureInstruments = []  # for storing history of future instruments
@@ -61,6 +90,7 @@ class UnderlyingProcessor:
         self.currentFuture = future.Future(futureVal, startTime)
         self.currentOptions = {}
         self.positionData = [startPositionData]
+        self.pnlData = [{'pnl': 0}] # TODOKANAV: Put in constants
         for instrumentId in optionsData:
             optionData = optionsData[instrumentId]
             opt = option.Option(futurePrice=futureVal,
@@ -89,6 +119,7 @@ class UnderlyingProcessor:
                 'position': self.currentOptions[instrumentId].position}
         stateToSave['options'] = optionDataToSave
         stateToSave['positionData'] = self.positionData[-1]
+        stateToSave['pnlData'] = self.pnlData[-1]
         return stateToSave
 
     def printCurrentState(self, isVerbose=False):
@@ -106,8 +137,9 @@ class UnderlyingProcessor:
         positionDelta = '%.2f' % currentState['positionData']['delta']
         positionGamma = '%.2f' % currentState['positionData']['gamma']
         positionTheta = '%.2f' % currentState['positionData']['theta']
+        pnl = '%.2f' % currentState['pnlData']['pnl']
         # print '\n\n\n\n\n'
-        print '%s %s %s %s %s %s %s %s %s %s %s' % (timeToPrint, futureValToPrint, volToPrint, rvolToPrint, mktLowToPrint, mktHighToPrint, hlavolToPrint, hlrvolToPrint, positionDelta, positionGamma, positionTheta)
+        print '%s %s %s %s %s %s %s %s %s %s %s %s' % (timeToPrint, futureValToPrint, volToPrint, rvolToPrint, mktLowToPrint, mktHighToPrint, hlavolToPrint, hlrvolToPrint, positionDelta, positionGamma, positionTheta, pnl)
         if not isVerbose:
             return
         print 'Time: ' + str(currentState['time'])
@@ -140,6 +172,7 @@ class UnderlyingProcessor:
         stateDataArray.append(serializedState['positionData']['delta'])
         stateDataArray.append(serializedState['positionData']['gamma'])
         stateDataArray.append(serializedState['positionData']['theta'])
+        stateDataArray.append(serializedState['pnlData']['pnl'])
         csvRow = ','.join(map(str, stateDataArray)) + '\n'
         fd = open(historyCsvFilename, 'a')
         fd.write(csvRow)
@@ -150,7 +183,7 @@ class UnderlyingProcessor:
         convertedTime = utils.convert_time(timeOfUpdate)
         if (convertedTime < self.lastTimeSaved + timedelta(0, TIME_INTERVAL_FOR_UPDATES)):
             return
-
+        self.lastTimeSaved = convertedTime
         # tracking perf
         start = time.time()
         # updating vol for each option first
@@ -159,11 +192,6 @@ class UnderlyingProcessor:
             opt = self.currentOptions[instrumentId]
             if shouldUpdateOption(opt, currentFutureVal):
                 opt.get_impl_vol()
-        # TODO: Kanav Call getPositionDf on options with position!=0 and future
-        # positionDF will have these keys: value, delta, gamma, theta, fees
-        # positionDf = getPositionDf(options_arr)
-        # if positionDf is not None:
-        #     self.positionData.append(positionDf)
         marketDataDf, featureDf = getFeaturesDf(
             timeOfUpdate, self.currentFuture, self.currentOptions, self.marketData[-1], self.features[-1])
         if marketDataDf is not None:
@@ -173,7 +201,35 @@ class UnderlyingProcessor:
         positionsDf = getPositionDf(self.currentFuture, self.currentOptions)
         if positionsDf is not None:
             self.positionData.append(positionsDf)
-        self.lastTimeSaved = convertedTime
+
+        # executing predictor
+        predictions = executePredictor(self.currentFuture, self.currentOptions, self.marketData[-1], self.features[-1], self.positionData[-1])
+        for prediction in predictions:
+            instrumentId = prediction['instrumentId']
+            volume = prediction['volume']
+            if prediction['type'] != 'BUY':
+                volume = -volume
+            tradePrice = 0
+            optionToOrder = self.currentOptions[instrumentId]
+            if optionToOrder:
+                tradePrice = optionToOrder.price
+            elif instrumentId == self.currentFuture:
+                # TODO handle this
+                print 'TO handle this. We are trading a future'
+                continue
+            else:
+                continue
+            fees = tradePrice * 0.001
+            orderToProcess = order.Order(instrumentId=instrumentId, tradePrice=tradePrice, vol=volume, time=timeOfUpdate, fees=fees)
+            self.updateWithNewOrder(orderToProcess)
+
+        #TODO: Should we calculate position data now or before
+
+        # Calculating PNL
+        pnlDf = calculatePnl(self.currentFuture, self.currentOptions, self.marketData[-1], self.features[-1], self.positionData[-1], self.pnlData[-1])
+        self.pnlData.append(pnlDf)
+
+        # Savingstate
         self.saveCurrentState()
         end = time.time()
         diffms = (end - start) * 1000
@@ -334,7 +390,7 @@ def getFeaturesDf(eval_date, future, opt_dict, lastMarketDataDf, lastFeaturesDf)
 
         except:
             raise
-            return None, None
+            return lastMarketDataDf, lastFeaturesDf
 
 
 def followFiles(files):
@@ -374,7 +430,7 @@ def createHistoryCsvFileIfNeeded():
         return
     fd = open(historyCsvFilename, 'a')
     headers = ['time', 'future', 'vol', 'r_vol',
-               'straddle_low', 'straddle_high', 'a_vol', 'r_vol', 'position_delta', 'position_gamma', 'position_theta']
+               'straddle_low', 'straddle_high', 'a_vol', 'r_vol', 'position_delta', 'position_gamma', 'position_theta', 'pnl']
     fd.write(','.join(map(str, headers)) + '\n')
     fd.close()
 
