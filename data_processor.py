@@ -52,20 +52,119 @@ def straddle(opt_arr, s):
 # optionsDict - dictionary of options with instrumentId as key, and value as option class
 # marketData - dictionary 
 # featureData - dictionary
-# positionData - has delta, theta, gamma
+# positionData - has delta, theta, gamma, total_options
 # returns an array of dictionary of predictions. A prediction looks like this
 # {instrumentId: 'OptionName',               name of option, or name of future
 #  volume: 5,                                lots you need to buy or sell
-#  type: 'BUY'}                               BUY or SELL                            
-def executePredictor(future, optionsDict, marketData, featureData, positionData):
+#  type: 1}                               1 for BUY or -1 for SELL                            
+def executePredictor(timeOfUpdate, future, optionsDict, marketData, featureData, positionData, threshold):
     # TODO CHADINI:
     futureVal =  future.getFutureVal()
+    omega = 0.25
+    
+    curr_vol = marketData['Vol']
+    pred = get_pred(marketData, featureData, omega)
+    edge = pred - curr_vol
+
+    long_lim = 500
+    short_lim = -300
+    predictions = settle_expiry(timeOfUpdate, optionsDict)
+    if len(predictions) == 0:
+        predictions = exit_position(timeOfUpdate, futureVal, optionsDict, marketData, featureData, positionData, edge, threshold)
+    if len(predictions) == 0:
+        predictions = enter_position(timeOfUpdate, futureVal, optionsDict, marketData, featureData, positionData, edge, threshold, long_lim, short_lim)
+
+    return predictions
+
+def get_pred(marketData, featureData, omega):
+    
+    Y_hat = 1.1 * featureData['HL AVol'] - 0.1 * marketData['R Vol'] #-0.25 * featureData['HL Rolling RVol'] + 0.25 * marketData['Rolling R Vol']#+ vcr_iv*(all_data['Future']/all_data['HL Future'] - 1)
+    
+    return Y_hat
+
+def isExpiry(timeOfUpdate):
+    convertedTime = utils.convert_time(timeOfUpdate)
+    expiry = utils.convert_time(EXP_DATE)
+    if  expiry - convertedTime < timedelta(minutes=2) :
+        return True
+    else:
+        return False
+
+def calc_retreat(positionData):
+    return max(0.3, 0.2*np.abs(positionData['total_options'])/100.0)
+
+def at_position_limit(positionData, long_lim, short_lim):
+    if (positionData['total_options'] > long_lim) or (positionData['total_options'] < short_lim) :
+        return True
+    else:
+        return False
+
+def get_opt_ref(s):
+    CallSymbol = SAMPLE_OPTION_INSTRUMENT_PREFIX + str(s) + '003'
+    PutSymbol = SAMPLE_OPTION_INSTRUMENT_PREFIX + str(s) + '004'
+    return CallSymbol, PutSymbol
+
+def settle_expiry(timeOfUpdate, optionsDict):
+ #EXPIRY: position goes to zero, no more trading
     predictions = []
-    for instrumentId in optionsDict:
-        if (1==1):# if you should trade this option, change this
+    if  isExpiry(timeOfUpdate):
+        for instrumentId in optionsDict:
+            opt_position = optionsDict[instrumentId].position
+            if (opt_position !=0):# if you should trade this option, change this
+                prediction = {'instrumentId': instrumentId,
+                          'volume': np.abs(opt.position),
+                          'type': -np.sign(opt.position)}
+                predictions.append(prediction)
+
+    return predictions
+def exit_condition(positionData, exit_threshold, edge):
+    if (positionData['total_options'] < 0):
+        if (-edge < exit_threshold) or (edge > 0):
+            return True 
+    elif (positionData['total_options'] > 0):
+        if (edge < exit_threshold) or (edge < 0):             
+            return True
+    else:
+        return False
+
+def exit_position(timeOfUpdate, futureVal, optionsDict, marketData, featureData, positionData, edge, threshold):
+    predictions = []
+    if exit_condition(positionData, 0.2* threshold, edge):
+        print('Getting out')
+        for instrumentId in optionsDict:
+            opt_position = optionsDict[instrumentId].position
+            if (opt_position !=0):# if you should trade this option, change this
+                prediction = {'instrumentId': instrumentId,
+                          'volume': np.abs(opt.position),
+                          'type': -np.sign(opt.position)}
+                predictions.append(prediction)
+
+    return predictions
+        
+
+def enter_position(timeOfUpdate, futureVal, optionsDict, marketData, featureData, positionData, edge, threshold, long_lim, short_lim):
+    retreat = calc_retreat(positionData)
+    if isExpiry(timeOfUpdate):
+        print('Expiry, no trading')
+        trade = False
+    elif at_position_limit(positionData, long_lim, short_lim): #or (np.abs(edge) > (3*threshold)):
+        print('Position Limit')
+        trade = False
+    elif np.abs(edge)>(threshold*(retreat)):
+        print('Not Enough Edge',edge,threshold*(retreat) )
+        trade = True
+    else:
+        print('Trading', edge,threshold*(retreat))
+        trade = False
+
+    predictions = []
+    if trade:
+        atm_call, atm_put = get_opt_ref(int(round(futureVal / 100.0, 0)) * 100)
+        atm_options = [atm_call, atm_put]
+        for instrumentId in atm_options:
             prediction = {'instrumentId': instrumentId,
-                          'volume': 1,
-                          'type': 'SELL'}
+                      'volume': 40,
+                      'type': np.sign(edge)}
             predictions.append(prediction)
 
     return predictions
@@ -200,11 +299,12 @@ class UnderlyingProcessor:
             self.features.append(featureDf)
 
         # executing predictor
-        predictions = executePredictor(self.currentFuture, self.currentOptions, self.marketData[-1], self.features[-1], self.positionData[-1])
+        threshold = .01
+        predictions = executePredictor(timeOfUpdate, self.currentFuture, self.currentOptions, self.marketData[-1], self.features[-1], self.positionData[-1], threshold)
         for prediction in predictions:
             instrumentId = prediction['instrumentId']
             volume = prediction['volume']
-            if prediction['type'] != 'BUY':
+            if prediction['type'] != 1:
                 volume = -volume
             tradePrice = 0
             optionToOrder = self.currentOptions[instrumentId]
@@ -313,6 +413,7 @@ def getPositionDf(future, opt_dict):
     temp_positiondf['delta'] = 0
     temp_positiondf['gamma'] = 0
     temp_positiondf['theta'] = 0
+    temp_positiondf['total_options'] = 0
 
     if future.position != 0:
         temp_positiondf['delta'] += float(opt.position) * 1
@@ -322,6 +423,7 @@ def getPositionDf(future, opt_dict):
         temp_positiondf['delta'] += float(opt.position) * delta
         temp_positiondf['gamma'] += float(opt.position) * gamma
         temp_positiondf['theta'] += float(opt.position) * theta
+        temp_positiondf['total_options'] += float(opt.position)
 
     return temp_positiondf
 
@@ -372,8 +474,8 @@ def getFeaturesDf(eval_date, future, opt_dict, lastMarketDataDf, lastFeaturesDf)
                 252 * var / (1 - utils.calculate_t_days(eval_date, utils.convert_time(eval_date).date() + timedelta(hours=15, minutes=30))))
 
             # Calculate Features
-            hl_iv = 360
-            hl_rv = 360 * 3
+            hl_iv = 740
+            hl_rv = 740 * 3
             temp_f['HL AVol'] = utils.ema_RT(
                 lastFeaturesDf['HL AVol'], temp_df['Vol'], hl_iv)
             temp_f['HL RVol'] = utils.ema_RT(
