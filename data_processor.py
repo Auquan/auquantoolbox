@@ -151,10 +151,10 @@ def enter_position(timeOfUpdate, futureVal, optionsDict, marketData, featureData
         print('Position Limit')
         trade = False
     elif np.abs(edge)>(threshold*(retreat)):
-        print('Not Enough Edge',edge,threshold*(retreat) )
+        print('Trading', edge,threshold*(retreat))
         trade = True
     else:
-        print('Trading', edge,threshold*(retreat))
+        print('Not Enough Edge',edge,threshold*(retreat) )
         trade = False
 
     predictions = []
@@ -169,15 +169,8 @@ def enter_position(timeOfUpdate, futureVal, optionsDict, marketData, featureData
 
     return predictions
 
-
-# Return: a Dictionary. You can add more keys if you want
-def calculatePnl(future, optionsDict, marketData, featureData, positionData, previousPnl):
-    # TODO CHADINI:
-    futureVal =  future.getFutureVal()
-    return {'pnl': 0}
-
 class UnderlyingProcessor:
-    def __init__(self, futureVal, optionsData, startMarketData, startFeaturesData, startPositionData, startTime):
+    def __init__(self, futureVal, optionsData, startMarketData, startFeaturesData, startPositionData, startPnlData, startTime):
         self.histFutureInstruments = []  # for storing history of future instruments
         self.histOptionInstruments = {}  # for storing history of option instruments
         # secondsInterval = pd.date_range(start=START_DATE, end=END_DATE, freq='1S')
@@ -189,7 +182,7 @@ class UnderlyingProcessor:
         self.currentFuture = future.Future(futureVal, startTime)
         self.currentOptions = {}
         self.positionData = [startPositionData]
-        self.pnlData = [{'pnl': 0}] # TODOKANAV: Put in constants
+        self.pnlData = [startPnlData] # TODOKANAV: Put in constants
         for instrumentId in optionsData:
             optionData = optionsData[instrumentId]
             opt = option.Option(futurePrice=futureVal,
@@ -236,9 +229,10 @@ class UnderlyingProcessor:
         positionDelta = '%.2f' % currentState['positionData']['delta']
         positionGamma = '%.2f' % currentState['positionData']['gamma']
         positionTheta = '%.2f' % currentState['positionData']['theta']
-        pnl = '%.2f' % currentState['pnlData']['pnl']
+        pnl = '%.2f' % currentState['pnlData']['Pnl']
+        cumulative_pnl = '%.2f' % currentState['pnlData']['Cumulative Pnl']
         # print '\n\n\n\n\n'
-        print '%s %s %s %s %s %s %s %s %s %s %s %s' % (timeToPrint, futureValToPrint, volToPrint, rvolToPrint, mktLowToPrint, mktHighToPrint, hlavolToPrint, hlrvolToPrint, positionDelta, positionGamma, positionTheta, pnl)
+        print '%s %s %s %s %s %s %s %s %s %s %s %s %s' % (timeToPrint, futureValToPrint, volToPrint, rvolToPrint, mktLowToPrint, mktHighToPrint, hlavolToPrint, hlrvolToPrint, positionDelta, positionGamma, positionTheta, pnl, cumulative_pnl)
         if not isVerbose:
             return
         print 'Time: ' + str(currentState['time'])
@@ -271,7 +265,9 @@ class UnderlyingProcessor:
         stateDataArray.append(serializedState['positionData']['delta'])
         stateDataArray.append(serializedState['positionData']['gamma'])
         stateDataArray.append(serializedState['positionData']['theta'])
-        stateDataArray.append(serializedState['pnlData']['pnl'])
+        stateDataArray.append(serializedState['pnlData']['Cumulative Pnl'])
+        stateDataArray.append(serializedState['pnlData']['Pnl'])
+        stateDataArray.append(serializedState['pnlData']['Cash'])
         csvRow = ','.join(map(str, stateDataArray)) + '\n'
         fd = open(historyCsvFilename, 'a')
         fd.write(csvRow)
@@ -301,6 +297,7 @@ class UnderlyingProcessor:
         # executing predictor
         threshold = .01
         predictions = executePredictor(timeOfUpdate, self.currentFuture, self.currentOptions, self.marketData[-1], self.features[-1], self.positionData[-1], threshold)
+        cash_used = 0
         for prediction in predictions:
             instrumentId = prediction['instrumentId']
             volume = prediction['volume']
@@ -312,22 +309,21 @@ class UnderlyingProcessor:
                 tradePrice = optionToOrder.price
             elif instrumentId == self.currentFuture:
                 # TODO handle this
-                print 'TO handle this. We are trading a future'
-                continue
+                tradePrice = currentFutureVal
             else:
                 continue
             fees = tradePrice * 0.001
+            cash_used += float(volume)*float(tradePrice)  + float(fees)
+            print(instrumentId, tradePrice, volume, cash_used)
             orderToProcess = order.Order(instrumentId=instrumentId, tradePrice=tradePrice, vol=volume, time=timeOfUpdate, fees=fees)
             self.updateWithNewOrder(orderToProcess)
 
         # Calculating updates position data
-        positionsDf = getPositionDf(self.currentFuture, self.currentOptions)
+        positionsDf, pnlDf = getPosition_PnlDf(self.currentFuture, self.currentOptions, self.pnlData[-1], cash_used)
         if positionsDf is not None:
-            self.positionData.append(positionsDf)
-
-        # Calculating PNL
-        pnlDf = calculatePnl(self.currentFuture, self.currentOptions, self.marketData[-1], self.features[-1], self.positionData[-1], self.pnlData[-1])
+            self.positionData.append(positionsDf) 
         self.pnlData.append(pnlDf)
+
 
         # Savingstate
         self.saveCurrentState()
@@ -403,20 +399,25 @@ class UnderlyingProcessor:
             self.updateWithNewOrder(order)
 
 
-def getPositionDf(future, opt_dict):
+def getPosition_PnlDf(future, opt_dict, previousPnl, cash_used):
+    futureVal =  future.getFutureVal()
     options_arr = []
     for instrumentId in opt_dict:
         if opt_dict[instrumentId].position != 0:
             options_arr.append(opt_dict[instrumentId])
 
     temp_positiondf = {}
+    temp_pnldf = {}
     temp_positiondf['delta'] = 0
     temp_positiondf['gamma'] = 0
     temp_positiondf['theta'] = 0
     temp_positiondf['total_options'] = 0
+    temp_pnldf['Cash'] = previousPnl['Cash'] - cash_used
+    instrumentsValue = 0
 
     if future.position != 0:
-        temp_positiondf['delta'] += float(opt.position) * 1
+        temp_positiondf['delta'] += float(future.position) * 1
+        instrumentsValue += float(future.position) * float(futureVal)
 
     for opt in options_arr:
         price, delta, theta, gamma = opt.get_all()
@@ -424,8 +425,11 @@ def getPositionDf(future, opt_dict):
         temp_positiondf['gamma'] += float(opt.position) * gamma
         temp_positiondf['theta'] += float(opt.position) * theta
         temp_positiondf['total_options'] += float(opt.position)
+        instrumentsValue += float(opt.position) * float(price)
 
-    return temp_positiondf
+    temp_pnldf['Pnl'] = instrumentsValue + temp_pnldf['Cash']
+    temp_pnldf['Cumulative Pnl'] = previousPnl['Cumulative Pnl'] + temp_pnldf['Pnl']
+    return temp_positiondf, temp_pnldf
 
 
 def getFeaturesDf(eval_date, future, opt_dict, lastMarketDataDf, lastFeaturesDf):
@@ -531,8 +535,8 @@ def createHistoryCsvFileIfNeeded():
     if os.path.isfile(historyCsvFilename):
         return
     fd = open(historyCsvFilename, 'a')
-    headers = ['time', 'future', 'vol', 'r_vol',
-               'straddle_low', 'straddle_high', 'a_vol', 'r_vol', 'position_delta', 'position_gamma', 'position_theta', 'pnl']
+    headers = ['Time', 'Future', 'Vol', 'R Vol',
+               'Straddle_low', 'Straddle_high', 'HL AVol', 'HL RVol', 'position_delta', 'position_gamma', 'position_theta', 'Cumulative Pnl']
     fd.write(','.join(map(str, headers)) + '\n')
     fd.close()
 
@@ -547,11 +551,11 @@ def startStrategyContinuous():
         print 'Reading from saved state'
         stateSaved = np.load(getContinuousSaveStateFilename()).item()
         up = UnderlyingProcessor(stateSaved['futureVal'], stateSaved['options'], stateSaved[
-            'marketData'], stateSaved['featureData'], stateSaved['positionData'], stateSaved['time'])
+            'marketData'], stateSaved['featureData'], stateSaved['positionData'], stateSaved['pnlData'], stateSaved['time'])
     else:
         print 'Reading from constants'
         up = UnderlyingProcessor(STARTING_FUTURE_VAL, STARTING_OPTIONS_DATA,
-                                 START_MARKET_DATA, START_FEATURES_DATA, START_POSITON_DATA, START_TIME)
+                                 START_MARKET_DATA, START_FEATURES_DATA, START_POSITON_DATA, START_PNL_DATA, START_TIME)
 
     instrumentsDataparser = ds.Dataparser()
     positionsDataparser = ds.OrdersParser()

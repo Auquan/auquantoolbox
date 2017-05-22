@@ -25,7 +25,7 @@ class Option:
     """
     This class will group the different black-shcoles calculations for an opion
     """
-    def __init__(self, futurePrice, instrumentId, exp_date, instrumentPrefix, eval_date, rf=0.01, vol=0.3, div=0,position=0):
+    def __init__(self, futurePrice, instrumentId, exp_date, instrumentPrefix, eval_date, rf=0.01, vol=0.2, div=0,position=0):
         self.s = get_index_val(futurePrice, constants.ROLL)
         self.k = getStrikePriceFromInstrumentId(instrumentId, instrumentPrefix)
         self.rf = rf
@@ -41,6 +41,7 @@ class Option:
         self.type = "C" if (instrumentId.endswith("003")) else "P"
         self.instrumentId = instrumentId
         self.position = position
+        self.delta = 0
 
     def updateWithInstrument(self, optionInstrument, currentFutureVal):
         self.eval_date = optionInstrument.time
