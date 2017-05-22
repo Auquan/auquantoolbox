@@ -585,5 +585,5 @@ def startStrategyHistory(historyFilePath):
             instrumentsToProcess = dataParser.processLines([line])
             up.processData(instrumentsToProcess)
 
-startStrategyContinuous()
-# startStrategyHistory('data_0505')
+#startStrategyContinuous()
+startStrategyHistory('/spare/local/cjain/greeks/BANKNIFTY.weekly/20170519/data')
