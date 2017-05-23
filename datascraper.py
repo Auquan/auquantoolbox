@@ -256,20 +256,21 @@ class Dataparser:
 class OrdersParser:
 
     def parseOrderFromLineItems(self, lineItems):
-        type = lineItems[15]
-        volume = float(lineItems[6])
+        instrumentId = lineItems[4]
+        type = lineItems[6]
+        volume = float(lineItems[10])
         volume = volume if type == 'BUY' else -volume
-        instrumentId = lineItems[13]
-        tradePrice = float(lineItems[8])
+        tradePrice = float(lineItems[12])
         time = str(datetime.now())
         fees = 0.001 * tradePrice
         return order.Order(instrumentId=instrumentId, tradePrice=tradePrice, vol=volume, time=time, fees=fees)
 
     def processLines(self, lines):
         accumulatedOrders = []
+        # :15:28:40.599762 NONE OrderSender::onFill:  symbol: BANKNIFTY118018980022600004 dir: BUY orderid: 3000011 fill_size: 80 fill_px: 12355 sent_px: 12380
         for line in lines:
             lineItems = line.split()
-            if len(lineItems) < 10:
+            if 'onFill' not in lineItems[2]:
                 continue
             parsedOrder = self.parseOrderFromLineItems(lineItems)
             accumulatedOrders.append(parsedOrder)

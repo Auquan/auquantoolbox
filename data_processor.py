@@ -60,14 +60,14 @@ def straddle(opt_arr, s):
 def executePredictor(timeOfUpdate, future, optionsDict, marketData, featureData, positionData, threshold):
     # TODO CHADINI:
     futureVal =  future.getFutureVal()
-    omega = 0.25
+    omega = OMEGA
     
     curr_vol = marketData['Vol']
     pred = get_pred(marketData, featureData, omega)
     edge = pred - curr_vol
 
-    long_lim = 20000
-    short_lim = -12000
+    long_lim = LONG_LIMIT
+    short_lim = SHORT_LIMIT
     predictions = settle_expiry(timeOfUpdate, optionsDict)
     if len(predictions) == 0:
         predictions = exit_position(timeOfUpdate, futureVal, optionsDict, marketData, featureData, positionData, edge, threshold)
@@ -78,7 +78,7 @@ def executePredictor(timeOfUpdate, future, optionsDict, marketData, featureData,
 
 def get_pred(marketData, featureData, omega):
     
-    Y_hat = 1.1 * featureData['HL AVol'] - 0.1 * marketData['R Vol'] #-0.25 * featureData['HL Rolling RVol'] + 0.25 * marketData['Rolling R Vol']#+ vcr_iv*(all_data['Future']/all_data['HL Future'] - 1)
+    Y_hat = 1.1 * featureData['HL AVol'] - 0.1 * marketData['R Vol'] -0.25 * featureData['HL Rolling RVol'] + 0.25 * marketData['Rolling R Vol']#+ vcr_iv*(all_data['Future']/all_data['HL Future'] - 1)
     
     return Y_hat
 
@@ -91,7 +91,7 @@ def isExpiry(timeOfUpdate):
         return False
 
 def calc_retreat(positionData):
-    return max(0.5, 0.2*np.abs(positionData['total_options'])/4000.0)
+    return max(MIN_EDGE, 0.02*np.abs(positionData['total_options'])/400.0)
 
 def at_position_limit(positionData, long_lim, short_lim):
     if (positionData['total_options'] > long_lim) or (positionData['total_options'] < short_lim) :
@@ -129,8 +129,8 @@ def exit_condition(positionData, exit_threshold, edge):
 
 def exit_position(timeOfUpdate, futureVal, optionsDict, marketData, featureData, positionData, edge, threshold):
     predictions = []
-    if exit_condition(positionData, 0.2* threshold, edge):
-        print('Getting out','Actual: %.2f Required: %.2f'%(100*edge,100*threshold*(.2)))
+    if exit_condition(positionData, 0.3* threshold, edge):
+        print('Getting out','Actual: %.2f Required: %.2f'%(100*edge,100*threshold*(.3)))
         for instrumentId in optionsDict:
             opt_position = optionsDict[instrumentId].position
             if (opt_position !=0):# if you should trade this option, change this
@@ -176,6 +176,16 @@ def writeOrder(orderToProcess):
     data = ['PLACE_MKT', orderToProcess.instrumentId, orderToProcess.volume, buySell ]
     fd.write(' '.join(map(str, data)) + '\n')
     fd.close()
+
+def writeOrder(orderToProcess):
+    #orderToProcess = order.Order(instrumentId=instrumentId, tradePrice=tradePrice, vol=volume, time=timeOfUpdate, fees=fees)
+    orderFilename = PLACE_ORDER_FILE_NAME
+    fd = open(orderFilename, 'a')
+    buySell = 'BUY' if orderToProcess.vol > 0 else 'SELL'
+    data = ['PLACE_MKT', orderToProcess.instrumentId, orderToProcess.vol, buySell ]
+    fd.write(' '.join(map(str, data)) + '\n')
+    fd.close()
+
 
 class UnderlyingProcessor:
     def __init__(self, futureVal, optionsData, startMarketData, startFeaturesData, startPositionData, startPnlData, startTime):
@@ -306,10 +316,11 @@ class UnderlyingProcessor:
                 self.features.append(featureDf)
 
             # executing predictor
-            threshold = .01
+            threshold = THRESHOLD
             predictions = executePredictor(timeOfUpdate, self.currentFuture, self.currentOptions, self.marketData[-1], self.features[-1], self.positionData[-1], threshold)
             cash_used = 0
-            if os.path.isfile(PLACE_ORDER_FILE_NAME):
+            
+            if len(predictions)>0 and os.path.isfile(PLACE_ORDER_FILE_NAME):
                 os.remove(PLACE_ORDER_FILE_NAME)
 
             for prediction in predictions:
@@ -330,9 +341,11 @@ class UnderlyingProcessor:
                 cash_used += float(volume)*float(tradePrice)  + float(fees)
                 print(instrumentId, '%.2f'%tradePrice, volume)
                 orderToProcess = order.Order(instrumentId=instrumentId, tradePrice=tradePrice, vol=volume, time=timeOfUpdate, fees=fees)
-                writeOrder(orderToProcess)
-		self.updateWithNewOrder(orderToProcess)
-
+                if BACKTEST:
+                    self.updateWithNewOrder(orderToProcess)
+                else:
+                    writeOrder(orderToProcess)
+                
             # Calculating updates position data
             positionsDf, pnlDf = getPosition_PnlDf(self.currentFuture, self.currentOptions, self.pnlData[-1], cash_used)
             if positionsDf is not None:
@@ -349,19 +362,17 @@ class UnderlyingProcessor:
             self.totalIter = self.totalIter + 1
             self.printCurrentState()
 
-
     def updateWithNewFutureInstrument(self, futureInstrument):
         # self.histFutureInstruments.append(instrument)  # just for storing
         self.updateFeatures(futureInstrument.time)
-	self.currentFuture.updateWithNewInstrument(futureInstrument)
+	    self.currentFuture.updateWithNewInstrument(futureInstrument)
         #self.updateFeatures(futureInstrument.time)
 
     def updateWithNewOptionInstrument(self, optionInstrument):
         # self.addNewOption(optionInstrument)  # just for storing
         self.updateFeatures(optionInstrument.time)
-	changedOption = self.currentOptions[optionInstrument.instrumentId]
-        changedOption.updateWithInstrument(
-            optionInstrument, self.currentFuture.getFutureVal())
+	    changedOption = self.currentOptions[optionInstrument.instrumentId]
+        changedOption.updateWithInstrument(optionInstrument, self.currentFuture.getFutureVal())
         #self.updateFeatures(optionInstrument.time)
 
     def updateWithNewOrder(self, order):
@@ -492,14 +503,18 @@ def getFeaturesDf(eval_date, future, opt_dict, lastMarketDataDf, lastFeaturesDf)
             else:
                 temp_df['Vol'] = lastMarketDataDf['Vol']
 
-            # Calculate Realized Vol
+            # Calculate Intraday and Rolling Realized Vol
             var = utils.calc_var_RT(
                 lastFeaturesDf['Var'], fut, lastMarketDataDf['Future'])
             temp_f['Var'] = var
-	    day_winddown = (1 - utils.calculate_t_days(eval_date, utils.convert_time(eval_date).date() + timedelta(hours=15, minutes=30)
-	    temp_df['Rolling R Vol'] =  np.sqrt((252 * var + lastMarketDataDf['Close R Vol']**2)/(1 + day_winddown))
+            day_winddown = 1 - utils.calculate_t_days(
+                            eval_date, utils.convert_time(eval_date).date() + timedelta(hours=15, minutes=30))
+            temp_df['Rolling R Vol'] =  np.sqrt((252 * var + lastMarketDataDf['Close R Vol']**2)/(1 + day_winddown))
             temp_df['R Vol'] = np.sqrt(252 * var /day_winddown)
-	    temp_df['Close R Vol'] = lastMarketDataDf['Close R Vol']
+            if utils.convert_time(eval_date).time() - utils.convert_time('15:30:00').time() < timedelta(minutes=2):
+                temp_df['Close R Vol'] = temp_df['R Vol']
+            else:
+                temp_df['Close R Vol'] = lastMarketDataDf['Close R Vol']
 
             # Calculate Features
             hl_iv = 22500/ float(TIME_INTERVAL_FOR_UPDATES)
@@ -512,10 +527,6 @@ def getFeaturesDf(eval_date, future, opt_dict, lastMarketDataDf, lastFeaturesDf)
                 lastFeaturesDf['HL Rolling RVol'], temp_df['Rolling R Vol'], hl_rv)
             temp_f['HL Future'] = utils.ema_RT(
                 lastFeaturesDf['HL Future'], temp_df['Future'], hl_iv)
-
-            # Combine Features into prediction
-            temp_f['Pred'] = temp_f['HL AVol'] + temp_f['HL RVol'] + \
-                temp_df['Future'] / temp_f['HL Future'] - 1
 
             # append data
             return temp_df, temp_f
@@ -616,7 +627,12 @@ def startStrategyHistory(historyFilePath):
     with open(historyFilePath) as f:
         for line in f:
             instrumentsToProcess = dataParser.processLines([line])
+            if utils.convert_time(dataParser.currentTime) > time.strptime('15:30:00'.%H:%M:%S):
+                continue
             up.processData(instrumentsToProcess)
 
-# startStrategyContinuous()
-startStrategyHistory('/spare/local/cjain/greeks/BANKNIFTY.weekly/20170522/data')
+if BACKTEST:
+    startStrategyHistory('/spare/local/cjain/greeks/BANKNIFTY.weekly/20170522/data')
+else:
+    startStrategyContinuous()
+
