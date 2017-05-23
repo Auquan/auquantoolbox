@@ -5,7 +5,6 @@ import os
 import csv
 import json
 import datetime as dt
-import matplotlib.pyplot as plt
 import random
 import csv
 import re
