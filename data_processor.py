@@ -365,13 +365,13 @@ class UnderlyingProcessor:
     def updateWithNewFutureInstrument(self, futureInstrument):
         # self.histFutureInstruments.append(instrument)  # just for storing
         self.updateFeatures(futureInstrument.time)
-	    self.currentFuture.updateWithNewInstrument(futureInstrument)
+        self.currentFuture.updateWithNewInstrument(futureInstrument)
         #self.updateFeatures(futureInstrument.time)
 
     def updateWithNewOptionInstrument(self, optionInstrument):
         # self.addNewOption(optionInstrument)  # just for storing
         self.updateFeatures(optionInstrument.time)
-	    changedOption = self.currentOptions[optionInstrument.instrumentId]
+        changedOption = self.currentOptions[optionInstrument.instrumentId]
         changedOption.updateWithInstrument(optionInstrument, self.currentFuture.getFutureVal())
         #self.updateFeatures(optionInstrument.time)
 
