@@ -1,4 +1,5 @@
 import math
+import datetime
 from datetime import timedelta
 import numpy as np
 import datascraper as ds
@@ -365,13 +366,13 @@ class UnderlyingProcessor:
     def updateWithNewFutureInstrument(self, futureInstrument):
         # self.histFutureInstruments.append(instrument)  # just for storing
         self.updateFeatures(futureInstrument.time)
-	    self.currentFuture.updateWithNewInstrument(futureInstrument)
+	self.currentFuture.updateWithNewInstrument(futureInstrument)
         #self.updateFeatures(futureInstrument.time)
 
     def updateWithNewOptionInstrument(self, optionInstrument):
         # self.addNewOption(optionInstrument)  # just for storing
         self.updateFeatures(optionInstrument.time)
-	    changedOption = self.currentOptions[optionInstrument.instrumentId]
+	changedOption = self.currentOptions[optionInstrument.instrumentId]
         changedOption.updateWithInstrument(optionInstrument, self.currentFuture.getFutureVal())
         #self.updateFeatures(optionInstrument.time)
 
@@ -511,7 +512,7 @@ def getFeaturesDf(eval_date, future, opt_dict, lastMarketDataDf, lastFeaturesDf)
                             eval_date, utils.convert_time(eval_date).date() + timedelta(hours=15, minutes=30))
             temp_df['Rolling R Vol'] =  np.sqrt((252 * var + lastMarketDataDf['Close R Vol']**2)/(1 + day_winddown))
             temp_df['R Vol'] = np.sqrt(252 * var /day_winddown)
-            if utils.convert_time(eval_date).time() - utils.convert_time('15:30:00').time() < timedelta(minutes=2):
+            if utils.convert_time(eval_date).time() > utils.convert_time('15:28:00').time():
                 temp_df['Close R Vol'] = temp_df['R Vol']
             else:
                 temp_df['Close R Vol'] = lastMarketDataDf['Close R Vol']
@@ -627,8 +628,6 @@ def startStrategyHistory(historyFilePath):
     with open(historyFilePath) as f:
         for line in f:
             instrumentsToProcess = dataParser.processLines([line])
-            if utils.convert_time(dataParser.currentTime) > time.strptime('15:30:00'.%H:%M:%S):
-                continue
             up.processData(instrumentsToProcess)
 
 if BACKTEST:
