@@ -81,6 +81,7 @@ def get_pred(marketData, featureData, omega):
     
     Y_hat = 1.1 * featureData['HL AVol'] - 0.1 * marketData['R Vol'] -0.25 * featureData['HL Rolling RVol'] + 0.25 * marketData['Rolling R Vol']#+ vcr_iv*(all_data['Future']/all_data['HL Future'] - 1)
     
+    print('Prediction: ', Y_hat)
     return Y_hat
 
 def isExpiry(timeOfUpdate):
@@ -519,7 +520,8 @@ def getFeaturesDf(eval_date, future, opt_dict, lastMarketDataDf, lastFeaturesDf)
             temp_f['HL Future'] = utils.ema_RT(
                 lastFeaturesDf['HL Future'], temp_df['Future'], hl_iv)
 
-            # append data
+            print(temp_df['Close R Vol'], temp_df['Rolling R Vol'], temp_df['R Vol'], temp_f['HL RVol'], temp_f['HL Rolling RVol'])
+	    # append data
             return temp_df, temp_f
 
         except:
@@ -621,7 +623,9 @@ def startStrategyHistory(historyFilePath):
             up.processData(instrumentsToProcess)
 
 if BACKTEST:
-    startStrategyHistory('/spare/local/cjain/greeks/BANKNIFTY.weekly/20170522/data')
+    print('Running Backtest')
+    startStrategyHistory('/spare/local/cjain/greeks/BANKNIFTY.weekly/20170523/data')
 else:
+    print('Running Live')
     startStrategyContinuous()
 
