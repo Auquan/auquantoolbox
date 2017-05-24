@@ -270,6 +270,8 @@ class OrdersParser:
         # :15:28:40.599762 NONE OrderSender::onFill:  symbol: BANKNIFTY118018980022600004 dir: BUY orderid: 3000011 fill_size: 80 fill_px: 12355 sent_px: 12380
         for line in lines:
             lineItems = line.split()
+            if len(lineItems) < 3:
+                continue
             if 'onFill' not in lineItems[2]:
                 continue
             parsedOrder = self.parseOrderFromLineItems(lineItems)
