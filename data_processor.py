@@ -58,7 +58,7 @@ def straddle(opt_arr, s):
 # {instrumentId: 'OptionName',               name of option, or name of future
 #  volume: 5,                                lots you need to buy or sell
 #  type: 1}                               1 for BUY or -1 for SELL                            
-def executePredictor(timeOfUpdate, future, optionsDict, marketData, featureData, positionData, threshold):
+def executePredictor(convertedTime, future, optionsDict, marketData, featureData, positionData, threshold):
     # TODO CHADINI:
     futureVal =  future.getFutureVal()
     omega = OMEGA
@@ -69,11 +69,11 @@ def executePredictor(timeOfUpdate, future, optionsDict, marketData, featureData,
 
     long_lim = LONG_LIMIT
     short_lim = SHORT_LIMIT
-    predictions = settle_expiry(timeOfUpdate, optionsDict)
+    predictions = settle_expiry(convertedTime, optionsDict)
     if len(predictions) == 0:
-        predictions = exit_position(timeOfUpdate, futureVal, optionsDict, marketData, featureData, positionData, edge, threshold)
+        predictions = exit_position(convertedTime, futureVal, optionsDict, marketData, featureData, positionData, edge, threshold)
     if len(predictions) == 0:
-        predictions = enter_position(timeOfUpdate, futureVal, optionsDict, marketData, featureData, positionData, edge, threshold, long_lim, short_lim)
+        predictions = enter_position(convertedTime, futureVal, optionsDict, marketData, featureData, positionData, edge, threshold, long_lim, short_lim)
 
     return predictions
 
@@ -81,11 +81,10 @@ def get_pred(marketData, featureData, omega):
     
     Y_hat = 1.1 * featureData['HL AVol'] - 0.1 * marketData['R Vol'] -0.25 * featureData['HL Rolling RVol'] + 0.25 * marketData['Rolling R Vol']#+ vcr_iv*(all_data['Future']/all_data['HL Future'] - 1)
     
-    print('Prediction: ', Y_hat)
+    print('Prediction: %.2f', %Y_hat)
     return Y_hat
 
-def isExpiry(timeOfUpdate):
-    convertedTime = utils.convert_time(timeOfUpdate)
+def isExpiry(convertedTime):
     expiry = utils.convert_time(EXP_DATE)
     if  expiry - convertedTime < timedelta(minutes=2) :
         return True
@@ -106,10 +105,10 @@ def get_opt_ref(s):
     PutSymbol = SAMPLE_OPTION_INSTRUMENT_PREFIX + str(s) + '004'
     return CallSymbol, PutSymbol
 
-def settle_expiry(timeOfUpdate, optionsDict):
+def settle_expiry(convertedTime, optionsDict):
  #EXPIRY: position goes to zero, no more trading
     predictions = []
-    if  isExpiry(timeOfUpdate):
+    if  isExpiry(convertedTime):
         for instrumentId in optionsDict:
             opt_position = optionsDict[instrumentId].position
             if (opt_position !=0):# if you should trade this option, change this
@@ -129,7 +128,7 @@ def exit_condition(positionData, exit_threshold, edge):
     else:
         return False
 
-def exit_position(timeOfUpdate, futureVal, optionsDict, marketData, featureData, positionData, edge, threshold):
+def exit_position(convertedTime, futureVal, optionsDict, marketData, featureData, positionData, edge, threshold):
     predictions = []
     if exit_condition(positionData, 0.3* threshold, edge):
         print('Getting out','Actual: %.2f Required: %.2f'%(100*edge,100*threshold*(.3)))
@@ -144,19 +143,21 @@ def exit_position(timeOfUpdate, futureVal, optionsDict, marketData, featureData,
     return predictions
         
 
-def enter_position(timeOfUpdate, futureVal, optionsDict, marketData, featureData, positionData, edge, threshold, long_lim, short_lim):
+def enter_position(convertedTime, futureVal, optionsDict, marketData, featureData, positionData, edge, threshold, long_lim, short_lim):
     retreat = calc_retreat(positionData)
-    if isExpiry(timeOfUpdate):
+    dte = utils.calculate_t_days(convertedTime, EXP_DATE)
+    edge_required = threshold*(retreat)/np.sqrt(float(dte))
+    if isExpiry(convertedTime):
         print('Expiry, no trading')
         trade = False
     elif at_position_limit(positionData, long_lim, short_lim): #or (np.abs(edge) > (3*threshold)):
         print('Position Limit')
         trade = False
-    elif np.abs(edge)>(threshold*(retreat)):
-        print('Trading', 'Actual: %.2f Required: %.2f'%(100*edge,100*threshold*(retreat)))
+    elif np.abs(edge)>(edge_required):
+        print('Trading', 'Actual: %.2f Required: %.2f'%(100*edge,100*edge_required))
         trade = True
     else:
-        print('Not Enough Edge','Actual: %.2f Required: %.2f'%(100*edge,100*threshold*(retreat)))
+        print('Not Enough Edge','Actual: %.2f Required: %.2f'%(100*edge,100*edge_required))
         trade = False
 
     predictions = []
@@ -301,7 +302,7 @@ class UnderlyingProcessor:
                 if shouldUpdateOption(opt, currentFutureVal):
                     opt.get_impl_vol()
             marketDataDf, featureDf = getFeaturesDf(
-                timeOfUpdate, self.currentFuture, self.currentOptions, self.marketData[-1], self.features[-1])
+                convertedTime, self.currentFuture, self.currentOptions, self.marketData[-1], self.features[-1])
             if marketDataDf is not None:
                 self.marketData.append(marketDataDf)
             if featureDf is not None:
@@ -309,7 +310,7 @@ class UnderlyingProcessor:
 
             # executing predictor
             threshold = THRESHOLD
-            predictions = executePredictor(timeOfUpdate, self.currentFuture, self.currentOptions, self.marketData[-1], self.features[-1], self.positionData[-1], threshold)
+            predictions = executePredictor(convertedTime, self.currentFuture, self.currentOptions, self.marketData[-1], self.features[-1], self.positionData[-1], threshold)
             cash_used = 0
             
             if len(predictions)>0 and os.path.isfile(PLACE_ORDER_FILE_NAME):
@@ -457,7 +458,7 @@ def getPosition_PnlDf(future, opt_dict, previousPnl, cash_used):
     return temp_positiondf, temp_pnldf
 
 
-def getFeaturesDf(eval_date, future, opt_dict, lastMarketDataDf, lastFeaturesDf):
+def getFeaturesDf(convertedTime, future, opt_dict, lastMarketDataDf, lastFeaturesDf):
     fut = future.getFutureVal()
     if fut == 0:
         print('Future not trading')
@@ -496,17 +497,25 @@ def getFeaturesDf(eval_date, future, opt_dict, lastMarketDataDf, lastFeaturesDf)
                 temp_df['Vol'] = lastMarketDataDf['Vol']
 
             # Calculate Intraday and Rolling Realized Vol
-            var = utils.calc_var_RT(
-                lastFeaturesDf['Var'], fut, lastMarketDataDf['Future'])
+            if np.abs(fut - lastFeaturesDf['Last Move Future']) > VAR_THRESHOLD:
+                var = utils.calc_var_RT(
+                    lastFeaturesDf['Var'], fut, lastFeaturesDf['Last Move Future'])
+                temp_f['Last Move Future'] = fut
+            else:
+                var = lastFeaturesDf['Var']
+                temp_f['Last Move Future'] = lastFeaturesDf['Last Move Future']
+            
             temp_f['Var'] = var
+            idx = convertedTime.ceil('min').strftime('%H:%M')
             day_winddown = 1 - utils.calculate_t_days(
-                            eval_date, utils.convert_time(eval_date).date() + timedelta(hours=15, minutes=30))
-            temp_df['Rolling R Vol'] =  np.sqrt((252 * var + lastMarketDataDf['Close R Vol']**2)/(1 + day_winddown))
+                            convertedTime, convertedTime.replace(hours=15, minutes=30, seconds=0))
+            temp_df['Rolling R Vol'] =  np.sqrt(252 * (var - temp_f['Var_Arr'][idx])+ lastMarketDataDf['Close R Vol']**2 )
             temp_df['R Vol'] = np.sqrt(252 * var /day_winddown)
-            if utils.convert_time(eval_date).time() > utils.convert_time('15:28:00').time():
+            if convertedTime.time() > utils.convert_time('15:28:30').time():
                 temp_df['Close R Vol'] = temp_df['R Vol']
             else:
                 temp_df['Close R Vol'] = lastMarketDataDf['Close R Vol']
+            temp_f['Var_Arr'][idx] = var
 
             # Calculate Features
             hl_iv = 22500/ float(TIME_INTERVAL_FOR_UPDATES)
@@ -520,7 +529,8 @@ def getFeaturesDf(eval_date, future, opt_dict, lastMarketDataDf, lastFeaturesDf)
             temp_f['HL Future'] = utils.ema_RT(
                 lastFeaturesDf['HL Future'], temp_df['Future'], hl_iv)
 
-            print(temp_df['Close R Vol'], temp_df['Rolling R Vol'], temp_df['R Vol'], temp_f['HL RVol'], temp_f['HL Rolling RVol'])
+            print('RV: Close %.2f Rolling %.2f ID %.2f HL ID: %.2f HL Roll %.2f'%(
+                temp_df['Close R Vol'], temp_df['Rolling R Vol'], temp_df['R Vol'], temp_f['HL RVol'], temp_f['HL Rolling RVol']))
 	    # append data
             return temp_df, temp_f
 
