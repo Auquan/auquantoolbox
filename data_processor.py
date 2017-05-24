@@ -1,4 +1,5 @@
 import math
+import datetime
 from datetime import timedelta
 import numpy as np
 import datascraper as ds
@@ -176,16 +177,6 @@ def writeOrder(orderToProcess):
     data = ['PLACE_MKT', orderToProcess.instrumentId, orderToProcess.volume, buySell ]
     fd.write(' '.join(map(str, data)) + '\n')
     fd.close()
-
-def writeOrder(orderToProcess):
-    #orderToProcess = order.Order(instrumentId=instrumentId, tradePrice=tradePrice, vol=volume, time=timeOfUpdate, fees=fees)
-    orderFilename = PLACE_ORDER_FILE_NAME
-    fd = open(orderFilename, 'a')
-    buySell = 'BUY' if orderToProcess.vol > 0 else 'SELL'
-    data = ['PLACE_MKT', orderToProcess.instrumentId, orderToProcess.vol, buySell ]
-    fd.write(' '.join(map(str, data)) + '\n')
-    fd.close()
-
 
 class UnderlyingProcessor:
     def __init__(self, futureVal, optionsData, startMarketData, startFeaturesData, startPositionData, startPnlData, startTime):
@@ -511,7 +502,7 @@ def getFeaturesDf(eval_date, future, opt_dict, lastMarketDataDf, lastFeaturesDf)
                             eval_date, utils.convert_time(eval_date).date() + timedelta(hours=15, minutes=30))
             temp_df['Rolling R Vol'] =  np.sqrt((252 * var + lastMarketDataDf['Close R Vol']**2)/(1 + day_winddown))
             temp_df['R Vol'] = np.sqrt(252 * var /day_winddown)
-            if utils.convert_time(eval_date).time() - utils.convert_time('15:30:00').time() < timedelta(minutes=2):
+            if utils.convert_time(eval_date).time() > utils.convert_time('15:28:00').time():
                 temp_df['Close R Vol'] = temp_df['R Vol']
             else:
                 temp_df['Close R Vol'] = lastMarketDataDf['Close R Vol']
@@ -627,8 +618,6 @@ def startStrategyHistory(historyFilePath):
     with open(historyFilePath) as f:
         for line in f:
             instrumentsToProcess = dataParser.processLines([line])
-            if utils.convert_time(dataParser.currentTime) > time.strptime('15:30:00'.%H:%M:%S):
-                continue
             up.processData(instrumentsToProcess)
 
 if BACKTEST:
