@@ -245,7 +245,7 @@ class Dataparser:
                     accumulatedInstruments.append(inst)
                 self.currentDate = lineItems[0]
                 self.currentTime = lineItems[1]
-                self.currentInstrumentId = lineItems[4]
+                self.currentInstrumentId = lineItems[4][len(SAMPLE_OPTION_INSTRUMENT_PREFIX):]
                 self.currentBookData = []
             elif(lineItemType == TYPE_LINE_BOOK_OPTION):
                 parsedOption = parseBookDataOptionLine(lineItems)
@@ -256,7 +256,7 @@ class Dataparser:
 class OrdersParser:
 
     def parseOrderFromLineItems(self, lineItems):
-        instrumentId = lineItems[4]
+        instrumentId = lineItems[4][len(SAMPLE_OPTION_INSTRUMENT_PREFIX):]
         type = lineItems[6]
         volume = float(lineItems[10])
         volume = volume if type == 'BUY' else -volume

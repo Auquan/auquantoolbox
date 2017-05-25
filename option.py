@@ -9,7 +9,7 @@ from scipy.optimize import fsolve
 import useful_fn as utils
 
 def getStrikePriceFromInstrumentId(instrumentId, instrumentPrefix):
-    return int(instrumentId[len(instrumentPrefix):-3])
+    return int(instrumentId[:-3])
 
 def get_index_val(fut, roll):
     # rf = opt_arr[0].rf
@@ -54,7 +54,6 @@ class Option:
 
     def updateWithOrder(self, order):
         self.position += order.volume
-        self.price = order.tradePrice
 
     def convert_time(self, timestamp):
         try:

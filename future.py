@@ -14,4 +14,3 @@ class Future:
 
     def updateWithOrder(self, order):
         self.position += order.volume
-        self.__futureVal = order.tradePrice
