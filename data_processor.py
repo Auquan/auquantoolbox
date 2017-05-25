@@ -51,18 +51,18 @@ def straddle(opt_arr, s):
 
 
 # optionsDict - dictionary of options with instrumentId as key, and value as option class
-# marketData - dictionary 
+# marketData - dictionary
 # featureData - dictionary
 # positionData - has delta, theta, gamma, total_options
 # returns an array of dictionary of predictions. A prediction looks like this
 # {instrumentId: 'OptionName',               name of option, or name of future
 #  volume: 5,                                lots you need to buy or sell
-#  type: 1}                               1 for BUY or -1 for SELL                            
+#  type: 1}                               1 for BUY or -1 for SELL
 def executePredictor(convertedTime, future, optionsDict, marketData, featureData, positionData, threshold):
     # TODO CHADINI:
     futureVal =  future.getFutureVal()
     omega = OMEGA
-    
+
     curr_vol = marketData['Vol']
     pred = get_pred(marketData, featureData, omega)
     edge = pred - curr_vol
@@ -78,10 +78,10 @@ def executePredictor(convertedTime, future, optionsDict, marketData, featureData
     return predictions
 
 def get_pred(marketData, featureData, omega):
-    
+
     Y_hat = 1.1 * featureData['HL AVol'] - 0.1 * marketData['R Vol'] -0.25 * featureData['HL Rolling RVol'] + 0.25 * marketData['Rolling R Vol']#+ vcr_iv*(all_data['Future']/all_data['HL Future'] - 1)
-    
-    print('Prediction: %.2f', %Y_hat)
+
+    print('Prediction: %.2f'%Y_hat)
     return Y_hat
 
 def isExpiry(convertedTime):
@@ -121,9 +121,9 @@ def settle_expiry(convertedTime, optionsDict):
 def exit_condition(positionData, exit_threshold, edge):
     if (positionData['total_options'] < 0):
         if (-edge < exit_threshold) or (edge > 0):
-            return True 
+            return True
     elif (positionData['total_options'] > 0):
-        if (edge < exit_threshold) or (edge < 0):             
+        if (edge < exit_threshold) or (edge < 0):
             return True
     else:
         return False
@@ -141,7 +141,7 @@ def exit_position(convertedTime, futureVal, optionsDict, marketData, featureData
                 predictions.append(prediction)
 
     return predictions
-        
+
 
 def enter_position(convertedTime, futureVal, optionsDict, marketData, featureData, positionData, edge, threshold, long_lim, short_lim):
     retreat = calc_retreat(positionData)
@@ -203,7 +203,7 @@ class UnderlyingProcessor:
                                 eval_date=startTime,
                                 vol=optionData['vol'],
                                 rf=RF,
-                                position=optionData['position'] if 'position' in optionData else 0) 
+                                position=optionData['position'] if 'position' in optionData else 0)
             self.currentOptions[instrumentId] = opt
         self.totalTimeUpdating = 0
         self.totalIter = 0
@@ -312,7 +312,7 @@ class UnderlyingProcessor:
             threshold = THRESHOLD
             predictions = executePredictor(convertedTime, self.currentFuture, self.currentOptions, self.marketData[-1], self.features[-1], self.positionData[-1], threshold)
             cash_used = 0
-            
+
             if len(predictions)>0 and os.path.isfile(PLACE_ORDER_FILE_NAME):
                 os.remove(PLACE_ORDER_FILE_NAME)
 
@@ -338,11 +338,11 @@ class UnderlyingProcessor:
                     self.updateWithNewOrder(orderToProcess)
                 else:
                     writeOrder(orderToProcess)
-                
+
             # Calculating updates position data
             positionsDf, pnlDf = getPosition_PnlDf(self.currentFuture, self.currentOptions, self.pnlData[-1], cash_used)
             if positionsDf is not None:
-                self.positionData.append(positionsDf) 
+                self.positionData.append(positionsDf)
             self.pnlData.append(pnlDf)
 
 
@@ -412,7 +412,7 @@ class UnderlyingProcessor:
     '''
     def processData(self, instrumentsToProcess):
         for instrument in instrumentsToProcess:
-            if utils.convert_time(instrument.time).time() >utils.convert_time('15:30:00').time(): 
+            if utils.convert_time(instrument.time).time() >utils.convert_time('15:30:00').time():
                 continue
             if instrument.isFuture():
                 self.updateWithNewFutureInstrument(instrument)
@@ -504,18 +504,22 @@ def getFeaturesDf(convertedTime, future, opt_dict, lastMarketDataDf, lastFeature
             else:
                 var = lastFeaturesDf['Var']
                 temp_f['Last Move Future'] = lastFeaturesDf['Last Move Future']
-            
+
             temp_f['Var'] = var
             idx = convertedTime.ceil('min').strftime('%H:%M')
             day_winddown = 1 - utils.calculate_t_days(
                             convertedTime, convertedTime.replace(hours=15, minutes=30, seconds=0))
-            temp_df['Rolling R Vol'] =  np.sqrt(252 * (var - temp_f['Var_Arr'][idx])+ lastMarketDataDf['Close R Vol']**2 )
-            temp_df['R Vol'] = np.sqrt(252 * var /day_winddown)
+
+	    try:
+		temp_df['Rolling R Vol'] =  np.sqrt(252 * (var - temp_f['varDict'][idx])+ lastMarketDataDf['Close R Vol']**2 )
+            except KeyError:
+		temp_df['Rolling R Vol'] =  np.sqrt(252 * (var)+ lastMarketDataDf['Close R Vol']**2 )
+	    temp_df['R Vol'] = np.sqrt(252 * var /day_winddown)
             if convertedTime.time() > utils.convert_time('15:28:30').time():
                 temp_df['Close R Vol'] = temp_df['R Vol']
             else:
                 temp_df['Close R Vol'] = lastMarketDataDf['Close R Vol']
-            temp_f['Var_Arr'][idx] = var
+            temp_f['varDict'][idx] = var
 
             # Calculate Features
             hl_iv = 22500/ float(TIME_INTERVAL_FOR_UPDATES)
@@ -591,6 +595,11 @@ def startStrategyContinuous():
         stateSaved = np.load(getContinuousSaveStateFilename()).item()
         up = UnderlyingProcessor(stateSaved['futureVal'], stateSaved['options'], stateSaved[
             'marketData'], stateSaved['featureData'], stateSaved['positionData'], stateSaved['pnlData'], stateSaved['time'])
+    elif os.path.isfile(PREVIOUS_SAVE_STATE_FILENAME):
+        print 'Reading from previous saved state'
+        stateSaved = np.load(PREVIOUS_SAVE_STATE_FILENAME).item()
+        up = UnderlyingProcessor(stateSaved['futureVal'], stateSaved['options'], stateSaved[
+           'marketData'], stateSaved['featureData'], stateSaved['positionData'], stateSaved['pnlData'
     else:
         print 'Reading from constants'
         up = UnderlyingProcessor(STARTING_FUTURE_VAL, STARTING_OPTIONS_DATA,
@@ -634,7 +643,7 @@ def startStrategyHistory(historyFilePath):
 
 if BACKTEST:
     print('Running Backtest')
-    startStrategyHistory('/spare/local/cjain/greeks/BANKNIFTY.weekly/20170523/data')
+    startStrategyHistory('/spare/local/cjain/greeks/BANKNIFTY.weekly/20170522/data')
 else:
     print('Running Live')
     startStrategyContinuous()
