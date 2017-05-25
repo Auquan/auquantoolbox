@@ -39,10 +39,10 @@ def getHistoryCsvFilename():
 def straddle(opt_arr, s):
     lowS = int(math.floor(s / 100.0)) * 100
     highS = int(math.ceil(s / 100.0)) * 100
-    lowSCallSymbol = SAMPLE_OPTION_INSTRUMENT_PREFIX + str(lowS) + '003'
-    lowSPutSymbol = SAMPLE_OPTION_INSTRUMENT_PREFIX + str(lowS) + '004'
-    highSCallSymbol = SAMPLE_OPTION_INSTRUMENT_PREFIX + str(highS) + '003'
-    highSPutSymbol = SAMPLE_OPTION_INSTRUMENT_PREFIX + str(highS) + '004'
+    lowSCallSymbol = str(lowS) + '003'
+    lowSPutSymbol =  str(lowS) + '004'
+    highSCallSymbol =  str(highS) + '003'
+    highSPutSymbol =  str(highS) + '004'
     std1 = opt_arr[lowSCallSymbol].price + opt_arr[lowSPutSymbol].price
     std2 = opt_arr[highSCallSymbol].price + opt_arr[highSPutSymbol].price
     d1 = opt_arr[lowSCallSymbol].delta + opt_arr[lowSPutSymbol].delta
@@ -176,7 +176,7 @@ def writeOrder(orderToProcess):
     orderFilename = PLACE_ORDER_FILE_NAME
     fd = open(orderFilename, 'a')
     buySell = 'BUY' if orderToProcess.volume > 0 else 'SELL'
-    data = ['PLACE_MKT', orderToProcess.instrumentId, np.abs(orderToProcess.volume), buySell ]
+    data = ['PLACE_MKT', SAMPLE_OPTION_INSTRUMENT_PREFIX + str(orderToProcess.instrumentId), np.abs(orderToProcess.volume), buySell ]
     fd.write(' '.join(map(str, data)) + '\n')
     fd.close()
 
