@@ -54,7 +54,6 @@ class Option:
 
     def updateWithOrder(self, order):
         self.position += order.volume
-        self.price = order.tradePrice
 
     def convert_time(self, timestamp):
         try:

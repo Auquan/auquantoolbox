@@ -176,7 +176,7 @@ def writeOrder(orderToProcess):
     orderFilename = PLACE_ORDER_FILE_NAME
     fd = open(orderFilename, 'a')
     buySell = 'BUY' if orderToProcess.volume > 0 else 'SELL'
-    data = ['PLACE_MKT', orderToProcess.instrumentId, orderToProcess.volume, buySell ]
+    data = ['PLACE_MKT', orderToProcess.instrumentId, np.abs(orderToProcess.volume), buySell ]
     fd.write(' '.join(map(str, data)) + '\n')
     fd.close()
 
@@ -509,13 +509,16 @@ def getFeaturesDf(convertedTime, future, opt_dict, lastMarketDataDf, lastFeature
             idx = convertedTime.ceil('min').strftime('%H:%M')
             day_winddown = 1 - utils.calculate_t_days(
                             convertedTime, convertedTime.replace(hours=15, minutes=30, seconds=0))
-            temp_df['Rolling R Vol'] =  np.sqrt(252 * (var - temp_f['Var_Arr'][idx])+ lastMarketDataDf['Close R Vol']**2 )
+            try:
+                temp_df['Rolling R Vol'] =  np.sqrt(252 * (var - temp_f['varDict'][idx])+ lastMarketDataDf['Close R Vol']**2 )
+            except KeyError:
+                temp_df['Rolling R Vol'] =  np.sqrt(252 * (var)+ lastMarketDataDf['Close R Vol']**2 )
             temp_df['R Vol'] = np.sqrt(252 * var /day_winddown)
             if convertedTime.time() > utils.convert_time('15:28:30').time():
                 temp_df['Close R Vol'] = temp_df['R Vol']
             else:
                 temp_df['Close R Vol'] = lastMarketDataDf['Close R Vol']
-            temp_f['Var_Arr'][idx] = var
+            temp_f['varDict'][idx] = var
 
             # Calculate Features
             hl_iv = 22500/ float(TIME_INTERVAL_FOR_UPDATES)
