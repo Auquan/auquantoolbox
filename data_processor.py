@@ -24,6 +24,7 @@ def atm_vol(x, y, order):
 def shouldUpdateOption(opt, currentFutureVal):
     return (np.abs(opt.k - currentFutureVal) < 300)
 
+
 def getContinuousSaveStateFilename():
     d = utils.convert_time(START_TIME).date()
     return CONTINUOS_SAVE_STATE_FILE_PREFIX + SAMPLE_OPTION_INSTRUMENT_PREFIX + '_' + str(d) + '.npy'
