@@ -18,10 +18,20 @@ class FutureInstrumentUpdate(InstrumentUpdate):
              high
              low
     '''
-    def __init__(self, futureInstrumentId, timeOfUpdate, bookData, expiryTime):
+    def __init__(self, futureInstrumentId, timeOfUpdate, bookData, expiryTime, underlyingInstrumentId):
         super.__init__(futureInstrumentId, timeOfUpdate, bookData)
         self.__futureInstrumentId = futureInstrumentId
         self.__expiryTime = expiryTime
+        self.__underlyingInstrumentId = underlyingInstrumentId
+
+    def getFutureInstrumentId(self):
+        return self.__futureInstrumentId
+    
+    def getTypeOfInstrument(self):
+        return INSTRUMENT_TYPE_FUTURE
 
     def getExpiryTime(self):
         return self.__expiryTime
+
+    def getUnderlyingInstrumentId(self):
+        return self.__underlyingInstrumentId

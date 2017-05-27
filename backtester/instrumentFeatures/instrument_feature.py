@@ -14,6 +14,6 @@ class InstrumentFeature:
         return
 
     @classmethod
-    def computeForFeature(cls, instrumentFeatureId, currentBookData):
+    def computeForFeature(cls, instrumentFeatureId, currentBookData, currentFeatures, ):
         instrumentFeatureCls = InstrumentFeature.getClassForInstrumentFeatureId(instrumentFeatureId)
         instrumentFeatureCls.compute(currentBookData)

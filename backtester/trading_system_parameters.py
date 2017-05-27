@@ -16,3 +16,6 @@ class TradingSystemParameters:
     '''
     def getFrequencyOfFeatureUpdates(self):
         return timedelta(0, 5)
+
+    def getFeatureIdentifiersForInstrumentType(self, instrumentType):
+        return ['price']

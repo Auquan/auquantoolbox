@@ -26,3 +26,7 @@ class InstrumentUpdate:
 
     def getTimeOfUpdate(self):
         return self.__timeOfUpdate
+
+    def getTypeOfInstrument(self):
+        raise "Unimplemented error"
+        return INSTRUMENT_TYPE_UNDEFINED

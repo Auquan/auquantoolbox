@@ -19,3 +19,9 @@ class StockInstrumentUpdate(InstrumentUpdate):
     def __init__(self, stockInstrumentId, timeOfUpdate, bookData):
         super.__init__(stockInstrumentId, timeOfUpdate, bookData)
         self.__stockInstrumentId = stockInstrumentId
+
+    def getStockInstrumentId(self):
+        return __stockInstrumentId
+
+    def getTypeOfInstrument(self):
+        return INSTRUMENT_TYPE_STOCK

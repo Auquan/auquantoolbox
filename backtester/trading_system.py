@@ -1,6 +1,6 @@
 import time
 from logger import *
-from instruments_collection import InstrumentCollection
+from instruments_manager import InstrumentManager
 
 
 class TradingSystem:
@@ -10,14 +10,20 @@ class TradingSystem:
 
     def __init__(self, tsParams):
         self.tsParams = tsParams
-        self.instrumentColl = InstrumentCollection()
+        self.instrumentManager = InstrumentManager()
         self.featuresUpdateTime = None
         self.totalTimeUpdating = 0  # for tracking perf
         self.totalUpdates = 0
 
     def processInstrumentUpdate(self, instrumentUpdate):
         instrumentIdToUpdate = instrumentUpdate.getInstrumentId()
-        instrumentToUpdate = self.instrumentColl.getInstrument(instrumentIdToUpdate)
+        instrumentToUpdate = self.instrumentManager.getInstrument(instrumentIdToUpdate)
+        # if not present try to create an instrument from this update first.
+        if instrumentToUpdate is None:
+            instrumentToUpdate = self.instrumentManager.createInstrumentFromUpdate(instrumentUpdate)
+            if instrumentToUpdate is None:
+                return
+            self.instrumentManager.addInstrument(instrumentToUpdate)
         instrumentToUpdate.update(instrumentUpdate)
         self.tryUpdateFeatures(instrumentUpdate.getTimeOfUpdate())
 
@@ -39,9 +45,7 @@ class TradingSystem:
             logInfo('Update: %d, Time: %.2f, Average: %.2f' % (self.totalUpdates, diffms, self.totalTimeUpdating / self.totalUpdates))
 
     def updateFeatures(timeOfUpdate):
-        for instrumentId in self.instrumentsDict:
-            instrument = self.instrumentsDict[instrumentId]
-            instrument.updateFeatures(timeOfUpdate)
+        self.instrumentManager.updateFeatures(timeOfUpdate)
 
     def startTrading(self):
         dataParser = self.tsParams.getDataParser()
