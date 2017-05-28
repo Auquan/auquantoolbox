@@ -2,6 +2,13 @@ from datetime import timedelta
 
 
 class TradingSystemParameters:
+
+    def __init__(self):
+        instrumentConfigDicts = {}
+        stockConfigDicts = [{'featureKey': 'price',
+                             'featureId': 'vwap',
+                             'data': {}}]
+
     '''
     Returns an instance of class DataParser
     '''
@@ -17,5 +24,5 @@ class TradingSystemParameters:
     def getFrequencyOfFeatureUpdates(self):
         return timedelta(0, 5)
 
-    def getFeatureIdentifiersForInstrumentType(self, instrumentType):
-        return ['price']
+    def getFeatureConfigsForInstrumentType(self, instrumentType):
+        return None

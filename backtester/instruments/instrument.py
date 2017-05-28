@@ -28,8 +28,13 @@ class Instrument:
 
     def updateFeatures(self, timeOfUpdate, tsParams):
         currentFeatures = {}
-        instrumentFeatureIdentifiers = tsParams.getFeatureIdentifiersForInstrumentType(self.getInstrumentType())
-        for instrumentFeatureIdentifier in instrumentFeatureIdentifiers:
-            featureKey, featureVal = InstrumentFeature.computeForFeature(instrumentFeatureIdentifier, self.getCurrentBookData(), currentFeatures)
-            currentFeatures[featureKey] = featureVal
+        featureConfigs = tsParams.getFeatureIdentifiersForInstrumentType(self.getInstrumentType())
+        for featureConfig in featureConfigs:
+            featureId = featureConfig.getFeatureId()
+            featureParams = featureConfig.getFeatureParams()
+            featureVal = InstrumentFeature.computeForFeature(instrumentFeatureId = featureId, 
+                                                             featureParams = featureParams, 
+                                                             currentFeatures = currentFeatures, 
+                                                             instrument = self)
+            currentFeatures[featureConfig.getFeatureKey()] = featureVal
         self.__lookbackFeatures.addData(currentFeatures)
