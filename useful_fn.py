@@ -50,7 +50,7 @@ def ema(data,period):
 
 def convert_time(timestamp):
     try:
-        d = pd.to_datetime(timestamp,infer_datetime_format=True)
+        d = pd.to_datetime(timestamp[:19],infer_datetime_format=True)
     except:
         if isinstance(timestamp, basestring):
             d = dt.datetime.strptime(timestamp,"%Y/%m/%d %H:%M:%S:%f")
@@ -58,7 +58,7 @@ def convert_time(timestamp):
             (year, month, day, hour, minute, second, microsecond) = (str(timestamp)[0:4], str(timestamp)[4:6],str(timestamp)[6:8],str(timestamp)[8:10], str(timestamp)[10:12],str(timestamp)[12:14],str(timestamp)[14:])
             d = dt(int(year), int(month), int(day),int(hour), int(minute), int(second), int(microsecond))
         else:
-            d = timestamp 
+            d = timestamp
     return d
 
 def calculate_t(eval_date,exp_date):
