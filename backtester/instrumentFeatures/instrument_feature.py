@@ -1,20 +1,4 @@
-
-class InstrumentFeatureConfig:
-
-    def __init__(self, configDict):
-        # TODO: validate
-        self.__featureKey = configDict['featureKey']
-        self.__featureIdentifier = configDict['featureId']
-        self.__featureParams = configDict['params']
-
-    def getFeatureKey(self):
-        return self.__featureKey
-
-    def getFeatureId(self):
-        return self.__featureIdentifier
-
-    def getFeatureParams(self):
-        return self.__featureParams
+from vwap_price_feature import VwapPriceInstrumentFeature
 
 
 class InstrumentFeature:
@@ -22,7 +6,7 @@ class InstrumentFeature:
     @classmethod
     def getClassForInstrumentFeatureId(cls, instrumentFeatureId):
         # TODO:
-        if instrumentFeatureId == 'vwap_price':
+        if instrumentFeatureId == 'vwap':
             return VwapPriceInstrumentFeature
         return InstrumentFeature
 
@@ -42,5 +26,3 @@ class InstrumentFeature:
     def compute(cls, currentFeatures, instrument):
         raise NotImplementedError
         return None, None
-
-    

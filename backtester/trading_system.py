@@ -1,6 +1,7 @@
 import time
 from logger import *
 from instruments_manager import InstrumentManager
+from trading_system_parameters import TradingSystemParameters
 
 
 class TradingSystem:
@@ -52,3 +53,9 @@ class TradingSystem:
         instrumentUpdates = dataParser.emitInstrumentUpdate()
         for instrumentUpdate in instrumentUpdates:
             self.processInstrumentUpdate(instrumentUpdate)
+
+
+if __name__ == "__main__":
+    tsParams = TradingSystemParameters()
+    tradingSystem = TradingSystem(tsParams)
+    tradingSystem.startTrading()

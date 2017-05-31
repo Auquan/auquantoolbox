@@ -1,6 +1,7 @@
-from data_source import DataSource
-import pandas as pd
 from datetime import datetime
+from backtester.instrumentUpdates import *
+from backtester.constants import *
+from logfile_data_source import LogfileDataSource
 
 TYPE_LINE_UNDEFINED = 0
 TYPE_LINE_BOOK_DATA = 1
@@ -33,44 +34,56 @@ def validateLineItem(lineItems):
     return TYPE_LINE_UNDEFINED
 
 
-class NiftyDataSource(DataSource):
-    def __init__(self, fileName):
-        self.fileName = fileName
-        self.file = open(fileName, "r")
-        self.file.seek(0, 2)
-        self.unfinishedLine = ''
-        self.currentTime = ''
-        self.currentDate = ''
+def parseBookDataOptionLine(lineItems):
+    if (len(lineItems) < 7):
+        return None
+    bidVol = float(lineItems[1])
+    bidPrice = float(lineItems[2])
+    askPrice = float(lineItems[4])
+    askVol = float(lineItems[5])
+    return {'bidVolume': bidVol,
+            'bidPrice': bidPrice,
+            'askPrice': askPrice,
+            'askVol': askVol}
+
+
+class NiftyDataSource(LogfileDataSource):
+    def __init__(self, fileName, futureInstrumentId, expiryTimeStr):
+        super.__init__(fileName)
+        self.futureInstrumentId = futureInstrumentId
+        self.expiryTime = datetime.strptime(expiryTimeStr, "%Y/%m/%d %H:%M:%S:%f")
         self.currentInstrumentId = None
-        self.currentBookData = []
+        self.currentTimeOfUpdate = None
+        self.currentBookData = None
 
     def processLine(self, line):
-        accumulatedInstruments = []
         lineItems = line.split()
         lineItemType = validateLineItem(lineItems)
 
         if (lineItemType == TYPE_LINE_BOOK_DATA):
             if self.currentInstrumentId is not None:
-                inst = instrument.Instrument(time=self.currentTime,
-                                             date=self.currentDate,
-                                             instrumentId=self.currentInstrumentId,
-                                             bookData=pd.DataFrame(self.currentBookData, columns=['bidVol', 'bidPrice', 'askPrice', 'askVol']))
-                self.currentDate = lineItems[0]
-                self.currentTime = lineItems[1]
+                inst = None
+                if self.currentInstrumentId == self.futureInstrumentId:
+                    inst = FutureInstrumentUpdate(futureInstrumentId=self.currentInstrumentId,
+                                                  timeOfUpdate=self.currentTimeOfUpdate,
+                                                  bookData=self.currentBookData,
+                                                  expiryTime=self.expiryTime,
+                                                  underlyingInstrumentId='NA')
+                else:
+                    strikePrice = float(self.currentInstrumentId[-8:-3])
+                    optionType = OPTION_TYPE_CALL if self.currentInstrumentId[-3:] == "003" else OPTION_TYPE_PUT
+                    inst = OptionInstrumentUpdate(optionInstrumentId=self.currentInstrumentId,
+                                                  timeOfUpdate=self.currentTimeOfUpdate,
+                                                  bookData=self.currentBookData,
+                                                  strikePrice=strikePrice,
+                                                  optionType=optionType,
+                                                  expiryTime=self.expiryTime,
+                                                  underlyingInstrumentId=self.futureInstrumentId)
+                self.currentTimeOfUpdate = datetime.strptime(lineItems[0] + ' ' + lineItems[1], "%Y/%m/%d %H:%M:%S:%f")
                 self.currentInstrumentId = lineItems[4]
-                self.currentBookData = []
+                self.currentBookData = None
                 return inst
             elif(lineItemType == TYPE_LINE_BOOK_OPTION):
                 parsedOption = parseBookDataOptionLine(lineItems)
-                self.currentBookData.append(parsedOption)
-
-    def emitInstrumentUpdate(self):
-        while True:
-            readLine = self.file.readline()
-            if readLine:
-                self.unfinishedLine = self.unfinishedLine + readLine
-                if self.unfinishedLine.endswith('\n'):
-                    self.unfinishedLine = ''
-                    instrumentUpdate = self.processLine(self.unfinishedLine)
-                    if instrumentUpdate:
-                        yield(instrumentUpdate)
+                if self.currentBookData is None:
+                    self.currentBookData = parsedOption

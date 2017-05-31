@@ -1,19 +1,15 @@
 from datetime import timedelta
+from instrumentFeatures.instrument_feature_config import InstrumentFeatureConfig
+from backtester.dataSource.nifty_data_source import NiftyDataSource
 
 
 class TradingSystemParameters:
-
-    def __init__(self):
-        instrumentConfigDicts = {}
-        stockConfigDicts = [{'featureKey': 'price',
-                             'featureId': 'vwap',
-                             'data': {}}]
 
     '''
     Returns an instance of class DataParser
     '''
     def getDataParser(self):
-        return None
+        return NiftyDataSource('OptionLogFile1.txt', 'BANKNIFTY1180189800-10', '5/10/2017 15:30:00')
 
     '''
     Returns a timedetla object to indicate frequency of updates to features
@@ -25,4 +21,8 @@ class TradingSystemParameters:
         return timedelta(0, 5)
 
     def getFeatureConfigsForInstrumentType(self, instrumentType):
-        return None
+        vwapConfigDict = {'featureKey': 'price',
+                          'featureId': 'vwap',
+                          'data': {}}
+        vwap = InstrumentFeatureConfig(vwapConfigDict)
+        return [vwap]

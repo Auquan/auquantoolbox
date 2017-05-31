@@ -1,7 +1,8 @@
 import time
+from data_source import DataSource
 
 
-class LogfileDataSource:
+class LogfileDataSource(DataSource):
     def __init__(self, fileName):
         self.fileName = fileName
         self.file = open(fileName, "r")

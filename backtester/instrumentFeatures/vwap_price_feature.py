@@ -11,5 +11,6 @@ class VwapPriceInstrumentFeature(InstrumentFeature):
     def compute(cls, currentFeatures, instrument):
         bookData = instrument.getCurrentBookData()
         instrumentType = instrument.getInstrumentType()
-        vwap = ((bookData['askPrice']*bookData['askVolume'])+(bookData['bidPrice']*bookData['bidVolume']))/(bookData['askVolume']+bookData['bidVolume'])
-        return 'price', vwap
+        vwap = ((bookData['askPrice'] * bookData['askVolume']) + (bookData['bidPrice'] *
+                                                                  bookData['bidVolume'])) / (bookData['askVolume'] + bookData['bidVolume'])
+        return vwap
