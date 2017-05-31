@@ -1,7 +1,8 @@
 class Future:
 
-    def __init__(self, futureVal, startTime, position=0):
+    def __init__(self, futureVal, roll, startTime, position=0):
         self.__futureVal = futureVal
+        self.roll = 0
         self.time = startTime
         self.position = position
 
@@ -14,3 +15,9 @@ class Future:
 
     def updateWithOrder(self, order):
         self.position += order.volume
+
+    def updateRoll(self, newRoll):
+        self.roll = newRoll
+
+    def getRoll(self):
+        return self.roll

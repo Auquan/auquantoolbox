@@ -35,6 +35,20 @@ def getHistoryCsvFilename():
     d = utils.convert_time(START_TIME).date()
     return HISTORY_CSV_FILE_PREFIX + SAMPLE_OPTION_INSTRUMENT_PREFIX + '_' + str(d) + '.csv'
 
+def getRoll(opt_arr, currentFuture):
+    s = currentFuture.getFutureVal() - currentFuture.getRoll()
+    lowS = int(math.floor(s / 100.0)) * 100
+    highS = int(math.ceil(s / 100.0)) * 100
+    lowSCallSymbol = str(lowS) + '003'
+    lowSPutSymbol =  str(lowS) + '004'
+    highSCallSymbol =  str(highS) + '003'
+    highSPutSymbol =  str(highS) + '004'
+    rf = RF
+    t = opt_arr[lowSCallSymbol].t
+    s1 = opt_arr[lowSCallSymbol].price - opt_arr[lowSPutSymbol].price + lowS * math.exp(-rf * t)
+    s2 = opt_arr[highSCallSymbol].price - opt_arr[highSPutSymbol].price + highS * math.exp(-rf * t)
+    updated_s = (s1+s2)/2
+    return currentFuture.getFutureVal() - updated_s
 
 def straddle(opt_arr, s):
     lowS = int(math.floor(s / 100.0)) * 100
@@ -289,55 +303,26 @@ class UnderlyingProcessor:
         convertedTime = utils.convert_time(timeOfUpdate)
         if (convertedTime < self.lastTimeSaved + timedelta(0, TIME_INTERVAL_FOR_UPDATES)):
             return
-        self.lastTimeSaved = convertedTime
         # tracking perf
         start = time.time()
-        # updating vol for each option first
+
         currentFutureVal = self.currentFuture.getFutureVal()
         if currentFutureVal == 0:
             print('Future not trading')
         else:
-            for instrumentId in self.currentOptions:
-                opt = self.currentOptions[instrumentId]
-                if shouldUpdateOption(opt, currentFutureVal):
-                    opt.get_impl_vol()
-            marketDataDf, featureDf = getFeaturesDf(
-                convertedTime, self.currentFuture, self.currentOptions, self.marketData[-1], self.features[-1])
+            updateRoll()
+            updateOptionVol()
+            marketDataDf, featureDf = getFeaturesDf(convertedTime, self.currentFuture, self.currentOptions, self.marketData[-1], self.features[-1])
             if marketDataDf is not None:
                 self.marketData.append(marketDataDf)
             if featureDf is not None:
                 self.features.append(featureDf)
-
+            
             # executing predictor
-            threshold = THRESHOLD
-            predictions = executePredictor(convertedTime, self.currentFuture, self.currentOptions, self.marketData[-1], self.features[-1], self.positionData[-1], threshold)
-            cash_used = 0
+            predictions = executePredictor(convertedTime, self.currentFuture, self.currentOptions, self.marketData[-1], self.features[-1], self.positionData[-1], THRESHOLD)
 
-            if len(predictions)>0 and os.path.isfile(PLACE_ORDER_FILE_NAME):
-                os.remove(PLACE_ORDER_FILE_NAME)
-
-            for prediction in predictions:
-                instrumentId = prediction['instrumentId']
-                volume = prediction['volume']
-                if prediction['type'] != 1:
-                    volume = -volume
-                tradePrice = 0
-                optionToOrder = self.currentOptions[instrumentId]
-                if optionToOrder:
-                    tradePrice = optionToOrder.price
-                elif instrumentId == self.currentFuture:
-                    # TODO handle this
-                    tradePrice = currentFutureVal
-                else:
-                    continue
-                fees = tradePrice * 0.001
-                cash_used += float(volume)*float(tradePrice)  + float(fees)
-                print(instrumentId, '%.2f'%tradePrice, volume)
-                orderToProcess = order.Order(instrumentId=instrumentId, tradePrice=tradePrice, vol=volume, time=timeOfUpdate, fees=fees)
-                if BACKTEST:
-                    self.updateWithNewOrder(orderToProcess)
-                else:
-                    writeOrder(orderToProcess)
+            #executing trades based on predictions
+            updateWithPredictions(predictions)
 
             # Calculating updates position data
             positionsDf, pnlDf = getPosition_PnlDf(self.currentFuture, self.currentOptions, self.pnlData[-1], cash_used)
@@ -345,7 +330,7 @@ class UnderlyingProcessor:
                 self.positionData.append(positionsDf)
             self.pnlData.append(pnlDf)
 
-
+            self.lastTimeSaved = convertedTime
             # Savingstate
             self.saveCurrentState()
 
@@ -365,7 +350,7 @@ class UnderlyingProcessor:
         # self.addNewOption(optionInstrument)  # just for storing
         self.updateFeatures(optionInstrument.time)
         changedOption = self.currentOptions[optionInstrument.instrumentId]
-        changedOption.updateWithInstrument(optionInstrument, self.currentFuture.getFutureVal())
+        changedOption.updateWithInstrument(optionInstrument, self.currentFuture.getFutureVal(), self.currentFuture.getRoll())
         #self.updateFeatures(optionInstrument.time)
 
     def updateWithNewOrder(self, order):
@@ -376,6 +361,46 @@ class UnderlyingProcessor:
             changedOption.updateWithOrder(order)
         self.updateFeatures(order.time)
 
+    def updateWithPredictions(predictions):
+        cash_used = 0
+        if len(predictions)>0 and os.path.isfile(PLACE_ORDER_FILE_NAME):
+            os.remove(PLACE_ORDER_FILE_NAME)
+
+        for prediction in predictions:
+            instrumentId = prediction['instrumentId']
+            volume = prediction['volume']
+            if prediction['type'] != 1:
+                volume = -volume
+            tradePrice = 0
+            optionToOrder = self.currentOptions[instrumentId]
+            
+            if optionToOrder:
+                tradePrice = optionToOrder.price
+            elif instrumentId == self.currentFuture:
+                # TODO handle this
+                tradePrice = self.currentFuture.getFutureVal()
+            else:
+                continue
+
+            fees = tradePrice * 0.001
+            cash_used += float(volume)*float(tradePrice)  + float(fees)
+            print(instrumentId, '%.2f'%tradePrice, volume)
+            orderToProcess = order.Order(instrumentId=instrumentId, tradePrice=tradePrice, vol=volume, time=timeOfUpdate, fees=fees)
+            if BACKTEST:
+                self.updateWithNewOrder(orderToProcess)
+            else:
+                writeOrder(orderToProcess)
+
+    def updateRoll(self):
+        roll = getRoll(self.currentOptions, self.currentFuture)
+        self.currentFuture.updateRoll(roll)
+
+    def updateOptionVol(self):
+        for instrumentId in self.currentOptions:
+            opt = self.currentOptions[instrumentId]
+            if shouldUpdateOption(opt, self.currentFuture.getFutureVal()):
+                opt.s = self.currentFuture.getFutureVal() - self.currentFuture.getRoll()
+                opt.get_impl_vol()
     '''
     ------------------------------------------------------
     ----------- For storing stuff ------------------------
@@ -459,15 +484,17 @@ def getPosition_PnlDf(future, opt_dict, previousPnl, cash_used):
 
 
 def getFeaturesDf(convertedTime, future, opt_dict, lastMarketDataDf, lastFeaturesDf):
-    fut = future.getFutureVal()
-    if fut == 0:
+    currentFutureVal = future.getFutureVal()
+    roll = future.getRoll()
+    if currentFutureVal == 0:
         print('Future not trading')
         return None, None
     else:
         temp_df = {}
         temp_f = {}
 
-        temp_df['Future'] = fut
+        temp_df['Future'] = currentFutureVal
+        temp_df['Roll'] = roll
         delta_arr = []
         vol_arr = []
         var = 0
@@ -475,7 +502,7 @@ def getFeaturesDf(convertedTime, future, opt_dict, lastMarketDataDf, lastFeature
             # Loop over all options and get implied vol for each option
             for instrumentId in opt_dict:
                 opt = opt_dict[instrumentId]
-                if not shouldUpdateOption(opt, fut):
+                if not shouldUpdateOption(opt, currentFutureVal):
                     continue
                 opt.get_price_delta()
                 price, delta = opt.calc_price, opt.delta
@@ -490,17 +517,17 @@ def getFeaturesDf(convertedTime, future, opt_dict, lastMarketDataDf, lastFeature
             if len(delta_arr) > 0:
                 temp_df['Vol'] = atm_vol(delta_arr, vol_arr, 2)
                 temp_df['Mkt_Straddle_low'], temp_df[
-                    'Mkt_Straddle_high'], delta_low, delta_high = straddle(opt_dict, option.get_index_val(fut, ROLL))
+                    'Mkt_Straddle_high'], delta_low, delta_high = straddle(opt_dict, currentFutureVal - roll)
                 delta_arr.append(0.5)
                 vol_arr.append(temp_df['Vol'])
             else:
                 temp_df['Vol'] = lastMarketDataDf['Vol']
 
             # Calculate Intraday and Rolling Realized Vol
-            if np.abs(fut - lastFeaturesDf['Last Move Future']) > VAR_THRESHOLD:
+            if np.abs(currentFutureVal - lastFeaturesDf['Last Move Future']) > VAR_THRESHOLD:
                 var = utils.calc_var_RT(
-                    lastFeaturesDf['Var'], fut, lastFeaturesDf['Last Move Future'])
-                temp_f['Last Move Future'] = fut
+                    lastFeaturesDf['Var'], currentFutureVal, lastFeaturesDf['Last Move Future'])
+                temp_f['Last Move Future'] = currentFutureVal
             else:
                 var = lastFeaturesDf['Var']
                 temp_f['Last Move Future'] = lastFeaturesDf['Last Move Future']
@@ -599,7 +626,7 @@ def startStrategyContinuous():
         print 'Reading from previous saved state'
         stateSaved = np.load(PREVIOUS_SAVE_STATE_FILENAME).item()
         up = UnderlyingProcessor(stateSaved['futureVal'], stateSaved['options'], stateSaved[
-           'marketData'], stateSaved['featureData'], stateSaved['positionData'], stateSaved['pnlData'
+           'marketData'], stateSaved['featureData'], stateSaved['positionData'], stateSaved['pnlData', stateSaved['time'])
     else:
         print 'Reading from constants'
         up = UnderlyingProcessor(STARTING_FUTURE_VAL, STARTING_OPTIONS_DATA,
