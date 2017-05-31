@@ -224,7 +224,7 @@ class UnderlyingProcessor:
         self.pnlData = [startPnlData] # TODOKANAV: Put in constants
         for instrumentId in optionsData:
             optionData = optionsData[instrumentId]
-            opt = option.Option(futurePrice=futureVal,
+            opt = option.Option(underlyingPrice=futureVal - ROLL,
                                 instrumentId=instrumentId,
                                 exp_date=EXP_DATE,
                                 instrumentPrefix=SAMPLE_OPTION_INSTRUMENT_PREFIX,
@@ -371,7 +371,7 @@ class UnderlyingProcessor:
         if optionInstrument.instrumentId in self.currentOptions :
             changedOption = self.currentOptions[optionInstrument.instrumentId]
         else:
-            changedOption = option.Option(futurePrice = self.currentFuture.getFutureVal(),
+            changedOption = option.Option(underlyingPrice = self.currentFuture.getFutureVal() - self.currentFuture.getRoll(),
                                 instrumentId = optionInstrument.instrumentId,
                                 exp_date = EXP_DATE,
                                 instrumentPrefix = SAMPLE_OPTION_INSTRUMENT_PREFIX,
@@ -382,7 +382,7 @@ class UnderlyingProcessor:
             self.currentOptions[optionInstrument.instrumentId] = changedOption
 
 
-        changedOption.updateWithInstrument(optionInstrument, self.currentFuture.getFutureVal())
+        changedOption.updateWithInstrument(optionInstrument, self.currentFuture)
         #self.updateFeatures(optionInstrument.time)
 
     def updateWithNewOrder(self, order):

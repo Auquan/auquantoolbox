@@ -7,15 +7,12 @@ import numpy as np
 import constants
 from scipy.optimize import fsolve
 import useful_fn as utils
+import future
 
 def getStrikePriceFromInstrumentId(instrumentId, instrumentPrefix):
     return int(instrumentId[:-3])
 
 def get_index_val(fut, roll):
-    # rf = opt_arr[0].rf
-    # t = opt_arr[0].t
-    # s1 = opt_arr[1].price - opt_arr[0].price + opt_arr[0].k * math.exp(-rf * t)
-    # s2 = opt_arr[3].price - opt_arr[2].price + opt_arr[2].k * math.exp(-rf * t)
     return fut - roll
 
 #=========================================================================
@@ -25,8 +22,8 @@ class Option:
     """
     This class will group the different black-shcoles calculations for an opion
     """
-    def __init__(self, futurePrice, instrumentId, exp_date, instrumentPrefix, eval_date, rf=0.01, vol=0.2, div=0,position=0):
-        self.s = get_index_val(futurePrice, constants.ROLL)
+    def __init__(self, underlyingPrice, instrumentId, exp_date, instrumentPrefix, eval_date, rf=0.01, vol=0.2, div=0,position=0):
+        self.s = underlyingPrice
         self.k = getStrikePriceFromInstrumentId(instrumentId, instrumentPrefix)
         self.rf = rf
         self.vol = vol
@@ -43,12 +40,12 @@ class Option:
         self.position = position
         self.delta = 0
 
-    def updateWithInstrument(self, optionInstrument, currentFutureVal):
+    def updateWithInstrument(self, optionInstrument, currentFuture):
         self.eval_date = optionInstrument.time
         self.t = self.calculate_t()
         if self.t <= 0:
             self.t = 0.000001  # Case valuation in expiration date
-        self.s = get_index_val(currentFutureVal, constants.ROLL)
+        self.s = get_index_val(currentFuture.getFutureVal(), currentFuture.getRoll())
         self.price = optionInstrument.getVwap()
         #self.vol = self.get_impl_vol() TOo slow right now to do at every update
 
