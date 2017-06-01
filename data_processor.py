@@ -11,10 +11,11 @@ import time
 import os
 import order
 
-
 def atm_vol(x, y, order):
     delta = 0.5
-    if order == 2:
+    if order < 2:
+        atmvol = sum(y)/float(len(y))
+    elif order < 4:
         p = np.polyfit(x, y, 1)
         atmvol = p[0] * delta + p[1]
     else:
@@ -23,13 +24,12 @@ def atm_vol(x, y, order):
     return atmvol
 
 
-def shouldUpdateOption(opt, currentFutureVal):
-    return (np.abs(opt.k - currentFutureVal) < 300)
+def shouldUpdateOption(opt, currentFutureVal, currentRoll):
+    return (np.abs(opt.k - (currentFutureVal - currentRoll)) < 130)
 
 def getContinuousSaveStateFilename():
     d = utils.convert_time(START_TIME).strftime('%Y%m%d')
     return CONTINUOS_SAVE_STATE_FILE_PREFIX + SAMPLE_OPTION_INSTRUMENT_PREFIX + '_' + d + '.npy'
-
 
 def getHistoryCsvFilename():
     d = utils.convert_time(START_TIME).date()
@@ -218,7 +218,7 @@ class UnderlyingProcessor:
         self.marketData = [startMarketData]
         self.features = [startFeaturesData]
         self.lastTimeSaved = utils.convert_time(startTime)
-        self.currentFuture = future.Future(futureVal, startTime)
+        self.currentFuture = future.Future(futureVal, ROLL, startTime)
         self.currentOptions = {}
         self.positionData = [startPositionData]
         self.pnlData = [startPnlData] # TODOKANAV: Put in constants
@@ -327,8 +327,8 @@ class UnderlyingProcessor:
         if currentFutureVal == 0:
             print('Future not trading')
         else:
-            updateRoll()
-            updateOptionVol()
+            self.updateRoll()
+            self.updateOptionVol()
             marketDataDf, featureDf = getFeaturesDf(
                 convertedTime, lastTimeSaved, self.currentFuture, self.currentOptions, self.marketData[-1], self.features[-1])
 
@@ -336,18 +336,12 @@ class UnderlyingProcessor:
                 self.marketData.append(marketDataDf)
             if featureDf is not None:
                 self.features.append(featureDf)
-            
+
             # executing predictor
             predictions = executePredictor(convertedTime, self.currentFuture, self.currentOptions, self.marketData[-1], self.features[-1], self.positionData[-1], THRESHOLD)
 
             #executing trades based on predictions
-            updateWithPredictions(predictions)
-
-            # Calculating updates position data
-            positionsDf, pnlDf = getPosition_PnlDf(self.currentFuture, self.currentOptions, self.positionData[-1], self.marketData[-1], self.pnlData[-1], cash_used)
-            if positionsDf is not None:
-                self.positionData.append(positionsDf)
-            self.pnlData.append(pnlDf)
+            self.updatePositionPnlWithPredictions(predictions, timeOfUpdate)
 
             self.lastTimeSaved = convertedTime
             # Savingstate
@@ -393,7 +387,7 @@ class UnderlyingProcessor:
             changedOption.updateWithOrder(order)
         self.updateFeatures(order.time)
 
-    def updateWithPredictions(predictions):
+    def updatePositionPnlWithPredictions(self, predictions, timeOfUpdate):
         cash_used = 0
         if len(predictions)>0 and os.path.isfile(PLACE_ORDER_FILE_NAME):
             os.remove(PLACE_ORDER_FILE_NAME)
@@ -405,7 +399,7 @@ class UnderlyingProcessor:
                 volume = -volume
             tradePrice = 0
             optionToOrder = self.currentOptions[instrumentId]
-            
+
             if optionToOrder:
                 tradePrice = optionToOrder.price
             elif instrumentId == self.currentFuture:
@@ -423,6 +417,12 @@ class UnderlyingProcessor:
             else:
                 writeOrder(orderToProcess)
 
+        # Calculating updates position data
+        positionsDf, pnlDf = getPosition_PnlDf(self.currentFuture, self.currentOptions, self.positionData[-1], self.marketData[-1], self.pnlData[-1], cash_used)
+        if positionsDf is not None:
+            self.positionData.append(positionsDf)
+        self.pnlData.append(pnlDf)
+
     def updateRoll(self):
         roll = getRoll(self.currentOptions, self.currentFuture)
         self.currentFuture.updateRoll(roll)
@@ -430,7 +430,7 @@ class UnderlyingProcessor:
     def updateOptionVol(self):
         for instrumentId in self.currentOptions:
             opt = self.currentOptions[instrumentId]
-            if shouldUpdateOption(opt, self.currentFuture.getFutureVal()):
+            if shouldUpdateOption(opt, self.currentFuture.getFutureVal(), self.currentFuture.getRoll()):
                 opt.s = self.currentFuture.getFutureVal() - self.currentFuture.getRoll()
                 opt.get_impl_vol()
     '''
@@ -544,27 +544,27 @@ def getFeaturesDf(convertedTime, lastTimeSaved, future, opt_dict, lastMarketData
             # Loop over all options and get implied vol for each option
             for instrumentId in opt_dict:
                 opt = opt_dict[instrumentId]
-                if not shouldUpdateOption(opt, currentFutureVal):
+                if not shouldUpdateOption(opt, currentFutureVal, roll):
                     continue
                 opt.get_price_delta()
                 price, delta = opt.calc_price, opt.delta
-                if abs(delta) < 0.75:
+                if abs(delta) < 0.7 and abs(delta) > 0.3 :
                     if (delta < 0):
                         delta = 1 + delta
                     delta_arr.append(delta)
                     # TODO: ivol?
                     vol_arr.append(opt.vol)
-
+            print(roll, vol_arr, delta_arr)
             # Calculate ATM Vol
             if len(delta_arr) > 0:
-                temp_df['Vol'] = atm_vol(delta_arr, vol_arr, 2)
-                temp_df['Mkt_Straddle_low'], temp_df[
-                    'Mkt_Straddle_high'], delta_low, delta_high = straddle(opt_dict, currentFutureVal - roll)
+                temp_df['Vol'] = atm_vol(delta_arr, vol_arr, len(delta_arr)-1)
                 delta_arr.append(0.5)
                 vol_arr.append(temp_df['Vol'])
             else:
                 temp_df['Vol'] = lastMarketDataDf['Vol']
 
+            temp_df['Mkt_Straddle_low'], temp_df[
+                    'Mkt_Straddle_high'], delta_low, delta_high = straddle(opt_dict, currentFutureVal - roll)
             # Calculate Intraday and Rolling Realized Vol
             #print('>>>>Checking R Vol Calcs', 'Curr Time', convertedTime.date(), 'Last Time', lastTimeSaved.date())
             #print('>>>>','Last Future %0.2f Curr Future %0.2f'%( lastFeaturesDf['Last Move Future'],fut))
