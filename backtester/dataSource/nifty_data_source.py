@@ -1,6 +1,6 @@
 from datetime import datetime
-from backtester.instrumentUpdates import *
-from backtester.constants import *
+from instrumentUpdates import *
+from constants import *
 from logfile_data_source import LogfileDataSource
 
 TYPE_LINE_UNDEFINED = 0
@@ -49,9 +49,9 @@ def parseBookDataOptionLine(lineItems):
 
 class NiftyDataSource(LogfileDataSource):
     def __init__(self, fileName, futureInstrumentId, expiryTimeStr):
-        super.__init__(fileName)
+        super(self.__class__, self).__init__(fileName)
         self.futureInstrumentId = futureInstrumentId
-        self.expiryTime = datetime.strptime(expiryTimeStr, "%Y/%m/%d %H:%M:%S:%f")
+        self.expiryTime = datetime.strptime(expiryTimeStr, "%m/%d/%Y %H:%M:%S")
         self.currentInstrumentId = None
         self.currentTimeOfUpdate = None
         self.currentBookData = None
