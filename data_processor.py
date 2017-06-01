@@ -98,9 +98,15 @@ def get_pred(marketData, featureData, omega):
     print('Prediction: %.4f'%(float(Y_hat)*100))
     return Y_hat
 
+def isClosingTime(convertedTime):
+    convertedTime.time() > utils.convert_time('15:28:00').time():
+        return True
+    else
+        return False
+
 def isExpiry(convertedTime):
     expiry = utils.convert_time(EXP_DATE)
-    if  expiry - convertedTime < timedelta(minutes=2) :
+    if  expiry - convertedTime < timedelta(hours=2) :
         return True
     else:
         return False
@@ -156,7 +162,17 @@ def exit_position(convertedTime, futureVal, optionsDict, marketData, featureData
     retreat = calc_retreat(positionData)
     dte = utils.calculate_t_days(convertedTime, EXP_DATE)
     edge_required = max(MIN_EDGE/100, threshold*(retreat)/np.sqrt(float(dte)))
-    if exit_condition(positionData, edge_required, edge, marketData['Vol']):
+    if isClosingTime(convertedTime):
+        print('Market Close, Getting out')
+        for instrumentId in optionsDict:
+            opt_position = optionsDict[instrumentId].position
+            if (opt_position !=0):# if you should trade this option, change this
+                prediction = {'instrumentId': instrumentId,
+                          'volume': np.abs(opt_position),
+                          'type': -np.sign(opt_position)}
+                predictions.append(prediction)
+
+    elif exit_condition(positionData, edge_required, edge, marketData['Vol']):
         print('Getting out','Last Enter Vol: %.2f Actual Edge: %.2f Required: %.2f'%(100*positionData['Last Enter Vol'], 100*edge,100*edge_required*(.3)))
         for instrumentId in optionsDict:
             opt_position = optionsDict[instrumentId].position
@@ -175,8 +191,11 @@ def enter_position(convertedTime, futureVal, optionsDict, marketData, featureDat
     edge_required =  max(MIN_EDGE/100, threshold*(retreat)/np.sqrt(float(dte)))
     # if np.abs(positionData['total_options'])>0:
         # edge_required = max(0.9*np.abs(positionData['Last Enter Vol'] - marketData['Vol']),edge_required)
-    if utils.convert_time(EXP_DATE)  - convertedTime < timedelta(minutes=180):
+    if isExpiry(convertedTime):
         print('Close to Expiry, no trading')
+        trade = False
+    elif isClosingTime(convertedTime):
+        print('Market Closing, no trading')
         trade = False
     elif at_position_limit(positionData, long_lim, short_lim): #or (np.abs(edge) > (3*threshold)):
         print('Position Limit')
