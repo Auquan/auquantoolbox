@@ -141,17 +141,17 @@ def settle_expiry(convertedTime, optionsDict):
 def exit_condition(positionData, edge_required, edge, currVol):
     exit_threshold = 0.2*edge_required
     if (positionData['total_options'] < 0):
-        if (-edge < exit_threshold) : # or ((positionData['Last Enter Vol'] - edge_required) > currVol ) or (edge > 0):
+        if (-edge < exit_threshold) or ((positionData['Last Enter Vol'] - edge_required) > currVol ) or (edge > 0):
             print('Short: Take Profits')
             return True
-        elif ((positionData['Last Enter Vol'] + 2*edge_required) < currVol ):
+        elif ((positionData['Last Enter Vol'] + min(3*MIN_EDGE/100, 2*edge_required)) < currVol ):
             print('Short: Hack')
             return True
     elif (positionData['total_options'] > 0):
-        if (edge < exit_threshold) : #or ((positionData['Last Enter Vol'] + edge_required) < currVol ) or (edge < 0):
+        if (edge < exit_threshold) or ((positionData['Last Enter Vol'] + edge_required) < currVol ) or (edge < 0):
             print('Long: Take Profits')
             return True
-        elif ((positionData['Last Enter Vol'] - 2*edge_required) > currVol ):
+        elif ((positionData['Last Enter Vol'] - min(3*MIN_EDGE/100, 2*edge_required)) > currVol ):
             print('Long: Hack')
             return True
     else:
@@ -189,8 +189,8 @@ def enter_position(convertedTime, futureVal, optionsDict, marketData, featureDat
     retreat = calc_retreat(positionData)
     dte = utils.calculate_t_days(convertedTime, EXP_DATE)
     edge_required =  max(MIN_EDGE/100, threshold*(retreat)/np.sqrt(float(dte)))
-    # if np.abs(positionData['total_options'])>0:
-        # edge_required = max(0.9*np.abs(positionData['Last Enter Vol'] - marketData['Vol']),edge_required)
+    if np.abs(positionData['total_options'])>0:
+        edge_required = max(0.9*np.abs(positionData['Last Enter Vol'] - marketData['Vol']),edge_required)
     if isExpiry(convertedTime):
         print('Close to Expiry, no trading')
         trade = False
