@@ -1,4 +1,5 @@
 from instrument_update import InstrumentUpdate
+from backtester.constants import *
 
 
 class StockInstrumentUpdate(InstrumentUpdate):

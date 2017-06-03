@@ -1,19 +1,26 @@
+# from vwap_price_feature import VwapPriceInstrumentFeature
+
+
 class MarketFeature:
 
     @classmethod
-    def getClassForMarketFeatureId(cls, marketFeatureId):
+    def getClassForMarketFeatureId(cls, instrumentFeatureId):
         # TODO:
-        return MarketFeature
+        return None
+
+    @classmethod
+    def computeForFeature(cls, marketFeatureId, featureParams, currentMarketFeatures, instrumentManager):
+        instrumentFeatureCls = MarketFeature.getClassForInstrumentFeatureId(marketFeatureId)
+        instrumentFeatureCls.compute(currentMarketFeatures, instrumentManager)
+
+    @classmethod
+    def validateInputs(cls, currentMarketFeatures, instrument):
+        return True
 
     '''
     override this method
     '''
     @classmethod
-    def compute(cls):
+    def compute(cls, currentMarketFeatures, instrument):
         raise NotImplementedError
-        return
-
-    @classmethod
-    def computeForFeature(cls, marketFeatureId, currentBookData):
-        marketFeatureCls = MarketFeature.getClassForMarketFeatureId(marketFeatureId)
-        marketFeatureCls.compute()
+        return None, None

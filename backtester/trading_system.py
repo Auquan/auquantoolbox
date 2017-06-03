@@ -21,14 +21,14 @@ class TradingSystem:
         instrumentToUpdate = self.instrumentManager.getInstrument(instrumentIdToUpdate)
         # if not present try to create an instrument from this update first.
         if instrumentToUpdate is None:
-            instrumentToUpdate = self.instrumentManager.createInstrumentFromUpdate(instrumentUpdate)
+            instrumentToUpdate = self.instrumentManager.createInstrumentFromUpdate(instrumentUpdate, self.tsParams)
             if instrumentToUpdate is None:
                 return
             self.instrumentManager.addInstrument(instrumentToUpdate)
         instrumentToUpdate.update(instrumentUpdate)
-        self.tryUpdateFeatures(instrumentUpdate.getTimeOfUpdate())
+        self.tryUpdateFeaturesAndExecute(instrumentUpdate.getTimeOfUpdate())
 
-    def tryUpdateFeatures(timeOfUpdate):
+    def tryUpdateFeaturesAndExecute(self, timeOfUpdate):
         shouldUpdateFeatures = False
         if self.featuresUpdateTime is None:
             shouldUpdateFeatures = True
@@ -36,17 +36,23 @@ class TradingSystem:
             shouldUpdateFeatures = True
         if shouldUpdateFeatures:
             self.featuresUpdateTime = timeOfUpdate
-            # tracking perf
-            start = time.time()
             self.updateFeatures(timeOfUpdate)
-            end = time.time()
-            diffms = (end - start) * 1000
-            self.totalTimeUpdating = self.totalTimeUpdating + diffms
-            self.totalUpdates = self.totalUpdates + 1
-            logInfo('Update: %d, Time: %.2f, Average: %.2f' % (self.totalUpdates, diffms, self.totalTimeUpdating / self.totalUpdates))
+            instrumentsToExecute = self.getInstrumentsToExecute(timeOfUpdate)
 
-    def updateFeatures(timeOfUpdate):
+    def updateFeatures(self, timeOfUpdate):
+        # tracking perf
+        start = time.time()
         self.instrumentManager.updateFeatures(timeOfUpdate)
+        end = time.time()
+        diffms = (end - start) * 1000
+        self.totalTimeUpdating = self.totalTimeUpdating + diffms
+        self.totalUpdates = self.totalUpdates + 1
+        logInfo('Update: %d, Time: %.2f, Average: %.2f' % (self.totalUpdates, diffms, self.totalTimeUpdating / self.totalUpdates))
+
+    def getInstrumentsToExecute(self, time):
+        executionSystem = self.tsParams.getExecutionSystem()
+        return executionSystem.getExecutions(time, self.instrumentManager)
+
 
     def startTrading(self):
         dataParser = self.tsParams.getDataParser()

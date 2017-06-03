@@ -4,10 +4,11 @@ from lookback_data import LookbackData
 
 
 class Instrument:
-    def __init__(self, instrumentId):
+    def __init__(self, instrumentId, tsParams):
         self.__instrumentId = instrumentId
         self.__currentInstrumentUpdate = None
         self.__lookbackFeatures = LookbackData()
+        self.tsParams = tsParams
 
     def getInstrumentType(self):
         raise NotImplementedError
@@ -26,15 +27,15 @@ class Instrument:
     def getCurrentBookData(self):
         return self.__currentInstrumentUpdate.getBookData()
 
-    def updateFeatures(self, timeOfUpdate, tsParams):
+    def updateFeatures(self, timeOfUpdate):
         currentFeatures = {}
-        featureConfigs = tsParams.getFeatureIdentifiersForInstrumentType(self.getInstrumentType())
+        featureConfigs = self.tsParams.getFeatureIdentifiersForInstrumentType(self.getInstrumentType())
         for featureConfig in featureConfigs:
             featureId = featureConfig.getFeatureId()
             featureParams = featureConfig.getFeatureParams()
-            featureVal = InstrumentFeature.computeForFeature(instrumentFeatureId = featureId, 
-                                                             featureParams = featureParams, 
-                                                             currentFeatures = currentFeatures, 
-                                                             instrument = self)
+            featureVal = InstrumentFeature.computeForFeature(instrumentFeatureId=featureId,
+                                                             featureParams=featureParams,
+                                                             currentFeatures=currentFeatures,
+                                                             instrument=self)
             currentFeatures[featureConfig.getFeatureKey()] = featureVal
         self.__lookbackFeatures.addData(currentFeatures)

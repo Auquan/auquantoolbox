@@ -1,5 +1,5 @@
 from instrument_update import InstrumentUpdate
-from constants import *
+from backtester.constants import *
 
 
 class OptionInstrumentUpdate(InstrumentUpdate):

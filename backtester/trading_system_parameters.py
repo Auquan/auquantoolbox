@@ -1,6 +1,9 @@
 from datetime import timedelta
 from instrumentFeatures.instrument_feature_config import InstrumentFeatureConfig
 from dataSource.nifty_data_source import NiftyDataSource
+from marketFeatures.market_feature_config import MarketFeatureConfig
+from executionSystem.simple_execution_system import SimpleExecutionSystem
+from orderPlacer.backtesting_order_placer import BacktestingOrderPlacer
 
 
 class TradingSystemParameters:
@@ -26,3 +29,20 @@ class TradingSystemParameters:
                           'data': {}}
         vwap = InstrumentFeatureConfig(vwapConfigDict)
         return [vwap]
+
+    def getMarketFeatureConfigs(self):
+        return []
+
+    def getPrediction(self, time, currentMarketFeatures, instrumentsManager):
+        lookbackMarketFeatures = instrumentsManager.getLookbackMarketFeatures().getData()
+        return 0.0
+
+    def getExecutionSystem(self):
+        if self.__executionSystem is None:
+            self.__executionSystem = SimpleExecutionSystem(longLimit=100, shortLimit=100)
+        return self.__executionSystem
+
+    def getOrderPlacer(self):
+        if self.__orderPlacer is None:
+            self.__orderPlacer = BacktestingOrderPlacer()
+        return self.__orderPlacer

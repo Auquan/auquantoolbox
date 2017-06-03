@@ -1,10 +1,11 @@
 from instrument import Instrument
+from backtester.constants import *
 
 
 class FutureInstrument(Instrument):
 
-    def __init__(self, futureInstrumentId, expiryTime, underlyingInstrumentId):
-    	super.__init__(futureInstrumentId)
+    def __init__(self, futureInstrumentId, expiryTime, underlyingInstrumentId, tsParams):
+        super.__init__(futureInstrumentId, tsParams)
         self.__futureInstrumentId = futureInstrumentId
         self.__expiryTime = expiryTime
         self.__underlyingInstrumentId = underlyingInstrumentId
@@ -14,8 +15,9 @@ class FutureInstrument(Instrument):
     '''
     Returns datettime object for expiry of option
     '''
+
     def getExpiryTime(self):
         return self.__expiryTime
 
     def getUnderlyingInstrumentId(self):
-    	return self.__underlyingInstrumentId
+        return self.__underlyingInstrumentId

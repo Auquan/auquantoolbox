@@ -1,4 +1,5 @@
 from instrument_update import InstrumentUpdate
+from backtester.constants import *
 
 
 class FutureInstrumentUpdate(InstrumentUpdate):
@@ -26,7 +27,7 @@ class FutureInstrumentUpdate(InstrumentUpdate):
 
     def getFutureInstrumentId(self):
         return self.__futureInstrumentId
-    
+
     def getTypeOfInstrument(self):
         return INSTRUMENT_TYPE_FUTURE
 

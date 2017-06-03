@@ -1,10 +1,11 @@
 from instrument import Instrument
+from backtester.constants import *
 
 
 class OptionInstrument(Instrument):
 
-    def __init__(self, optionInstrumentId, strikePrice, optionType, expiryTime, underlyingInstrumentId):
-        super.__init__(optionInstrumentId)
+    def __init__(self, optionInstrumentId, strikePrice, optionType, expiryTime, underlyingInstrumentId, tsParams):
+        super.__init__(optionInstrumentId, tsParams)
         self.__optionInstrumentId = optionInstrumentId
         self.__strikePrice = strikePrice
         self.__optionType = optionType

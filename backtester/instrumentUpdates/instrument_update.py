@@ -1,3 +1,4 @@
+from backtester.constants import *
 '''
 A base class to represent an update to instrument.
 '''

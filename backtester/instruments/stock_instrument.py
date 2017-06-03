@@ -1,10 +1,11 @@
 from instrument import Instrument
+from backtester.constants import *
 
 
 class StockInstrument(Instrument):
 
-    def __init__(self, stockInstrumentId):
-    	super.__init__(stockInstrumentId)
+    def __init__(self, stockInstrumentId, tsParams):
+        super.__init__(stockInstrumentId, tsParams)
         self.__stockInstrumentId = stockInstrumentId
 
     def getInstrumentType(self):
