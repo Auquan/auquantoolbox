@@ -1,7 +1,4 @@
-from instrument_feature import InstrumentFeature
-
-
-class VwapPriceInstrumentFeature(InstrumentFeature):
+class VwapPriceInstrumentFeature(object):
 
     @classmethod
     def validateInputs(cls, currentFeatures, instrument):
@@ -11,6 +8,10 @@ class VwapPriceInstrumentFeature(InstrumentFeature):
     def compute(cls, currentFeatures, instrument):
         bookData = instrument.getCurrentBookData()
         instrumentType = instrument.getInstrumentType()
-        vwap = ((bookData['askPrice'] * bookData['askVolume']) + (bookData['bidPrice'] *
-                                                                  bookData['bidVolume'])) / (bookData['askVolume'] + bookData['bidVolume'])
-        return vwap
+        totalVolume = (bookData['askVolume'] + bookData['bidVolume'])
+        if totalVolume > 0:
+            vwap = ((bookData['askPrice'] * bookData['askVolume']) + (bookData['bidPrice'] *
+                                                                      bookData['bidVolume'])) / totalVolume
+            return vwap
+        else:
+            return 0

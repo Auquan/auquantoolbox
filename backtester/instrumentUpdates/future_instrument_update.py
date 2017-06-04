@@ -19,8 +19,8 @@ class FutureInstrumentUpdate(InstrumentUpdate):
              high
              low
     '''
-    def __init__(self, futureInstrumentId, timeOfUpdate, bookData, expiryTime, underlyingInstrumentId):
-        super.__init__(futureInstrumentId, timeOfUpdate, bookData)
+    def __init__(self, futureInstrumentId, tradeSymbol, timeOfUpdate, bookData, expiryTime, underlyingInstrumentId):
+        super(FutureInstrumentUpdate, self).__init__(futureInstrumentId, tradeSymbol, timeOfUpdate, bookData)
         self.__futureInstrumentId = futureInstrumentId
         self.__expiryTime = expiryTime
         self.__underlyingInstrumentId = underlyingInstrumentId

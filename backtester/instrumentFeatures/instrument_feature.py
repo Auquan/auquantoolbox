@@ -1,7 +1,7 @@
 from vwap_price_feature import VwapPriceInstrumentFeature
 
 
-class InstrumentFeature:
+class InstrumentFeature(object):
 
     @classmethod
     def getClassForInstrumentFeatureId(cls, instrumentFeatureId):

@@ -15,8 +15,8 @@ class OptionInstrumentUpdate(InstrumentUpdate):
              volume
              openInterest
     '''
-    def __init__(self, optionInstrumentId, timeOfUpdate, bookData, strikePrice, optionType, expiryTime, underlyingInstrumentId):
-        super.__init__(optionInstrumentId, timeOfUpdate, bookData)
+    def __init__(self, optionInstrumentId, tradeSymbol, timeOfUpdate, bookData, strikePrice, optionType, expiryTime, underlyingInstrumentId):
+        super(OptionInstrumentUpdate, self).__init__(optionInstrumentId, tradeSymbol, timeOfUpdate, bookData)
         self.__optionInstrumentId = optionInstrumentId
         self.__expiryTime = expiryTime
         self.__strikePrice = strikePrice

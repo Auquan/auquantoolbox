@@ -1,18 +1,25 @@
+from backtester.trading_system_parameters import TradingSystemParameters
 from datetime import timedelta
-from instrumentFeatures.instrument_feature_config import InstrumentFeatureConfig
-from dataSource.auquan_data_source import AuquanDataSource
-from marketFeatures.market_feature_config import MarketFeatureConfig
-from executionSystem.simple_execution_system import SimpleExecutionSystem
-from orderPlacer.backtesting_order_placer import BacktestingOrderPlacer
+from backtester.instrumentFeatures.instrument_feature_config import InstrumentFeatureConfig
+from backtester.dataSource.auquan_data_source import AuquanDataSource
+from backtester.marketFeatures.market_feature_config import MarketFeatureConfig
+from backtester.executionSystem.simple_execution_system import SimpleExecutionSystem
+from backtester.orderPlacer.backtesting_order_placer import BacktestingOrderPlacer
+from backtester.trading_system import TradingSystem
 
 
-class TradingSystemParameters(object):
+class MyTradingParams(TradingSystemParameters):
     '''
     Returns an instance of class DataParser
     '''
     def getDataParser(self):
-        raise NotImplementedError
-        return None
+        instrumentIdsByType = {'futures': ['banknifty', 'nifty']}
+        startDateStr = '2016/07/01'
+        endDateStr = '2016/07/04'
+        return AuquanDataSource(folderName='historicalData',
+                                instrumentIdsByType=instrumentIdsByType,
+                                startDateStr=startDateStr,
+                                endDateStr=endDateStr)
 
     '''
     Returns a timedetla object to indicate frequency of updates to features
@@ -42,3 +49,9 @@ class TradingSystemParameters(object):
 
     def getOrderPlacer(self):
         return BacktestingOrderPlacer()
+
+
+if __name__ == "__main__":
+    tsParams = MyTradingParams()
+    tradingSystem = TradingSystem(tsParams)
+    tradingSystem.startTrading()

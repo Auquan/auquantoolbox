@@ -5,7 +5,7 @@ from backtester.constants import *
 class FutureInstrument(Instrument):
 
     def __init__(self, futureInstrumentId, expiryTime, underlyingInstrumentId, tsParams):
-        super.__init__(futureInstrumentId, tsParams)
+        super(FutureInstrument, self).__init__(futureInstrumentId, tsParams)
         self.__futureInstrumentId = futureInstrumentId
         self.__expiryTime = expiryTime
         self.__underlyingInstrumentId = underlyingInstrumentId

@@ -1,6 +1,3 @@
-# from vwap_price_feature import VwapPriceInstrumentFeature
-
-
 class MarketFeature:
 
     @classmethod

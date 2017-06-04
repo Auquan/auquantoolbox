@@ -1,5 +1,5 @@
 import time
-from logger import *
+from backtester.logger import *
 from instruments_manager import InstrumentManager
 from trading_system_parameters import TradingSystemParameters
 
@@ -11,12 +11,15 @@ class TradingSystem:
 
     def __init__(self, tsParams):
         self.tsParams = tsParams
-        self.instrumentManager = InstrumentManager()
+        self.instrumentManager = InstrumentManager(self.tsParams)
         self.featuresUpdateTime = None
         self.totalTimeUpdating = 0  # for tracking perf
         self.totalUpdates = 0
+        self.executionSystem = None
+        self.orderPlacer = None
 
     def processInstrumentUpdate(self, instrumentUpdate):
+        self.tryUpdateFeaturesAndExecute(instrumentUpdate.getTimeOfUpdate())
         instrumentIdToUpdate = instrumentUpdate.getInstrumentId()
         instrumentToUpdate = self.instrumentManager.getInstrument(instrumentIdToUpdate)
         # if not present try to create an instrument from this update first.
@@ -26,18 +29,24 @@ class TradingSystem:
                 return
             self.instrumentManager.addInstrument(instrumentToUpdate)
         instrumentToUpdate.update(instrumentUpdate)
-        self.tryUpdateFeaturesAndExecute(instrumentUpdate.getTimeOfUpdate())
+
+    def processPlacedOrder(self, placedOrder):
+        instrumentId = placedOrder.getInstrumentId()
+        changeInPosition = placedOrder.getChangeInPosition()
+        placedInstrument = self.instrumentManager.getInstrument(instrumentId)
+        placedInstrument.updatePosition(changeInPosition)
 
     def tryUpdateFeaturesAndExecute(self, timeOfUpdate):
         shouldUpdateFeatures = False
         if self.featuresUpdateTime is None:
             shouldUpdateFeatures = True
-        elif timeOfUpdate >= (self.featuresUpdateTime + self.tsParams.getFrequencyOfFeatureUpdates):
+        elif timeOfUpdate >= (self.featuresUpdateTime + self.tsParams.getFrequencyOfFeatureUpdates()):
             shouldUpdateFeatures = True
         if shouldUpdateFeatures:
             self.featuresUpdateTime = timeOfUpdate
             self.updateFeatures(timeOfUpdate)
             instrumentsToExecute = self.getInstrumentsToExecute(timeOfUpdate)
+            self.orderPlacer.placeOrders(timeOfUpdate, instrumentsToExecute, self.instrumentManager)
 
     def updateFeatures(self, timeOfUpdate):
         # tracking perf
@@ -50,18 +59,16 @@ class TradingSystem:
         logInfo('Update: %d, Time: %.2f, Average: %.2f' % (self.totalUpdates, diffms, self.totalTimeUpdating / self.totalUpdates))
 
     def getInstrumentsToExecute(self, time):
-        executionSystem = self.tsParams.getExecutionSystem()
-        return executionSystem.getExecutions(time, self.instrumentManager)
-
+        return self.executionSystem.getExecutions(time, self.instrumentManager)
 
     def startTrading(self):
         dataParser = self.tsParams.getDataParser()
+        self.executionSystem = self.tsParams.getExecutionSystem()
+        self.orderPlacer = self.tsParams.getOrderPlacer()
         instrumentUpdates = dataParser.emitInstrumentUpdate()
+        placedOrders = self.orderPlacer.emitPlacedOrders()
+        # TODO:
+        #for placedOrder in placedOrders:
+        #    self.processPlacedOrder(placedOrder)
         for instrumentUpdate in instrumentUpdates:
             self.processInstrumentUpdate(instrumentUpdate)
-
-
-if __name__ == "__main__":
-    tsParams = TradingSystemParameters()
-    tradingSystem = TradingSystem(tsParams)
-    tradingSystem.startTrading()

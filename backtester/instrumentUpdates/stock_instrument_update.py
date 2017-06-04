@@ -17,8 +17,8 @@ class StockInstrumentUpdate(InstrumentUpdate):
              high
              low
     '''
-    def __init__(self, stockInstrumentId, timeOfUpdate, bookData):
-        super.__init__(stockInstrumentId, timeOfUpdate, bookData)
+    def __init__(self, stockInstrumentId, tradeSymbol, timeOfUpdate, bookData):
+        super(StockInstrumentUpdate, self).__init__(stockInstrumentId, tradeSymbol, timeOfUpdate, bookData)
         self.__stockInstrumentId = stockInstrumentId
 
     def getStockInstrumentId(self):

@@ -1,16 +1,24 @@
 from backtester.constants import *
 from lookback_data import LookbackData
 from marketFeatures.market_feature import MarketFeature
+from instruments import *
+from backtester.logger import *
 
 
 class InstrumentManager:
-    def __init__(self):
+    def __init__(self, tsParams):
+        self.tsParams = tsParams
         self.__instrumentsDict = {}
         # TODO: create a different place to hold different types of instruments
-        self.__lookbackMarketFeatures = LookbackData()
+        featureConfigs = tsParams.getMarketFeatureConfigs()
+        columns = map(lambda x: x.getFeatureKey(), featureConfigs)
+        columns.append('prediction')
+        self.__lookbackMarketFeatures = LookbackData(500, columns)
 
     def getInstrument(self, instrumentId):
-        return self.instrumentsDict[instrumentId]
+        if instrumentId not in self.__instrumentsDict:
+            return None
+        return self.__instrumentsDict[instrumentId]
 
     def getLookbackMarketFeatures(self):
         return self.__lookbackMarketFeatures
@@ -49,8 +57,8 @@ class InstrumentManager:
         self.__instrumentsDict[instrumentId] = instrument
 
     def updateFeatures(self, timeOfUpdate):
-        for instrumentId in self.instrumentsDict:
-            instrument = self.instrumentsDict[instrumentId]
+        for instrumentId in self.__instrumentsDict:
+            instrument = self.__instrumentsDict[instrumentId]
             instrument.updateFeatures(timeOfUpdate)
 
         currentMarketFeatures = {}
@@ -64,4 +72,5 @@ class InstrumentManager:
                                                          instrumentManager=self)
             currentMarketFeatures[featureConfig.getFeatureKey()] = featureVal
         currentMarketFeatures['prediction'] = self.tsParams.getPrediction(timeOfUpdate, currentMarketFeatures, self)
-        self.__lookbackFeatures.addData(currentMarketFeatures)
+        logInfo('Market Features: %s' % str(currentMarketFeatures))
+        self.__lookbackMarketFeatures.addData(timeOfUpdate, currentMarketFeatures)

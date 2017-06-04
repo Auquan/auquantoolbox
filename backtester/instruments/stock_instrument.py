@@ -5,7 +5,7 @@ from backtester.constants import *
 class StockInstrument(Instrument):
 
     def __init__(self, stockInstrumentId, tsParams):
-        super.__init__(stockInstrumentId, tsParams)
+        super(StockInstrument, self).__init__(stockInstrumentId, tsParams)
         self.__stockInstrumentId = stockInstrumentId
 
     def getInstrumentType(self):
