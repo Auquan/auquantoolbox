@@ -50,6 +50,9 @@ class MyTradingParams(TradingSystemParameters):
     def getOrderPlacer(self):
         return BacktestingOrderPlacer()
 
+    def getLookbackSize(self):
+        return 500
+
 
 if __name__ == "__main__":
     tsParams = MyTradingParams()

@@ -42,3 +42,6 @@ class TradingSystemParameters(object):
 
     def getOrderPlacer(self):
         return BacktestingOrderPlacer()
+
+    def getLookbackSize(self):
+        return 500

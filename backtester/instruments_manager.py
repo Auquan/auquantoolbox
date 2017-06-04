@@ -13,7 +13,7 @@ class InstrumentManager:
         featureConfigs = tsParams.getMarketFeatureConfigs()
         columns = map(lambda x: x.getFeatureKey(), featureConfigs)
         columns.append('prediction')
-        self.__lookbackMarketFeatures = LookbackData(500, columns)
+        self.__lookbackMarketFeatures = LookbackData(tsParams.getLookbackSize(), columns)
 
     def getInstrument(self, instrumentId):
         if instrumentId not in self.__instrumentsDict:

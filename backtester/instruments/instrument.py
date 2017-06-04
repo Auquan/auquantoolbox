@@ -8,7 +8,7 @@ class Instrument(object):
         self.__instrumentId = instrumentId
         self.__currentInstrumentUpdate = None
         featureConfigs = tsParams.getFeatureConfigsForInstrumentType(self.getInstrumentType())
-        self.__lookbackFeatures = LookbackData(500, map(lambda x: x.getFeatureKey(), featureConfigs))
+        self.__lookbackFeatures = LookbackData(tsParams.getLookbackSize(), map(lambda x: x.getFeatureKey(), featureConfigs))
         self.__position = 0
         self.tsParams = tsParams
 
