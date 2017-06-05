@@ -32,6 +32,9 @@ class Instrument(object):
     def updatePosition(self, changeInPosition):
         self.__position = self.__position + changeInPosition
 
+    def getCurrentPosition(self):
+        return self.__position
+
     def getCurrentBookData(self):
         return self.__currentInstrumentUpdate.getBookData()
 
@@ -46,4 +49,5 @@ class Instrument(object):
                                                              currentFeatures=currentFeatures,
                                                              instrument=self)
             currentFeatures[featureConfig.getFeatureKey()] = featureVal
+        logInfo('Instrument Features: %s: %s' % (self.__instrumentId, str(currentFeatures)))
         self.__lookbackFeatures.addData(timeOfUpdate, currentFeatures)

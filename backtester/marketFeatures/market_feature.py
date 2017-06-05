@@ -8,7 +8,7 @@ class MarketFeature:
     @classmethod
     def computeForFeature(cls, marketFeatureId, featureParams, currentMarketFeatures, instrumentManager):
         instrumentFeatureCls = MarketFeature.getClassForInstrumentFeatureId(marketFeatureId)
-        instrumentFeatureCls.compute(currentMarketFeatures, instrumentManager)
+        instrumentFeatureCls.compute(featureParams, currentMarketFeatures, instrumentManager)
 
     @classmethod
     def validateInputs(cls, currentMarketFeatures, instrument):

@@ -31,11 +31,14 @@ class MyTradingParams(TradingSystemParameters):
         return timedelta(0, 5)
 
     def getFeatureConfigsForInstrumentType(self, instrumentType):
+        positionConfigDict = {'featureKey': 'position',
+                              'featureId': 'position',
+                              'params': {}}
         vwapConfigDict = {'featureKey': 'price',
                           'featureId': 'vwap',
                           'params': {}}
-        vwap = InstrumentFeatureConfig(vwapConfigDict)
-        return [vwap]
+        configDicts = [positionConfigDict, vwapConfigDict]
+        return map(lambda x: InstrumentFeatureConfig(x), configDicts)
 
     def getMarketFeatureConfigs(self):
         return []
