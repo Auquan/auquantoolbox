@@ -19,6 +19,9 @@ class TradingSystem:
         self.orderPlacer = None
 
     def processInstrumentUpdate(self, instrumentUpdate):
+        # TODO: Not sure if this is the right place
+        for placedOrder in self.orderPlacer.emitPlacedOrders():
+            self.processPlacedOrder(placedOrder)
         self.tryUpdateFeaturesAndExecute(instrumentUpdate.getTimeOfUpdate())
         instrumentIdToUpdate = instrumentUpdate.getInstrumentId()
         instrumentToUpdate = self.instrumentManager.getInstrument(instrumentIdToUpdate)
@@ -62,13 +65,10 @@ class TradingSystem:
         return self.executionSystem.getExecutions(time, self.instrumentManager)
 
     def startTrading(self):
+        # TODO: Figure out a good way to handle order parsers with live data later on.
         dataParser = self.tsParams.getDataParser()
         self.executionSystem = self.tsParams.getExecutionSystem()
         self.orderPlacer = self.tsParams.getOrderPlacer()
         instrumentUpdates = dataParser.emitInstrumentUpdate()
-        placedOrders = self.orderPlacer.emitPlacedOrders()
-        # TODO:
-        #for placedOrder in placedOrders:
-        #    self.processPlacedOrder(placedOrder)
         for instrumentUpdate in instrumentUpdates:
             self.processInstrumentUpdate(instrumentUpdate)

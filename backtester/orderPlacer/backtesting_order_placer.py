@@ -21,3 +21,4 @@ class BacktestingOrderPlacer(BaseOrderPlacer):
     def emitPlacedOrders(self):
         for placedOrder in self.__orders:
             yield(placedOrder)
+        self.__orders = []
