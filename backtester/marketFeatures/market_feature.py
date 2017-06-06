@@ -1,23 +1,13 @@
-class MarketFeature:
+class MarketFeature(object):
 
     @classmethod
-    def getClassForMarketFeatureId(cls, instrumentFeatureId):
-        # TODO:
-        return None
-
-    @classmethod
-    def computeForFeature(cls, marketFeatureId, featureParams, currentMarketFeatures, instrumentManager):
-        instrumentFeatureCls = MarketFeature.getClassForInstrumentFeatureId(marketFeatureId)
-        instrumentFeatureCls.compute(featureParams, currentMarketFeatures, instrumentManager)
-
-    @classmethod
-    def validateInputs(cls, currentMarketFeatures, instrument):
+    def validateInputs(cls, featureParams, currentMarketFeatures, instrumentManager):
         return True
 
     '''
     override this method
     '''
     @classmethod
-    def compute(cls, currentMarketFeatures, instrument):
+    def compute(cls, featureParams, currentMarketFeatures, instrumentManager):
         raise NotImplementedError
         return None, None

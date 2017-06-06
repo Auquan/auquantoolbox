@@ -1,11 +1,10 @@
 from backtester.trading_system_parameters import TradingSystemParameters
 from datetime import timedelta
-from backtester.instrumentFeatures.instrument_feature_config import InstrumentFeatureConfig
 from backtester.dataSource.auquan_data_source import AuquanDataSource
-from backtester.marketFeatures.market_feature_config import MarketFeatureConfig
 from backtester.executionSystem.simple_execution_system import SimpleExecutionSystem
 from backtester.orderPlacer.backtesting_order_placer import BacktestingOrderPlacer
 from backtester.trading_system import TradingSystem
+from backtester.constants import *
 
 
 class MyTradingParams(TradingSystemParameters):
@@ -28,23 +27,25 @@ class MyTradingParams(TradingSystemParameters):
     frequency
     '''
     def getFrequencyOfFeatureUpdates(self):
-        return timedelta(0, 5)
+        return timedelta(0, 30)
 
-    def getFeatureConfigsForInstrumentType(self, instrumentType):
+    def getInstrumentFeatureConfigDicts(self, instrumentType):
+        # ADD RELEVANT FEATURES HERE
         positionConfigDict = {'featureKey': 'position',
                               'featureId': 'position',
                               'params': {}}
         vwapConfigDict = {'featureKey': 'price',
                           'featureId': 'vwap',
                           'params': {}}
-        configDicts = [positionConfigDict, vwapConfigDict]
-        return map(lambda x: InstrumentFeatureConfig(x), configDicts)
+        return {INSTRUMENT_TYPE_FUTURE: [positionConfigDict, vwapConfigDict]}
 
-    def getMarketFeatureConfigs(self):
+    def getMarketFeatureConfigDicts(self):
+        # ADD RELEVANT FEATURES HERE
         return []
 
-    def getPrediction(self, time, currentMarketFeatures, instrumentsManager):
+    def getPrediction(self, time, currentMarketFeatures, instrumentManager):
         lookbackMarketFeatures = instrumentsManager.getLookbackMarketFeatures().getData()
+        # IMPLEMENT THIS
         return 0.0
 
     def getExecutionSystem(self):

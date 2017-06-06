@@ -1,7 +1,7 @@
 from backtester.constants import *
-from lookback_data import LookbackData
-from marketFeatures.market_feature import MarketFeature
-from instruments import *
+from backtester.lookback_data import LookbackData
+from backtester.marketFeatures.market_feature_config import MarketFeatureConfig
+from backtester.instruments import *
 from backtester.logger import *
 
 
@@ -66,10 +66,10 @@ class InstrumentManager:
         for featureConfig in featureConfigs:
             featureId = featureConfig.getFeatureId()
             featureParams = featureConfig.getFeatureParams()
-            featureVal = MarketFeature.computeForFeature(instrumentFeatureId=featureId,
-                                                         featureParams=featureParams,
-                                                         currentMarketFeatures=currentMarketFeatures,
-                                                         instrumentManager=self)
+            featureCls = MarketFeatureConfig.getClassForInstrumentFeatureId(featureId)
+            featureVal = featureCls.compute(featureParams=featureParams,
+                                            currentMarketFeatures=currentMarketFeatures,
+                                            instrumentManager=self)
             currentMarketFeatures[featureConfig.getFeatureKey()] = featureVal
         currentMarketFeatures['prediction'] = self.tsParams.getPrediction(timeOfUpdate, currentMarketFeatures, self)
         logInfo('Market Features: %s' % str(currentMarketFeatures))

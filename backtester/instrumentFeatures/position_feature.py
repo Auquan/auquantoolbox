@@ -1,7 +1,10 @@
-class PositionFeature(object):
+from instrument_feature import InstrumentFeature
+
+
+class PositionFeature(InstrumentFeature):
 
     @classmethod
-    def validateInputs(cls, currentFeatures, instrument):
+    def validateInputs(cls, featureParams, currentFeatures, instrument):
         return True
 
     @classmethod
