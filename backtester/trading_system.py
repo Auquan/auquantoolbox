@@ -1,7 +1,7 @@
 import time
 from backtester.logger import *
 from instruments_manager import InstrumentManager
-from trading_system_parameters import TradingSystemParameters
+from datetime import datetime
 
 
 class TradingSystem:
@@ -17,9 +17,10 @@ class TradingSystem:
         self.totalUpdates = 0
         self.executionSystem = None
         self.orderPlacer = None
+        self.runLogFolder = 'runLog_' + str(datetime.now())
 
     def processInstrumentUpdate(self, instrumentUpdate):
-        # TODO: Not sure if this is the right place
+        # TODO: Not sure if this is the right place for updating placed orders
         for placedOrder in self.orderPlacer.emitPlacedOrders():
             self.processPlacedOrder(placedOrder)
         self.tryUpdateFeaturesAndExecute(instrumentUpdate.getTimeOfUpdate())
@@ -40,6 +41,7 @@ class TradingSystem:
         placedInstrument.updatePosition(changeInPosition)
 
     def tryUpdateFeaturesAndExecute(self, timeOfUpdate):
+        # TODO: Fix this to run independently of time of update of instrument and at regular frequency updates
         shouldUpdateFeatures = False
         if self.featuresUpdateTime is None:
             shouldUpdateFeatures = True
@@ -63,6 +65,10 @@ class TradingSystem:
 
     def getInstrumentsToExecute(self, time):
         return self.executionSystem.getExecutions(time, self.instrumentManager)
+
+    def saveCurrentState(self):
+        # TODO:
+        marketFeaturesFileName = self.runLogFolder + '/marketFeatures'
 
     def startTrading(self):
         # TODO: Figure out a good way to handle order parsers with live data later on.

@@ -18,6 +18,8 @@ class PlacedOrder():
         return self.__fees
 
 
+# TODO: For live orders, we need a way to track what orders we have placed but havent gotten 
+# a confirmation for. Also, need something for failure of orders.
 class BaseOrderPlacer():
 
     '''

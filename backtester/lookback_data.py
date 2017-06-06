@@ -26,3 +26,6 @@ class LookbackData:
     '''
     def getData(self):
         return self.__data
+
+    def getLastData(self):
+        return self.__data.iloc[-1]
