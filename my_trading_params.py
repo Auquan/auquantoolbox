@@ -29,7 +29,7 @@ class MyTradingParams(TradingSystemParameters):
     def getFrequencyOfFeatureUpdates(self):
         return timedelta(0, 30)
 
-    def getInstrumentFeatureConfigDicts(self, instrumentType):
+    def getInstrumentFeatureConfigDicts(self):
         # ADD RELEVANT FEATURES HERE
         positionConfigDict = {'featureKey': 'position',
                               'featureId': 'position',
@@ -44,7 +44,7 @@ class MyTradingParams(TradingSystemParameters):
         return []
 
     def getPrediction(self, time, currentMarketFeatures, instrumentManager):
-        lookbackMarketFeatures = instrumentsManager.getLookbackMarketFeatures().getData()
+        lookbackMarketFeatures = instrumentManager.getLookbackMarketFeatures().getData()
         # IMPLEMENT THIS
         return 0.0
 
