@@ -11,7 +11,7 @@ class TradingSystemParameters(object):
     def __init__(self):
         self.__instrumentFeatureConfigs = {}
         instrumentFeatureConfigDicts = self.getInstrumentFeatureConfigDicts()
-        for instrumentType in instrumentFeatureConfigs:
+        for instrumentType in instrumentFeatureConfigDicts:
             self.__instrumentFeatureConfigs[instrumentType] = map(lambda x: InstrumentFeatureConfig(x), instrumentFeatureConfigDicts[instrumentType])
         self.__marketFeatureConfigs = map(lambda x: MarketFeatureConfig(x), self.getMarketFeatureConfigDicts())
 
@@ -112,7 +112,7 @@ class TradingSystemParameters(object):
     ###      END OF OVERRIDING METHODS
     #####################################################################
 
-    def getInstrumentFeatureConfigsForType(self, instrumentType):
+    def getFeatureConfigsForInstrumentType(self, instrumentType):
         if instrumentType in self.__instrumentFeatureConfigs:
             return self.__instrumentFeatureConfigs[instrumentType]
         else:
