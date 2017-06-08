@@ -7,7 +7,7 @@ from backtester.logger import *
 
 featureIdToFeatureCls = {'vwap': VwapPriceInstrumentFeature,
                          'position': PositionFeature,
-                         'movingAverage': MovingAverageInstrumentFeature}
+                         'moving_average': MovingAverageInstrumentFeature}
 
 
 class InstrumentFeatureConfig:
