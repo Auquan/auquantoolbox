@@ -4,11 +4,11 @@ from instrument_feature import InstrumentFeature
 class VwapPriceInstrumentFeature(InstrumentFeature):
 
     @classmethod
-    def validateInputs(cls, featureParams, currentFeatures, instrument):
+    def validateInputs(cls, featureKey, featureParams, currentFeatures, instrument):
         return True
 
     @classmethod
-    def compute(cls, featureParams, currentFeatures, instrument):
+    def compute(cls, featureKey, featureParams, currentFeatures, instrument):
         bookData = instrument.getCurrentBookData()
         instrumentType = instrument.getInstrumentType()
         totalVolume = (bookData['askVolume'] + bookData['bidVolume'])

@@ -1,7 +1,7 @@
 from instrument_feature import InstrumentFeature
 
 
-class PositionFeature(InstrumentFeature):
+class MovingSDevInstrumentFeature(InstrumentFeature):
 
     @classmethod
     def validateInputs(cls, featureKey, featureParams, currentFeatures, instrument):
@@ -9,6 +9,5 @@ class PositionFeature(InstrumentFeature):
 
     @classmethod
     def compute(cls, featureKey, featureParams, currentFeatures, instrument):
-        bookData = instrument.getCurrentBookData()
-        instrumentType = instrument.getInstrumentType()
-        return instrument.getCurrentPosition()
+        sdev = instrument.getLookbackFeatures().getData()[featureParams['featureName']][-featureParams['period']:].std()
+        return sdev

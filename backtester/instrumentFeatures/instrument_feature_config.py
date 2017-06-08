@@ -1,14 +1,18 @@
 from vwap_price_feature import VwapPriceInstrumentFeature
 from position_feature import PositionFeature
 from moving_average_feature import MovingAverageInstrumentFeature
+from moving_sdev_feature import MovingSDevInstrumentFeature
+from exp_moving_average_feature import ExpMovingAverageInstrumentFeature
 from instrument_feature import InstrumentFeature
 from backtester.logger import *
 
 
 featureIdToFeatureCls = {'vwap': VwapPriceInstrumentFeature,
                          'position': PositionFeature,
-                         'moving_average': MovingAverageInstrumentFeature}
-
+                         'moving_average': MovingAverageInstrumentFeature,
+                         'moving_sdev' : MovingSDevInstrumentFeature,
+                         'exponential_moving_average' : ExpMovingAverageInstrumentFeature,
+                         }
 
 class InstrumentFeatureConfig:
 

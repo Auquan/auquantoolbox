@@ -45,10 +45,12 @@ class Instrument(object):
         currentFeatures = {}
         featureConfigs = self.tsParams.getFeatureConfigsForInstrumentType(self.getInstrumentType())
         for featureConfig in featureConfigs:
+            featureKey = featureConfig.getFeatureKey()
             featureId = featureConfig.getFeatureId()
             featureParams = featureConfig.getFeatureParams()
             featureCls = InstrumentFeatureConfig.getClassForInstrumentFeatureId(featureId)
-            featureVal = featureCls.compute(featureParams=featureParams,
+            featureVal = featureCls.compute(featureKey= featureKey,
+                                            featureParams=featureParams,
                                             currentFeatures=currentFeatures,
                                             instrument=self)
             currentFeatures[featureConfig.getFeatureKey()] = featureVal
