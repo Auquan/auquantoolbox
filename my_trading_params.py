@@ -37,7 +37,11 @@ class MyTradingParams(TradingSystemParameters):
         vwapConfigDict = {'featureKey': 'price',
                           'featureId': 'vwap',
                           'params': {}}
-        return {INSTRUMENT_TYPE_FUTURE: [positionConfigDict, vwapConfigDict]}
+        maConfigDict = {'featureKey': 'ma_90',
+                          'featureId': 'moving_average',
+                          'params': {'featureName':'price',
+                                        'period':90}}
+        return {INSTRUMENT_TYPE_FUTURE: [positionConfigDict, vwapConfigDict, maConfigDict]}
 
     def getMarketFeatureConfigDicts(self):
         # ADD RELEVANT FEATURES HERE

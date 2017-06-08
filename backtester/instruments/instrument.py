@@ -22,6 +22,9 @@ class Instrument(object):
     def getTradeSymbol(self):
         return self.__currentInstrumentUpdate.getTradeSymbol()
 
+    def getLookbackFeatures(self):
+        return self.__lookbackFeatures
+
     def update(self, instrumentUpdate):
         if (self.__currentInstrumentUpdate is not None) and (instrumentUpdate is not None):
             if self.__currentInstrumentUpdate.getTimeOfUpdate() > instrumentUpdate.getTimeOfUpdate():
