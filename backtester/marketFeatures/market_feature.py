@@ -8,6 +8,6 @@ class MarketFeature(object):
     override this method
     '''
     @classmethod
-    def compute(cls, featureParams, currentMarketFeatures, instrumentManager):
+    def compute(cls, featureParams, featureKey, currentMarketFeatures, instrumentManager):
         raise NotImplementedError
         return None, None

@@ -5,6 +5,8 @@ from backtester.executionSystem.simple_execution_system import SimpleExecutionSy
 from backtester.orderPlacer.backtesting_order_placer import BacktestingOrderPlacer
 from backtester.trading_system import TradingSystem
 from backtester.constants import *
+from my_custom_instrument_feature import MyCustomInstrumentFeature
+from my_custom_market_feature import MyCustomMarketFeature
 
 
 class MyTradingParams(TradingSystemParameters):
@@ -29,6 +31,9 @@ class MyTradingParams(TradingSystemParameters):
     def getFrequencyOfFeatureUpdates(self):
         return timedelta(0, 30)
 
+    def getCustomInstrumentFeatures(self):
+        return {'my_custom_inst_feature': MyCustomInstrumentFeature}
+
     def getInstrumentFeatureConfigDicts(self):
         # ADD RELEVANT FEATURES HERE
         positionConfigDict = {'featureKey': 'position',
@@ -37,11 +42,20 @@ class MyTradingParams(TradingSystemParameters):
         vwapConfigDict = {'featureKey': 'price',
                           'featureId': 'vwap',
                           'params': {}}
-        return {INSTRUMENT_TYPE_FUTURE: [positionConfigDict, vwapConfigDict]}
+        customFeatureDict = {'featureKey': 'custom_inst_feature',
+                             'featureId': 'my_custom_inst_feature',
+                             'params': {'param1': 'value1'}}
+        return {INSTRUMENT_TYPE_FUTURE: [positionConfigDict, vwapConfigDict, customFeatureDict]}
+
+    def getCustomMarketFeatures(self):
+        return {'my_custom_mrkt_feature': MyCustomMarketFeature}
 
     def getMarketFeatureConfigDicts(self):
         # ADD RELEVANT FEATURES HERE
-        return []
+        customFeatureDict = {'featureKey': 'custom_mrkt_feature',
+                             'featureId': 'my_custom_mrkt_feature',
+                             'params': {'param1': 'value1'}}
+        return [customFeatureDict]
 
     def getPrediction(self, time, currentMarketFeatures, instrumentManager):
         lookbackMarketFeatures = instrumentManager.getLookbackMarketFeatures().getData()

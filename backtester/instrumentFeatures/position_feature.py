@@ -8,7 +8,7 @@ class PositionFeature(InstrumentFeature):
         return True
 
     @classmethod
-    def compute(cls, featureParams, currentFeatures, instrument):
+    def compute(cls, featureParams, featureKey, currentFeatures, instrument):
         bookData = instrument.getCurrentBookData()
         instrumentType = instrument.getInstrumentType()
         return instrument.getCurrentPosition()
