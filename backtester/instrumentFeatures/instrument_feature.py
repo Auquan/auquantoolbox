@@ -8,6 +8,6 @@ class InstrumentFeature(object):
     override this method
     '''
     @classmethod
-    def compute(cls, featureKey, featureParams, currentFeatures, instrument):
+    def compute(cls, featureParams, featureKey, currentFeatures, instrument):
         raise NotImplementedError
         return None, None

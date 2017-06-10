@@ -8,7 +8,7 @@ class VwapPriceInstrumentFeature(InstrumentFeature):
         return True
 
     @classmethod
-    def compute(cls, featureKey, featureParams, currentFeatures, instrument):
+    def compute(cls, featureParams, featureKey, currentFeatures, instrument):
         bookData = instrument.getCurrentBookData()
         instrumentType = instrument.getInstrumentType()
         totalVolume = (bookData['askVolume'] + bookData['bidVolume'])

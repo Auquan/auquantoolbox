@@ -22,7 +22,7 @@ class StockInstrumentUpdate(InstrumentUpdate):
         self.__stockInstrumentId = stockInstrumentId
 
     def getStockInstrumentId(self):
-        return __stockInstrumentId
+        return self.__stockInstrumentId
 
     def getTypeOfInstrument(self):
         return INSTRUMENT_TYPE_STOCK

@@ -47,12 +47,13 @@ class Instrument(object):
         for featureConfig in featureConfigs:
             featureKey = featureConfig.getFeatureKey()
             featureId = featureConfig.getFeatureId()
+            featureKey = featureConfig.getFeatureKey()
             featureParams = featureConfig.getFeatureParams()
             featureCls = InstrumentFeatureConfig.getClassForInstrumentFeatureId(featureId)
-            featureVal = featureCls.compute(featureKey= featureKey,
-                                            featureParams=featureParams,
+            featureVal = featureCls.compute(featureParams=featureParams,
+                                            featureKey=featureKey,
                                             currentFeatures=currentFeatures,
                                             instrument=self)
-            currentFeatures[featureConfig.getFeatureKey()] = featureVal
+            currentFeatures[featureKey] = featureVal
         logInfo('Instrument Features: %s: %s' % (self.__instrumentId, str(currentFeatures)))
         self.__lookbackFeatures.addData(timeOfUpdate, currentFeatures)

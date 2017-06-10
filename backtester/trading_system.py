@@ -76,5 +76,7 @@ class TradingSystem:
         self.executionSystem = self.tsParams.getExecutionSystem()
         self.orderPlacer = self.tsParams.getOrderPlacer()
         instrumentUpdates = dataParser.emitInstrumentUpdate()
+
         for instrumentUpdate in instrumentUpdates:
+            # logInfo('TimeOfUpdate: %s TradeSymbol: %s, Volume: %.2f' % (instrumentUpdate.getTimeOfUpdate(), instrumentUpdate.getTradeSymbol(), instrumentUpdate.getBookData()['volume']))
             self.processInstrumentUpdate(instrumentUpdate)

@@ -9,6 +9,8 @@ from backtester.constants import *
 
 class TradingSystemParameters(object):
     def __init__(self):
+        InstrumentFeatureConfig.setupCustomInstrumentFeatures(self.getCustomInstrumentFeatures())
+        MarketFeatureConfig.setupCustomMarketFeatures(self.getCustomMarketFeatures())
         self.__instrumentFeatureConfigs = {}
         instrumentFeatureConfigDicts = self.getInstrumentFeatureConfigDicts()
         for instrumentType in instrumentFeatureConfigDicts:
@@ -20,7 +22,7 @@ class TradingSystemParameters(object):
     #####################################################################
 
     '''
-    Returns an instance of class DataParser
+    Returns an instance of class DataParser. Source of data for instruments
     '''
     def getDataParser(self):
         raise NotImplementedError
@@ -34,6 +36,17 @@ class TradingSystemParameters(object):
     '''
     def getFrequencyOfFeatureUpdates(self):
         return timedelta(0, 60)
+
+    '''
+    This is a way to use any custom instrument features you might have made.
+    Returns a dictionary where
+    key: featureId to access this feature (Make sure this doesnt conflict with any of the pre defined feature Ids)
+    value: Your custom Class which computes this feature. The class should be an instance of InstrumentFeature
+    Eg. if your custom class is MyCustomInstrumentFeature, and you want to access this via featureId='my_custom_feature', 
+    you will import that class, and return this function as {'my_custom_feature': MyCustomInstrumentFeature}
+    '''
+    def getCustomInstrumentFeatures(self):
+        return {}
 
     '''
     Returns a dictionary with:
@@ -64,6 +77,17 @@ class TradingSystemParameters(object):
         return {}
 
     '''
+    This is a way to use any custom market features you might have made.
+    Returns a dictionary where
+    key: featureId to access this feature (Make sure this doesnt conflict with any of the pre defined feature Ids)
+    value: Your custom Class which computes this feature. The class should be an instance of MarketFeature
+    Eg. if your custom class is MyCustomMarketFeature, and you want to access this via featureId='my_custom_feature',
+    you will import that class, and return this function as {'my_custom_feature': MyCustomMarketFeature}
+    '''
+    def getCustomMarketFeatures(self):
+        return {}
+
+    '''
     Returns an array of market feature config dictionaries
         market feature config Dictionary has the following keys:
         featureId: a string representing the type of feature you want to use
@@ -74,7 +98,7 @@ class TradingSystemParameters(object):
         return []
 
     '''
-    A function that returns your predicted value based on your heuristics. 
+    A function that returns your predicted value based on your heuristics.
     If you are just trading one asset like a stock, it could be the predicted value of the stock.
     If you are doing pair trading, the prediction could be the difference in the prices of the stocks.
     Arguments:
