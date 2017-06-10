@@ -1,10 +1,56 @@
-from datetime import datetime
+try:
+    # py3
+    from urllib.request import Request, urlopen
+    from urllib.parse import urlencode
+except ImportError:
+    # py2
+    from urllib2 import Request, urlopen
+    from urllib import urlencode
+from datetime import datetime, timedelta
 from backtester.instrumentUpdates import *
 from backtester.constants import *
 from data_source import DataSource
-import os
 import os.path
-from pandas_datareader import data
+import pandas
+
+
+def get_historical_prices(symbol, start_date, end_date):
+    """
+    Get historical prices for the given ticker symbol.
+    Date format is 'YYYY-MM-DD'
+    Returns a nested dictionary (dict of dicts).
+    outer dict keys are dates ('YYYY-MM-DD')
+    """
+    params = urlencode({
+        's': symbol,
+        'a': int(start_date[5:7]) - 1,
+        'b': int(start_date[8:10]),
+        'c': int(start_date[0:4]),
+        'd': int(end_date[5:7]) - 1,
+        'e': int(end_date[8:10]),
+        'f': int(end_date[0:4]),
+        'g': 'd',
+        'ignore': '.csv',
+    })
+    url = 'http://real-chart.finance.yahoo.com/table.csv?%s' % params
+    req = Request(url)
+    resp = urlopen(req)
+    content = str(resp.read().decode('utf-8').strip())
+    daily_data = content.splitlines()
+    hist_dict = dict()
+    keys = daily_data[0].split(',')
+    for day in daily_data[1:]:
+        day_data = day.split(',')
+        date = day_data[0]
+        hist_dict[date] = \
+            {keys[1]: day_data[1],
+             keys[2]: day_data[2],
+             keys[3]: day_data[3],
+             keys[4]: day_data[4],
+             keys[5]: day_data[5],
+             keys[6]: day_data[6]}
+    return hist_dict
+
 
 TYPE_LINE_UNDEFINED = 0
 TYPE_LINE_HEADER = 1
@@ -64,7 +110,6 @@ class InstrumentsFromFile():
                 self.currentTimeOfUpdate = datetime.strptime(lineItems[0], "%Y-%m-%d")
                 self.currentInstrumentSymbol = self.instrumentId
                 self.currentBookData = parseDataLine(lineItems)
-                # right now only works for stocks
                 inst = StockInstrumentUpdate(stockInstrumentId=self.instrumentId,
                                               tradeSymbol=self.currentInstrumentSymbol,
                                               timeOfUpdate=self.currentTimeOfUpdate,
@@ -81,37 +126,40 @@ class InstrumentsFromFile():
                     instruments.append(inst)
             return instruments
 
-class GoogleStockDataSource(DataSource):
-    def __init__(self, cachedFolderName, instrumentIds, startDateStr, endDateStr):
+class YahooStockDataSource(DataSource):
+    def __init__(self, cachedFolderName, stockSymbols, startDateStr, endDateStr):
         self.startDate = datetime.strptime(startDateStr, "%Y/%m/%d")
         self.endDate = datetime.strptime(endDateStr, "%Y/%m/%d")
         self.cachedFolderName = cachedFolderName
-        self.instrumentIds = instrumentIds
+        self.stockSymbols = stockSymbols
         self.currentDate = self.startDate
 
     def downloadFile(self, instrumentId, fileName):
+        data = get_historical_prices(instrumentId, self.startDate.strftime("%Y-%m-%d"), self.endDate.strftime("%Y-%m-%d"))
         pd = data.DataReader(instrumentId, 'google', self.startDate, self.endDate)
         pd.to_csv(fileName)
 
     def getFileName(self, instrumentType, instrumentId):
-        return '%s/%s_%s_%s_%s.csv' % (self.cachedFolderName, instrumentId, instrumentType, self.startDate.strftime("%Y%m%d"), self.startDate.strftime("%Y%m%d"))
+        return '%s/%s/%s_%s_%s.csv' % (self.folderName, instrumentType, instrumentId, self.startDate.strftime("%Y%m%d"), self.startDate.strftime("%Y%m%d"))
 
     def emitInstrumentUpdate(self):
-        allInstrumentUpdates = []
-        for instrumentId in self.instrumentIds:
-            fileName = self.getFileName(INSTRUMENT_TYPE_STOCK, instrumentId)
-            if not os.path.exists(self.cachedFolderName):
-                os.mkdir(self.cachedFolderName, 0755)
-            if not os.path.isfile(fileName):
-                self.downloadFile(instrumentId, fileName)
-            fileHandler = InstrumentsFromFile(fileName=fileName, instrumentId=instrumentId)
-            instrumentUpdates = fileHandler.processLinesIntoInstruments()
-            allInstrumentUpdates = allInstrumentUpdates + instrumentUpdates
-        allInstrumentUpdates.sort(key=lambda x: x.getTimeOfUpdate())
-        for instrumentUpdate in allInstrumentUpdates:
-            yield(instrumentUpdate)
+        while (self.currentDate <= self.endDate):
+            allInstrumentUpdates = []
+            for instrumentType in self.instrumentIdsByType:
+                instrumentIds = self.instrumentIdsByType[instrumentType]
+                for instrumentId in instrumentIds:
+                    fileName = self.getFileName(instrumentType, instrumentId)
+                    if not os.path.isfile(fileName):
+                        self.downloadFile(instrumentId, fileName)
+                    fileHandler = InstrumentsFromFile(fileName=fileName, instrumentId=instrumentId)
+                    instrumentUpdates = fileHandler.processLinesIntoInstruments()
+                    allInstrumentUpdates = allInstrumentUpdates + instrumentUpdates
+            allInstrumentUpdates.sort(key=lambda x: x.getTimeOfUpdate())
+            for instrumentUpdate in allInstrumentUpdates:
+                yield(instrumentUpdate)
+            self.currentDate = self.currentDate + timedelta(days=1)
 
 
 if __name__ == "__main__":
-    a = datetime.strptime('2017/06/30', "%Y/%m/%d")
-    print get_exp_date(a)
+    ds = GoogleDataSource('a', '', '2017/05/10', '2017/06/09')
+    

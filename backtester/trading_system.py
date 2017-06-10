@@ -78,5 +78,5 @@ class TradingSystem:
         instrumentUpdates = dataParser.emitInstrumentUpdate()
 
         for instrumentUpdate in instrumentUpdates:
-            logInfo('TimeOfUpdate: %s TradeSymbol: %s, Volume: %.2f' % (instrumentUpdate.getTimeOfUpdate(), instrumentUpdate.getTradeSymbol(), instrumentUpdate.getBookData()['volume']))
+            # logInfo('TimeOfUpdate: %s TradeSymbol: %s, Volume: %.2f' % (instrumentUpdate.getTimeOfUpdate(), instrumentUpdate.getTradeSymbol(), instrumentUpdate.getBookData()['volume']))
             self.processInstrumentUpdate(instrumentUpdate)

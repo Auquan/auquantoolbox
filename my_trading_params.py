@@ -1,7 +1,7 @@
 from backtester.trading_system_parameters import TradingSystemParameters
 from datetime import timedelta
 from backtester.dataSource.auquan_data_source import AuquanDataSource
-from backtester.dataSource.google_data_source import GoogleDataSource
+from backtester.dataSource.google_data_source import GoogleStockDataSource
 from backtester.executionSystem.simple_execution_system import SimpleExecutionSystem
 from backtester.orderPlacer.backtesting_order_placer import BacktestingOrderPlacer
 from backtester.trading_system import TradingSystem
@@ -24,13 +24,13 @@ class MyTradingParams(TradingSystemParameters):
                                 startDateStr=startDateStr,
                                 endDateStr=endDateStr)
         '''
-        instrumentIdsByType = {'stock': ['IBM', 'AAPL', 'MSFT']}
+        instrumentIds = ['IBM', 'AAPL', 'MSFT']
         startDateStr = '2017/05/10'
         endDateStr = '2017/06/09'
-        return GoogleDataSource(folderName='historicalData',
-                               instrumentIdsByType=instrumentIdsByType,
-                               startDateStr=startDateStr,
-                               endDateStr=endDateStr)
+        return GoogleStockDataSource(cachedFolderName='googleData',
+                                     instrumentIds=instrumentIds,
+                                     startDateStr=startDateStr,
+                                     endDateStr=endDateStr)
 
     '''
     Returns a timedetla object to indicate frequency of updates to features
@@ -55,7 +55,7 @@ class MyTradingParams(TradingSystemParameters):
         customFeatureDict = {'featureKey': 'custom_inst_feature',
                              'featureId': 'my_custom_inst_feature',
                              'params': {'param1': 'value1'}}
-        return {INSTRUMENT_TYPE_FUTURE: [positionConfigDict, vwapConfigDict, customFeatureDict]}
+        return {INSTRUMENT_TYPE_STOCK: [positionConfigDict, customFeatureDict]}
 
     def getCustomMarketFeatures(self):
         return {'my_custom_mrkt_feature': MyCustomMarketFeature}
