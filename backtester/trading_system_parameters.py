@@ -22,7 +22,7 @@ class TradingSystemParameters(object):
     #####################################################################
 
     '''
-    Returns an instance of class DataParser
+    Returns an instance of class DataParser. Source of data for instruments
     '''
     def getDataParser(self):
         raise NotImplementedError
