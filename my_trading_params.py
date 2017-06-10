@@ -1,6 +1,7 @@
 from backtester.trading_system_parameters import TradingSystemParameters
 from datetime import timedelta
 from backtester.dataSource.auquan_data_source import AuquanDataSource
+from backtester.dataSource.yahoo_data_source import YahooDataSource
 from backtester.executionSystem.simple_execution_system import SimpleExecutionSystem
 from backtester.orderPlacer.backtesting_order_placer import BacktestingOrderPlacer
 from backtester.trading_system import TradingSystem
@@ -14,6 +15,7 @@ class MyTradingParams(TradingSystemParameters):
     Returns an instance of class DataParser
     '''
     def getDataParser(self):
+        '''
         instrumentIdsByType = {'futures': ['banknifty', 'nifty']}
         startDateStr = '2016/07/01'
         endDateStr = '2016/07/04'
@@ -21,6 +23,14 @@ class MyTradingParams(TradingSystemParameters):
                                 instrumentIdsByType=instrumentIdsByType,
                                 startDateStr=startDateStr,
                                 endDateStr=endDateStr)
+        '''
+        instrumentIdsByType = {'stock': ['YHOO', 'GOOG']}
+        startDateStr = '2017/05/10'
+        endDateStr = '2017/06/09'
+        return YahooDataSource(folderName='historicalData',
+                               instrumentIdsByType=instrumentIdsByType,
+                               startDateStr=startDateStr,
+                               endDateStr=endDateStr)
 
     '''
     Returns a timedetla object to indicate frequency of updates to features
