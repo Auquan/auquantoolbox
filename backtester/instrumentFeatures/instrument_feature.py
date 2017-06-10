@@ -1,7 +1,7 @@
 class InstrumentFeature(object):
 
     @classmethod
-    def validateInputs(cls, featureKey, featureParams, currentFeatures, instrument):
+    def validateInputs(cls, featureParams, featureKey, currentFeatures, instrument):
         return True
 
     '''

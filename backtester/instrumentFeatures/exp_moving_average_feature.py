@@ -5,11 +5,11 @@ from backtester.financial_fn import ema
 class ExpMovingAverageInstrumentFeature(InstrumentFeature):
 
     @classmethod
-    def validateInputs(cls, featureKey, featureParams, currentFeatures, instrument):
+    def validateInputs(cls, featureParams, featureKey, currentFeatures, instrument):
         return True
 
     @classmethod
-    def compute(cls, featureKey, featureParams, currentFeatures, instrument):
+    def compute(cls, featureParams, featureKey, currentFeatures, instrument):
         data = instrument.getLookbackFeatures().getData()[featureKey]
         if len(data.index) > 0:
             prev_ema = data[-1]

@@ -4,11 +4,11 @@ import math
 class MomentumInstrumentFeature(InstrumentFeature):
 
     @classmethod
-    def validateInputs(cls, featureKey, featureParams, currentFeatures, instrument):
+    def validateInputs(cls, featureParams, featureKey, currentFeatures, instrument):
         return True
 
     @classmethod
-    def compute(cls, featureKey, featureParams, currentFeatures, instrument):
+    def compute(cls, featureParams, featureKey, currentFeatures, instrument):
         data = instrument.getLookbackFeatures().getData()[featureParams['featureName']]
         if len(data.index) > 0:
         	m = data.sub(data.shift(featureParams['period']), fill_value = 0)[-1]

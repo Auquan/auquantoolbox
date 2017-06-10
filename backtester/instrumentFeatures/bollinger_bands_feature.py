@@ -5,11 +5,11 @@ from backtester.financial_fn import msdev
 class BollingerBandsInstrumentFeature(InstrumentFeature):
 
     @classmethod
-    def validateInputs(cls, featureKey, featureParams, currentFeatures, instrument):
+    def validateInputs(cls, featureParams, featureKey, currentFeatures, instrument):
         return True
 
     @classmethod
-    def compute(cls, featureKey, featureParams, currentFeatures, instrument):
+    def compute(cls, featureParams, featureKey, currentFeatures, instrument):
         avg = ma(instrument.getLookbackFeatures().getData()[featureParams['featureName']], featureParams['period'])
         sdev = msdev(instrument.getLookbackFeatures().getData()[featureParams['featureName']], featureParams['period'])
         if len(avg.index) > 0: 

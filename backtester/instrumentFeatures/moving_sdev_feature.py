@@ -4,11 +4,11 @@ from backtester.financial_fn import msdev
 class MovingSDevInstrumentFeature(InstrumentFeature):
 
     @classmethod
-    def validateInputs(cls, featureKey, featureParams, currentFeatures, instrument):
+    def validateInputs(cls, featureParams, featureKey, currentFeatures, instrument):
         return True
 
     @classmethod
-    def compute(cls, featureKey, featureParams, currentFeatures, instrument):
+    def compute(cls, featureParams, featureKey, currentFeatures, instrument):
     	data = instrument.getLookbackFeatures().getData()[featureParams['featureName']]
         sdev = msdev(data, featureParams['period'])
         if len(sdev.index) > 0 :

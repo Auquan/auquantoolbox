@@ -4,7 +4,7 @@ from instrument_feature import InstrumentFeature
 class VwapPriceInstrumentFeature(InstrumentFeature):
 
     @classmethod
-    def validateInputs(cls, featureKey, featureParams, currentFeatures, instrument):
+    def validateInputs(cls, featureParams, featureKey, currentFeatures, instrument):
         return True
 
     @classmethod
