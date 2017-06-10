@@ -24,7 +24,7 @@ class MyTradingParams(TradingSystemParameters):
                                 startDateStr=startDateStr,
                                 endDateStr=endDateStr)
         '''
-        instrumentIdsByType = {'stock': ['YHOO', 'GOOG']}
+        instrumentIdsByType = {'stock': ['YHOO', 'GOOG', 'AAPL', 'MSFT']}
         startDateStr = '2017/05/10'
         endDateStr = '2017/06/09'
         return YahooDataSource(folderName='historicalData',
