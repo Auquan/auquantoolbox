@@ -1,5 +1,6 @@
 from instrument_feature import InstrumentFeature
 import math
+from backtester.financial_fn import ema
 
 class ExpMovingAverageInstrumentFeature(InstrumentFeature):
 
@@ -9,10 +10,11 @@ class ExpMovingAverageInstrumentFeature(InstrumentFeature):
 
     @classmethod
     def compute(cls, featureKey, featureParams, currentFeatures, instrument):
-        if featureKey in instrument.getLookbackFeatures().getData():
-            prev_ema = instrument.getLookbackFeatures().getData()[featureKey][-1]
+        data = instrument.getLookbackFeatures().getData()[featureKey]
+        if len(data.index) > 0:
+            prev_ema = data[-1]
         else:
-            prev_ema = instrument.getLookbackFeatures().getData()[featureParams['featureName']]
+            prev_ema = instrument.getLookbackFeatures().getData()[featureParams['featureName']].iloc[0]
         halflife= featureParams['period']
         alpha =  1 - math.exp(math.log(0.5) / halflife)
         avg = currentFeatures[featureParams['featureName']] * alpha + prev_ema* (1-alpha)

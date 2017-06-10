@@ -1,7 +1,7 @@
 from instrument_feature import InstrumentFeature
-from backtester.financial_fn import ma
+import math
 
-class MovingAverageInstrumentFeature(InstrumentFeature):
+class MOMInstrumentFeature(InstrumentFeature):
 
     @classmethod
     def validateInputs(cls, featureKey, featureParams, currentFeatures, instrument):
@@ -10,6 +10,5 @@ class MovingAverageInstrumentFeature(InstrumentFeature):
     @classmethod
     def compute(cls, featureKey, featureParams, currentFeatures, instrument):
         data = instrument.getLookbackFeatures().getData()[featureParams['featureName']]
-        avg = ma(data, featureParams['period'])[-1]
-        return avg
-        
+        m = data.sub(data.shift(featureParams['period']), fill_value = 0)[-1]
+        return m

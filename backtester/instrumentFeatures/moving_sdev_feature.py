@@ -1,5 +1,5 @@
 from instrument_feature import InstrumentFeature
-
+from backtester.financial_fn import msdev
 
 class MovingSDevInstrumentFeature(InstrumentFeature):
 
@@ -9,5 +9,6 @@ class MovingSDevInstrumentFeature(InstrumentFeature):
 
     @classmethod
     def compute(cls, featureKey, featureParams, currentFeatures, instrument):
-        sdev = instrument.getLookbackFeatures().getData()[featureParams['featureName']][-featureParams['period']:].std()
+    	data = instrument.getLookbackFeatures().getData()[featureParams['featureName']]
+        sdev = msdev(data, featureParams['period'])[-1]
         return sdev

@@ -46,7 +46,10 @@ def ema(data, period):
     avg = data.ewm(halflife=period).mean()
     return avg
 
-
+def msdev(data,period):
+    s = data.rolling(window=period).std()
+    return s
+    
 def convert_time(timestamp):
     try:
         d = pd.to_datetime(timestamp, infer_datetime_format=True)
