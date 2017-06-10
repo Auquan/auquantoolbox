@@ -81,7 +81,7 @@ class InstrumentsFromFile():
                     instruments.append(inst)
             return instruments
 
-class YahooDataSource(DataSource):
+class GoogleDataSource(DataSource):
     def __init__(self, folderName, instrumentIdsByType, startDateStr, endDateStr):
         self.startDate = datetime.strptime(startDateStr, "%Y/%m/%d")
         self.endDate = datetime.strptime(endDateStr, "%Y/%m/%d")
