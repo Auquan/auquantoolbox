@@ -10,6 +10,9 @@ class MovingAverageInstrumentFeature(InstrumentFeature):
     @classmethod
     def compute(cls, featureKey, featureParams, currentFeatures, instrument):
         data = instrument.getLookbackFeatures().getData()[featureParams['featureName']]
-        avg = ma(data, featureParams['period'])[-1]
-        return avg
+        avg = ma(data, featureParams['period'])
+        if len(avg.index) > 0 :
+        	return avg[-1]
+        else:
+        	return currentFeatures[featureParams['featureName']]
         

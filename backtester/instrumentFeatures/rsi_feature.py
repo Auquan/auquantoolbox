@@ -2,7 +2,7 @@ from instrument_feature import InstrumentFeature
 from backtester.financial_fn import ma
 
 
-class RSIFeature(InstrumentFeature):
+class RSIInstrumentFeature(InstrumentFeature):
 
     @classmethod
     def validateInputs(cls, featureKey, featureParams, currentFeatures, instrument):
@@ -15,8 +15,11 @@ class RSIFeature(InstrumentFeature):
     	data_downside = data_upside.copy()
     	data_downside[data_upside>0] = 0
     	data_upside[data_upside<0] = 0
-    	avg_upside = ma(data_upside, featureParams['period'])[-1]
-    	avg_downside = ma(data_downside, featureParams['period'])[-1]
-    	rs = -avg_upside/avg_downside
+        if len(data.index) > 0:
+    	   avg_upside = ma(data_upside, featureParams['period'])[-1]
+    	   avg_downside = ma(data_downside, featureParams['period'])[-1]
+    	   rs = -avg_upside/avg_downside
+        else:
+            rs = 0
     	return 100-(100/(1+rs))
         

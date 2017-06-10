@@ -2,7 +2,7 @@ from instrument_feature import InstrumentFeature
 from backtester.financial_fn import ma
 from backtester.financial_fn import msdev
 
-class BBandsInstrumentFeature(InstrumentFeature):
+class BollingerBandsInstrumentFeature(InstrumentFeature):
 
     @classmethod
     def validateInputs(cls, featureKey, featureParams, currentFeatures, instrument):
@@ -12,4 +12,7 @@ class BBandsInstrumentFeature(InstrumentFeature):
     def compute(cls, featureKey, featureParams, currentFeatures, instrument):
         avg = ma(instrument.getLookbackFeatures().getData()[featureParams['featureName']], featureParams['period'])
         sdev = msdev(instrument.getLookbackFeatures().getData()[featureParams['featureName']], featureParams['period'])
-        return [avg - sdev, avg + sdev]
+        if len(avg.index) > 0: 
+        	return [(avg - sdev)[-1], (avg + sdev)[-1]]
+        else:
+        	return [avg, avg]

@@ -3,6 +3,10 @@ from position_feature import PositionFeature
 from moving_average_feature import MovingAverageInstrumentFeature
 from moving_sdev_feature import MovingSDevInstrumentFeature
 from exp_moving_average_feature import ExpMovingAverageInstrumentFeature
+from macd_feature import MACDInstrumentFeature
+from momentum_feature import MomentumInstrumentFeature
+from bollinger_bands_feature import BollingerBandsInstrumentFeature
+from rsi_feature import RSIInstrumentFeature
 from instrument_feature import InstrumentFeature
 from backtester.logger import *
 
@@ -12,6 +16,10 @@ featureIdToFeatureCls = {'vwap': VwapPriceInstrumentFeature,
                          'moving_average': MovingAverageInstrumentFeature,
                          'moving_sdev' : MovingSDevInstrumentFeature,
                          'exponential_moving_average' : ExpMovingAverageInstrumentFeature,
+                         'macd' : MACDInstrumentFeature,
+                         'momentum' : MomentumInstrumentFeature,
+                         'bollinger_bands' : BollingerBandsInstrumentFeature,
+                         'rsi' : RSIInstrumentFeature,
                          }
 
 class InstrumentFeatureConfig:
