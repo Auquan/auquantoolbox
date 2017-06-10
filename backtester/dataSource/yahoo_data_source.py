@@ -5,6 +5,7 @@ from backtester.constants import *
 from data_source import DataSource
 import os.path
 import pdb
+from pandas_datareader import data
 
 TYPE_LINE_UNDEFINED = 0
 TYPE_LINE_HEADER = 1
@@ -25,7 +26,7 @@ def checkTimestamp(lineItem):
 
 # Returns the type of lineItems
 def validateLineItem(lineItems):
-    if len(lineItems) == 7:
+    if len(lineItems) == 6:
         if lineItems[0] == "Date":
             return TYPE_LINE_HEADER
         elif checkDate(lineItems[0]):
@@ -34,19 +35,17 @@ def validateLineItem(lineItems):
 
 
 def parseDataLine(lineItems):
-    if (len(lineItems) != 7):
+    if (len(lineItems) != 6):
         return None
     openPrice = float(lineItems[1])
     high = float(lineItems[2])
     low = float(lineItems[3])
     closePrice = float(lineItems[4])
-    adjClose = float(lineItems[5])
-    volume = float(lineItems[6])
+    volume = float(lineItems[5])
     return {'open': openPrice,
             'high': high,
             'low': low,
             'close': closePrice,
-            'adjClose': adjClose,
             'volume': volume}
 
 class InstrumentsFromFile():
@@ -82,7 +81,6 @@ class InstrumentsFromFile():
                     instruments.append(inst)
             return instruments
 
-
 class YahooDataSource(DataSource):
     def __init__(self, folderName, instrumentIdsByType, startDateStr, endDateStr):
         self.startDate = datetime.strptime(startDateStr, "%Y/%m/%d")
@@ -91,8 +89,12 @@ class YahooDataSource(DataSource):
         self.instrumentIdsByType = instrumentIdsByType
         self.currentDate = self.startDate
 
+    def downloadFile(self, instrumentId, fileName):
+        pd = data.DataReader(instrumentId, 'google', self.startDate, self.endDate)
+        pd.to_csv(fileName)
+
     def getFileName(self, instrumentType, instrumentId):
-        return '%s/%s/%s.csv' % (self.folderName, instrumentType, instrumentId)
+        return '%s/%s/%s_%s_%s.csv' % (self.folderName, instrumentType, instrumentId, self.startDate.strftime("%Y%m%d"), self.startDate.strftime("%Y%m%d"))
 
     def emitInstrumentUpdate(self):
         while (self.currentDate <= self.endDate):
@@ -102,7 +104,7 @@ class YahooDataSource(DataSource):
                 for instrumentId in instrumentIds:
                     fileName = self.getFileName(instrumentType, instrumentId)
                     if not os.path.isfile(fileName):
-                        continue
+                        self.downloadFile(instrumentId, fileName)
                     fileHandler = InstrumentsFromFile(fileName=fileName, instrumentId=instrumentId)
                     instrumentUpdates = fileHandler.processLinesIntoInstruments()
                     allInstrumentUpdates = allInstrumentUpdates + instrumentUpdates
