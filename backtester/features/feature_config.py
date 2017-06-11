@@ -7,6 +7,7 @@ from momentum_feature import MomentumFeature
 from moving_average_feature import MovingAverageFeature
 from moving_sdev_feature import MovingSDevFeature
 from position_instrument_feature import PositionInstrumentFeature
+from ratio_feature import RatioMarketFeature
 from rsi_feature import RSIFeature
 from vwap_price_feature import VwapPriceInstrumentFeature
 
@@ -18,6 +19,7 @@ featureIdToFeatureCls = {'bollinger_bands': BollingerBandsFeature,
                          'moving_average': MovingAverageFeature,
                          'moving_sdev': MovingSDevFeature,
                          'position': PositionInstrumentFeature,
+                         'ratio': RatioMarketFeature,
                          'rsi': RSIFeature,
                          'vwap': VwapPriceInstrumentFeature,
                          }

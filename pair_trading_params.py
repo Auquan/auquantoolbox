@@ -12,9 +12,10 @@ class MyTradingParams(TradingSystemParameters):
     '''
     Returns an instance of class DataParser. Source of data for instruments
     '''
+
     def getDataParser(self):
-        instrumentIds = ['IBM', 'AAPL', 'MSFT']
-        startDateStr = '2017/05/10'
+        instrumentIds = ['MSFT', 'ADBE']
+        startDateStr = '2016/01/10'
         endDateStr = '2017/06/09'
         return GoogleStockDataSource(cachedFolderName='googleData',
                                      instrumentIds=instrumentIds,
@@ -27,8 +28,9 @@ class MyTradingParams(TradingSystemParameters):
     Consequently any trading decisions that need to take place happen with the same
     frequency
     '''
+
     def getFrequencyOfFeatureUpdates(self):
-        return timedelta(0, 30) # minutes, seconds
+        return timedelta(0, 30)  # minutes, seconds
 
     '''
     This is a way to use any custom features you might have made.
@@ -38,6 +40,7 @@ class MyTradingParams(TradingSystemParameters):
     Eg. if your custom class is MyCustomFeature, and you want to access this via featureId='my_custom_feature',
     you will import that class, and return this function as {'my_custom_feature': MyCustomFeature}
     '''
+
     def getCustomFeatures(self):
         return {'my_custom_feature': MyCustomFeature}
 
@@ -66,14 +69,12 @@ class MyTradingParams(TradingSystemParameters):
     For each future instrument, you will have features keyed by position and price.
     For each stock instrument, you will have features keyed by position, mv_avg_30, mv_avg_90
     '''
+
     def getInstrumentFeatureConfigDicts(self):
         # ADD RELEVANT FEATURES HERE
         positionConfigDict = {'featureKey': 'position',
                               'featureId': 'position',
                               'params': {}}
-        vwapConfigDict = {'featureKey': 'price',
-                          'featureId': 'vwap',
-                          'params': {}}
         customFeatureDict = {'featureKey': 'custom_inst_feature',
                              'featureId': 'my_custom_feature',
                              'params': {'param1': 'value1'}}
@@ -86,12 +87,30 @@ class MyTradingParams(TradingSystemParameters):
         featureKey: a string representing the key you will use to access the value of this feature.this
         params: A dictionary with which contains other optional params if needed by the feature
     '''
+
     def getMarketFeatureConfigDicts(self):
         # ADD RELEVANT FEATURES HERE
-        customFeatureDict = {'featureKey': 'custom_mrkt_feature',
-                             'featureId': 'my_custom_feature',
-                             'params': {'param1': 'value1'}}
-        return [customFeatureDict]
+        ratioDict = {'featureKey': 'ratio',
+                     'featureId': 'ratio',
+                     'params': {'inst_1': 'MSFT',
+                                'inst_2': 'ADBE',
+                                'feature': 'close'}}
+        ma1Dict = {'featureKey': 'ma_60',
+                   'featureId': 'moving_average',
+                   'params': {'period': 60,
+                              'featureName': 'ratio'}}
+        ma2Dict = {'featureKey': 'ma_10',
+                   'featureId': 'moving_average',
+                   'params': {'period': 10,
+                              'featureName': 'ratio'}}
+        sdevDict = {'featureKey': 'sdev_60',
+                    'featureId': 'moving_sdev',
+                    'params': {'period': 60,
+                               'featureName': 'ratio'}}
+        # customFeatureDict = {'featureKey': 'custom_mrkt_feature',
+        #                      'featureId': 'my_custom_mrkt_feature',
+        #                      'params': {'param1': 'value1'}}
+        return [ratioDict, ma1Dict, ma2Dict, sdevDict]
 
     '''
     A function that returns your predicted value based on your heuristics.
@@ -102,15 +121,29 @@ class MyTradingParams(TradingSystemParameters):
     currentMarketFeatures - Dictionary of market features which have been calculated at this update cycle.
     instrumentManager - Holder for all instruments and everything else if you need.
     '''
+
     def getPrediction(self, time, currentMarketFeatures, instrumentManager):
-        lookbackMarketFeaturesDf = instrumentManager.getDataDf() # Does not include currentMarketFeatures yet
+        lookbackMarketFeatures = instrumentManager.getDataDf()
         # IMPLEMENT THIS
-        return 0.0
+        if currentMarketFeatures['sdev_60'] != 0:
+            z_score = (currentMarketFeatures['ma_10'] - currentMarketFeatures['ma_60']) / currentMarketFeatures['sdev_60']
+        else:
+            z_score = 0
+        if z_score > 1:
+            return {'MSFT': -1,
+                    'ADBE': 1}
+        elif z_score < -1:
+            return {'MSFT': 1,
+                    'ADBE': -1}
+        else:
+            return {'MSFT': 0,
+                    'ADBE': 0}
 
     '''
     Returns the type of execution system we want to use. Its an implementation of the class ExecutionSystem
-    Basically, it converts prediction to intended positions for different instruments.
+    It converts prediction to intended positions for different instruments.
     '''
+
     def getExecutionSystem(self):
         return SimpleExecutionSystem(longLimit=12000, shortLimit=12000)
 
@@ -119,6 +152,7 @@ class MyTradingParams(TradingSystemParameters):
     It helps place an order, and also read confirmations of orders being placed.
     For Backtesting, you can just use the BacktestingOrderPlacer, which places the order which you want, and automatically confirms it too.
     '''
+
     def getOrderPlacer(self):
         return BacktestingOrderPlacer()
 
@@ -127,8 +161,9 @@ class MyTradingParams(TradingSystemParameters):
     stored upto this amount.
     This number is the number of times we have updated our features.
     '''
+
     def getLookbackSize(self):
-        return 500
+        return 60
 
 
 if __name__ == "__main__":

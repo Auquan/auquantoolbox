@@ -1,2 +1,3 @@
 *.pyc
+googleData/*
 .DS_Store
