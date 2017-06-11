@@ -31,16 +31,19 @@ class InstrumentManager:
 
     def createInstrumentFromUpdate(self, instrumentUpdate, tsParams):
         type = instrumentUpdate.getTypeOfInstrument()
+        bookDataFeatures = instrumentUpdate.getBookDataFeatures()
         instrument = None
         if type == INSTRUMENT_TYPE_STOCK:
             stockInstrumentId = instrumentUpdate.getStockInstrumentId()
             instrument = StockInstrument(stockInstrumentId=stockInstrumentId,
+                                         bookDataFeatures=bookDataFeatures,
                                          tsParams=tsParams)
         elif type == INSTRUMENT_TYPE_FUTURE:
             futureInstrumentId = instrumentUpdate.getFutureInstrumentId()
             expiryTime = instrumentUpdate.getExpiryTime()
             underlyingInstrumentId = instrumentUpdate.getUnderlyingInstrumentId()
             instrument = FutureInstrument(futureInstrumentId=futureInstrumentId,
+                                          bookDataFeatures=bookDataFeatures,
                                           expiryTime=expiryTime,
                                           underlyingInstrumentId=underlyingInstrumentId,
                                           tsParams=tsParams)
@@ -51,6 +54,7 @@ class InstrumentManager:
             expiryTime = instrumentUpdate.getExpiryTime()
             underlyingInstrumentId = instrumentUpdate.getUnderlyingInstrumentId()
             instrument = OptionInstrument(optionInstrumentId=optionInstrumentId,
+                                          bookDataFeatures=bookDataFeatures,
                                           strikePrice=strikePrice,
                                           optionType=optionType,
                                           expiryTime=expiryTime,

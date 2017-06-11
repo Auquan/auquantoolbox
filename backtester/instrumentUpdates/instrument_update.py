@@ -29,6 +29,9 @@ class InstrumentUpdate(object):
     def getBookData(self):
         return self.__bookData
 
+    def getBookDataFeatures(self):
+        return self.__bookData.keys()
+
     def getTimeOfUpdate(self):
         return self.__timeOfUpdate
 
