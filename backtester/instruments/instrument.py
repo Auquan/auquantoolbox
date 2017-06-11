@@ -1,5 +1,5 @@
 from backtester.logger import *
-from backtester.instrumentFeatures.instrument_feature_config import InstrumentFeatureConfig
+from backtester.features.feature_config import FeatureConfig
 from backtester.lookback_data import LookbackData
 
 
@@ -22,8 +22,8 @@ class Instrument(object):
     def getTradeSymbol(self):
         return self.__currentInstrumentUpdate.getTradeSymbol()
 
-    def getLookbackFeatures(self):
-        return self.__lookbackFeatures
+    def getDataDf(self):
+        return self.__lookbackFeatures.getData()
 
     def update(self, instrumentUpdate):
         if (self.__currentInstrumentUpdate is not None) and (instrumentUpdate is not None):
@@ -49,11 +49,12 @@ class Instrument(object):
             featureId = featureConfig.getFeatureId()
             featureKey = featureConfig.getFeatureKey()
             featureParams = featureConfig.getFeatureParams()
-            featureCls = InstrumentFeatureConfig.getClassForInstrumentFeatureId(featureId)
-            featureVal = featureCls.compute(featureParams=featureParams,
-                                            featureKey=featureKey,
-                                            currentFeatures=currentFeatures,
-                                            instrument=self)
+            featureCls = FeatureConfig.getClassForFeatureId(featureId)
+            featureVal = featureCls.computeForInstrument(featureParams=featureParams,
+                                                         featureKey=featureKey,
+                                                         currentFeatures=currentFeatures,
+                                                         instrument=self,
+                                                         instrumentManager=None)  # TODO
             currentFeatures[featureKey] = featureVal
         logInfo('Instrument Features: %s: %s' % (self.__instrumentId, str(currentFeatures)))
         self.__lookbackFeatures.addData(timeOfUpdate, currentFeatures)

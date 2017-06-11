@@ -8,7 +8,7 @@ class SimpleExecutionSystem(BaseExecutionSystem):
 
     def getExecutions(self, time, instrumentsManager):
         # TODO:
-        marketFeatures = instrumentsManager.getLookbackMarketFeatures().getData()
-        currentMarketFeatures = marketFeatures.iloc[-1]
-        currentPrediction = currentMarketFeatures['prediction']
+        marketFeaturesDf = instrumentsManager.getDataDf()
+        currentMarketFeatures = marketFeaturesDf.iloc[-1]
+        currentPrediction = marketFeaturesDf['prediction']
         return []

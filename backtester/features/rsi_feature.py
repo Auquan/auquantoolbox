@@ -1,16 +1,12 @@
-from instrument_feature import InstrumentFeature
+from feature import Feature
 from backtester.financial_fn import ma
 
 
-class RSIInstrumentFeature(InstrumentFeature):
+class RSIFeature(Feature):
 
     @classmethod
-    def validateInputs(cls, featureParams, featureKey, currentFeatures, instrument):
-        return True
-
-    @classmethod
-    def compute(cls, featureParams, featureKey, currentFeatures, instrument):
-        data = instrument.getLookbackFeatures().getData()[featureParams['featureName']]
+    def computeForLookbackData(cls, featureParams, featureKey, currentFeatures, lookbackDataDf):
+        data = lookbackDataDf[featureParams['featureName']]
         data_upside = data.sub(data.shift(1), fill_value=0)
         data_downside = data_upside.copy()
         data_downside[data_upside > 0] = 0

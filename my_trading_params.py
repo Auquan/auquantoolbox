@@ -5,8 +5,7 @@ from backtester.executionSystem.simple_execution_system import SimpleExecutionSy
 from backtester.orderPlacer.backtesting_order_placer import BacktestingOrderPlacer
 from backtester.trading_system import TradingSystem
 from backtester.constants import *
-from my_custom_instrument_feature import MyCustomInstrumentFeature
-from my_custom_market_feature import MyCustomMarketFeature
+from my_custom_feature import MyCustomFeature
 
 
 class MyTradingParams(TradingSystemParameters):
@@ -32,15 +31,15 @@ class MyTradingParams(TradingSystemParameters):
         return timedelta(0, 30)
 
     '''
-    This is a way to use any custom instrument features you might have made.
+    This is a way to use any custom features you might have made.
     Returns a dictionary where
     key: featureId to access this feature (Make sure this doesnt conflict with any of the pre defined feature Ids)
-    value: Your custom Class which computes this feature. The class should be an instance of InstrumentFeature
-    Eg. if your custom class is MyCustomInstrumentFeature, and you want to access this via featureId='my_custom_feature', 
-    you will import that class, and return this function as {'my_custom_feature': MyCustomInstrumentFeature}
+    value: Your custom Class which computes this feature. The class should be an instance of Feature
+    Eg. if your custom class is MyCustomFeature, and you want to access this via featureId='my_custom_feature',
+    you will import that class, and return this function as {'my_custom_feature': MyCustomFeature}
     '''
-    def getCustomInstrumentFeatures(self):
-        return {'my_custom_inst_feature': MyCustomInstrumentFeature}
+    def getCustomFeatures(self):
+        return {'my_custom_feature': MyCustomFeature}
 
     '''
     Returns a dictionary with:
@@ -76,20 +75,9 @@ class MyTradingParams(TradingSystemParameters):
                           'featureId': 'vwap',
                           'params': {}}
         customFeatureDict = {'featureKey': 'custom_inst_feature',
-                             'featureId': 'my_custom_inst_feature',
+                             'featureId': 'my_custom_feature',
                              'params': {'param1': 'value1'}}
         return {INSTRUMENT_TYPE_STOCK: [positionConfigDict, customFeatureDict]}
-
-    '''
-    This is a way to use any custom market features you might have made.
-    Returns a dictionary where
-    key: featureId to access this feature (Make sure this doesnt conflict with any of the pre defined feature Ids)
-    value: Your custom Class which computes this feature. The class should be an instance of MarketFeature
-    Eg. if your custom class is MyCustomMarketFeature, and you want to access this via featureId='my_custom_feature',
-    you will import that class, and return this function as {'my_custom_feature': MyCustomMarketFeature}
-    '''
-    def getCustomMarketFeatures(self):
-        return {'my_custom_mrkt_feature': MyCustomMarketFeature}
 
     '''
     Returns an array of market feature config dictionaries
@@ -101,7 +89,7 @@ class MyTradingParams(TradingSystemParameters):
     def getMarketFeatureConfigDicts(self):
         # ADD RELEVANT FEATURES HERE
         customFeatureDict = {'featureKey': 'custom_mrkt_feature',
-                             'featureId': 'my_custom_mrkt_feature',
+                             'featureId': 'my_custom_feature',
                              'params': {'param1': 'value1'}}
         return [customFeatureDict]
 
@@ -115,7 +103,7 @@ class MyTradingParams(TradingSystemParameters):
     instrumentManager - Holder for all instruments and everything else if you need.
     '''
     def getPrediction(self, time, currentMarketFeatures, instrumentManager):
-        lookbackMarketFeatures = instrumentManager.getLookbackMarketFeatures().getData()
+        lookbackMarketFeaturesDf = instrumentManager.getDataDf()
         # IMPLEMENT THIS
         return 0.0
 

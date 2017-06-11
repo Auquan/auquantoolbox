@@ -1,7 +1,5 @@
 from datetime import timedelta
-from instrumentFeatures.instrument_feature_config import InstrumentFeatureConfig
-from dataSource.auquan_data_source import AuquanDataSource
-from marketFeatures.market_feature_config import MarketFeatureConfig
+from features.feature_config import FeatureConfig
 from executionSystem.simple_execution_system import SimpleExecutionSystem
 from orderPlacer.backtesting_order_placer import BacktestingOrderPlacer
 from backtester.constants import *
@@ -9,13 +7,12 @@ from backtester.constants import *
 
 class TradingSystemParameters(object):
     def __init__(self):
-        InstrumentFeatureConfig.setupCustomInstrumentFeatures(self.getCustomInstrumentFeatures())
-        MarketFeatureConfig.setupCustomMarketFeatures(self.getCustomMarketFeatures())
+        FeatureConfig.setupCustomFeatures(self.getCustomFeatures())
         self.__instrumentFeatureConfigs = {}
         instrumentFeatureConfigDicts = self.getInstrumentFeatureConfigDicts()
         for instrumentType in instrumentFeatureConfigDicts:
-            self.__instrumentFeatureConfigs[instrumentType] = map(lambda x: InstrumentFeatureConfig(x), instrumentFeatureConfigDicts[instrumentType])
-        self.__marketFeatureConfigs = map(lambda x: MarketFeatureConfig(x), self.getMarketFeatureConfigDicts())
+            self.__instrumentFeatureConfigs[instrumentType] = map(lambda x: FeatureConfig(x), instrumentFeatureConfigDicts[instrumentType])
+        self.__marketFeatureConfigs = map(lambda x: FeatureConfig(x), self.getMarketFeatureConfigDicts())
 
     #####################################################################
     ###      START OF OVERRIDING METHODS
@@ -38,14 +35,14 @@ class TradingSystemParameters(object):
         return timedelta(0, 60)
 
     '''
-    This is a way to use any custom instrument features you might have made.
+    This is a way to use any custom features you might have made.
     Returns a dictionary where
     key: featureId to access this feature (Make sure this doesnt conflict with any of the pre defined feature Ids)
-    value: Your custom Class which computes this feature. The class should be an instance of InstrumentFeature
-    Eg. if your custom class is MyCustomInstrumentFeature, and you want to access this via featureId='my_custom_feature', 
-    you will import that class, and return this function as {'my_custom_feature': MyCustomInstrumentFeature}
+    value: Your custom Class which computes this feature. The class should be an instance of Feature
+    Eg. if your custom class is MyCustomFeature, and you want to access this via featureId='my_custom_feature',
+    you will import that class, and return this function as {'my_custom_feature': MyCustomFeature}
     '''
-    def getCustomInstrumentFeatures(self):
+    def getCustomFeatures(self):
         return {}
 
     '''
@@ -74,17 +71,6 @@ class TradingSystemParameters(object):
     For each stock instrument, you will have features keyed by position, mv_avg_30, mv_avg_90
     '''
     def getInstrumentFeatureConfigDicts(self):
-        return {}
-
-    '''
-    This is a way to use any custom market features you might have made.
-    Returns a dictionary where
-    key: featureId to access this feature (Make sure this doesnt conflict with any of the pre defined feature Ids)
-    value: Your custom Class which computes this feature. The class should be an instance of MarketFeature
-    Eg. if your custom class is MyCustomMarketFeature, and you want to access this via featureId='my_custom_feature',
-    you will import that class, and return this function as {'my_custom_feature': MyCustomMarketFeature}
-    '''
-    def getCustomMarketFeatures(self):
         return {}
 
     '''
@@ -127,7 +113,7 @@ class TradingSystemParameters(object):
     '''
     Returns the amount of lookback data you want for your calculations. The historical market features and instrument features are only
     stored upto this amount.
-    This number is the number of times we have updated our features. 
+    This number is the number of times we have updated our features.
     '''
     def getLookbackSize(self):
         return 500
