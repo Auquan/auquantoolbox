@@ -1,7 +1,12 @@
 from market_feature import MarketFeature
 from backtester.logger import *
+from ratio_feature import RatioFeature
+from moving_average_feature import MovingAverageInstrumentFeature
+from moving_sdev_feature import MovingSdevInstrumentFeature
 
-featureIdToFeatureCls = {}
+featureIdToFeatureCls = {'ratio': RatioFeature,
+                         'moving_average' : MovingAverageInstrumentFeature,
+                         'moving_sdev' : MovingSdevInstrumentFeature }
 
 
 class MarketFeatureConfig:
