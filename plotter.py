@@ -1,8 +1,6 @@
 import pandas as pd
 import numpy as np
 import plotly
-from plotly import tools
-print plotly.__version__  # version >1.9.4 required
 from plotly.graph_objs import Scatter, Layout
 from os import listdir
 from os.path import isfile, join, basename
