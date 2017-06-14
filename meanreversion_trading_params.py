@@ -122,7 +122,6 @@ class MyTradingParams(TradingSystemParameters):
             return {'AAPL': 0.5}
 
         lookbackInstrumentFeatures = instrument.getDataDf().iloc[-1]
-        print(lookbackInstrumentFeatures)
         # IMPLEMENT THIS
         if lookbackInstrumentFeatures['sdev_60'] != 0:
             z_score = (lookbackInstrumentFeatures['ma_10'] - lookbackInstrumentFeatures['ma_60']) / lookbackInstrumentFeatures['sdev_60']

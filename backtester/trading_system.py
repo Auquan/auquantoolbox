@@ -18,7 +18,7 @@ class TradingSystem:
         self.totalUpdates = 0
         self.executionSystem = None
         self.orderPlacer = None
-        self.stateWriter = StateWriter('runLogs', str(datetime.now()))
+        self.stateWriter = StateWriter('runLogs', datetime.strftime(datetime.now(), '%Y%m%d_%H%M%S'))
 
     def processInstrumentUpdate(self, instrumentUpdate):
         # TODO: Not sure if this is the right place for updating placed orders
