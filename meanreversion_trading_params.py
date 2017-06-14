@@ -2,7 +2,6 @@ from backtester.trading_system_parameters import TradingSystemParameters
 from datetime import timedelta
 from backtester.dataSource.google_data_source import GoogleStockDataSource
 from backtester.executionSystem.simple_execution_system import SimpleExecutionSystem
-from backtester.executionSystem.pair_execution_system import PairExecutionSystem
 from backtester.orderPlacer.backtesting_order_placer import BacktestingOrderPlacer
 from backtester.trading_system import TradingSystem
 from backtester.constants import *
@@ -15,7 +14,7 @@ class MyTradingParams(TradingSystemParameters):
     '''
 
     def getDataParser(self):
-        instrumentIds = ['MSFT', 'ADBE']
+        instrumentIds = ['AAPL']
         startDateStr = '2016/01/10'
         endDateStr = '2017/06/09'
         return GoogleStockDataSource(cachedFolderName='googleData',
@@ -76,10 +75,20 @@ class MyTradingParams(TradingSystemParameters):
         positionConfigDict = {'featureKey': 'position',
                               'featureId': 'position',
                               'params': {}}
-        customFeatureDict = {'featureKey': 'custom_inst_feature',
-                             'featureId': 'my_custom_feature',
-                             'params': {'param1': 'value1'}}
-        return {INSTRUMENT_TYPE_STOCK: [positionConfigDict, customFeatureDict]}
+
+        ma1Dict = {'featureKey': 'ma_60',
+                   'featureId': 'moving_average',
+                   'params': {'period': 90,
+                              'featureName': 'close'}}
+        ma2Dict = {'featureKey': 'ma_10',
+                   'featureId': 'moving_average',
+                   'params': {'period': 15,
+                              'featureName': 'close'}}
+        sdevDict = {'featureKey': 'sdev_60',
+                    'featureId': 'moving_sdev',
+                    'params': {'period': 90,
+                               'featureName': 'close'}}
+        return {INSTRUMENT_TYPE_STOCK: [positionConfigDict, ma1Dict, ma2Dict, sdevDict]}
 
     '''
     Returns an array of market feature config dictionaries
@@ -91,27 +100,11 @@ class MyTradingParams(TradingSystemParameters):
 
     def getMarketFeatureConfigDicts(self):
         # ADD RELEVANT FEATURES HERE
-        ratioDict = {'featureKey': 'ratio',
-                     'featureId': 'ratio',
-                     'params': {'inst_1': 'MSFT',
-                                'inst_2': 'ADBE',
-                                'feature': 'close'}}
-        ma1Dict = {'featureKey': 'ma_60',
-                   'featureId': 'moving_average',
-                   'params': {'period': 60,
-                              'featureName': 'ratio'}}
-        ma2Dict = {'featureKey': 'ma_10',
-                   'featureId': 'moving_average',
-                   'params': {'period': 10,
-                              'featureName': 'ratio'}}
-        sdevDict = {'featureKey': 'sdev_60',
-                    'featureId': 'moving_sdev',
-                    'params': {'period': 60,
-                               'featureName': 'ratio'}}
+
         # customFeatureDict = {'featureKey': 'custom_mrkt_feature',
         #                      'featureId': 'my_custom_mrkt_feature',
         #                      'params': {'param1': 'value1'}}
-        return [ratioDict, ma1Dict, ma2Dict, sdevDict]
+        return []
 
     '''
     A function that returns your predicted value based on your heuristics.
@@ -124,24 +117,25 @@ class MyTradingParams(TradingSystemParameters):
     '''
 
     def getPrediction(self, time, currentMarketFeatures, instrumentManager):
-        lookbackMarketFeatures = instrumentManager.getDataDf()
+        instrument = instrumentManager.getInstrument('AAPL')
+        if instrument is None:
+            return {'AAPL': 0.5}
+
+        lookbackInstrumentFeatures = instrument.getDataDf().iloc[-1]
+        print(lookbackInstrumentFeatures)
         # IMPLEMENT THIS
-        if currentMarketFeatures['sdev_60'] != 0:
-            z_score = (currentMarketFeatures['ma_10'] - currentMarketFeatures['ma_60']) / currentMarketFeatures['sdev_60']
+        if lookbackInstrumentFeatures['sdev_60'] != 0:
+            z_score = (lookbackInstrumentFeatures['ma_10'] - lookbackInstrumentFeatures['ma_60']) / lookbackInstrumentFeatures['sdev_60']
         else:
             z_score = 0
         if z_score > 1:
-            return {'MSFT': .2,
-                    'ADBE': .8}
+            return {'AAPL': 0.2}
         elif z_score < -1:
-            return {'MSFT': .8,
-                    'ADBE': 0.2}
+            return {'AAPL': 0.8}
         elif (z_score > 0.5) or (z_score < -0.5) :
-            return {'MSFT': 0.6,
-                    'ADBE': 0.6}
+            return {'AAPL': 0.6}
         else:
-            return {'MSFT': 0.5,
-                    'ADBE': 0.5}
+            return {'AAPL': 0.5}
 
     '''
     Returns the type of execution system we want to use. Its an implementation of the class ExecutionSystem
@@ -149,18 +143,11 @@ class MyTradingParams(TradingSystemParameters):
     '''
 
     def getExecutionSystem(self):
-        return PairExecutionSystem(pair=['MSFT', 'ADBE'],
-                                   pairRatio=0.6,
-                                   pairEnter_threshold=0.7, 
-                                   pairExit_threshold=0.55,
-                                   pairLongLimit=100,
-                                   pairShortLimit=100,
-                                   pairLotSize=10)
-        # return SimpleExecutionSystem(enter_threshold=0.7, 
-        #                              exit_threshold=0.55, 
-        #                              longLimit={'MSFT': 100,'ADBE': 100 * ratio}, 
-        #                              shortLimit={'MSFT': -100,'ADBE': -100 * ratio}, 
-        #                              lotSize={'MSFT': 10,'ADBE': 10 * ratio})
+        return SimpleExecutionSystem(enter_threshold=0.7, 
+                                     exit_threshold=0.55, 
+                                     longLimit=100, 
+                                     shortLimit=100, 
+                                     lotSize=10)
 
     '''
     Returns the type of order placer we want to use. its an implementation of the class OrderPlacer.
@@ -178,7 +165,7 @@ class MyTradingParams(TradingSystemParameters):
     '''
 
     def getLookbackSize(self):
-        return 60
+        return 100
 
 
 if __name__ == "__main__":
