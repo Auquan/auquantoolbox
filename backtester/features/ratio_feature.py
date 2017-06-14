@@ -23,7 +23,9 @@ class RatioMarketFeature(Feature):
         if (instrument1 is None) or (instrument2 is None):
             return 0
         else:
-            instrument1Price = instrument1.getCurrentBookData()[feature]
-            instrument2Price = instrument2.getCurrentBookData()[feature]
-            r = instrument1Price / instrument2Price
-            return r
+            instrument1Price = instrument1.getDataDf()[feature].iloc[-1]
+            instrument2Price = instrument2.getDataDf()[feature].iloc[-1]
+            if instrument2Price is not 0:
+                return instrument1Price / instrument2Price
+            else:
+                return 0

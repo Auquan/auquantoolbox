@@ -4,8 +4,8 @@ from backtester.constants import *
 
 class FutureInstrument(Instrument):
 
-    def __init__(self, futureInstrumentId, expiryTime, underlyingInstrumentId, tsParams):
-        super(FutureInstrument, self).__init__(futureInstrumentId, tsParams)
+    def __init__(self, futureInstrumentId, bookDataFeatures, expiryTime, underlyingInstrumentId, tsParams):
+        super(FutureInstrument, self).__init__(futureInstrumentId, bookDataFeatures, tsParams)
         self.__futureInstrumentId = futureInstrumentId
         self.__expiryTime = expiryTime
         self.__underlyingInstrumentId = underlyingInstrumentId

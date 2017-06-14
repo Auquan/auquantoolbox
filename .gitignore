@@ -1,3 +1,4 @@
 *.pyc
 googleData/*
+runLogs/*
 .DS_Store

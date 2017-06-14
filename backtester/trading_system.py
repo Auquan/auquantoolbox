@@ -2,6 +2,7 @@ import time
 from backtester.logger import *
 from instruments_manager import InstrumentManager
 from datetime import datetime
+from state_writer import StateWriter
 
 
 class TradingSystem:
@@ -17,7 +18,7 @@ class TradingSystem:
         self.totalUpdates = 0
         self.executionSystem = None
         self.orderPlacer = None
-        self.runLogFolder = 'runLog_' + str(datetime.now())
+        self.stateWriter = StateWriter('runLogs', str(datetime.now()))
 
     def processInstrumentUpdate(self, instrumentUpdate):
         # TODO: Not sure if this is the right place for updating placed orders
@@ -52,6 +53,7 @@ class TradingSystem:
             self.updateFeatures(timeOfUpdate)
             instrumentsToExecute = self.getInstrumentsToExecute(timeOfUpdate)
             self.orderPlacer.placeOrders(timeOfUpdate, instrumentsToExecute, self.instrumentManager)
+            self.saveCurrentState()
 
     def updateFeatures(self, timeOfUpdate):
         # tracking perf
@@ -67,8 +69,7 @@ class TradingSystem:
         return self.executionSystem.getExecutions(time, self.instrumentManager)
 
     def saveCurrentState(self):
-        # TODO:
-        marketFeaturesFileName = self.runLogFolder + '/marketFeatures'
+        self.stateWriter.writeCurrentState(self.instrumentManager)
 
     def startTrading(self):
         # TODO: Figure out a good way to handle order parsers with live data later on.

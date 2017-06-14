@@ -1,14 +1,17 @@
 from backtester.logger import *
 from backtester.features.feature_config import FeatureConfig
 from backtester.lookback_data import LookbackData
+import copy
 
 
 class Instrument(object):
-    def __init__(self, instrumentId, tsParams):
+    def __init__(self, instrumentId, bookDataFeatures, tsParams):
         self.__instrumentId = instrumentId
         self.__currentInstrumentUpdate = None
         featureConfigs = tsParams.getFeatureConfigsForInstrumentType(self.getInstrumentType())
-        self.__lookbackFeatures = LookbackData(tsParams.getLookbackSize(), map(lambda x: x.getFeatureKey(), featureConfigs))
+        featureColumns = map(lambda x: x.getFeatureKey(), featureConfigs)
+        featureColumns = bookDataFeatures + featureColumns
+        self.__lookbackFeatures = LookbackData(tsParams.getLookbackSize(), featureColumns)
         self.__position = 0
         self.tsParams = tsParams
 
@@ -42,7 +45,7 @@ class Instrument(object):
         return self.__currentInstrumentUpdate.getBookData()
 
     def updateFeatures(self, timeOfUpdate):
-        currentFeatures = {}
+        currentFeatures = copy.deepcopy(self.getCurrentBookData())
         featureConfigs = self.tsParams.getFeatureConfigsForInstrumentType(self.getInstrumentType())
         for featureConfig in featureConfigs:
             featureKey = featureConfig.getFeatureKey()

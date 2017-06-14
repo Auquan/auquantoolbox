@@ -4,8 +4,8 @@ from backtester.constants import *
 
 class OptionInstrument(Instrument):
 
-    def __init__(self, optionInstrumentId, strikePrice, optionType, expiryTime, underlyingInstrumentId, tsParams):
-        super(OptionInstrument, self).__init__(optionInstrumentId, tsParams)
+    def __init__(self, optionInstrumentId, bookDataFeatures, strikePrice, optionType, expiryTime, underlyingInstrumentId, tsParams):
+        super(OptionInstrument, self).__init__(optionInstrumentId, bookDataFeatures, tsParams)
         self.__optionInstrumentId = optionInstrumentId
         self.__strikePrice = strikePrice
         self.__optionType = optionType
