@@ -1,7 +1,6 @@
 import csv
 import os
 
-
 class StateWriter:
 
     def __init__(self, parentFolderName, runName):
@@ -12,8 +11,15 @@ class StateWriter:
         if not os.path.exists(self.__folderName):
             os.mkdir(self.__folderName, 0755)
         self.__marketFeaturesFilename = self.__folderName + '/marketFeatures.csv'
+        self.__marketFeaturesFile =  open(self.__marketFeaturesFilename, 'wb')
         self.__marketFeaturesWriter = None
         self.__instrumentIdToWriters = {}
+
+    def marketFeaturesFilename(self):
+        return self.__marketFeaturesFilename
+
+    def closeStateWriter(self):
+        self.__marketFeaturesFile.close()
 
     def writeColumns(self, writer, df):
         featureKeys = list(df.columns)
@@ -30,7 +36,7 @@ class StateWriter:
     def writeCurrentState(self, instrumentManager):
         marketFeaturesDf = instrumentManager.getDataDf()
         if self.__marketFeaturesWriter is None:
-            self.__marketFeaturesWriter = csv.writer(open(self.__marketFeaturesFilename, 'wb'))
+            self.__marketFeaturesWriter = csv.writer(self.__marketFeaturesFile)
             self.writeColumns(self.__marketFeaturesWriter, marketFeaturesDf)
         self.writeLastFeatures(self.__marketFeaturesWriter, marketFeaturesDf)
         instrumentsDict = instrumentManager.getAllInstrumentsByInstrumentId()
