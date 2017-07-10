@@ -16,7 +16,7 @@ class MyTradingParams(TradingSystemParameters):
     def getDataParser(self):
         instrumentIds = ['AAPL']
         startDateStr = '2016/01/10'
-        endDateStr = '2017/06/09'
+        endDateStr = '2016/02/09'
         return GoogleStockDataSource(cachedFolderName='googleData',
                                      instrumentIds=instrumentIds,
                                      startDateStr=startDateStr,
@@ -75,20 +75,28 @@ class MyTradingParams(TradingSystemParameters):
         positionConfigDict = {'featureKey': 'position',
                               'featureId': 'position',
                               'params': {}}
+        feesConfigDict = {'featureKey': 'fees',
+                              'featureId': 'fees',
+                              'params': {'price':'close',
+                                         'feesDict':{-1 : 0.001, 1: 0.001, 0: 0}}}
+        profitlossConfigDict = {'featureKey': 'pnl',
+                              'featureId': 'pnl',
+                              'params': {'price':'close',
+                                          'fees' : 'fees'}}
 
         ma1Dict = {'featureKey': 'ma_60',
                    'featureId': 'moving_average',
-                   'params': {'period': 90,
+                   'params': {'period': 10,
                               'featureName': 'close'}}
         ma2Dict = {'featureKey': 'ma_10',
                    'featureId': 'moving_average',
-                   'params': {'period': 15,
+                   'params': {'period': 3,
                               'featureName': 'close'}}
         sdevDict = {'featureKey': 'sdev_60',
                     'featureId': 'moving_sdev',
-                    'params': {'period': 90,
+                    'params': {'period': 10,
                                'featureName': 'close'}}
-        return {INSTRUMENT_TYPE_STOCK: [positionConfigDict, ma1Dict, ma2Dict, sdevDict]}
+        return {INSTRUMENT_TYPE_STOCK: [positionConfigDict, feesConfigDict, profitlossConfigDict, ma1Dict, ma2Dict, sdevDict]}
 
     '''
     Returns an array of market feature config dictionaries
@@ -104,7 +112,10 @@ class MyTradingParams(TradingSystemParameters):
         # customFeatureDict = {'featureKey': 'custom_mrkt_feature',
         #                      'featureId': 'my_custom_mrkt_feature',
         #                      'params': {'param1': 'value1'}}
-        return []
+        profitlossConfigDict = {'featureKey': 'pnl',
+                              'featureId': 'pnl',
+                              'params': {'instrument_pnl_feature':'pnl'}}
+        return [profitlossConfigDict]
 
     '''
     A function that returns your predicted value based on your heuristics.
@@ -164,7 +175,7 @@ class MyTradingParams(TradingSystemParameters):
     '''
 
     def getLookbackSize(self):
-        return 100
+        return 10
 
 
 if __name__ == "__main__":
