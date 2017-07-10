@@ -22,6 +22,8 @@ class MyTradingParams(TradingSystemParameters):
                                      startDateStr=startDateStr,
                                      endDateStr=endDateStr)
 
+    def getStartingCapital(self):
+        return 100000
     '''
     Returns a timedetla object to indicate frequency of updates to features
     Any updates within this frequncy to instruments do not trigger feature updates.
@@ -83,6 +85,9 @@ class MyTradingParams(TradingSystemParameters):
                               'featureId': 'pnl',
                               'params': {'price':'close',
                                           'fees' : 'fees'}}
+        capitalConfigDict = {'featureKey': 'capital',
+                              'featureId': 'capital',
+                              'params': {'price':'close', 'fees' : 'fees'}}
 
         ma1Dict = {'featureKey': 'ma_60',
                    'featureId': 'moving_average',
@@ -96,7 +101,8 @@ class MyTradingParams(TradingSystemParameters):
                     'featureId': 'moving_sdev',
                     'params': {'period': 10,
                                'featureName': 'close'}}
-        return {INSTRUMENT_TYPE_STOCK: [positionConfigDict, feesConfigDict, profitlossConfigDict, ma1Dict, ma2Dict, sdevDict]}
+        return {INSTRUMENT_TYPE_STOCK: [positionConfigDict, feesConfigDict, profitlossConfigDict, capitalConfigDict, \
+                                        ma1Dict, ma2Dict, sdevDict]}
 
     '''
     Returns an array of market feature config dictionaries
@@ -115,7 +121,16 @@ class MyTradingParams(TradingSystemParameters):
         profitlossConfigDict = {'featureKey': 'pnl',
                               'featureId': 'pnl',
                               'params': {'instrument_pnl_feature':'pnl'}}
-        return [profitlossConfigDict]
+        capitalConfigDict = {'featureKey': 'capital',
+                              'featureId': 'capital',
+                              'params': {'initial_capital':self.getStartingCapital(),
+                                         'capital':'capital',
+                                         'pnl' : 'pnl' }}
+        portfoliovalueConfigDict = {'featureKey': 'portfolio_value',
+                                    'featureId': 'portfolio_value',
+                                    'params': {'initial_capital':self.getStartingCapital(),
+                                                'pnl':'pnl' }}
+        return [profitlossConfigDict, capitalConfigDict, portfoliovalueConfigDict]
 
     '''
     A function that returns your predicted value based on your heuristics.
@@ -155,8 +170,9 @@ class MyTradingParams(TradingSystemParameters):
     def getExecutionSystem(self):
         return SimpleExecutionSystem(enter_threshold=0.7, 
                                      exit_threshold=0.55, 
-                                     longLimit=100, 
-                                     shortLimit=100, 
+                                     longLimit=1000, 
+                                     shortLimit=1000,
+                                     capitalUsageLimit = 0.10*self.getStartingCapital(), 
                                      lotSize=10)
 
     '''

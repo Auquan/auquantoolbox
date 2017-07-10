@@ -12,6 +12,8 @@ from rsi_feature import RSIFeature
 from vwap_price_feature import VwapPriceInstrumentFeature
 from profitloss_feature import  ProfitLossFeature
 from fees_feature import  FeesFeature
+from capital_feature import CapitalFeature
+from portfolio_value_feature import PortfolioValueFeature
 
 featureIdToFeatureCls = {'bollinger_bands': BollingerBandsFeature,
                          'exponential_moving_average': ExpMovingAverageFeature,
@@ -25,6 +27,8 @@ featureIdToFeatureCls = {'bollinger_bands': BollingerBandsFeature,
                          'ratio': RatioMarketFeature,
                          'rsi': RSIFeature,
                          'vwap': VwapPriceInstrumentFeature,
+                         'capital' : CapitalFeature,
+                         'portfolio_value' : PortfolioValueFeature
                          }
 
 

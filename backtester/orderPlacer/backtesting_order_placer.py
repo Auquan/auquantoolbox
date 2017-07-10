@@ -13,12 +13,11 @@ class BacktestingOrderPlacer(BaseOrderPlacer):
             factor = 1 if instrumentExecution.getExecutionType() == INSTRUMENT_EXECUTION_BUY else -1
             changeInPosition = instrumentExecution.getVolume() * factor
             placedOrder = PlacedOrder(instrumentId=instrumentId,
-                                      changeInPosition=changeInPosition,
-                                      changeInCash=0,
-                                      fees=0)
+                                      changeInPosition=changeInPosition)
             self.__orders.append(placedOrder)
 
     def emitPlacedOrders(self):
         for placedOrder in self.__orders:
+            #placedOrder.changeInPosition = UpdateFromExchange
             yield(placedOrder)
         self.__orders = []

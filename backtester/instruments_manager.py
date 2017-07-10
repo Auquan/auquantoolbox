@@ -84,5 +84,6 @@ class InstrumentManager:
                                                      instrumentManager=self)
             currentMarketFeatures[featureKey] = featureVal
         currentMarketFeatures['prediction'] = self.tsParams.getPrediction(timeOfUpdate, currentMarketFeatures, self)
+        
         logInfo('Market Features: %s' % str(currentMarketFeatures))
         self.__lookbackMarketFeatures.addData(timeOfUpdate, currentMarketFeatures)

@@ -13,6 +13,7 @@ class TradingSystem:
 
     def __init__(self, tsParams):
         self.tsParams = tsParams
+        self.capital = 0
         self.instrumentManager = InstrumentManager(self.tsParams)
         self.featuresUpdateTime = None
         self.totalTimeUpdating = 0  # for tracking perf
@@ -22,9 +23,7 @@ class TradingSystem:
         self.stateWriter = StateWriter('runLogs', datetime.strftime(datetime.now(), '%Y%m%d_%H%M%S'))
 
     def processInstrumentUpdate(self, instrumentUpdate):
-        # TODO: Not sure if this is the right place for updating placed orders
-        for placedOrder in self.orderPlacer.emitPlacedOrders():
-            self.processPlacedOrder(placedOrder)
+
         self.tryUpdateFeaturesAndExecute(instrumentUpdate.getTimeOfUpdate())
         instrumentIdToUpdate = instrumentUpdate.getInstrumentId()
         instrumentToUpdate = self.instrumentManager.getInstrument(instrumentIdToUpdate)
@@ -52,8 +51,11 @@ class TradingSystem:
         if shouldUpdateFeatures:
             self.featuresUpdateTime = timeOfUpdate
             self.updateFeatures(timeOfUpdate)
+            for placedOrder in self.orderPlacer.emitPlacedOrders():
+                self.processPlacedOrder(placedOrder)
             instrumentsToExecute = self.getInstrumentsToExecute(timeOfUpdate)
             self.orderPlacer.placeOrders(timeOfUpdate, instrumentsToExecute, self.instrumentManager)
+            self.capital = self.instrumentManager.getDataDf()['capital'][-1]
             self.saveCurrentState()
 
     def updateFeatures(self, timeOfUpdate):
@@ -67,7 +69,7 @@ class TradingSystem:
         logInfo('Update: %d, Time: %.2f, Average: %.2f' % (self.totalUpdates, diffms, self.totalTimeUpdating / self.totalUpdates))
 
     def getInstrumentsToExecute(self, time):
-        return self.executionSystem.getExecutions(time, self.instrumentManager)
+        return self.executionSystem.getExecutions(time, self.instrumentManager, self.capital)
 
     def saveCurrentState(self):
         self.stateWriter.writeCurrentState(self.instrumentManager)
@@ -77,6 +79,7 @@ class TradingSystem:
         dataParser = self.tsParams.getDataParser()
         self.executionSystem = self.tsParams.getExecutionSystem()
         self.orderPlacer = self.tsParams.getOrderPlacer()
+        self.capital = self.tsParams.getStartingCapital()
         instrumentUpdates = dataParser.emitInstrumentUpdate()
 
         for instrumentUpdate in instrumentUpdates:
