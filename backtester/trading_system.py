@@ -3,6 +3,7 @@ from backtester.logger import *
 from instruments_manager import InstrumentManager
 from datetime import datetime
 from state_writer import StateWriter
+from plotter import plot
 
 
 class TradingSystem:
@@ -81,3 +82,7 @@ class TradingSystem:
         for instrumentUpdate in instrumentUpdates:
             # logInfo('TimeOfUpdate: %s TradeSymbol: %s, Volume: %.2f' % (instrumentUpdate.getTimeOfUpdate(), instrumentUpdate.getTradeSymbol(), instrumentUpdate.getBookData()['volume']))
             self.processInstrumentUpdate(instrumentUpdate)
+
+        self.stateWriter.closeStateWriter()
+        # TODO do metric stuff here
+        plot(self.stateWriter.marketFeaturesFilename(), [])

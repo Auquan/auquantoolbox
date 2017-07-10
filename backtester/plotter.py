@@ -35,7 +35,7 @@ def generateGraph(path, fileName):
         "data": [],
         "layout": Layout(title= fileName + " Plot")
     }
-    df = pd.read_csv(path)
+    df = pd.read_csv(path, engine='python')
     for col in df.columns[1:]:
         plot_data['data'] += [Scatter(x=df['time'], y=df[col], name = col)]
     plotly.offline.plot(plot_data, filename=fileName+".html")
