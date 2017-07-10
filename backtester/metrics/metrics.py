@@ -6,7 +6,7 @@ class Metrics():
     def __init__(self, parentFolderName, runName):
         self.__runName = runName
         self.__folderName = parentFolderName + '/' + 'runLog_' + runName
-        self.__marketFeaturesFilename = self.__folderName + '/marketFeatures.csv'
+        self.__marketFeaturesDf = self.__folderName + '/marketFeatures.csv'
         self.__stats = {}
 
     def getCumulativeReturns(self):

@@ -19,23 +19,55 @@ TODO: 1) Support excluding columns for each files.
       2) Cleanup the html files generated from plotting/dont regenerate and recycle ones present.
       3) Provide a selector GUI to chose the files.
 '''
-def plot(dir, excludeFiles):
-    if isfile(dir):
-        fileName = basename(dir)
-        generateGraph(dir, fileName)
+def plot(dir, marketFeatures, excludeFiles):
+    if isfile(marketFeatures):
+        fileName = basename(marketFeatures)
+        df = pd.read_csv(fileName, engine='python')
+        stats = Metrics(df, dir).getMetrics()
+        generateGraph(df, fileName,stats)
     else:
         for fileName in listdir(dir):
             path = join(dir, fileName)
             if (not isfile(path)) or (fileName in excludeFiles) :
                 continue
-            generateGraph(path, fileName)
+            df = pd.read_csv(path, engine='python')
+            stats = Metrics(df).getMetrics()
+            generateGraph(path, fileName, [])
 
-def generateGraph(path, fileName):
+def generateGraph(df, fileName, stats):
+    layout = dict(
+        title= stats,
+        xaxis=dict(
+            rangeselector=dict(
+                buttons=list([
+                    dict(count=6,
+                         label='6m',
+                         step='month',
+                         stepmode='backward'),
+                    dict(count=1,
+                        label='YTD',
+                        step='year',
+                        stepmode='todate'),
+                    dict(count=1,
+                        label='1y',
+                        step='year',
+                        stepmode='backward'),
+                    dict(count=5,
+                         label='5y',
+                         step='year',
+                         stepmode='backward'),
+                    dict(step='all')
+                ])
+            ),
+            rangeslider=dict(),
+            type='date'
+        )
+    )
     plot_data = {
         "data": [],
-        "layout": Layout(title= fileName + " Plot")
+        "layout": layout
     }
-    df = pd.read_csv(path, engine='python')
     for col in df.columns[1:]:
         plot_data['data'] += [Scatter(x=df['time'], y=df[col], name = col)]
     plotly.offline.plot(plot_data, filename=fileName+".html")
+

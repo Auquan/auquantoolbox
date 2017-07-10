@@ -15,9 +15,12 @@ class StateWriter:
         self.__marketFeaturesWriter = None
         self.__instrumentIdToWriters = {}
 
-    def marketFeaturesFilename(self):
+    def getMarketFeaturesFilename(self):
         return self.__marketFeaturesFilename
 
+    def getFolderName(self):
+        return self.__folderName
+        
     def closeStateWriter(self):
         self.__marketFeaturesFile.close()
 
