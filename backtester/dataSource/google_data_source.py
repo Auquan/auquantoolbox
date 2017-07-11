@@ -106,7 +106,7 @@ class GoogleStockDataSource(DataSource):
         pd.to_csv(fileName)
 
     def getFileName(self, instrumentType, instrumentId):
-        return '%s/%s_%s_%s_%s.csv' % (self.cachedFolderName, instrumentId, instrumentType, self.startDate.strftime("%Y%m%d"), self.startDate.strftime("%Y%m%d"))
+        return '%s/%s_%s_%s_%s.csv' % (self.cachedFolderName, instrumentId, instrumentType, self.startDate.strftime("%Y%m%d"), self.endDate.strftime("%Y%m%d"))
 
     def emitInstrumentUpdate(self):
         allInstrumentUpdates = []

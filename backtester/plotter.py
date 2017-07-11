@@ -22,21 +22,29 @@ TODO: 1) Support excluding columns for each files.
 '''
 def plot(dir, marketFeatures, benchmark, price, excludeFiles):
     if isfile(marketFeatures):
-        df = pd.read_csv(marketFeatures, engine='python')
-        metrics = Metrics(marketFeaturesDf = df)
-        metrics.calculateMetrics(benchmark, price, dir)
-        stats = metrics.getMetricsString()
-        generateGraph(df, marketFeatures, stats)
+        df, stats, benchmark_pnl = getDataReady(dir, marketFeatures, benchmark, price)
+        generateGraph(df, marketFeatures, stats, benchmark_pnl)
     else:
         for fileName in listdir(dir):
             path = join(dir, fileName)
             if (not isfile(path)) or (fileName in excludeFiles) :
                 continue
-            metrics = Metrics(marketFeaturesDf = df)
-            metrics.calculateMetrics(benchmark, price, dir)
-            generateGraph(path, fileName, stats)
+            df, stats, benchmark_pnl = getDataReady(dir, path, benchmark, price)
+            generateGraph(df, fileName, stats, benchmark_pnl)
 
-def generateGraph(df, fileName, stats):
+def getDataReady(dir, marketFeatures, benchmark, price):
+    df = pd.read_csv(marketFeatures, engine='python')
+    df.set_index(df['time'], inplace=True)
+    df.index = pd.to_datetime(df.index)
+    pv = df['portfolio_value'][0]
+    df['Returns(%)'] = 100*(df['pnl']/pv)
+    metrics = Metrics(marketFeaturesDf = df)
+    metrics.calculateMetrics(benchmark, price, dir)
+    stats = metrics.getMetricsString()
+    benchmark_pnl = metrics.getBenchmarkData(benchmark,price, dir)['returns']
+    return df, stats, benchmark_pnl
+
+def generateGraph(df, fileName, stats, benchmark_pnl):
     layout = dict(
         title= stats,
         xaxis=dict(
@@ -71,5 +79,6 @@ def generateGraph(df, fileName, stats):
     }
     for col in df.columns[1:]:
         plot_data['data'] += [Scatter(x=df['time'], y=df[col], name = col)]
+    plot_data['data'] += [Scatter(x=df['time'], y=100*benchmark_pnl, name = 'Benchmark (%)')]
     plotly.offline.plot(plot_data, filename=fileName+".html")
 

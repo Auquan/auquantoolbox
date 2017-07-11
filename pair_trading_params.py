@@ -15,8 +15,8 @@ class MyTradingParams(TradingSystemParameters):
     '''
 
     def getDataParser(self):
-        instrumentIds = ['MSFT', 'ADBE']
-        startDateStr = '2011/01/10'
+        instrumentIds = ['MSFT', 'ADBE', 'SPY']
+        startDateStr = '2013/06/01'
         endDateStr = '2017/06/30'
         return GoogleStockDataSource(cachedFolderName='googleData',
                                      instrumentIds=instrumentIds,
@@ -43,7 +43,7 @@ class MyTradingParams(TradingSystemParameters):
     '''
 
     def getBenchmark(self):
-        return 'MSFT'
+        return 'SPY'
 
     def getCustomFeatures(self):
         return {'my_custom_feature': MyCustomFeature}

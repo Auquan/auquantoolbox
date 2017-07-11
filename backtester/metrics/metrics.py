@@ -8,25 +8,30 @@ class Metrics():
         self.__stats = {}
 
     def getMetricsString(self):
-        return 'Total Pnl: %0.2f%%'%self.__stats['Total Pnl(%)'] + '\t' + \
-        'Ann. Return: %0.2f%%'%self.__stats['Annual Return(%)'] + '\t' + \
-        'Ann. Vol: %0.2f%%'%self.__stats['Annual Vol(%)'] + '\t' + \
-        'Base Return: %0.2f%%'%self.__stats['Base Return(%)'] + '\t' + \
-        'Sharpe Ratio: %0.2f'%self.__stats['Sharpe Ratio'] + '\t' + \
-        'Sortino Ratio: %0.2f'%self.__stats['Sortino Ratio'] + '\t' + \
-        'Max Drawdown: %0.2f%%'%self.__stats['Max Drawdown(%)'] + '\t' + \
-        'Profit/Loss Ratio: %0.2f'%self.__stats['Profit/Loss Ratio'] + '\t' + \
-        'Accuracy: %0.2f%%'%self.__stats['Accuracy'] + '\t' 
+        return \
+          ' Total Pnl: %0.2f%% '%(100*self.__stats['Total Pnl(%)']) \
+        + ' Ann. Return: %0.2f%% '%(100*self.__stats['Annual Return(%)']) \
+        + ' Ann. Vol: %0.2f%% '%(100*self.__stats['Annual Vol(%)']) \
+        + ' Benchmark: %0.2f%% '%self.__stats['Base Return(%)'] \
+        + ' Sharpe Ratio: %0.2f '%self.__stats['Sharpe Ratio'] \
+        + ' Sortino Ratio: %0.2f '%self.__stats['Sortino Ratio'] \
+        + ' Max Drawdown: %0.2f%% '%(100*self.__stats['Max Drawdown(%)']) \
+        + ' Profit/Loss Ratio: %0.2f '%self.__stats['Profit/Loss Ratio'] \
+        + ' Accuracy: %0.2f%% '%self.__stats['Accuracy'] 
         #+ 'Log Loss         : %0.2f'%self.__stats['Log Loss'] 
 
     def getMetrics(self):
         return self.__stats
 
+    def resampleData(self, series, period):
+        return series.resample(period)
+
     def calculateMetrics(self, baseSymbol, priceFeature, folderName):
 
         stats = {}
-        total_pnl = self.__marketFeaturesDf['pnl']
-        portfolioValue = self.__marketFeaturesDf['portfolio_value']
+        
+        total_pnl = self.resampleData(self.__marketFeaturesDf['pnl'], '1D').last()
+        portfolioValue = self.resampleData(self.__marketFeaturesDf['portfolio_value'], '1D').last()
         total_days = len(total_pnl)
         total_return = total_pnl[total_days-1]/portfolioValue[0]
         
@@ -37,20 +42,21 @@ class Metrics():
 
         stats['Total Pnl(%)'] = total_return
         stats['Annual Return(%)'] = self.annualized_return(total_return, total_days)
-        stats['Base Return(%)'] = self.annualized_return(benchmark['total_returns'],total_days)
+        stats['Base Return(%)'] = self.annualized_return(benchmark['total_return'],total_days)
         stats['Annual Vol(%)']= self.annual_vol(daily_return)
         #stats['Beta'] = self.beta(daily_return,benchmark['daily_returns'])
         stats['Sharpe Ratio'] = self.sharpe_ratio(total_return, total_days, daily_return)
         stats['Sortino Ratio'] = self.sortino_ratio(total_return, total_days, daily_return)
-        stats['Max Drawdown(%)'] = self.max_drawdown(portfolioValue)
-        stats['Profit/Loss Ratio']= self.profit_factor(daily_return)
-        stats['Accuracy']=self.accuracy(daily_return)
+        stats['Max Drawdown(%)'] = self.max_drawdown(self.__marketFeaturesDf['portfolio_value'])
+        stats['Profit/Loss Ratio']= self.profit_factor(self.__marketFeaturesDf['pnl'])
+        stats['Accuracy']=self.accuracy(self.__marketFeaturesDf['pnl'])
         #stats['Log Loss']=logLoss(daily_return)
-
+        print(stats)
         self.__stats = stats
 
     def annualized_return(self, total_return, total_days):
-        return 100*((1 + total_return)**(252 / total_days) - 1)
+        annualized_return = ((1 + total_return)**(252.0/np.float(total_days)) - 1)
+        return annualized_return
         
 
     def annualized_std(self, daily_return):
@@ -116,11 +122,13 @@ class Metrics():
         baseline_data = {}
         path = folderName + '/' + baseSymbol + '_features.csv'
         csv = pd.read_csv(path, engine='python')
+        csv.set_index(csv['time'], inplace=True)
+        csv.index = pd.to_datetime(csv.index)
         #features = [col.upper() for col in csv.columns]
-        baseline_data['price'] =  csv[priceFeature]
+        baseline_data['price'] =  self.resampleData(csv[priceFeature], '1D').last()
         start = baseline_data['price'][0]
-        last = baseline_data['price'][len(baseline_data['price'])-1]
-        baseline_data['total_returns'] = last/start - 1
+        baseline_data['returns'] = baseline_data['price']/start - 1
+        baseline_data['total_return'] = baseline_data['returns'][len(baseline_data['price'])-1]
         baseline_data['daily_returns'] =  baseline_data['price']/baseline_data['price'].shift(1) - 1
         baseline_data['daily_returns'].dropna(inplace=True)
         return baseline_data            
