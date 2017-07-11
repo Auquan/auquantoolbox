@@ -87,4 +87,4 @@ class TradingSystem:
 
         self.stateWriter.closeStateWriter()
         # TODO do metric stuff here
-        #plot(self.stateWriter.getFolderName(), self.stateWriter.getMarketFeaturesFilename(), [])
+        plot(self.stateWriter.getFolderName(), self.stateWriter.getMarketFeaturesFilename(), [])
