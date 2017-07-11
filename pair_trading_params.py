@@ -73,18 +73,7 @@ class MyTradingParams(TradingSystemParameters):
 
     def getInstrumentFeatureConfigDicts(self):
         # ADD RELEVANT FEATURES HERE
-        positionConfigDict = {'featureKey': 'position',
-                              'featureId': 'position',
-                              'params': {}}
-        feesConfigDict = {'featureKey': 'fees',
-                              'featureId': 'fees',
-                              'params': {'price':'close',
-                                         'feesDict':{-1 : 0.001, 1: 0.001, 0: 0}}}
-        profitlossConfigDict = {'featureKey': 'pnl',
-                              'featureId': 'pnl',
-                              'params': {'price':'close',
-                                          'fees' : 'fees'}}
-        return {INSTRUMENT_TYPE_STOCK: [positionConfigDict, feesConfigDict, profitlossConfigDict]}
+        return {INSTRUMENT_TYPE_STOCK: []}
 
     '''
     Returns an array of market feature config dictionaries
@@ -113,13 +102,10 @@ class MyTradingParams(TradingSystemParameters):
                     'featureId': 'moving_sdev',
                     'params': {'period': 60,
                                'featureName': 'ratio'}}
-        profitlossConfigDict = {'featureKey': 'pnl',
-                              'featureId': 'pnl',
-                              'params': {'instrument_pnl_feature':'pnl'}}
         # customFeatureDict = {'featureKey': 'custom_mrkt_feature',
         #                      'featureId': 'my_custom_mrkt_feature',
         #                      'params': {'param1': 'value1'}}
-        return [ratioDict, ma1Dict, ma2Dict, sdevDict, profitlossConfigDict]
+        return [ratioDict, ma1Dict, ma2Dict, sdevDict]
 
     '''
     A function that returns your predicted value based on your heuristics.

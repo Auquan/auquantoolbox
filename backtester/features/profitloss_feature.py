@@ -1,5 +1,5 @@
 from feature import Feature
-import numpy as np
+
 
 class ProfitLossFeature(Feature):
 
@@ -10,16 +10,15 @@ class ProfitLossFeature(Feature):
     def computeForInstrument(cls, featureParams, featureKey, currentFeatures, instrument, instrumentManager):
 
         priceDict = instrument.getDataDf()[featureParams['price']]
-        if len(priceDict) <1:
+        if len(priceDict) < 1:
             return 0
         fees = currentFeatures[featureParams['fees']]
         currentPosition = instrument.getCurrentPosition()
         previousPosition = instrument.getDataDf()['position'][-1]
         previousPrice = priceDict[-1]
-        currentPrice = currentFeatures[featureParams['price']]       
+        currentPrice = currentFeatures[featureParams['price']]
         pnl = previousPosition * (currentPrice - previousPrice) - fees
         return pnl
-
 
     '''
     Computing for Market. By default defers to computeForLookbackData

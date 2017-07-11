@@ -5,15 +5,33 @@ from backtester.instruments import *
 from backtester.logger import *
 
 
+def getCompulsoryMarketFeatureConfigs(tsParams):
+    profitlossConfigDict = {'featureKey': 'pnl',
+                            'featureId': 'pnl',
+                            'params': {'instrument_pnl_feature': 'pnl'}}
+    capitalConfigDict = {'featureKey': 'capital',
+                         'featureId': 'capital',
+                         'params': {'initial_capital': tsParams.getStartingCapital(),
+                                    'pnl': 'pnl'}}
+    portfoliovalueConfigDict = {'featureKey': 'portfolio_value',
+                                'featureId': 'portfolio_value',
+                                'params': {'initial_capital': tsParams.getStartingCapital(),
+                                           'pnl': 'pnl'}}
+    compulsoryConfigDicts = [profitlossConfigDict, capitalConfigDict, portfoliovalueConfigDict]
+    compulsoryMarketFeatureConfigs = map(lambda x: FeatureConfig(x), compulsoryConfigDicts)
+    return compulsoryMarketFeatureConfigs
+
+
 class InstrumentManager:
     def __init__(self, tsParams):
         self.tsParams = tsParams
         self.__instrumentsDict = {}
         # TODO: create a different place to hold different types of instruments
         featureConfigs = tsParams.getMarketFeatureConfigs()
+        self.__compulsoryFeatureConfigs = getCompulsoryMarketFeatureConfigs(tsParams)
         columns = map(lambda x: x.getFeatureKey(), featureConfigs)
-        columns.append('prediction')
-        self.__lookbackMarketFeatures = LookbackData(tsParams.getLookbackSize(), columns)
+        compulsoryColumns = map(lambda x: x.getFeatureKey(), self.__compulsoryFeatureConfigs)
+        self.__lookbackMarketFeatures = LookbackData(tsParams.getLookbackSize(), columns + compulsoryColumns + ['prediction'])
 
     def getInstrument(self, instrumentId):
         if instrumentId not in self.__instrumentsDict:
@@ -72,7 +90,7 @@ class InstrumentManager:
             instrument.updateFeatures(timeOfUpdate)
 
         currentMarketFeatures = {}
-        featureConfigs = self.tsParams.getMarketFeatureConfigs()
+        featureConfigs = self.tsParams.getMarketFeatureConfigs() + self.__compulsoryFeatureConfigs
         for featureConfig in featureConfigs:
             featureId = featureConfig.getFeatureId()
             featureKey = featureConfig.getFeatureKey()
@@ -84,6 +102,6 @@ class InstrumentManager:
                                                      instrumentManager=self)
             currentMarketFeatures[featureKey] = featureVal
         currentMarketFeatures['prediction'] = self.tsParams.getPrediction(timeOfUpdate, currentMarketFeatures, self)
-        
+
         logInfo('Market Features: %s' % str(currentMarketFeatures))
         self.__lookbackMarketFeatures.addData(timeOfUpdate, currentMarketFeatures)

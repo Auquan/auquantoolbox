@@ -23,7 +23,8 @@ class TradingSystem:
         self.stateWriter = StateWriter('runLogs', datetime.strftime(datetime.now(), '%Y%m%d_%H%M%S'))
 
     def processInstrumentUpdate(self, instrumentUpdate):
-
+        for placedOrder in self.orderPlacer.emitPlacedOrders():
+            self.processPlacedOrder(placedOrder)
         self.tryUpdateFeaturesAndExecute(instrumentUpdate.getTimeOfUpdate())
         instrumentIdToUpdate = instrumentUpdate.getInstrumentId()
         instrumentToUpdate = self.instrumentManager.getInstrument(instrumentIdToUpdate)
@@ -51,8 +52,6 @@ class TradingSystem:
         if shouldUpdateFeatures:
             self.featuresUpdateTime = timeOfUpdate
             self.updateFeatures(timeOfUpdate)
-            for placedOrder in self.orderPlacer.emitPlacedOrders():
-                self.processPlacedOrder(placedOrder)
             instrumentsToExecute = self.getInstrumentsToExecute(timeOfUpdate)
             self.orderPlacer.placeOrders(timeOfUpdate, instrumentsToExecute, self.instrumentManager)
             self.capital = self.instrumentManager.getDataDf()['capital'][-1]

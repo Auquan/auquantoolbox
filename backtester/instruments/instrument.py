@@ -4,16 +4,37 @@ from backtester.lookback_data import LookbackData
 import copy
 
 
+def getCompulsoryInstrumentFeatureConfigs(tsParams):
+    positionConfigDict = {'featureKey': 'position',
+                          'featureId': 'position',
+                          'params': {}}
+    feesConfigDict = {'featureKey': 'fees',
+                      'featureId': 'fees',
+                      'params': {'price': 'close',
+                                 'feesDict': {-1: 0.001, 1: 0.001, 0: 0}}}
+    profitlossConfigDict = {'featureKey': 'pnl',
+                            'featureId': 'pnl',
+                            'params': {'price': tsParams.getPriceFeatureKey(),
+                                       'fees': 'fees'}}
+    capitalConfigDict = {'featureKey': 'capital',
+                         'featureId': 'capital',
+                         'params': {'price': tsParams.getPriceFeatureKey(), 'fees': 'fees'}}
+    compulsoryConfigDicts = [positionConfigDict, feesConfigDict, profitlossConfigDict, capitalConfigDict]
+    compulsoryInstrumentFeatureConfigs = map(lambda x: FeatureConfig(x), compulsoryConfigDicts)
+    return compulsoryInstrumentFeatureConfigs
+
+
 class Instrument(object):
     def __init__(self, instrumentId, bookDataFeatures, tsParams):
         self.__instrumentId = instrumentId
         self.__currentInstrumentUpdate = None
-        featureConfigs = tsParams.getFeatureConfigsForInstrumentType(self.getInstrumentType())
-        featureColumns = map(lambda x: x.getFeatureKey(), featureConfigs)
-        featureColumns = bookDataFeatures + featureColumns
-        self.__lookbackFeatures = LookbackData(tsParams.getLookbackSize(), featureColumns)
-        self.__position = 0
         self.tsParams = tsParams
+        self.__position = 0
+        self.__compulsoryFeatureConfigs = getCompulsoryInstrumentFeatureConfigs(tsParams)
+        featureConfigs = tsParams.getFeatureConfigsForInstrumentType(self.getInstrumentType())
+        compulsoryFeatureColumns = map(lambda x: x.getFeatureKey(), self.__compulsoryFeatureConfigs)
+        featureColumns = map(lambda x: x.getFeatureKey(), featureConfigs)
+        self.__lookbackFeatures = LookbackData(tsParams.getLookbackSize(), bookDataFeatures + featureColumns + compulsoryFeatureColumns)
 
     def getInstrumentType(self):
         raise NotImplementedError
@@ -47,6 +68,7 @@ class Instrument(object):
     def updateFeatures(self, timeOfUpdate):
         currentFeatures = copy.deepcopy(self.getCurrentBookData())
         featureConfigs = self.tsParams.getFeatureConfigsForInstrumentType(self.getInstrumentType())
+        featureConfigs = featureConfigs + self.__compulsoryFeatureConfigs
         for featureConfig in featureConfigs:
             featureKey = featureConfig.getFeatureKey()
             featureId = featureConfig.getFeatureId()

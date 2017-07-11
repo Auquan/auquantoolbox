@@ -26,6 +26,12 @@ class TradingSystemParameters(object):
         return None
 
     '''
+    Return starting capital
+    '''
+    def getStartingCapital(self):
+        return 100000
+
+    '''
     Returns a timedetla object to indicate frequency of updates to features
     Any updates within this frequncy to instruments do not trigger feature updates.
     Consequently any trading decisions that need to take place happen with the same
@@ -82,6 +88,15 @@ class TradingSystemParameters(object):
     '''
     def getMarketFeatureConfigDicts(self):
         return []
+
+    '''
+    Returns the feature key of instrument to use for price calculations ie pnl, fees etc.
+    type: Type of Instrument
+    For example, for stocks close should be fine.
+    Defaults to close for all insturment types
+    '''
+    def getPriceFeatureKey(self):
+        return 'close'
 
     '''
     A function that returns your predicted value based on your heuristics.
