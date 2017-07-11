@@ -15,9 +15,9 @@ class MyTradingParams(TradingSystemParameters):
     '''
 
     def getDataParser(self):
-        instrumentIds = ['MSFT', 'ADBE']
-        startDateStr = '2016/01/10'
-        endDateStr = '2017/06/09'
+        instrumentIds = ['MSFT', 'ADBE','SPY']
+        startDateStr = '2011/01/10'
+        endDateStr = '2017/06/30'
         return GoogleStockDataSource(cachedFolderName='googleData',
                                      instrumentIds=instrumentIds,
                                      startDateStr=startDateStr,
@@ -41,6 +41,9 @@ class MyTradingParams(TradingSystemParameters):
     Eg. if your custom class is MyCustomFeature, and you want to access this via featureId='my_custom_feature',
     you will import that class, and return this function as {'my_custom_feature': MyCustomFeature}
     '''
+
+    def getBenchmark(self):
+        return 'SPY'
 
     def getCustomFeatures(self):
         return {'my_custom_feature': MyCustomFeature}
@@ -90,17 +93,17 @@ class MyTradingParams(TradingSystemParameters):
                      'params': {'inst_1': 'MSFT',
                                 'inst_2': 'ADBE',
                                 'feature': 'close'}}
-        ma1Dict = {'featureKey': 'ma_60',
+        ma1Dict = {'featureKey': 'ma_90',
                    'featureId': 'moving_average',
-                   'params': {'period': 60,
+                   'params': {'period': 90,
                               'featureName': 'ratio'}}
         ma2Dict = {'featureKey': 'ma_10',
                    'featureId': 'moving_average',
                    'params': {'period': 10,
                               'featureName': 'ratio'}}
-        sdevDict = {'featureKey': 'sdev_60',
+        sdevDict = {'featureKey': 'sdev_90',
                     'featureId': 'moving_sdev',
-                    'params': {'period': 60,
+                    'params': {'period': 90,
                                'featureName': 'ratio'}}
         # customFeatureDict = {'featureKey': 'custom_mrkt_feature',
         #                      'featureId': 'my_custom_mrkt_feature',
@@ -147,9 +150,10 @@ class MyTradingParams(TradingSystemParameters):
                                    pairRatio=0.6,
                                    pairEnter_threshold=0.7, 
                                    pairExit_threshold=0.55,
-                                   pairLongLimit=100,
-                                   pairShortLimit=100,
-                                   pairLotSize=10)
+                                   pairLongLimit=10000,
+                                   pairShortLimit=10000,
+                                   pairCapitalUsageLimit = 0.10*self.getStartingCapital(),
+                                   pairLotSize=100)
         # return SimpleExecutionSystem(enter_threshold=0.7, 
         #                              exit_threshold=0.55, 
         #                              longLimit={'MSFT': 100,'ADBE': 100 * ratio}, 

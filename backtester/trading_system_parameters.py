@@ -39,6 +39,12 @@ class TradingSystemParameters(object):
     '''
     def getFrequencyOfFeatureUpdates(self):
         return timedelta(0, 60)
+    '''
+     Returns the symbol to use as benchmark for market returns
+    '''
+    def getBenchmark(self):
+        raise NotImplementedError
+        return None
 
     '''
     This is a way to use any custom features you might have made.

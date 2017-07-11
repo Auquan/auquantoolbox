@@ -20,12 +20,11 @@ TODO: 1) Support excluding columns for each files.
       2) Cleanup the html files generated from plotting/dont regenerate and recycle ones present.
       3) Provide a selector GUI to chose the files.
 '''
-def plot(dir, marketFeatures, excludeFiles):
+def plot(dir, marketFeatures, benchmark, price, excludeFiles):
     if isfile(marketFeatures):
-        print(marketFeatures)
         df = pd.read_csv(marketFeatures, engine='python')
         metrics = Metrics(marketFeaturesDf = df)
-        metrics.calculateMetrics('AAPL','close',dir)
+        metrics.calculateMetrics(benchmark, price, dir)
         stats = metrics.getMetricsString()
         generateGraph(df, marketFeatures, stats)
     else:
@@ -33,9 +32,9 @@ def plot(dir, marketFeatures, excludeFiles):
             path = join(dir, fileName)
             if (not isfile(path)) or (fileName in excludeFiles) :
                 continue
-            df = pd.read_csv(path, engine='python')
-            stats = Metrics(df).getMetrics()
-            generateGraph(path, fileName, [])
+            metrics = Metrics(marketFeaturesDf = df)
+            metrics.calculateMetrics(benchmark, price, dir)
+            generateGraph(path, fileName, stats)
 
 def generateGraph(df, fileName, stats):
     layout = dict(

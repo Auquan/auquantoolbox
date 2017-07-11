@@ -32,6 +32,9 @@ class MyTradingParams(TradingSystemParameters):
     def getFrequencyOfFeatureUpdates(self):
         return timedelta(0, 30)  # minutes, seconds
 
+    def getBenchmark(self):
+        return 'AAPL'
+
     '''
     This is a way to use any custom features you might have made.
     Returns a dictionary where
