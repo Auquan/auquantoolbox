@@ -23,12 +23,20 @@ def checkTimestamp(lineItem):
     return True
 
 
+def isFloat(string):
+    try:
+        return float(string) or float(string) == 0.0
+    except ValueError:  # if string is not a number
+        return False
+
 # Returns the type of lineItems
+
+
 def validateLineItem(lineItems):
     if len(lineItems) == 6:
         if lineItems[0] == "Date":
             return TYPE_LINE_HEADER
-        elif checkDate(lineItems[0]):
+        elif checkDate(lineItems[0]) and isFloat(lineItems[1]) and isFloat(lineItems[2]) and isFloat(lineItems[3]) and isFloat(lineItems[4]) and isFloat(lineItems[5]):
             return TYPE_LINE_DATA
     return TYPE_LINE_UNDEFINED
 
@@ -47,6 +55,7 @@ def parseDataLine(lineItems):
             'close': closePrice,
             'volume': volume}
 
+
 class InstrumentsFromFile():
     def __init__(self, fileName, instrumentId):
         self.fileName = fileName
@@ -64,11 +73,13 @@ class InstrumentsFromFile():
                 self.currentTimeOfUpdate = datetime.strptime(lineItems[0], "%Y-%m-%d")
                 self.currentInstrumentSymbol = self.instrumentId
                 self.currentBookData = parseDataLine(lineItems)
+                if self.currentBookData is None:
+                    return None
                 # right now only works for stocks
                 inst = StockInstrumentUpdate(stockInstrumentId=self.instrumentId,
-                                              tradeSymbol=self.currentInstrumentSymbol,
-                                              timeOfUpdate=self.currentTimeOfUpdate,
-                                              bookData=self.currentBookData)
+                                             tradeSymbol=self.currentInstrumentSymbol,
+                                             timeOfUpdate=self.currentTimeOfUpdate,
+                                             bookData=self.currentBookData)
                 return inst
         return None
 
@@ -80,6 +91,7 @@ class InstrumentsFromFile():
                 if inst is not None:
                     instruments.append(inst)
             return instruments
+
 
 class GoogleStockDataSource(DataSource):
     def __init__(self, cachedFolderName, instrumentIds, startDateStr, endDateStr):
