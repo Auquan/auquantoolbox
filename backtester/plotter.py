@@ -4,6 +4,7 @@ import plotly
 from plotly.graph_objs import Scatter, Layout
 from os import listdir
 from os.path import isfile, join, basename
+from metrics.metrics import Metrics
 
 '''
 Usage(to test in console):
@@ -21,10 +22,12 @@ TODO: 1) Support excluding columns for each files.
 '''
 def plot(dir, marketFeatures, excludeFiles):
     if isfile(marketFeatures):
-        fileName = basename(marketFeatures)
-        df = pd.read_csv(fileName, engine='python')
-        stats = Metrics(df, dir).getMetrics()
-        generateGraph(df, fileName,stats)
+        print(marketFeatures)
+        df = pd.read_csv(marketFeatures, engine='python')
+        metrics = Metrics(marketFeaturesDf = df)
+        metrics.calculateMetrics('AAPL','close',dir)
+        stats = metrics.getMetricsString()
+        generateGraph(df, marketFeatures, stats)
     else:
         for fileName in listdir(dir):
             path = join(dir, fileName)
