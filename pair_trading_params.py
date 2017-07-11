@@ -15,7 +15,7 @@ class MyTradingParams(TradingSystemParameters):
     '''
 
     def getDataParser(self):
-        instrumentIds = ['MSFT', 'ADBE','SPY']
+        instrumentIds = ['MSFT', 'ADBE']
         startDateStr = '2011/01/10'
         endDateStr = '2017/06/30'
         return GoogleStockDataSource(cachedFolderName='googleData',
@@ -43,7 +43,7 @@ class MyTradingParams(TradingSystemParameters):
     '''
 
     def getBenchmark(self):
-        return 'SPY'
+        return 'MSFT'
 
     def getCustomFeatures(self):
         return {'my_custom_feature': MyCustomFeature}
@@ -123,8 +123,8 @@ class MyTradingParams(TradingSystemParameters):
     def getPrediction(self, time, currentMarketFeatures, instrumentManager):
         lookbackMarketFeatures = instrumentManager.getDataDf()
         # IMPLEMENT THIS
-        if currentMarketFeatures['sdev_60'] != 0:
-            z_score = (currentMarketFeatures['ma_10'] - currentMarketFeatures['ma_60']) / currentMarketFeatures['sdev_60']
+        if currentMarketFeatures['sdev_90'] != 0:
+            z_score = (currentMarketFeatures['ma_10'] - currentMarketFeatures['ma_90']) / currentMarketFeatures['sdev_90']
         else:
             z_score = 0
         if z_score > 1:
@@ -150,10 +150,10 @@ class MyTradingParams(TradingSystemParameters):
                                    pairRatio=0.6,
                                    pairEnter_threshold=0.7, 
                                    pairExit_threshold=0.55,
-                                   pairLongLimit=10000,
-                                   pairShortLimit=10000,
+                                   pairLongLimit=20000,
+                                   pairShortLimit=20000,
                                    pairCapitalUsageLimit = 0.10*self.getStartingCapital(),
-                                   pairLotSize=100)
+                                   pairLotSize=200)
         # return SimpleExecutionSystem(enter_threshold=0.7, 
         #                              exit_threshold=0.55, 
         #                              longLimit={'MSFT': 100,'ADBE': 100 * ratio}, 
@@ -176,7 +176,7 @@ class MyTradingParams(TradingSystemParameters):
     '''
 
     def getLookbackSize(self):
-        return 60
+        return 90
 
 
 if __name__ == "__main__":
