@@ -13,6 +13,7 @@ class TradingSystem:
 
     def __init__(self, tsParams):
         self.tsParams = tsParams
+        self.portfolioValue = 0
         self.capital = 0
         self.instrumentManager = InstrumentManager(self.tsParams)
         self.featuresUpdateTime = None
@@ -54,6 +55,7 @@ class TradingSystem:
             self.updateFeatures(timeOfUpdate)
             instrumentsToExecute = self.getInstrumentsToExecute(timeOfUpdate)
             self.orderPlacer.placeOrders(timeOfUpdate, instrumentsToExecute, self.instrumentManager)
+            self.portfolioValue = self.instrumentManager.getDataDf()['portfolio_value'][-1]
             self.capital = self.instrumentManager.getDataDf()['capital'][-1]
             self.saveCurrentState()
 
@@ -73,19 +75,30 @@ class TradingSystem:
     def saveCurrentState(self):
         self.stateWriter.writeCurrentState(self.instrumentManager)
 
+    def closePositions(self, timeOfUpdate):
+        instrumentsToExecute = self.executionSystem.exitPosition(self.instrumentManager, [], True)
+        self.orderPlacer.placeOrders(timeOfUpdate, instrumentsToExecute, self.instrumentManager)
+        for placedOrder in self.orderPlacer.emitPlacedOrders():
+            self.processPlacedOrder(placedOrder)
+        self.updateFeatures(timeOfUpdate)
+        self.saveCurrentState()
+
     def startTrading(self):
         # TODO: Figure out a good way to handle order parsers with live data later on.
         dataParser = self.tsParams.getDataParser()
         self.executionSystem = self.tsParams.getExecutionSystem()
         self.orderPlacer = self.tsParams.getOrderPlacer()
+        self.portfolioValue = self.tsParams.getStartingCapital()
         self.capital = self.tsParams.getStartingCapital()
         instrumentUpdates = dataParser.emitInstrumentUpdate()
 
         for instrumentUpdate in instrumentUpdates:
             # logInfo('TimeOfUpdate: %s TradeSymbol: %s, Volume: %.2f' % (instrumentUpdate.getTimeOfUpdate(), instrumentUpdate.getTradeSymbol(), instrumentUpdate.getBookData()['volume']))
             self.processInstrumentUpdate(instrumentUpdate)
+            if self.portfolioValue < 0:
+                break
 
+        self.closePositions(instrumentUpdate.getTimeOfUpdate())
         self.stateWriter.closeStateWriter()
-        # TODO do metric stuff here
         plot(self.stateWriter.getFolderName(), self.stateWriter.getMarketFeaturesFilename(), \
             self.tsParams.getBenchmark(), self.tsParams.getPriceFeatureKey(), [])

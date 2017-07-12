@@ -40,15 +40,18 @@ class SimpleExecutionSystem(BaseExecutionSystem):
 		executions += self.enterPosition(instrumentsManager, currentPredictions, capital)
 		return executions
 	
-	def exitPosition(self, instrumentsManager, currentPredictions):
+	def exitPosition(self, instrumentsManager, currentPredictions, closeAllPositions=False):
 		executions = []
 		instruments = instrumentsManager.getAllInstrumentsByInstrumentId().values()
 		for instrument in instruments:
 			position = instrument.getCurrentPosition()
 			if position == 0:
 				continue
+			if closeAllPositions:
+				instrumentExec = InstrumentExection(instrument.getInstrumentId(), np.abs(position), -np.sign(position))
+				executions.append(instrumentExec)
 			# take Profits
-			if self.exitCondition(instrumentsManager, instrument, currentPredictions):
+			elif self.exitCondition(instrumentsManager, instrument, currentPredictions):
 				instrumentExec = InstrumentExection(instrument.getInstrumentId(), np.abs(position), -np.sign(position))
 				executions.append(instrumentExec)
 
