@@ -96,6 +96,7 @@ class TradingSystem:
             # logInfo('TimeOfUpdate: %s TradeSymbol: %s, Volume: %.2f' % (instrumentUpdate.getTimeOfUpdate(), instrumentUpdate.getTradeSymbol(), instrumentUpdate.getBookData()['volume']))
             self.processInstrumentUpdate(instrumentUpdate)
             if self.portfolioValue < 0:
+                print('OUT OF MONEY!!!!')
                 break
 
         self.closePositions(instrumentUpdate.getTimeOfUpdate())
