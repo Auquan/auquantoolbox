@@ -1,18 +1,20 @@
 import numpy as np
 import pandas as pd
 from pandas.tseries.offsets import BDay
+from functools import partial
+from pandas.tseries.frequencies import to_offset
 
 class Metrics():
     def __init__(self, marketFeaturesDf):
         self.__marketFeaturesDf = marketFeaturesDf
         self.__stats = {}
 
-    def getMetricsString(self):
+    def getMarketMetricsString(self):
         return \
           ' Total Pnl: %0.2f%% '%(100*self.__stats['Total Pnl(%)']) \
         + ' Ann. Return: %0.2f%% '%(100*self.__stats['Annual Return(%)']) \
         + ' Ann. Vol: %0.2f%% '%(100*self.__stats['Annual Vol(%)']) \
-        + ' Benchmark: %0.2f%% '%self.__stats['Base Return(%)'] \
+        + ' Benchmark: %0.2f%% '%(100*self.__stats['Base Return(%)']) \
         + ' Sharpe Ratio: %0.2f '%self.__stats['Sharpe Ratio'] \
         + ' Sortino Ratio: %0.2f '%self.__stats['Sortino Ratio'] \
         + ' Max Drawdown: %0.2f%% '%(100*self.__stats['Max Drawdown(%)']) \
@@ -20,26 +22,38 @@ class Metrics():
         + ' Accuracy: %0.2f%% '%self.__stats['Accuracy'] 
         #+ 'Log Loss         : %0.2f'%self.__stats['Log Loss'] 
 
+    def getMetricsString(self):
+        return \
+          ' Total Pnl: %0.2f '%(self.__stats['Total Pnl(%)']) \
+        + ' Benchmark: %0.2f%% '%self.__stats['Base Return(%)'] \
+        + ' Profit/Loss Ratio: %0.2f '%self.__stats['Profit/Loss Ratio'] \
+        + ' Accuracy: %0.2f%% '%self.__stats['Accuracy'] 
+        #+ 'Log Loss         : %0.2f'%self.__stats['Log Loss'] 
+
     def getMetrics(self):
         return self.__stats
 
-    def resampleData(self, series, period):
-        return series.resample(period)
+    def round(self, t, freq):
+        freq = to_offset(freq)
+        return pd.Timestamp((t.value // freq.delta.value) * freq.delta.value)
 
-    def calculateMetrics(self, baseSymbol, priceFeature, folderName):
+    def resampleData(self, series, period):
+        return series.groupby(partial(self.round, freq=period))
+        #series.resample(period)
+
+    def calculateMarketMetrics(self, baseSymbol, priceFeature, startingCapital, folderName):
 
         stats = {}
         
         total_pnl = self.resampleData(self.__marketFeaturesDf['pnl'], '1D').last()
         portfolioValue = self.resampleData(self.__marketFeaturesDf['portfolio_value'], '1D').last()
         total_days = len(total_pnl)
-        total_return = total_pnl[total_days-1]/portfolioValue[0]
-        
-        daily_return = portfolioValue /portfolioValue.shift(1) - 1
+        total_return = total_pnl[total_days-1]/startingCapital        
+        daily_return = (portfolioValue /portfolioValue.shift(1) - 1)
         daily_return.dropna(inplace=True)
         #prediction = self.__marketFeaturesDf['prediction']
         benchmark = self.getBenchmarkData(baseSymbol,priceFeature, folderName)
-
+        
         stats['Total Pnl(%)'] = total_return
         stats['Annual Return(%)'] = self.annualized_return(total_return, total_days)
         stats['Base Return(%)'] = self.annualized_return(benchmark['total_return'],total_days)
@@ -48,6 +62,26 @@ class Metrics():
         stats['Sharpe Ratio'] = self.sharpe_ratio(total_return, total_days, daily_return)
         stats['Sortino Ratio'] = self.sortino_ratio(total_return, total_days, daily_return)
         stats['Max Drawdown(%)'] = self.max_drawdown(self.__marketFeaturesDf['portfolio_value'])
+        stats['Profit/Loss Ratio']= self.profit_factor(total_pnl)
+        stats['Accuracy']=self.accuracy(self.__marketFeaturesDf['pnl'])
+        #stats['Log Loss']=logLoss(daily_return)
+        print(stats)
+        self.__stats = stats
+
+    def calculateMetrics(self, priceFeature, startingCapital):
+
+        stats = {}
+        
+        total_pnl = self.resampleData(self.__marketFeaturesDf['pnl'], '1D').last()
+        price = self.resampleData(self.__marketFeaturesDf[priceFeature], '1D').last()
+        total_days = len(total_pnl)
+        total_return = total_pnl[total_days-1]/startingCapital
+        base_return = price[total_days-1]/price[0] - 1
+        daily_return = price /price.shift(1) - 1
+        daily_return.dropna(inplace=True)
+
+        stats['Total Pnl(%)'] = total_return
+        stats['Base Return(%)'] = self.annualized_return(base_return,total_days)
         stats['Profit/Loss Ratio']= self.profit_factor(self.__marketFeaturesDf['pnl'])
         stats['Accuracy']=self.accuracy(self.__marketFeaturesDf['pnl'])
         #stats['Log Loss']=logLoss(daily_return)
@@ -90,7 +124,6 @@ class Metrics():
 
     def beta(self, daily_return, baseline_daily_return):
         stdev = np.std(baseline_daily_return)
-        print(len(daily_return), len(baseline_daily_return))
         if stdev == 0:
             return np.nan
         else:
@@ -100,18 +133,22 @@ class Metrics():
         return self.annualized_return(daily_return) - beta*self.annualized_return(baseline_daily_return)
 
     def profit_factor(self,daily_return):
-        downside_return = daily_return.copy()
+        returns = (daily_return-daily_return.shift(1))
+        returns.dropna(inplace=True)
+        downside_return = returns.copy()
         downside_return[downside_return > 0]= 0
-        upside_return = daily_return.copy()
+        upside_return = returns.copy()
         upside_return[upside_return < 0]= 0
         if downside_return.sum() == 0:
             return 0
         return -(upside_return.sum())/(downside_return.sum())
 
     def accuracy(self,daily_return):
-        total_return = daily_return.copy()
+        returns = (daily_return-daily_return.shift(1))
+        returns.dropna(inplace=True)
+        total_return = returns.copy()
         total_return[total_return != 0]= 1
-        upside_return = daily_return.copy()
+        upside_return = returns.copy()
         upside_return[upside_return < 0]= 0
         upside_return[upside_return > 0]= 1
         if total_return.sum() == 0:

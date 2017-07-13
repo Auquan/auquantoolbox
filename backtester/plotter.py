@@ -20,28 +20,39 @@ TODO: 1) Support excluding columns for each files.
       2) Cleanup the html files generated from plotting/dont regenerate and recycle ones present.
       3) Provide a selector GUI to chose the files.
 '''
-def plot(dir, marketFeatures, benchmark, price, excludeFiles):
-    if isfile(marketFeatures):
-        df, stats, benchmark_pnl = getDataReady(dir, marketFeatures, benchmark, price)
+def plot(dir, marketFeatures, benchmark, price, startingCapital, excludeFiles):
+    if marketFeatures is not None and isfile(marketFeatures):
+        df, stats, benchmark_pnl = getDataReady(dir, marketFeatures, benchmark, price, startingCapital, True)
         generateGraph(df, marketFeatures, stats, benchmark_pnl)
     else:
+        print(excludeFiles)
         for fileName in listdir(dir):
-            path = join(dir, fileName)
-            if (not isfile(path)) or (fileName in excludeFiles) :
+            path = dir + '/' + fileName
+            print(fileName, path)
+            if (not isfile(path)) or (path in excludeFiles) or (fileName in excludeFiles):
+                print('excluding ', fileName)
                 continue
-            df, stats, benchmark_pnl = getDataReady(dir, path, benchmark, price)
+            df, stats, benchmark_pnl = getDataReady(dir, path, benchmark, price, startingCapital, False)
             generateGraph(df, fileName, stats, benchmark_pnl)
 
-def getDataReady(dir, marketFeatures, benchmark, price):
-    df = pd.read_csv(marketFeatures, engine='python')
+def getDataReady(dir, features, benchmark, price, startingCapital, market=True):
+    df = pd.read_csv(features, engine='python')
     df.set_index(df['time'], inplace=True)
     df.index = pd.to_datetime(df.index)
-    pv = df['portfolio_value'][0]
-    df['Returns(%)'] = 100*(df['pnl']/pv)
-    metrics = Metrics(marketFeaturesDf = df)
-    metrics.calculateMetrics(benchmark, price, dir)
-    stats = metrics.getMetricsString()
-    benchmark_pnl = metrics.getBenchmarkData(benchmark,price, dir)['returns']
+    if market:
+        df['Returns(%)'] = 100*(df['pnl']/startingCapital)
+        metrics = Metrics(marketFeaturesDf = df)
+        metrics.calculateMarketMetrics(benchmark, price, startingCapital, dir)
+        benchmark_pnl = metrics.getBenchmarkData(benchmark,price, dir)['returns']
+        stats = metrics.getMarketMetricsString()
+    else:
+        metrics = Metrics(marketFeaturesDf = df)
+        metrics.calculateMetrics(price, startingCapital)
+        benchmark_pnl = None
+        stats = metrics.getMetricsString()
+
+    
+    
     return df, stats, benchmark_pnl
 
 def generateGraph(df, fileName, stats, benchmark_pnl):
@@ -79,6 +90,7 @@ def generateGraph(df, fileName, stats, benchmark_pnl):
     }
     for col in df.columns[1:]:
         plot_data['data'] += [Scatter(x=df['time'], y=df[col], name = col)]
-    plot_data['data'] += [Scatter(x=df['time'], y=100*benchmark_pnl, name = 'Benchmark (%)')]
+    if benchmark_pnl is not None:
+        plot_data['data'] += [Scatter(x=df['time'], y=100*benchmark_pnl, name = 'Benchmark (%)')]
     plotly.offline.plot(plot_data, filename=fileName+".html")
 

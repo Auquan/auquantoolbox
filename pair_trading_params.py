@@ -16,7 +16,7 @@ class MyTradingParams(TradingSystemParameters):
 
     def getDataParser(self):
         instrumentIds = ['MSFT', 'ADBE', 'SPY']
-        startDateStr = '2013/06/01'
+        startDateStr = '2013/01/01'
         endDateStr = '2017/06/30'
         return GoogleStockDataSource(cachedFolderName='googleData',
                                      instrumentIds=instrumentIds,
