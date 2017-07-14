@@ -22,7 +22,16 @@ class MyTradingParams(TradingSystemParameters):
                                      endDateStr=endDateStr)
 
     '''
-    Return starting capital
+    Return the market instrument to benchmark your strategy's perfromancy. 
+    Strategies that perform better than the benchmark are considered successfull.
+    For most cases, choose the broad stock market index, like S&P500(US) or Nifty50(India)
+    '''
+
+    def getBenchmark(self):
+        return 'SPY'
+
+    '''
+    Return starting capital - the initial amount of money you're putting into your trading system
     '''
     def getStartingCapital(self):
         return 100000

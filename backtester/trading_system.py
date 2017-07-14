@@ -55,8 +55,8 @@ class TradingSystem:
             self.updateFeatures(timeOfUpdate)
             instrumentsToExecute = self.getInstrumentsToExecute(timeOfUpdate)
             self.orderPlacer.placeOrders(timeOfUpdate, instrumentsToExecute, self.instrumentManager)
-            self.portfolioValue = self.instrumentManager.getDataDf()['portfolio_value'][-1]
-            self.capital = self.instrumentManager.getDataDf()['capital'][-1]
+            self.portfolioValue = self.instrumentManager.getDataDf()['portfolio_value'][-1] #TODO: find a better way to get this value
+            self.capital = self.instrumentManager.getDataDf()['capital'][-1] #TODO: find a better way to get this value
             self.saveCurrentState()
 
     def updateFeatures(self, timeOfUpdate):
@@ -96,7 +96,7 @@ class TradingSystem:
             # logInfo('TimeOfUpdate: %s TradeSymbol: %s, Volume: %.2f' % (instrumentUpdate.getTimeOfUpdate(), instrumentUpdate.getTradeSymbol(), instrumentUpdate.getBookData()['volume']))
             self.processInstrumentUpdate(instrumentUpdate)
             if self.portfolioValue < 0:
-                print('OUT OF MONEY!!!!')
+                logInfo('Trading will STOP - OUT OF MONEY!!!!')
                 break
 
         self.closePositions(instrumentUpdate.getTimeOfUpdate())

@@ -82,7 +82,7 @@ class Metrics():
 
         stats['Total Pnl(%)'] = total_return
         stats['Base Return(%)'] = self.annualized_return(base_return,total_days)
-        stats['Profit/Loss Ratio']= self.profit_factor(self.__marketFeaturesDf['pnl'])
+        stats['Profit/Loss Ratio']= self.profit_factor(total_pnl)
         stats['Accuracy']=self.accuracy(self.__marketFeaturesDf['pnl'])
         #stats['Log Loss']=logLoss(daily_return)
         print(stats)
