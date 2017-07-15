@@ -12,3 +12,15 @@ Feature ID  | Parameters | Description
 ------------- | ------------- | -------------  
 *moving_average*  | Content Cell |
 *moving_sdev*  | Content Cell |
+*exponential_moving_average*  | Content Cell |
+*momentum*  | Content Cell |
+*bollinger_bands*  | Content Cell |
+*macd*  | Content Cell |
+*ratio*  | Content Cell |
+*rsi*  | Content Cell |
+*vwap*  | Content Cell |
+*fees*   | Content Cell |
+*position*  | Content Cell |
+*pnl*  | Content Cell |
+*capital*  | Content Cell |
+*portfolio_value*  | Content Cell |
