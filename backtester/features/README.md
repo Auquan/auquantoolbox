@@ -10,17 +10,17 @@ Feature config Dictionary has the following keys:
   
 Feature ID  | Parameters | Description
 :-------------: | ------------- | -------------  
-*moving_average*  | 'featureName': feature to calculate moving average for, 'period': moving period to average over |
-*moving_sdev*  | 'featureName': feature to calculate moving standard deviation for, 'period': moving period to calculate over |
-*exponential_moving_average*  | Content Cell |
-*momentum*  | Content Cell |
-*bollinger_bands*  | Content Cell |
-*macd*  | Content Cell |
-*ratio*  | Content Cell |
-*rsi*  | Content Cell |
-*vwap*  | Content Cell |
-*fees*   | Content Cell |
-*position*  | Content Cell |
-*pnl*  | Content Cell |
-*capital*  | Content Cell |
-*portfolio_value*  | Content Cell |
+*moving_average*  | 'featureName', 'period' |
+*moving_sdev*  | 'featureName', 'period' |
+*exponential_moving_average*  | 'featureName', 'period' |
+*momentum*  | 'featureName', 'period' |
+*bollinger_bands*  | 'featureName', 'period' |
+*macd*  | 'featureName', 'period1', 'period2' |
+*ratio*  | 'featureName', 'instrumentId1', 'instrumentId2' |
+*rsi*  | 'featureName', 'period' |
+*vwap*  | - |
+*fees*   | 'feesDict', 'price' |
+*position*  | - |
+*pnl*  | 'fees', 'price' |
+*capital*  | 'initial_capital', 'price' |
+*portfolio_value*  | 'initial_capital', 'pnl' |
