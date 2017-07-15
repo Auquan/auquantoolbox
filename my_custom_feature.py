@@ -1,5 +1,8 @@
 from backtester.features.feature import Feature
 
+'''
+Use this class as a base if you want to make your own feature which you want to use in your strategy.
+'''
 
 class MyCustomFeature(Feature):
 
