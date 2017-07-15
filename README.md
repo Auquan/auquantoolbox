@@ -15,3 +15,4 @@
 
 4. Use my_trading_params.py as a template to create your very own strategy. Copy that template to another file 
 and then start implementing the methods in that file. Use pair_trading_params.py and meanreversion_trading_params.py as exmaples for motivations.
+Detailed explanation for the trading system can be found [here](https://bitbucket.org/auquan/auquantoolbox/src/b29563e5977833dbbfec8bc17c89a4bc936e28d1/backtester/README.md?at=master&fileviewer=file-view-default)
