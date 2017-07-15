@@ -26,7 +26,7 @@ Current choices for datasource are:
 
 ## Benchmark ##
 The market instrument to benchmark your strategy's perfromancy. Strategies that perform better than the benchmark are considered successful.
-*Make sure that you specify the benchmark instrumentID in list of instruments to get data for.
+*Make sure that you specify the benchmark instrumentID in list of instruments to get data for.*
 
 ## Starting Capital ##
 The initial amount of money you're putting into your trading system. This is set to 1 million notional by default.
@@ -48,18 +48,18 @@ Features can be called by specifying config dictionaries. Create one dictionary 
 Instrument features are calculated per instrument (for example position, fees) and market features are calculated for whole trading system (for example portfolio value)
 
 Feature config Dictionary has the following keys:
-        featureId: a string representing the type of feature you want to use
-        featureKey: {optional} a string representing the key you will use to access the value of this feature.
-                    If not present, will just use featureId
-        params: {optional} A dictionary with which contains other optional params if needed by the feature
+  featureId: a string representing the type of feature you want to use
+  featureKey: {optional} a string representing the key you will use to access the value of this feature.
+              If not present, will just use featureId
+  params: {optional} A dictionary with which contains other optional params if needed by the feature
         
 Full list of features is available [here](https://bitbucket.org/auquan/auquantoolbox/src/master/backtester/features/README.md).
 
 To use your own custom features(you need to create them separately using this [template](https://bitbucket.org/auquan/auquantoolbox/src/master/my_custom_feature.py), return a dictionary where
-    key: featureId to access this feature (Make sure this doesnt conflict with any of the pre defined feature Ids)
-    value: Your custom Class which computes this feature. The class should be an instance of Feature
-    Eg. if your custom class is MyCustomFeature, and you want to access this via featureId='my_custom_feature',
-    you will import that class, and return this function as {'my_custom_feature': MyCustomFeature}
+  key: featureId to access this feature (Make sure this doesnt conflict with any of the pre defined feature Ids)
+  value: Your custom Class which computes this feature. The class should be an instance of Feature
+  Eg. if your custom class is MyCustomFeature, and you want to access this via featureId='my_custom_feature',
+  you will import that class, and return this function as {'my_custom_feature': MyCustomFeature}
 
 ## Prediction Function ##
 Combine all the features to create a prediction function which should output the probability that a given instrument is a buy. 
