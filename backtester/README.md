@@ -24,13 +24,17 @@ Current choices for datasource are:
 * AuquanDataSource - Data from US stock database of 500 biggest stocks maintained by Auquan.
 
 ## InstrumentFeatures ##
-A Feature for the instrument. 
+A Feature for the instrument. Full list of features is available [here]().
 
 ## MarketFeatures ##
-A Feature for the market
+A Feature for the market. Full list of features is available [here]().
 
 ## ExecutionSystem ##
-Takes a prediction value and converts it into possible positions to be taken for each type of instrument. It takes into account current positions and confidence factor of the prediction.
+Takes a prediction value and converts it into possible trades for each instrument. It takes into account current positions, risk limits, current capital and confidence factor of the prediction.
+Current choices are:
+
+* Simple Execution System
+* Pair Execution System
 
 ## OrderPlacer ##
 Manages placing and confirming of orders.
