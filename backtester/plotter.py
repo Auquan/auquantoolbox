@@ -4,7 +4,8 @@ import plotly
 from plotly.graph_objs import Scatter, Layout
 from os import listdir
 from os.path import isfile, join, basename
-from metrics.metrics import Metrics
+from backtester.metrics.metrics import Metrics
+from backtester.logger import *
 
 '''
 Usage(to test in console):
@@ -22,18 +23,18 @@ TODO: 1) Support excluding columns for each files.
 '''
 def plot(dir, marketFeatures, benchmark, price, startingCapital, excludeFiles):
     if marketFeatures is not None and isfile(marketFeatures):
+        logInfo('Generating %s'%marketFeatures)
         df, stats, benchmark_pnl = getDataReady(dir, marketFeatures, benchmark, price, startingCapital, True)
         generateGraph(df, marketFeatures, stats, benchmark_pnl)
     else:
-        print(excludeFiles)
         for fileName in listdir(dir):
             path = dir + '/' + fileName
-            print(fileName, path)
             if (not isfile(path)) or (path in excludeFiles) or (fileName in excludeFiles):
                 print('excluding ', fileName)
                 continue
+            logInfo('Generating %s'%fileName)
             df, stats, benchmark_pnl = getDataReady(dir, path, benchmark, price, startingCapital, False)
-            generateGraph(df, fileName, stats, benchmark_pnl)
+            generateGraph(df, fileName, fileName + ' ' + stats, benchmark_pnl)
 
 def getDataReady(dir, features, benchmark, price, startingCapital, market=True):
     df = pd.read_csv(features, engine='python')
@@ -50,9 +51,7 @@ def getDataReady(dir, features, benchmark, price, startingCapital, market=True):
         metrics.calculateMetrics(price, startingCapital)
         benchmark_pnl = None
         stats = metrics.getMetricsString()
-
-    
-    
+    logInfo(stats)
     return df, stats, benchmark_pnl
 
 def generateGraph(df, fileName, stats, benchmark_pnl):

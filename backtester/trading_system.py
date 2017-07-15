@@ -102,7 +102,7 @@ class TradingSystem:
         self.closePositions(instrumentUpdate.getTimeOfUpdate())
         self.stateWriter.closeStateWriter()
         
-        #plot(self.stateWriter.getFolderName(), None, \
-        #    self.tsParams.getBenchmark(), self.tsParams.getPriceFeatureKey(), self.tsParams.getStartingCapital(), [self.stateWriter.getMarketFeaturesFilename()])
+        plot(self.stateWriter.getFolderName(), None, \
+           self.tsParams.getBenchmark(), self.tsParams.getPriceFeatureKey(), self.tsParams.getStartingCapital(), [self.stateWriter.getMarketFeaturesFilename()])
         plot(self.stateWriter.getFolderName(), self.stateWriter.getMarketFeaturesFilename(), \
             self.tsParams.getBenchmark(), self.tsParams.getPriceFeatureKey(), self.tsParams.getStartingCapital(), [])
