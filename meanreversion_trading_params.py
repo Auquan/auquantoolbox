@@ -75,17 +75,17 @@ class MyTradingParams(TradingSystemParameters):
 
     def getInstrumentFeatureConfigDicts(self):
         # ADD RELEVANT FEATURES HERE
-        ma1Dict = {'featureKey': 'ma_60',
+        ma1Dict = {'featureKey': 'ma_90',
                    'featureId': 'moving_average',
-                   'params': {'period': 10,
+                   'params': {'period': 90,
                               'featureName': 'close'}}
-        ma2Dict = {'featureKey': 'ma_10',
+        ma2Dict = {'featureKey': 'ma_5',
                    'featureId': 'moving_average',
-                   'params': {'period': 3,
+                   'params': {'period': 5,
                               'featureName': 'close'}}
-        sdevDict = {'featureKey': 'sdev_60',
+        sdevDict = {'featureKey': 'sdev_90',
                     'featureId': 'moving_sdev',
-                    'params': {'period': 10,
+                    'params': {'period': 90,
                                'featureName': 'close'}}
         return {INSTRUMENT_TYPE_STOCK: [ma1Dict, ma2Dict, sdevDict]}
 
@@ -122,8 +122,8 @@ class MyTradingParams(TradingSystemParameters):
 
         lookbackInstrumentFeatures = instrument.getDataDf().iloc[-1]
         # IMPLEMENT THIS
-        if lookbackInstrumentFeatures['sdev_60'] != 0:
-            z_score = (lookbackInstrumentFeatures['ma_10'] - lookbackInstrumentFeatures['ma_60']) / lookbackInstrumentFeatures['sdev_60']
+        if lookbackInstrumentFeatures['sdev_90'] != 0:
+            z_score = (lookbackInstrumentFeatures['ma_5'] - lookbackInstrumentFeatures['ma_90']) / lookbackInstrumentFeatures['sdev_90']
         else:
             z_score = 0
         if z_score > 1:
@@ -143,8 +143,8 @@ class MyTradingParams(TradingSystemParameters):
     def getExecutionSystem(self):
         return SimpleExecutionSystem(enter_threshold=0.7, 
                                      exit_threshold=0.55, 
-                                     longLimit=1000, 
-                                     shortLimit=1000,
+                                     longLimit=10000, 
+                                     shortLimit=10000,
                                      capitalUsageLimit = 0.10*self.getStartingCapital(), 
                                      lotSize=10)
 
@@ -164,7 +164,7 @@ class MyTradingParams(TradingSystemParameters):
     '''
 
     def getLookbackSize(self):
-        return 10
+        return 90
 
 
 if __name__ == "__main__":

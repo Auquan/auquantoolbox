@@ -23,7 +23,7 @@ class MyTradingParams(TradingSystemParameters):
 
     '''
     Return the market instrument to benchmark your strategy's perfromancy. 
-    Strategies that perform better than the benchmark are considered successfull.
+    Strategies that perform better than the benchmark are considered successful.
     For most cases, choose the broad stock market index, like S&P500(US) or Nifty50(India)
     '''
 
@@ -34,7 +34,7 @@ class MyTradingParams(TradingSystemParameters):
     Return starting capital - the initial amount of money you're putting into your trading system
     '''
     def getStartingCapital(self):
-        return 100000
+        return 1000000
 
     '''
     Returns a timedetla object to indicate frequency of updates to features
@@ -119,8 +119,11 @@ class MyTradingParams(TradingSystemParameters):
 
     '''
     A function that returns your predicted value based on your heuristics.
-    If you are just trading one asset like a stock, it could be the predicted value of the stock.
-    If you are doing pair trading, the prediction could be the difference in the prices of the stocks.
+    Combine all the features to create a prediction function which should output the probability that a given instrument is a buy. 
+    A predicted value of 1 means instrument is a guaranteed buy, 
+    Value of -1 means a guaranteed sell and 0.5 means it's trading at fair price (neither a buy or a sell)
+    If you are just trading one asset like a stock, prediction will be on the value of the stock.
+    If you are doing pair trading, the prediction could be on the difference in the prices of the stocks.
     Arguments:
     time - When this prediction is being calculated
     currentMarketFeatures - Dictionary of market features which have been calculated at this update cycle.
@@ -133,10 +136,17 @@ class MyTradingParams(TradingSystemParameters):
 
     '''
     Returns the type of execution system we want to use. Its an implementation of the class ExecutionSystem
-    Basically, it converts prediction to intended positions for different instruments.
+    It converts prediction to intended trades for different instruments. 
+    Instruments with probability predictions values above enter_threshold are bought and below (1-enter_threshold) are sold.
+    Instrument positions with probability predictions values betweem (1-exit_threshold) and exit_threshold are closed 
     '''
     def getExecutionSystem(self):
-        return SimpleExecutionSystem(longLimit=12000, shortLimit=12000)
+        return SimpleExecutionSystem(enter_threshold=0.7, 
+                                     exit_threshold=0.55, 
+                                     longLimit=10000, 
+                                     shortLimit=10000,
+                                     capitalUsageLimit = 0.10*self.getStartingCapital(), 
+                                     lotSize=10)
 
     '''
     Returns the type of order placer we want to use. its an implementation of the class OrderPlacer.
@@ -149,7 +159,6 @@ class MyTradingParams(TradingSystemParameters):
     '''
     Returns the amount of lookback data you want for your calculations. The historical market features and instrument features are only
     stored upto this amount.
-    This number is the number of times we have updated our features.
     '''
     def getLookbackSize(self):
         return 500

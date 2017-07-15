@@ -90,9 +90,9 @@ class MyTradingParams(TradingSystemParameters):
         # ADD RELEVANT FEATURES HERE
         ratioDict = {'featureKey': 'ratio',
                      'featureId': 'ratio',
-                     'params': {'inst_1': 'MSFT',
-                                'inst_2': 'ADBE',
-                                'feature': 'close'}}
+                     'params': {'instrumentId1': 'MSFT',
+                                'instrumentId2': 'ADBE',
+                                'featureName': 'close'}}
         ma1Dict = {'featureKey': 'ma_90',
                    'featureId': 'moving_average',
                    'params': {'period': 90,

@@ -15,10 +15,10 @@ class RatioMarketFeature(Feature):
     '''
     @classmethod
     def computeForMarket(cls, featureParams, featureKey, currentMarketFeatures, instrumentManager):
-        feature = featureParams['feature']
-        instrumentId1 = featureParams['inst_1']
+        feature = featureParams['featureName']
+        instrumentId1 = featureParams['instrumentId1']
         instrument1 = instrumentManager.getInstrument(instrumentId1)
-        instrumentId2 = featureParams['inst_2']
+        instrumentId2 = featureParams['instrumentId2']
         instrument2 = instrumentManager.getInstrument(instrumentId2)
         if (instrument1 is None) or (instrument2 is None):
             return 0
