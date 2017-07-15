@@ -10,10 +10,10 @@ Feature config Dictionary has the following keys:
   
 Feature ID  | Parameters | Description
 :-------------: | ------------- | -------------  
-*moving_average*  | 'featureName', 'period' |
-*moving_sdev*  | 'featureName', 'period' |
-*exponential_moving_average*  | 'featureName', 'period' |
-*momentum*  | 'featureName', 'period' |
+*moving_average*  | 'featureName', 'period' | calculate moving average of *featureName* over *period* 
+*moving_sdev*  | 'featureName', 'period' | calculate moving standard deviation of *featureName* over *period*
+*exponential_moving_average*  | 'featureName', 'period' | calculate exp. weighted moving average of *featureName* with *period* as half life 
+*momentum*  | 'featureName', 'period' | calculate momentum in *featureName* over *period* as featureValue(now) -  featureValue(now - period)
 *bollinger_bands*  | 'featureName', 'period' |
 *macd*  | 'featureName', 'period1', 'period2' |
 *ratio*  | 'featureName', 'instrumentId1', 'instrumentId2' |
