@@ -9,9 +9,9 @@ Feature config Dictionary has the following keys:
   > *params:* {optional} A dictionary with which contains other optional params if needed by the feature 
   
 Feature ID  | Parameters | Description
-------------- | ------------- | -------------  
-*moving_average*  | Content Cell |
-*moving_sdev*  | Content Cell |
+:-------------: | ------------- | -------------  
+*moving_average*  | 'featureName': feature to calculate moving average for, 'period': moving period to average over |
+*moving_sdev*  | 'featureName': feature to calculate moving standard deviation for, 'period': moving period to calculate over |
 *exponential_moving_average*  | Content Cell |
 *momentum*  | Content Cell |
 *bollinger_bands*  | Content Cell |
