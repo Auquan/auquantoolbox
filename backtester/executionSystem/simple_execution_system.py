@@ -3,11 +3,12 @@ from backtester.logger import *
 import numpy as np
 
 class SimpleExecutionSystem(BaseExecutionSystem):
-	def __init__(self, enter_threshold=0.7, exit_threshold=0.55, longLimit=10, shortLimit=10, lotSize=1):
+	def __init__(self, enter_threshold=0.7, exit_threshold=0.55, longLimit=10, shortLimit=10, capitalUsageLimit = 0,lotSize=1):
 		self.enter_threshold = enter_threshold
 		self.exit_threshold = exit_threshold
 		self.longLimit = longLimit
 		self.shortLimit = shortLimit
+		self.capitalUsageLimit = capitalUsageLimit
 		self.lotSize = lotSize
 
 	def getLongLimit(self, instrumentId):
@@ -28,7 +29,7 @@ class SimpleExecutionSystem(BaseExecutionSystem):
 		else:
 			return self.lotSize
 
-	def getExecutions(self, time, instrumentsManager):
+	def getExecutions(self, time, instrumentsManager, capital):
 		# TODO:
 		marketFeaturesDf = instrumentsManager.getDataDf()
 		currentMarketFeatures = marketFeaturesDf.iloc[-1]
@@ -36,18 +37,21 @@ class SimpleExecutionSystem(BaseExecutionSystem):
 		print(currentPredictions)
 		executions = []
 		executions += self.exitPosition(instrumentsManager, currentPredictions)
-		executions += self.enterPosition(instrumentsManager, currentPredictions)
+		executions += self.enterPosition(instrumentsManager, currentPredictions, capital)
 		return executions
 	
-	def exitPosition(self, instrumentsManager, currentPredictions):
+	def exitPosition(self, instrumentsManager, currentPredictions, closeAllPositions=False):
 		executions = []
 		instruments = instrumentsManager.getAllInstrumentsByInstrumentId().values()
 		for instrument in instruments:
 			position = instrument.getCurrentPosition()
 			if position == 0:
 				continue
+			if closeAllPositions:
+				instrumentExec = InstrumentExection(instrument.getInstrumentId(), np.abs(position), -np.sign(position))
+				executions.append(instrumentExec)
 			# take Profits
-			if self.exitCondition(instrumentsManager, instrument, currentPredictions):
+			elif self.exitCondition(instrumentsManager, instrument, currentPredictions):
 				instrumentExec = InstrumentExection(instrument.getInstrumentId(), np.abs(position), -np.sign(position))
 				executions.append(instrumentExec)
 
@@ -57,14 +61,14 @@ class SimpleExecutionSystem(BaseExecutionSystem):
 				executions.append(instrumentExec)
 		return executions
 
-	def enterPosition(self, instrumentsManager, currentPredictions):
+	def enterPosition(self, instrumentsManager, currentPredictions, capital):
 		executions = []
 		for instrumentId in currentPredictions.keys():
 			instrument = instrumentsManager.getInstrument(instrumentId)
 			if instrument is None:
 				continue
 			#Dont add if already at limit
-			if self.atPositionLimit(instrumentsManager, instrument):
+			if self.atPositionLimit(capital, instrumentsManager, instrument):
 				continue
 			#Enter position if condition met
 			if self.enterCondition(instrumentsManager, instrument, currentPredictions):
@@ -80,11 +84,14 @@ class SimpleExecutionSystem(BaseExecutionSystem):
 		probBuy = currentPredictions[instrumentId]
 		return np.abs(probBuy - 0.5) > (self.enter_threshold - 0.5)
 
-	def atPositionLimit(self, instrumentsManager, instrument):
+	def atPositionLimit(self, capital, instrumentsManager, instrument):
 		position = instrument.getCurrentPosition()
 		instrumentId = instrument.getInstrumentId()
 		if (position > self.getLongLimit(instrumentId)) or (position < -self.getShortLimit(instrumentId)):
 			logInfo('At Position Limit for %s'%instrumentId)
+			return True
+		if capital < self.capitalUsageLimit:
+			logInfo('Not Enough Capital')
 			return True
 		return False
 

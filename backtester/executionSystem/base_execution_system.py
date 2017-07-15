@@ -19,5 +19,5 @@ class BaseExecutionSystem(object):
     '''
     Returns an array of InstrumentExecutions
     '''
-    def getExecutions(self, time, instrumentsManager):
+    def getExecutions(self, time, instrumentsManager, capital):
         return []

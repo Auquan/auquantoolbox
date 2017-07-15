@@ -15,8 +15,8 @@ class MyTradingParams(TradingSystemParameters):
 
     def getDataParser(self):
         instrumentIds = ['AAPL']
-        startDateStr = '2016/01/10'
-        endDateStr = '2017/06/09'
+        startDateStr = '2011/01/10'
+        endDateStr = '2017/02/09'
         return GoogleStockDataSource(cachedFolderName='googleData',
                                      instrumentIds=instrumentIds,
                                      startDateStr=startDateStr,
@@ -31,6 +31,9 @@ class MyTradingParams(TradingSystemParameters):
 
     def getFrequencyOfFeatureUpdates(self):
         return timedelta(0, 30)  # minutes, seconds
+
+    def getBenchmark(self):
+        return 'AAPL'
 
     '''
     This is a way to use any custom features you might have made.
@@ -72,23 +75,19 @@ class MyTradingParams(TradingSystemParameters):
 
     def getInstrumentFeatureConfigDicts(self):
         # ADD RELEVANT FEATURES HERE
-        positionConfigDict = {'featureKey': 'position',
-                              'featureId': 'position',
-                              'params': {}}
-
         ma1Dict = {'featureKey': 'ma_60',
                    'featureId': 'moving_average',
-                   'params': {'period': 90,
+                   'params': {'period': 10,
                               'featureName': 'close'}}
         ma2Dict = {'featureKey': 'ma_10',
                    'featureId': 'moving_average',
-                   'params': {'period': 15,
+                   'params': {'period': 3,
                               'featureName': 'close'}}
         sdevDict = {'featureKey': 'sdev_60',
                     'featureId': 'moving_sdev',
-                    'params': {'period': 90,
+                    'params': {'period': 10,
                                'featureName': 'close'}}
-        return {INSTRUMENT_TYPE_STOCK: [positionConfigDict, ma1Dict, ma2Dict, sdevDict]}
+        return {INSTRUMENT_TYPE_STOCK: [ma1Dict, ma2Dict, sdevDict]}
 
     '''
     Returns an array of market feature config dictionaries
@@ -144,8 +143,9 @@ class MyTradingParams(TradingSystemParameters):
     def getExecutionSystem(self):
         return SimpleExecutionSystem(enter_threshold=0.7, 
                                      exit_threshold=0.55, 
-                                     longLimit=100, 
-                                     shortLimit=100, 
+                                     longLimit=1000, 
+                                     shortLimit=1000,
+                                     capitalUsageLimit = 0.10*self.getStartingCapital(), 
                                      lotSize=10)
 
     '''
@@ -164,7 +164,7 @@ class MyTradingParams(TradingSystemParameters):
     '''
 
     def getLookbackSize(self):
-        return 100
+        return 10
 
 
 if __name__ == "__main__":

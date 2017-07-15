@@ -15,9 +15,9 @@ class MyTradingParams(TradingSystemParameters):
     '''
 
     def getDataParser(self):
-        instrumentIds = ['MSFT', 'ADBE']
-        startDateStr = '2016/01/10'
-        endDateStr = '2017/06/09'
+        instrumentIds = ['MSFT', 'ADBE', 'SPY']
+        startDateStr = '2013/01/01'
+        endDateStr = '2017/06/30'
         return GoogleStockDataSource(cachedFolderName='googleData',
                                      instrumentIds=instrumentIds,
                                      startDateStr=startDateStr,
@@ -41,6 +41,9 @@ class MyTradingParams(TradingSystemParameters):
     Eg. if your custom class is MyCustomFeature, and you want to access this via featureId='my_custom_feature',
     you will import that class, and return this function as {'my_custom_feature': MyCustomFeature}
     '''
+
+    def getBenchmark(self):
+        return 'SPY'
 
     def getCustomFeatures(self):
         return {'my_custom_feature': MyCustomFeature}
@@ -73,13 +76,7 @@ class MyTradingParams(TradingSystemParameters):
 
     def getInstrumentFeatureConfigDicts(self):
         # ADD RELEVANT FEATURES HERE
-        positionConfigDict = {'featureKey': 'position',
-                              'featureId': 'position',
-                              'params': {}}
-        customFeatureDict = {'featureKey': 'custom_inst_feature',
-                             'featureId': 'my_custom_feature',
-                             'params': {'param1': 'value1'}}
-        return {INSTRUMENT_TYPE_STOCK: [positionConfigDict, customFeatureDict]}
+        return {INSTRUMENT_TYPE_STOCK: []}
 
     '''
     Returns an array of market feature config dictionaries
@@ -96,17 +93,17 @@ class MyTradingParams(TradingSystemParameters):
                      'params': {'inst_1': 'MSFT',
                                 'inst_2': 'ADBE',
                                 'feature': 'close'}}
-        ma1Dict = {'featureKey': 'ma_60',
+        ma1Dict = {'featureKey': 'ma_90',
                    'featureId': 'moving_average',
-                   'params': {'period': 60,
+                   'params': {'period': 90,
                               'featureName': 'ratio'}}
         ma2Dict = {'featureKey': 'ma_10',
                    'featureId': 'moving_average',
                    'params': {'period': 10,
                               'featureName': 'ratio'}}
-        sdevDict = {'featureKey': 'sdev_60',
+        sdevDict = {'featureKey': 'sdev_90',
                     'featureId': 'moving_sdev',
-                    'params': {'period': 60,
+                    'params': {'period': 90,
                                'featureName': 'ratio'}}
         # customFeatureDict = {'featureKey': 'custom_mrkt_feature',
         #                      'featureId': 'my_custom_mrkt_feature',
@@ -126,8 +123,8 @@ class MyTradingParams(TradingSystemParameters):
     def getPrediction(self, time, currentMarketFeatures, instrumentManager):
         lookbackMarketFeatures = instrumentManager.getDataDf()
         # IMPLEMENT THIS
-        if currentMarketFeatures['sdev_60'] != 0:
-            z_score = (currentMarketFeatures['ma_10'] - currentMarketFeatures['ma_60']) / currentMarketFeatures['sdev_60']
+        if currentMarketFeatures['sdev_90'] != 0:
+            z_score = (currentMarketFeatures['ma_10'] - currentMarketFeatures['ma_90']) / currentMarketFeatures['sdev_90']
         else:
             z_score = 0
         if z_score > 1:
@@ -153,9 +150,10 @@ class MyTradingParams(TradingSystemParameters):
                                    pairRatio=0.6,
                                    pairEnter_threshold=0.7, 
                                    pairExit_threshold=0.55,
-                                   pairLongLimit=100,
-                                   pairShortLimit=100,
-                                   pairLotSize=10)
+                                   pairLongLimit=20000,
+                                   pairShortLimit=20000,
+                                   pairCapitalUsageLimit = 0.10*self.getStartingCapital(),
+                                   pairLotSize=200)
         # return SimpleExecutionSystem(enter_threshold=0.7, 
         #                              exit_threshold=0.55, 
         #                              longLimit={'MSFT': 100,'ADBE': 100 * ratio}, 
@@ -178,7 +176,7 @@ class MyTradingParams(TradingSystemParameters):
     '''
 
     def getLookbackSize(self):
-        return 60
+        return 90
 
 
 if __name__ == "__main__":

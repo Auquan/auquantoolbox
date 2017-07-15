@@ -10,18 +10,25 @@ from position_instrument_feature import PositionInstrumentFeature
 from ratio_feature import RatioMarketFeature
 from rsi_feature import RSIFeature
 from vwap_price_feature import VwapPriceInstrumentFeature
-
+from profitloss_feature import  ProfitLossFeature
+from fees_feature import  FeesFeature
+from capital_feature import CapitalFeature
+from portfolio_value_feature import PortfolioValueFeature
 
 featureIdToFeatureCls = {'bollinger_bands': BollingerBandsFeature,
                          'exponential_moving_average': ExpMovingAverageFeature,
+                         'fees' : FeesFeature, 
                          'macd': MACDFeature,
                          'momentum': MomentumFeature,
                          'moving_average': MovingAverageFeature,
                          'moving_sdev': MovingSDevFeature,
                          'position': PositionInstrumentFeature,
+                         'pnl' :  ProfitLossFeature,
                          'ratio': RatioMarketFeature,
                          'rsi': RSIFeature,
                          'vwap': VwapPriceInstrumentFeature,
+                         'capital' : CapitalFeature,
+                         'portfolio_value' : PortfolioValueFeature
                          }
 
 

@@ -4,6 +4,7 @@ import plotly
 from plotly.graph_objs import Scatter, Layout
 from os import listdir
 from os.path import isfile, join, basename
+from metrics.metrics import Metrics
 
 '''
 Usage(to test in console):
@@ -19,23 +20,77 @@ TODO: 1) Support excluding columns for each files.
       2) Cleanup the html files generated from plotting/dont regenerate and recycle ones present.
       3) Provide a selector GUI to chose the files.
 '''
-def plot(dir, excludeFiles):
-    if isfile(dir):
-        fileName = basename(dir)
-        generateGraph(dir, fileName)
+def plot(dir, marketFeatures, benchmark, price, startingCapital, excludeFiles):
+    if marketFeatures is not None and isfile(marketFeatures):
+        df, stats, benchmark_pnl = getDataReady(dir, marketFeatures, benchmark, price, startingCapital, True)
+        generateGraph(df, marketFeatures, stats, benchmark_pnl)
     else:
+        print(excludeFiles)
         for fileName in listdir(dir):
-            path = join(dir, fileName)
-            if (not isfile(path)) or (fileName in excludeFiles) :
+            path = dir + '/' + fileName
+            print(fileName, path)
+            if (not isfile(path)) or (path in excludeFiles) or (fileName in excludeFiles):
+                print('excluding ', fileName)
                 continue
-            generateGraph(path, fileName)
+            df, stats, benchmark_pnl = getDataReady(dir, path, benchmark, price, startingCapital, False)
+            generateGraph(df, fileName, stats, benchmark_pnl)
 
-def generateGraph(path, fileName):
+def getDataReady(dir, features, benchmark, price, startingCapital, market=True):
+    df = pd.read_csv(features, engine='python')
+    df.set_index(df['time'], inplace=True)
+    df.index = pd.to_datetime(df.index)
+    if market:
+        df['Returns(%)'] = 100*(df['pnl']/startingCapital)
+        metrics = Metrics(marketFeaturesDf = df)
+        metrics.calculateMarketMetrics(benchmark, price, startingCapital, dir)
+        benchmark_pnl = metrics.getBenchmarkData(benchmark,price, dir)['returns']
+        stats = metrics.getMarketMetricsString()
+    else:
+        metrics = Metrics(marketFeaturesDf = df)
+        metrics.calculateMetrics(price, startingCapital)
+        benchmark_pnl = None
+        stats = metrics.getMetricsString()
+
+    
+    
+    return df, stats, benchmark_pnl
+
+def generateGraph(df, fileName, stats, benchmark_pnl):
+    layout = dict(
+        title= stats,
+        xaxis=dict(
+            rangeselector=dict(
+                buttons=list([
+                    dict(count=6,
+                         label='6m',
+                         step='month',
+                         stepmode='backward'),
+                    dict(count=1,
+                        label='YTD',
+                        step='year',
+                        stepmode='todate'),
+                    dict(count=1,
+                        label='1y',
+                        step='year',
+                        stepmode='backward'),
+                    dict(count=5,
+                         label='5y',
+                         step='year',
+                         stepmode='backward'),
+                    dict(step='all')
+                ])
+            ),
+            rangeslider=dict(),
+            type='date'
+        )
+    )
     plot_data = {
         "data": [],
-        "layout": Layout(title= fileName + " Plot")
+        "layout": layout
     }
-    df = pd.read_csv(path, engine='python')
     for col in df.columns[1:]:
         plot_data['data'] += [Scatter(x=df['time'], y=df[col], name = col)]
+    if benchmark_pnl is not None:
+        plot_data['data'] += [Scatter(x=df['time'], y=100*benchmark_pnl, name = 'Benchmark (%)')]
     plotly.offline.plot(plot_data, filename=fileName+".html")
+

@@ -22,6 +22,21 @@ class MyTradingParams(TradingSystemParameters):
                                      endDateStr=endDateStr)
 
     '''
+    Return the market instrument to benchmark your strategy's perfromancy. 
+    Strategies that perform better than the benchmark are considered successfull.
+    For most cases, choose the broad stock market index, like S&P500(US) or Nifty50(India)
+    '''
+
+    def getBenchmark(self):
+        return 'SPY'
+
+    '''
+    Return starting capital - the initial amount of money you're putting into your trading system
+    '''
+    def getStartingCapital(self):
+        return 100000
+
+    '''
     Returns a timedetla object to indicate frequency of updates to features
     Any updates within this frequncy to instruments do not trigger feature updates.
     Consequently any trading decisions that need to take place happen with the same
@@ -92,6 +107,15 @@ class MyTradingParams(TradingSystemParameters):
                              'featureId': 'my_custom_feature',
                              'params': {'param1': 'value1'}}
         return [customFeatureDict]
+
+    '''
+    Returns the feature key of instrument to use for price calculations ie pnl, fees etc.
+    type: Type of Instrument
+    For example, for stocks close should be fine.
+    Defaults to close for all insturment types
+    '''
+    def getPriceFeatureKey(self, type):
+        return 'close'
 
     '''
     A function that returns your predicted value based on your heuristics.
