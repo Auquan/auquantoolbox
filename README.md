@@ -7,7 +7,7 @@
     * plotly  
 2. Clone/Download this repository.
 
-        git clone https://likwidskin@bitbucket.org/likwidskin/trading_scripts.git
+        git clone https://likwidskin@bitbucket.org/likwidskin/auquantoolbox.git
 
 3.  Navigate to the place where you downloaded the repo. Go inside that folder and run which will execute your strategy.
 
