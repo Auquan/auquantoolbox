@@ -1,7 +1,8 @@
 # **How it works?** #
 
 ## Trading System ##
-The main system that runs your backtest. Raw data (tick or end of day data) for instruments are sent to the trading system. At every such update of data before updating the state of that instrument in the system, the trading system does the following things:
+The main system that runs your backtest. Raw data (tick or end of day data) for instruments are sent to the trading system. 
+At every such update of data before updating the state of that instrument in the system, the trading system does the following things:  
 * Checks whether it is time to update the features and execute. It updates features at a frequency determined by trading parameters.  
 * If it is, it first loops over all instruments and updates the features for each instrument (specified by trading parameters). Each instrument stores its features, which can be later extracted out.  
 * Then, the trading system computes all the market features (specified by trading parameters). 
