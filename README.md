@@ -1,8 +1,9 @@
 # **Quick Startup Guide** #
-Packages to install
-1. numpy
-2. pandas
-3. pandas-datareader
+
+Packages to install  
+1. numpy  
+2. pandas  
+3. pandas-datareader  
 
 Override the different functions according to your need in my_trading_params.py and run
 
