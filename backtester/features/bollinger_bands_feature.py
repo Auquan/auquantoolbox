@@ -7,9 +7,10 @@ class BollingerBandsFeature(Feature):
 
     @classmethod
     def computeForLookbackData(cls, featureParams, featureKey, currentFeatures, lookbackDataDf):
-        avg = ma(lookbackDataDf[featureParams['featureName']], featureParams['period'])
-        sdev = msdev(lookbackDataDf[featureParams['featureName']], featureParams['period'])
-        if len(avg.index) > 0:
-            return [(avg - sdev)[-1], (avg + sdev)[-1]]
-        else:
-            return [avg, avg]
+        data = lookbackDataDf[featureParams['featureName']]
+        avg = data[-featureParams['period']:].mean()
+        sdev = data[-featureParams['period']:].std()
+        if len(data) < 1:
+        	return [0,0]
+        return [(avg - sdev), (avg + sdev)]
+            

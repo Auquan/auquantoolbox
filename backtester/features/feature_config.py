@@ -20,6 +20,7 @@ from moving_sum import MovingSumFeature
 from portfolio_value_feature import PortfolioValueFeature
 from position_instrument_feature import PositionInstrumentFeature
 from profitloss_feature import  ProfitLossFeature
+from rank_feature import RankFeature
 from ratio_feature import RatioMarketFeature
 from rsi_feature import RSIFeature
 from scale_feature import ScaleFeature
@@ -46,6 +47,7 @@ featureIdToFeatureCls = {'argmax' : ArgMaxFeature,
                          'portfolio_value' : PortfolioValueFeature,
                          'position': PositionInstrumentFeature,
                          'pnl' :  ProfitLossFeature,
+                         'rank' : RankFeature,
                          'ratio': RatioMarketFeature,
                          'rsi': RSIFeature,
                          'scale' : ScaleFeature,

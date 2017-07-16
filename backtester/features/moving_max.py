@@ -9,4 +9,4 @@ class MovingMaximumFeature(Feature):
     def computeForLookbackData(cls, featureParams, featureKey, currentFeatures, lookbackDataDf):
         data = lookbackDataDf[featureParams['featureName']]
         #avg = ma(data, featureParams['period'])
-        return data.rolling(featureParams['period']).apply(np.argmax) + 1
+        return data[-featureParams['period']:].max()

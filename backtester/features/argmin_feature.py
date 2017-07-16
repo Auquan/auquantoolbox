@@ -8,5 +8,6 @@ class ArgMinFeature(Feature):
     @classmethod
     def computeForLookbackData(cls, featureParams, featureKey, currentFeatures, lookbackDataDf):
         data = lookbackDataDf[featureParams['featureName']]
-        #avg = ma(data, featureParams['period'])
-        return data.rolling(featureParams['period']).apply(np.argmin) + 1
+        if len(data)<1:
+        	return 0
+        return data[-featureParams['period']:].idxmin()

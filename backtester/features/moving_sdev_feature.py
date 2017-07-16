@@ -7,8 +7,7 @@ class MovingSDevFeature(Feature):
     @classmethod
     def computeForLookbackData(cls, featureParams, featureKey, currentFeatures, lookbackDataDf):
         data = lookbackDataDf[featureParams['featureName']]
-        sdev = msdev(data, featureParams['period'])
-        if len(sdev.index) > 0:
-            return sdev[-1]
-        else:
+        sdev = data[-featureParams['period']:].std()
+        if len(data) < 1:
             return 0
+        return sdev
