@@ -1,34 +1,55 @@
 from feature import Feature
 from backtester.logger import *
+from argmax_feature import ArgMaxFeature
+from argmin_feature import ArgMinFeature
 from bollinger_bands_feature import BollingerBandsFeature
+from capital_feature import CapitalFeature
+from crossSectionMomentum_feature import CrossSectionMomentumFeature
+from delay_feature import DelayFeature
+from difference_feature import DifferenceFeature
 from exp_moving_average_feature import ExpMovingAverageFeature
+from fees_feature import  FeesFeature
 from macd_feature import MACDFeature
 from momentum_feature import MomentumFeature
 from moving_average_feature import MovingAverageFeature
+from moving_correlation import MovingCorrelationFeature
+from moving_max import MovingMaximumFeature
+from moving_min import MovingMinimumFeature
 from moving_sdev_feature import MovingSDevFeature
+from moving_sum import MovingSumFeature
+from portfolio_value_feature import PortfolioValueFeature
 from position_instrument_feature import PositionInstrumentFeature
+from profitloss_feature import  ProfitLossFeature
 from ratio_feature import RatioMarketFeature
 from rsi_feature import RSIFeature
+from scale_feature import ScaleFeature
 from vwap_price_feature import VwapPriceInstrumentFeature
-from profitloss_feature import  ProfitLossFeature
-from fees_feature import  FeesFeature
-from capital_feature import CapitalFeature
-from portfolio_value_feature import PortfolioValueFeature
 
-featureIdToFeatureCls = {'bollinger_bands': BollingerBandsFeature,
+
+featureIdToFeatureCls = {'argmax' : ArgMaxFeature,
+                         'argmin' : ArgMinFeature,
+                         'bollinger_bands': BollingerBandsFeature,
+                         'capital' : CapitalFeature,
+                         'cross_sectional_momentum' : CrossSectionMomentumFeature,
+                         'delay' : DelayFeature,
+                         'difference' DifferenceFeature,
                          'exponential_moving_average': ExpMovingAverageFeature,
                          'fees' : FeesFeature, 
                          'macd': MACDFeature,
                          'momentum': MomentumFeature,
                          'moving_average': MovingAverageFeature,
+                         'moving_correlation': MovingCorrelationFeature,
+                         'moving_max': MovingMaximumFeature,
+                         'moving_min': MovingMinimumFeature,
                          'moving_sdev': MovingSDevFeature,
+                         'moving_sum' : MovingSumFeature,
+                         'portfolio_value' : PortfolioValueFeature
                          'position': PositionInstrumentFeature,
                          'pnl' :  ProfitLossFeature,
                          'ratio': RatioMarketFeature,
                          'rsi': RSIFeature,
+                         'scale' : ScaleFeature,
                          'vwap': VwapPriceInstrumentFeature,
-                         'capital' : CapitalFeature,
-                         'portfolio_value' : PortfolioValueFeature
                          }
 
 

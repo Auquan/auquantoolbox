@@ -29,7 +29,7 @@ class TradingSystemParameters(object):
     Return starting capital
     '''
     def getStartingCapital(self):
-        return 100000
+        return 1000000
 
     '''
     Returns a timedetla object to indicate frequency of updates to features
