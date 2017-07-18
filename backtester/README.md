@@ -63,7 +63,7 @@ To use your own custom features(you need to create them separately using this [t
 
 ## Prediction Function ##
 Combine all the features to create a prediction function which should output the probability that a given instrument is a buy. 
-An predicted value of 1 means instrument is a guaranteed buy, -1 means a guaranteed sell and 0.5 means it's trading at fair price (neither a buy or a sell)
+An predicted value of 1 means instrument is a guaranteed buy, 0 means a guaranteed sell and 0.5 means it's trading at fair price (neither a buy or a sell)
 
 ## ExecutionSystem ##
 Takes a prediction value and converts it into possible trades for each instrument. It takes into account current positions, risk limits, current capital and value of the prediction.
