@@ -5,6 +5,7 @@ from backtester.executionSystem.simple_execution_system import SimpleExecutionSy
 from backtester.orderPlacer.backtesting_order_placer import BacktestingOrderPlacer
 from backtester.trading_system import TradingSystem
 from backtester.constants import *
+from backtester.logger import *
 from my_custom_feature import MyCustomFeature
 
 
@@ -16,6 +17,7 @@ class MyTradingParams(TradingSystemParameters):
         instrumentIds = ['IBM', 'AAPL', 'MSFT']
         startDateStr = '2017/05/10'
         endDateStr = '2017/06/09'
+        instrumentIds = list(set(instrumentIds + [self.getBenchmark()]))
         return GoogleStockDataSource(cachedFolderName='googleData',
                                      instrumentIds=instrumentIds,
                                      startDateStr=startDateStr,
@@ -83,16 +85,13 @@ class MyTradingParams(TradingSystemParameters):
     '''
     def getInstrumentFeatureConfigDicts(self):
         # ADD RELEVANT FEATURES HERE
-        positionConfigDict = {'featureKey': 'position',
-                              'featureId': 'position',
-                              'params': {}}
         vwapConfigDict = {'featureKey': 'price',
                           'featureId': 'vwap',
                           'params': {}}
         customFeatureDict = {'featureKey': 'custom_inst_feature',
                              'featureId': 'my_custom_feature',
                              'params': {'param1': 'value1'}}
-        return {INSTRUMENT_TYPE_STOCK: [positionConfigDict, customFeatureDict]}
+        return {INSTRUMENT_TYPE_STOCK: [customFeatureDict]}
 
     '''
     Returns an array of market feature config dictionaries
@@ -114,7 +113,7 @@ class MyTradingParams(TradingSystemParameters):
     For example, for stocks close should be fine.
     Defaults to close for all insturment types
     '''
-    def getPriceFeatureKey(self, type):
+    def getPriceFeatureKey(self):
         return 'close'
 
     '''
@@ -132,7 +131,10 @@ class MyTradingParams(TradingSystemParameters):
     def getPrediction(self, time, currentMarketFeatures, instrumentManager):
         lookbackMarketFeaturesDf = instrumentManager.getDataDf() # Does not include currentMarketFeatures yet
         # IMPLEMENT THIS
-        return 0.0
+        predictions = {}
+        for k in instrumentManager.getAllInstrumentsByInstrumentId():
+            predictions[k] = 0.5
+        return predictions
 
     '''
     Returns the type of execution system we want to use. Its an implementation of the class ExecutionSystem
@@ -167,4 +169,8 @@ class MyTradingParams(TradingSystemParameters):
 if __name__ == "__main__":
     tsParams = MyTradingParams()
     tradingSystem = TradingSystem(tsParams)
+    logInfo('THIS IS A SAMPLE TRADING SYSTEM' + '\n\n' + \
+     'Use this as a template to implement features and prediction function' + '\n\n' + \
+     'Uncomment the last line when you want to execute your trading system' + '\n\n' + \
+     '--------------')
     tradingSystem.startTrading()
