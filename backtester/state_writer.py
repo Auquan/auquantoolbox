@@ -10,8 +10,8 @@ class StateWriter:
         self.__folderName = parentFolderName + '/' + 'runLog_' + runName
         if not os.path.exists(self.__folderName):
             os.mkdir(self.__folderName, 0755)
-        self.__marketFeaturesFilename = self.__folderName + '/marketFeatures.csv'
-        self.__marketFeaturesFile =  open(self.__marketFeaturesFilename, 'wb')
+        self.__openFiles = []
+        self.__marketFeaturesFilename = None
         self.__marketFeaturesWriter = None
         self.__instrumentIdToWriters = {}
 
@@ -22,7 +22,8 @@ class StateWriter:
         return self.__folderName
         
     def closeStateWriter(self):
-        self.__marketFeaturesFile.close()
+        for file in self.__openFiles:
+            file.close()
 
     def writeColumns(self, writer, df):
         featureKeys = list(df.columns)
@@ -39,7 +40,10 @@ class StateWriter:
     def writeCurrentState(self, instrumentManager):
         marketFeaturesDf = instrumentManager.getDataDf()
         if self.__marketFeaturesWriter is None:
-            self.__marketFeaturesWriter = csv.writer(self.__marketFeaturesFile)
+            self.__marketFeaturesFilename = self.__folderName + '/marketFeatures.csv'
+            marketFeaturesFile =  open(self.__marketFeaturesFilename, 'wb')
+            self.__openFiles.append(marketFeaturesFile)
+            self.__marketFeaturesWriter = csv.writer(marketFeaturesFile)
             self.writeColumns(self.__marketFeaturesWriter, marketFeaturesDf)
         self.writeLastFeatures(self.__marketFeaturesWriter, marketFeaturesDf)
         instrumentsDict = instrumentManager.getAllInstrumentsByInstrumentId()
@@ -48,7 +52,9 @@ class StateWriter:
             instrumentFeaturesDf = instrument.getDataDf()
             if instrumentId not in self.__instrumentIdToWriters:
                 instrumentFeaturesFilename = self.__folderName + '/' + instrumentId + '_features.csv'
-                self.__instrumentIdToWriters[instrumentId] = csv.writer(open(instrumentFeaturesFilename, 'wb'))
+                instrumentFeaturesFile = open(instrumentFeaturesFilename, 'wb')
+                self.__openFiles.append(instrumentFeaturesFile) 
+                self.__instrumentIdToWriters[instrumentId] = csv.writer(instrumentFeaturesFile)
                 self.writeColumns(self.__instrumentIdToWriters[instrumentId], instrumentFeaturesDf)
             instrumentFeaturesWriter = self.__instrumentIdToWriters[instrumentId]
             self.writeLastFeatures(instrumentFeaturesWriter, instrumentFeaturesDf)
