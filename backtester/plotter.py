@@ -34,7 +34,7 @@ def plot(dir, marketFeatures, benchmark, price, startingCapital, excludeFiles):
                 continue
             logInfo('Generating %s'%fileName)
             df, stats, benchmark_pnl = getDataReady(dir, path, benchmark, price, startingCapital, False)
-            generateGraph(df, fileName, fileName + ' ' + stats, benchmark_pnl)
+            generateGraph(df, path, fileName + ' ' + stats, benchmark_pnl)
 
 def getDataReady(dir, features, benchmark, price, startingCapital, market=True):
     df = pd.read_csv(features, engine='python')
