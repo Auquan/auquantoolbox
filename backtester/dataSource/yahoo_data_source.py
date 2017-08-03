@@ -126,7 +126,8 @@ class YahooStockDataSource(DataSource):
                 crumb = crumb.replace(u'\\u002F', '/')
         return cookie, crumb  # return a tuple of crumb and cookie
 
-    def downloadFile(self, instrumentId, fileName):  
+    def downloadFile(self, instrumentId, fileName):
+        logInfo('Downloading %s'%fileName)  
         cookie, crumb = self.getCookie(instrumentId)
         start = int(mktime(self.startDate.timetuple()))
         end = int(mktime(self.endDate.timetuple()))

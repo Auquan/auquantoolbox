@@ -1,6 +1,7 @@
 from datetime import datetime
 from backtester.instrumentUpdates import *
 from backtester.constants import *
+from backtester.logger import *
 from data_source import DataSource
 import os
 import os.path
@@ -102,6 +103,7 @@ class GoogleStockDataSource(DataSource):
         self.currentDate = self.startDate
 
     def downloadFile(self, instrumentId, fileName):
+        logInfo('Downloading %s'%fileName)
         pd = data.DataReader(instrumentId, 'google', self.startDate, self.endDate)
         pd.to_csv(fileName)
 

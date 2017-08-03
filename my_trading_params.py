@@ -1,6 +1,6 @@
 from backtester.trading_system_parameters import TradingSystemParameters
 from datetime import timedelta
-from backtester.dataSource.google_data_source import GoogleStockDataSource
+from backtester.dataSource.yahoo_data_source import YahooStockDataSource
 from backtester.executionSystem.simple_execution_system import SimpleExecutionSystem
 from backtester.orderPlacer.backtesting_order_placer import BacktestingOrderPlacer
 from backtester.trading_system import TradingSystem
@@ -18,7 +18,7 @@ class MyTradingParams(TradingSystemParameters):
         startDateStr = '2017/05/10'
         endDateStr = '2017/06/09'
         instrumentIds = list(set(instrumentIds + [self.getBenchmark()]))
-        return GoogleStockDataSource(cachedFolderName='googleData',
+        return YahooStockDataSource(cachedFolderName='yahooData',
                                      instrumentIds=instrumentIds,
                                      startDateStr=startDateStr,
                                      endDateStr=endDateStr)

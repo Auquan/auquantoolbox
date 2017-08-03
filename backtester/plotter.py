@@ -37,9 +37,8 @@ def plot(dir, marketFeatures, benchmark, price, startingCapital, excludeFiles):
             generateGraph(df, path, fileName + ' ' + stats, benchmark_pnl)
 
 def getDataReady(dir, features, benchmark, price, startingCapital, market=True):
-    df = pd.read_csv(features, engine='python')
-    df.set_index(df['time'], inplace=True)
-    df.index = pd.to_datetime(df.index)
+    df = pd.read_csv(features, engine='python', index_col= 'time', parse_dates=True)
+
     if market:
         df['Returns(%)'] = 100*(df['pnl']/startingCapital)
         metrics = Metrics(marketFeaturesDf = df)
@@ -88,8 +87,8 @@ def generateGraph(df, fileName, stats, benchmark_pnl):
         "layout": layout
     }
     for col in df.columns[1:]:
-        plot_data['data'] += [Scatter(x=df['time'], y=df[col], name = col)]
+        plot_data['data'] += [Scatter(x=df.index, y=df[col], name = col)]
     if benchmark_pnl is not None:
-        plot_data['data'] += [Scatter(x=df['time'], y=100*benchmark_pnl, name = 'Benchmark (%)')]
+        plot_data['data'] += [Scatter(x=df.index, y=100*benchmark_pnl, name = 'Benchmark (%)')]
     plotly.offline.plot(plot_data, filename=fileName+".html")
 

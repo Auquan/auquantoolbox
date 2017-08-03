@@ -1,4 +1,6 @@
 *.pyc
 googleData/*
 runLogs/*
+yahooData/*
+*csv.html
 .DS_Store

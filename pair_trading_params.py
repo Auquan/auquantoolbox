@@ -1,12 +1,14 @@
 from backtester.trading_system_parameters import TradingSystemParameters
 from datetime import timedelta
-from backtester.dataSource.google_data_source import GoogleStockDataSource
+from backtester.dataSource.yahoo_data_source import YahooStockDataSource
 from backtester.executionSystem.simple_execution_system import SimpleExecutionSystem
 from backtester.executionSystem.pair_execution_system import PairExecutionSystem
 from backtester.orderPlacer.backtesting_order_placer import BacktestingOrderPlacer
 from backtester.trading_system import TradingSystem
 from backtester.constants import *
 from my_custom_feature import MyCustomFeature
+
+instrumentIds = ['FEDERALBNK.BO', 'ICICIBANK.BO','NIFTYBEES.NS']
 
 
 class MyTradingParams(TradingSystemParameters):
@@ -15,10 +17,9 @@ class MyTradingParams(TradingSystemParameters):
     '''
 
     def getDataParser(self):
-        instrumentIds = ['MSFT', 'ADBE', 'SPY']
-        startDateStr = '2013/01/01'
+        startDateStr = '2010/01/01'
         endDateStr = '2017/06/30'
-        return GoogleStockDataSource(cachedFolderName='googleData',
+        return YahooStockDataSource(cachedFolderName='yahooData',
                                      instrumentIds=instrumentIds,
                                      startDateStr=startDateStr,
                                      endDateStr=endDateStr)
@@ -43,7 +44,7 @@ class MyTradingParams(TradingSystemParameters):
     '''
 
     def getBenchmark(self):
-        return 'SPY'
+        return 'NIFTYBEES.NS'
 
     def getCustomFeatures(self):
         return {'my_custom_feature': MyCustomFeature}
@@ -76,7 +77,11 @@ class MyTradingParams(TradingSystemParameters):
 
     def getInstrumentFeatureConfigDicts(self):
         # ADD RELEVANT FEATURES HERE
-        return {INSTRUMENT_TYPE_STOCK: []}
+        ma1Dict = {'featureKey': 'ma_90',
+                   'featureId': 'moving_average',
+                   'params': {'period': 90,
+                              'featureName': 'adjClose'}}
+        return {INSTRUMENT_TYPE_STOCK: [ma1Dict]}
 
     '''
     Returns an array of market feature config dictionaries
@@ -88,11 +93,12 @@ class MyTradingParams(TradingSystemParameters):
 
     def getMarketFeatureConfigDicts(self):
         # ADD RELEVANT FEATURES HERE
+
         ratioDict = {'featureKey': 'ratio',
                      'featureId': 'ratio',
-                     'params': {'instrumentId1': 'MSFT',
-                                'instrumentId2': 'ADBE',
-                                'featureName': 'close'}}
+                     'params': {'instrumentId1': instrumentIds[0],
+                                'instrumentId2': instrumentIds[1],
+                                'featureName': 'adjClose'}}
         ma1Dict = {'featureKey': 'ma_90',
                    'featureId': 'moving_average',
                    'params': {'period': 90,
@@ -105,10 +111,16 @@ class MyTradingParams(TradingSystemParameters):
                     'featureId': 'moving_sdev',
                     'params': {'period': 90,
                                'featureName': 'ratio'}}
+        correlDict = {'featureKey': 'correl_90',
+                    'featureId': 'cross_instrument_correlation',
+                    'params': {'period': 90,
+                               'instrumentId1': instrumentIds[0],
+                                'instrumentId2': instrumentIds[1],
+                                'featureName': 'adjClose'}}
         # customFeatureDict = {'featureKey': 'custom_mrkt_feature',
         #                      'featureId': 'my_custom_mrkt_feature',
         #                      'params': {'param1': 'value1'}}
-        return [ratioDict, ma1Dict, ma2Dict, sdevDict]
+        return [ratioDict, ma1Dict, ma2Dict, sdevDict, correlDict]
 
     '''
     A function that returns your predicted value based on your heuristics.
@@ -127,18 +139,25 @@ class MyTradingParams(TradingSystemParameters):
             z_score = (currentMarketFeatures['ma_10'] - currentMarketFeatures['ma_90']) / currentMarketFeatures['sdev_90']
         else:
             z_score = 0
+        instrument = instrumentManager.getInstrument(instrumentIds[0])
+        print(instrument)
+        #z_score = z_score + instrument.getDataDf()['position']/20000
+        
+        if currentMarketFeatures['correl_90'] < 0.5:
+            z_score = 0
+
         if z_score > 1:
-            return {'MSFT': .2,
-                    'ADBE': .8}
+            return {instrumentIds[0]: .2,
+                    instrumentIds[1]: .8}
         elif z_score < -1:
-            return {'MSFT': .8,
-                    'ADBE': 0.2}
+            return {instrumentIds[0]: .8,
+                    instrumentIds[1]: 0.2}
         elif (z_score > 0.5) or (z_score < -0.5) :
-            return {'MSFT': 0.6,
-                    'ADBE': 0.6}
+            return {instrumentIds[0]: 0.6,
+                    instrumentIds[1]: 0.6}
         else:
-            return {'MSFT': 0.5,
-                    'ADBE': 0.5}
+            return {instrumentIds[0]: 0.5,
+                    instrumentIds[1]: 0.5}
 
     '''
     Returns the type of execution system we want to use. Its an implementation of the class ExecutionSystem
@@ -146,8 +165,8 @@ class MyTradingParams(TradingSystemParameters):
     '''
 
     def getExecutionSystem(self):
-        return PairExecutionSystem(pair=['MSFT', 'ADBE'],
-                                   pairRatio=0.6,
+        return PairExecutionSystem(pair=[instrumentIds[0], instrumentIds[1]],
+                                   pairRatio=0.3,
                                    pairEnter_threshold=0.7, 
                                    pairExit_threshold=0.55,
                                    pairLongLimit=20000,
@@ -156,9 +175,9 @@ class MyTradingParams(TradingSystemParameters):
                                    pairLotSize=200)
         # return SimpleExecutionSystem(enter_threshold=0.7, 
         #                              exit_threshold=0.55, 
-        #                              longLimit={'MSFT': 100,'ADBE': 100 * ratio}, 
-        #                              shortLimit={'MSFT': -100,'ADBE': -100 * ratio}, 
-        #                              lotSize={'MSFT': 10,'ADBE': 10 * ratio})
+        #                              longLimit={'ADANIPOWER.BO': 100,'RPOWER.BO': 100 * ratio}, 
+        #                              shortLimit={'ADANIPOWER.BO': -100,'RPOWER.BO': -100 * ratio}, 
+        #                              lotSize={'ADANIPOWER.BO': 10,'RPOWER.BO': 10 * ratio})
 
     '''
     Returns the type of order placer we want to use. its an implementation of the class OrderPlacer.
@@ -182,4 +201,4 @@ class MyTradingParams(TradingSystemParameters):
 if __name__ == "__main__":
     tsParams = MyTradingParams()
     tradingSystem = TradingSystem(tsParams)
-    tradingSystem.startTrading()
+    tradingSystem.startTrading(onlyAnalyze=False)

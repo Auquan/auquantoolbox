@@ -4,12 +4,14 @@ from argmax_feature import ArgMaxFeature
 from argmin_feature import ArgMinFeature
 from bollinger_bands_feature import BollingerBandsFeature
 from capital_feature import CapitalFeature
+from crossInstrument_correlation_feature import MovingInstrumentCorrelationFeature
 from crossSectionMomentum_feature import CrossSectionMomentumFeature
 from delay_feature import DelayFeature
 from difference_feature import DifferenceFeature
 from exp_moving_average_feature import ExpMovingAverageFeature
 from fees_feature import  FeesFeature
 from macd_feature import MACDFeature
+from ma_ribbon_feature import MARibbonFeature
 from momentum_feature import MomentumFeature
 from moving_average_feature import MovingAverageFeature
 from moving_correlation import MovingCorrelationFeature
@@ -32,11 +34,13 @@ featureIdToFeatureCls = {'argmax' : ArgMaxFeature,
                          'bollinger_bands': BollingerBandsFeature,
                          'capital' : CapitalFeature,
                          'cross_sectional_momentum' : CrossSectionMomentumFeature,
+                         'cross_instrument_correlation' : MovingInstrumentCorrelationFeature,
                          'delay' : DelayFeature,
                          'difference' : DifferenceFeature,
                          'exponential_moving_average': ExpMovingAverageFeature,
                          'fees' : FeesFeature, 
                          'macd': MACDFeature,
+                         'ma_ribbon': MARibbonFeature,
                          'momentum': MomentumFeature,
                          'moving_average': MovingAverageFeature,
                          'moving_correlation': MovingCorrelationFeature,
