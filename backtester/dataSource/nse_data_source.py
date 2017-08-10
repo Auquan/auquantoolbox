@@ -254,9 +254,8 @@ class NSEStockDataSource(DataSource):
     def adjustPriceForSplitAndDiv(self, instrumentId, fileName, yahooDS_div, yahooDS_split):
         divFile = self.getFileName('div', instrumentId)
         splitFile = self.getFileName('split', instrumentId)
-        if not os.path.isfile(divFile):
+        if not (os.path.isfile(divFile) and os.path.isfile(splitFile)):
             yahooDS_div.downloadFile('%s.NS'%instrumentId, divFile)
-        if not os.path.isfile(splitFile):
             yahooDS_split.downloadFile('%s.NS'%instrumentId, splitFile)
         div = pd.read_csv(divFile, engine='python', index_col= 'Date', parse_dates=True)
         split = pd.read_csv(splitFile, engine='python', index_col= 'Date', parse_dates=True)
@@ -265,13 +264,23 @@ class NSEStockDataSource(DataSource):
         interim=(temp['Close']-temp['Dividends'])/temp['Close']
         multiplier1 = interim.sort_index(ascending=False).cumprod().sort_index(ascending=True) 
         temp2 = split['Stock Splits'].str.split('/',expand=True)
-        multiplier2 = pd.to_numeric(temp2[1])/pd.to_numeric(temp2[0])
+        if len(temp2.index) > 0:
+            temp_mult = pd.to_numeric(temp2[1])/pd.to_numeric(temp2[0])
+            multiplier2 = temp_mult.sort_index(ascending=False).cumprod().sort_index(ascending=True)
+        else:
+            multiplier2 = pd.Series(1, index = multiplier1.index)
         multiplier = pd.concat([multiplier1,multiplier2],axis=1).fillna(method='bfill').fillna(1)
         multiplier[1] = multiplier[1].shift(-1).fillna(1)
         temp['Close'] = temp['Close']* multiplier[0]*multiplier[1]
         temp['Open'] = temp['Open']* multiplier[0]*multiplier[1]
         temp['High'] = temp['High']* multiplier[0]*multiplier[1]
         temp['Low'] = temp['Low']* multiplier[0]*multiplier[1]
+        temp['Last'] = temp['Last']* multiplier[0]*multiplier[1]
+        temp['Average'] = temp['Average'] * multiplier[0]*multiplier[1]
+        temp['Total Traded Quantity'] = temp['Total Traded Quantity']/multiplier[1]
+        temp['Turnover'] =  temp['Turnover'] * multiplier[0]
+        temp['Deliverable Qty'] = temp['Deliverable Qty']/multiplier[1]
+
         del temp['Dividends']
         temp.to_csv(fileName)
 
