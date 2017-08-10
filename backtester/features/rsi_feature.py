@@ -13,8 +13,8 @@ class RSIFeature(Feature):
         data_upside[data_upside < 0] = 0
         if len(data.index) > 0:
             avg_upside = ma(data_upside, featureParams['period'])[-1]
-            avg_downside = ma(data_downside, featureParams['period'])[-1]
-            rs = -avg_upside / avg_downside
+            avg_downside = - ma(data_downside, featureParams['period'])[-1]
+            rs = avg_upside / avg_downside
         else:
             rs = 0
-        return 100 - (100 / (1 + rs))
+        return 100 - (100 * avg_downside / (avg_downside + avg_upside ))

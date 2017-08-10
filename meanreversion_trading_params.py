@@ -14,7 +14,7 @@ class MyTradingParams(TradingSystemParameters):
     '''
 
     def getDataParser(self):
-        instrumentIds = ['AAPL']
+        instrumentIds = ['AAPL', 'GOOG']
         startDateStr = '2011/01/10'
         endDateStr = '2017/02/09'
         return GoogleStockDataSource(cachedFolderName='googleData',
@@ -116,24 +116,30 @@ class MyTradingParams(TradingSystemParameters):
     '''
 
     def getPrediction(self, time, currentMarketFeatures, instrumentManager):
-        instrument = instrumentManager.getInstrument('AAPL')
-        if instrument is None:
-            return {'AAPL': 0.5}
+        instrumentIds = instrumentManager.getAllInstrumentsByInstrumentId()
+        predictions = {}
+        for ids in instrumentIds:
+            instrument = instrumentManager.getInstrument(ids)
 
-        lookbackInstrumentFeatures = instrument.getDataDf().iloc[-1]
-        # IMPLEMENT THIS
-        if lookbackInstrumentFeatures['sdev_90'] != 0:
-            z_score = (lookbackInstrumentFeatures['ma_5'] - lookbackInstrumentFeatures['ma_90']) / lookbackInstrumentFeatures['sdev_90']
-        else:
-            z_score = 0
-        if z_score > 1:
-            return {'AAPL': 0.2}
-        elif z_score < -1:
-            return {'AAPL': 0.8}
-        elif (z_score > 0.5) or (z_score < -0.5) :
-            return {'AAPL': 0.6}
-        else:
-            return {'AAPL': 0.5}
+            if instrument is None:
+                predictions[ids] = 0.5
+
+            lookbackInstrumentFeatures = instrument.getDataDf().iloc[-1]
+            # IMPLEMENT THIS
+            if lookbackInstrumentFeatures['sdev_90'] != 0:
+                z_score = (lookbackInstrumentFeatures['ma_5'] - lookbackInstrumentFeatures['ma_90']) / lookbackInstrumentFeatures['sdev_90']
+            else:
+                z_score = 0
+            if z_score > 1:
+                predictions[ids] = 0.2
+            elif z_score < -1:
+                predictions[ids] = 0.8
+            elif (z_score > 0.5) or (z_score < -0.5) :
+                predictions[ids] = 0.6
+            else:
+                predictions[ids] = 0.5
+
+        return predictions
 
     '''
     Returns the type of execution system we want to use. Its an implementation of the class ExecutionSystem

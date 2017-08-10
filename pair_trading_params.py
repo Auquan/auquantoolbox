@@ -1,6 +1,7 @@
 from backtester.trading_system_parameters import TradingSystemParameters
 from datetime import timedelta
 from backtester.dataSource.yahoo_data_source import YahooStockDataSource
+from backtester.dataSource.nse_data_source import NSEStockDataSource
 from backtester.executionSystem.simple_execution_system import SimpleExecutionSystem
 from backtester.executionSystem.pair_execution_system import PairExecutionSystem
 from backtester.orderPlacer.backtesting_order_placer import BacktestingOrderPlacer
@@ -8,7 +9,7 @@ from backtester.trading_system import TradingSystem
 from backtester.constants import *
 from my_custom_feature import MyCustomFeature
 
-instrumentIds = ['FEDERALBNK.BO', 'ICICIBANK.BO','NIFTYBEES.NS']
+instrumentIds = ['FEDERALBNK', 'ICICIBANK','NIFTYBEES']
 
 
 class MyTradingParams(TradingSystemParameters):
@@ -19,7 +20,7 @@ class MyTradingParams(TradingSystemParameters):
     def getDataParser(self):
         startDateStr = '2010/01/01'
         endDateStr = '2017/06/30'
-        return YahooStockDataSource(cachedFolderName='yahooData',
+        return NSEStockDataSource(cachedFolderName='nseData',
                                      instrumentIds=instrumentIds,
                                      startDateStr=startDateStr,
                                      endDateStr=endDateStr)
@@ -44,7 +45,7 @@ class MyTradingParams(TradingSystemParameters):
     '''
 
     def getBenchmark(self):
-        return 'NIFTYBEES.NS'
+        return 'NIFTYBEES'
 
     def getCustomFeatures(self):
         return {'my_custom_feature': MyCustomFeature}
@@ -80,7 +81,7 @@ class MyTradingParams(TradingSystemParameters):
         ma1Dict = {'featureKey': 'ma_90',
                    'featureId': 'moving_average',
                    'params': {'period': 90,
-                              'featureName': 'adjClose'}}
+                              'featureName': 'close'}}
         return {INSTRUMENT_TYPE_STOCK: [ma1Dict]}
 
     '''
@@ -98,7 +99,7 @@ class MyTradingParams(TradingSystemParameters):
                      'featureId': 'ratio',
                      'params': {'instrumentId1': instrumentIds[0],
                                 'instrumentId2': instrumentIds[1],
-                                'featureName': 'adjClose'}}
+                                'featureName': 'close'}}
         ma1Dict = {'featureKey': 'ma_90',
                    'featureId': 'moving_average',
                    'params': {'period': 90,
@@ -116,7 +117,7 @@ class MyTradingParams(TradingSystemParameters):
                     'params': {'period': 90,
                                'instrumentId1': instrumentIds[0],
                                 'instrumentId2': instrumentIds[1],
-                                'featureName': 'adjClose'}}
+                                'featureName': 'close'}}
         # customFeatureDict = {'featureKey': 'custom_mrkt_feature',
         #                      'featureId': 'my_custom_mrkt_feature',
         #                      'params': {'param1': 'value1'}}

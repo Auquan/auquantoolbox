@@ -1,5 +1,6 @@
 from feature import Feature
 from backtester.financial_fn import ma
+import numpy as np
 
 
 class MARibbonFeature(Feature):
@@ -10,9 +11,9 @@ class MARibbonFeature(Feature):
         rolling_means = np.zeros(featureParams['numRibbons'])
         if len(data) < 1:
         	return rolling_means
-        for i in np.linspace(featureParams['startPeriod'], 
-        							featureParams['endPeriod'], 
-        							int((featureParams['endPeriod'] - featureParams['startPeriod'])/featureParams['numRibbons'])):
-    		rolling_means[i] = data[-i:].mean()
+        space = int((featureParams['endPeriod'] - featureParams['startPeriod'])/(featureParams['numRibbons']-1))
+        for idx in np.linspace(featureParams['startPeriod'], featureParams['endPeriod'], featureParams['numRibbons']):
+            i = int(idx)
+            rolling_means[i/space - 1] = data[-i:].mean()
         
         return rolling_means

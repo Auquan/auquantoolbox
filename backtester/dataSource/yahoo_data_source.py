@@ -104,12 +104,13 @@ class InstrumentsFromFile():
 
 
 class YahooStockDataSource(DataSource):
-    def __init__(self, cachedFolderName, instrumentIds, startDateStr, endDateStr):
+    def __init__(self, cachedFolderName, instrumentIds, startDateStr, endDateStr,event='history'):
         self.startDate = datetime.strptime(startDateStr, "%Y/%m/%d")
         self.endDate = datetime.strptime(endDateStr, "%Y/%m/%d")
         self.cachedFolderName = cachedFolderName
         self.instrumentIds = instrumentIds
         self.currentDate = self.startDate
+        self.event = event
 
     def getCookie(self, instrumentId):
         """Returns a tuple pair of cookie and crumb used in the request"""
@@ -131,7 +132,8 @@ class YahooStockDataSource(DataSource):
         cookie, crumb = self.getCookie(instrumentId)
         start = int(mktime(self.startDate.timetuple()))
         end = int(mktime(self.endDate.timetuple()))
-        url = 'https://query1.finance.yahoo.com/v7/finance/download/%s?period1=%s&period2=%s&interval=1d&events=history&crumb=%s'%(instrumentId, start, end, crumb)
+        event = self.event
+        url = 'https://query1.finance.yahoo.com/v7/finance/download/%s?period1=%s&period2=%s&interval=1d&events=%s&crumb=%s'%(instrumentId, start, end, event,crumb)
         data = requests.get(url, cookies={'B':cookie})
         with open(fileName,'w') as f:
             f.write(data.content)
@@ -173,4 +175,5 @@ if __name__ == "__main__":
     YahooStockDataSource(cachedFolderName='yahooData',
                                      instrumentIds=instrumentIds,
                                      startDateStr=startDateStr,
-                                     endDateStr=endDateStr)
+                                     endDateStr=endDateStr,
+                                     event='history')
