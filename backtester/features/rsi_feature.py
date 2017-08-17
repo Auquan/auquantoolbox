@@ -16,5 +16,6 @@ class RSIFeature(Feature):
             avg_downside = - ma(data_downside, featureParams['period'])[-1]
             rs = avg_upside / avg_downside
         else:
-            rs = 0
+            return 0 
+
         return 100 - (100 * avg_downside / (avg_downside + avg_upside ))

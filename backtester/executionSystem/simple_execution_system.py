@@ -3,38 +3,54 @@ from backtester.logger import *
 import numpy as np
 
 class SimpleExecutionSystem(BaseExecutionSystem):
-	def __init__(self, enter_threshold=0.7, exit_threshold=0.55, longLimit=10, shortLimit=10, capitalUsageLimit = 0,lotSize=1):
+	def __init__(self, enter_threshold=0.7, exit_threshold=0.55, longLimit=10, \
+				shortLimit=10, capitalUsageLimit = 0,lotSize=1, limitType='L',price=''):
 		self.enter_threshold = enter_threshold
 		self.exit_threshold = exit_threshold
 		self.longLimit = longLimit
 		self.shortLimit = shortLimit
 		self.capitalUsageLimit = capitalUsageLimit
 		self.lotSize = lotSize
+		self.limitType = limitType
+		self.priceFeature = price
 
-	def getLongLimit(self, instrumentId):
+	def getLongLimit(self, instrument):
+		instrumentId = instrument.getInstrumentId()
 		if isinstance(self.longLimit, dict):
-			return self.longLimit[instrumentId]
+			return self.convertLimit(self.longLimit[instrumentId], instrument)
 		else:
-			return self.longLimit
+			return self.convertLimit(self.longLimit, instrument)
 
-	def getShortLimit(self, instrumentId):
+	def getShortLimit(self, instrument):
+		instrumentId = instrument.getInstrumentId()
 		if isinstance(self.shortLimit, dict):
-			return self.shortLimit[instrumentId]
+			return self.convertLimit(self.shortLimit[instrumentId], instrument)
 		else:
-			return self.shortLimit
+			return self.convertLimit(self.shortLimit, instrument)
 
-	def getLotSize(self, instrumentId):
+	def getLotSize(self, instrument):
+		instrumentId = instrument.getInstrumentId()
 		if isinstance(self.lotSize, dict):
-			return self.lotSize[instrumentId]
+			return self.convertLimit(self.lotSize[instrumentId], instrument)
 		else:
-			return self.lotSize
+			return self.convertLimit(self.lotSize, instrument)
+
+	def convertLimit(self, value, instrument):
+		if self.limitType == 'L':
+			return value
+		try:
+			price = instrument.getDataDf()[self.priceFeature].iloc[-1]
+			print(instrument.getInstrumentId(), np.floor(np.float(value)/price))
+			return np.floor(np.float(value)/price)
+		except KeyError:
+			logError('You have specified Dollar Limit but Price Feature Key does not exist')
 
 	def getExecutions(self, time, instrumentsManager, capital):
 		# TODO:
 		marketFeaturesDf = instrumentsManager.getDataDf()
 		currentMarketFeatures = marketFeaturesDf.iloc[-1]
 		currentPredictions = marketFeaturesDf['prediction'].iloc[-1]
-		print(currentPredictions)
+		logInfo(str(currentPredictions))
 		executions = []
 		executions += self.exitPosition(instrumentsManager, currentPredictions)
 		executions += self.enterPosition(instrumentsManager, currentPredictions, capital)
@@ -54,11 +70,15 @@ class SimpleExecutionSystem(BaseExecutionSystem):
 			elif self.exitCondition(instrumentsManager, instrument, currentPredictions):
 				instrumentExec = InstrumentExection(instrument.getInstrumentId(), np.abs(position), -np.sign(position))
 				executions.append(instrumentExec)
+				logInfo('EXIT TRADE: %s Size: %.2f B/S: %i '%(
+					instrument.getInstrumentId(), np.abs(position), -np.sign(position)))
 
 			#hack
 			elif self.hackCondition(instrumentsManager):
 				instrumentExec = InstrumentExection(instrument.getInstrumentId(), np.abs(position), -np.sign(position))
 				executions.append(instrumentExec)
+				logInfo('HACK TRADE: %s Size: %.2f B/S: %i '%(
+					instrument.getInstrumentId(), np.abs(position), -np.sign(position)))
 		return executions
 
 	def enterPosition(self, instrumentsManager, currentPredictions, capital):
@@ -72,12 +92,18 @@ class SimpleExecutionSystem(BaseExecutionSystem):
 				continue
 			#Enter position if condition met
 			if self.enterCondition(instrumentsManager, instrument, currentPredictions):
-				print(instrumentId, self.getLotSize(instrumentId),np.sign(currentPredictions[instrumentId] - 0.5))
+				buySell = self.getBuySell(instrument, currentPredictions)
+				logInfo('ENTER TRADE: %s Size: %.2f B/S: %i '%(
+					instrumentId, self.getLotSize(instrument), buySell))
 				instrumentExec = InstrumentExection(instrumentId, 
-													self.getLotSize(instrumentId), 
-													np.sign(currentPredictions[instrumentId] - 0.5))
+													self.getLotSize(instrument), buySell)
 				executions.append(instrumentExec)
 		return executions
+
+	def getBuySell(self, instrument, currentPredictions):
+		instrumentId = instrument.getInstrumentId()
+		return np.sign(currentPredictions[instrumentId] - 0.5)
+
 
 	def enterCondition(self, instrumentsManager, instrument, currentPredictions):
 		instrumentId = instrument.getInstrumentId()
@@ -87,11 +113,11 @@ class SimpleExecutionSystem(BaseExecutionSystem):
 	def atPositionLimit(self, capital, instrumentsManager, instrument):
 		position = instrument.getCurrentPosition()
 		instrumentId = instrument.getInstrumentId()
-		if (position > self.getLongLimit(instrumentId)) or (position < -self.getShortLimit(instrumentId)):
-			logInfo('At Position Limit for %s'%instrumentId)
+		if (position > self.getLongLimit(instrument)) or (position < -self.getShortLimit(instrument)):
+			logWarn('At Position Limit for %s'%instrumentId)
 			return True
 		if capital < self.capitalUsageLimit:
-			logInfo('Not Enough Capital')
+			logWarn('Not Enough Capital')
 			return True
 		return False
 

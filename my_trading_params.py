@@ -172,5 +172,5 @@ if __name__ == "__main__":
     logInfo('THIS IS A SAMPLE TRADING SYSTEM' + '\n\n' + \
      'Use this as a template to implement features and prediction function' + '\n\n' + \
      'Uncomment the last line when you want to execute your trading system' + '\n\n' + \
-     '--------------')
+     '--------------', True)
     tradingSystem.startTrading()

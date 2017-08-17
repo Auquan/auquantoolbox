@@ -3,7 +3,7 @@ from backtester.financial_fn import ma
 import numpy as np
 
 
-class MARibbonFeature(Feature):
+class MARibbonHammingDistanceFeature(Feature):
 
     @classmethod
     def computeForLookbackData(cls, featureParams, featureKey, currentFeatures, lookbackDataDf):
@@ -15,5 +15,6 @@ class MARibbonFeature(Feature):
         for idx in np.linspace(featureParams['startPeriod'], featureParams['endPeriod'], featureParams['numRibbons']):
             i = int(idx)
             rolling_means[i/space - 1] = data[-i:].mean()
-        
-        return rolling_means
+        ranking = stats.rankdata(rolling_means)
+        d = distance.hamming(ranking, range(1, 1+len(rolling_means)))
+        return d
