@@ -18,7 +18,7 @@ from bs4 import BeautifulSoup
 import urllib2
 from urllib import urlencode, quote
 import dateutil.parser
-from backtester.dataSource.yahoo_data_source import YahooStockDataSource
+from backtester.dataSource.data_source_utils import downloadFileFromYahoo
 
 TYPE_LINE_UNDEFINED = 0
 TYPE_LINE_HEADER = 1
@@ -224,14 +224,6 @@ class NSEStockDataSource(DataSource):
     def emitInstrumentUpdate(self, adjustPrice=True):
         allInstrumentUpdates = []
         
-        if adjustPrice:
-            yahooDS_div = YahooStockDataSource(cachedFolderName=self.cachedFolderName,
-                            instrumentIds=self.instrumentIds,startDateStr=datetime.strftime(self.startDate, "%Y/%m/%d"),
-                            endDateStr=datetime.strftime(self.endDate, "%Y/%m/%d"),event='div')
-            yahooDS_split = YahooStockDataSource(cachedFolderName=self.cachedFolderName,
-                             instrumentIds=self.instrumentIds,startDateStr=datetime.strftime(self.startDate, "%Y/%m/%d"),
-                            endDateStr=datetime.strftime(self.endDate, "%Y/%m/%d"),event='split')
-        
         for instrumentId in self.instrumentIds:
             fileName = self.getFileName(INSTRUMENT_TYPE_STOCK, instrumentId)
             
@@ -241,7 +233,7 @@ class NSEStockDataSource(DataSource):
             if not os.path.isfile(fileName):
                 self.downloadFile(instrumentId, fileName)
                 if adjustPrice:
-                    self.adjustPriceForSplitAndDiv(instrumentId,fileName,yahooDS_div,yahooDS_split)
+                    self.adjustPriceForSplitAndDiv(instrumentId,fileName)
             
             fileHandler = InstrumentsFromFile(fileName=fileName, instrumentId=instrumentId)
             instrumentUpdates = fileHandler.processLinesIntoInstruments(self.lineLength)
@@ -251,12 +243,12 @@ class NSEStockDataSource(DataSource):
         for instrumentUpdate in allInstrumentUpdates:
             yield(instrumentUpdate)
 
-    def adjustPriceForSplitAndDiv(self, instrumentId, fileName, yahooDS_div, yahooDS_split):
+    def adjustPriceForSplitAndDiv(self, instrumentId, fileName):
         divFile = self.getFileName('div', instrumentId)
         splitFile = self.getFileName('split', instrumentId)
         if not (os.path.isfile(divFile) and os.path.isfile(splitFile)):
-            yahooDS_div.downloadFile('%s.NS'%instrumentId, divFile)
-            yahooDS_split.downloadFile('%s.NS'%instrumentId, splitFile)
+            downloadFileFromYahoo(self.startDate, self.endDate, '%s.NS'%instrumentId, divFile, event='div')
+            downloadFileFromYahoo(self.startDate, self.endDate, '%s.NS'%instrumentId, splitFile, event='split')
         div = pd.read_csv(divFile, engine='python', index_col= 'Date', parse_dates=True)
         split = pd.read_csv(splitFile, engine='python', index_col= 'Date', parse_dates=True)
         prices = pd.read_csv(fileName, engine='python', index_col= 'Date', parse_dates=True)
