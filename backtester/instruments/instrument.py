@@ -88,7 +88,7 @@ class Instrument(object):
                                                          featureKey=featureKey,
                                                          currentFeatures=currentFeatures,
                                                          instrument=self,
-                                                         instrumentManager=instrumentManger)  # TODO
+                                                         instrumentManager=instrumentManger)
             currentFeatures[featureKey] = featureVal
         logInfo('Instrument Features: %s: %s' % (self.__instrumentId, str(currentFeatures)))
         self.__lookbackFeatures.addData(timeOfUpdate, currentFeatures)

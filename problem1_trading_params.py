@@ -91,7 +91,7 @@ class MyTradingParams(TradingSystemParameters):
                                'featureName': price}}
         scoreDict = {'featureKey': 'score',
                     'featureId': 'score_fv',
-                    'params': {'predictionKey': 'ma_5'}}
+                    'params': {'predictionKey': 'prediction'}}
         return {INSTRUMENT_TYPE_STOCK: [ma1Dict, sdevDict,scoreDict]}
 
     '''
