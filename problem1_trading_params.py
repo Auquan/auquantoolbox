@@ -11,7 +11,7 @@ from my_custom_feature import MyCustomFeature
 
 start = '2010/01/01'
 end = '2017/06/30'
-assets = [ 'PNB', 'BANKBEES']#,'FEDERALBNK', 'ICICIBANK', 'CANBK', 'SBIN', 'YESBANK', 'KOTAKBANK', 
+assets = [ 'PNB', 'FEDERALBNK']#, 'ICICIBANK', 'CANBK', 'SBIN', 'YESBANK', 'KOTAKBANK', 
           #'BANKBARODA', 'HDFCBANK', 'AXISBANK', 'INDUSINDBK', 'NIFTYBEES']
 price = 'close'
 class MyTradingParams(TradingSystemParameters):
@@ -132,12 +132,11 @@ class MyTradingParams(TradingSystemParameters):
         for ids in instrumentIds:
             instrument = instrumentManager.getInstrument(ids)
 
-            if instrument is None:
-                predictions[ids] = 0
+            if instrument is not None:
 
-            lookbackInstrumentFeatures = instrument.getDataDf().iloc[-1]
-            # IMPLEMENT THIS
-            predictions[ids] = lookbackInstrumentFeatures['ma_5']
+              lookbackInstrumentFeatures = instrument.getDataDf().iloc[-1]
+              # IMPLEMENT THIS
+              predictions[ids] = lookbackInstrumentFeatures['ma_5']
 
         return predictions
 

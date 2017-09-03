@@ -17,11 +17,14 @@ class ScoreFairValueFeature(Feature):
             price = featureParams['price']
         if 'countKey' in featureParams:
             countKey = featureParams['countKey']
-        prevData = lookbackDataDf[featureKey].iloc[-1]
-        prevCount = lookbackMarketDataDf[countKey].iloc[-1]
-        temp = prevCount * (prevData**2)
-        prevCount+=1
         predictionDict = lookbackMarketDataDf[predictionKey].iloc[-1]
+        prevCount = lookbackMarketDataDf[countKey].iloc[-1]
+        if len(predictionDict)==0 or prevCount==0:
+            return 0
+        prevData = lookbackDataDf[featureKey].iloc[-1]
+        
+        temp = (prevCount-1) * (prevData**2)
+        
         sqError = (predictionDict[instrument.getInstrumentId()] - lookbackDataDf[price].iloc[-1])**2
         temp = (temp + sqError)
         return np.sqrt(float(temp)/float(prevCount))

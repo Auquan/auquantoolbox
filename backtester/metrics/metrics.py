@@ -66,6 +66,7 @@ class Metrics():
         stats['Max Drawdown(%)'] = self.max_drawdown(self.__marketFeaturesDf['portfolio_value'])
         stats['Profit/Loss Ratio']= self.profit_factor(total_pnl)
         stats['Accuracy']=self.accuracy(self.__marketFeaturesDf['pnl'])
+        stats['Score']=self.__marketFeaturesDf['score'].iloc[-1] #TODO change reference to score
         #stats['Log Loss']=logLoss(daily_return)
         self.__stats = stats
 
