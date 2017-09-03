@@ -6,6 +6,7 @@ from data_source import DataSource
 import os
 import os.path
 from pandas_datareader import data
+from backtester.dataSource.data_source_utils import downloadFileFromYahoo
 
 TYPE_LINE_UNDEFINED = 0
 TYPE_LINE_HEADER = 1
@@ -33,8 +34,8 @@ def isFloat(string):
 # Returns the type of lineItems
 
 
-def validateLineItem(lineItems):
-    if len(lineItems) == 6:
+def validateLineItem(lineItems, lineLength):
+    if len(lineItems) == lineLength:
         if lineItems[0] == "Date":
             return TYPE_LINE_HEADER
         elif checkDate(lineItems[0]) and isFloat(lineItems[1]) and isFloat(lineItems[2]) and isFloat(lineItems[3]) and isFloat(lineItems[4]) and isFloat(lineItems[5]):
@@ -42,8 +43,8 @@ def validateLineItem(lineItems):
     return TYPE_LINE_UNDEFINED
 
 
-def parseDataLine(lineItems):
-    if (len(lineItems) != 6):
+def parseDataLine(lineItems, lineLength):
+    if (len(lineItems) != lineLength):
         return None
     openPrice = float(lineItems[1])
     high = float(lineItems[2])
@@ -65,15 +66,15 @@ class InstrumentsFromFile():
         self.currentTimeOfUpdate = None
         self.currentBookData = None
 
-    def processLine(self, line):
+    def processLine(self, line, lineLength):
         lineItems = line.split(',')
-        lineItemType = validateLineItem(lineItems)
+        lineItemType = validateLineItem(lineItems,lineLength)
         if (lineItemType == TYPE_LINE_DATA):
             inst = None
             if self.currentInstrumentSymbol is not None:
                 self.currentTimeOfUpdate = datetime.strptime(lineItems[0], "%Y-%m-%d")
                 self.currentInstrumentSymbol = self.instrumentId
-                self.currentBookData = parseDataLine(lineItems)
+                self.currentBookData = parseDataLine(lineItems,lineLength)
                 if self.currentBookData is None:
                     return None
                 # right now only works for stocks
@@ -84,11 +85,11 @@ class InstrumentsFromFile():
                 return inst
         return None
 
-    def processLinesIntoInstruments(self):
+    def processLinesIntoInstruments(self,lineLength):
         with open(self.fileName, "r") as ins:
             instruments = []
             for line in ins:
-                inst = self.processLine(line)
+                inst = self.processLine(line,lineLength)
                 if inst is not None:
                     instruments.append(inst)
             return instruments
@@ -101,6 +102,7 @@ class GoogleStockDataSource(DataSource):
         self.cachedFolderName = cachedFolderName
         self.instrumentIds = instrumentIds
         self.currentDate = self.startDate
+        self.lineLength = 6
 
     def downloadFile(self, instrumentId, fileName):
         logInfo('Downloading %s'%fileName)
@@ -110,14 +112,17 @@ class GoogleStockDataSource(DataSource):
     def getFileName(self, instrumentType, instrumentId):
         return '%s/%s_%s_%s_%s.csv' % (self.cachedFolderName, instrumentId, instrumentType, self.startDate.strftime("%Y%m%d"), self.endDate.strftime("%Y%m%d"))
 
-    def emitInstrumentUpdate(self):
+    def emitInstrumentUpdate(self, adjustPrice=True):
         allInstrumentUpdates = []
+
         for instrumentId in self.instrumentIds:
             fileName = self.getFileName(INSTRUMENT_TYPE_STOCK, instrumentId)
             if not os.path.exists(self.cachedFolderName):
                 os.mkdir(self.cachedFolderName, 0755)
             if not os.path.isfile(fileName):
                 self.downloadFile(instrumentId, fileName)
+                if adjustPrice:
+                    self.adjustPriceForSplitAndDiv(instrumentId,fileName)
             fileHandler = InstrumentsFromFile(fileName=fileName, instrumentId=instrumentId)
             instrumentUpdates = fileHandler.processLinesIntoInstruments()
             allInstrumentUpdates = allInstrumentUpdates + instrumentUpdates
@@ -125,7 +130,31 @@ class GoogleStockDataSource(DataSource):
         for instrumentUpdate in allInstrumentUpdates:
             yield(instrumentUpdate)
 
+    def adjustPriceForSplitAndDiv(self, instrumentId, fileName):
+        divFile = self.getFileName('div', instrumentId)
+        splitFile = self.getFileName('split', instrumentId)
+        if not (os.path.isfile(divFile) and os.path.isfile(splitFile)):
+            downloadFileFromYahoo(self.startDate, self.endDate, '%s.NS'%instrumentId, divFile, event='div')
+            downloadFileFromYahoo(self.startDate, self.endDate, '%s.NS'%instrumentId, splitFile, event='split')
+        div = pd.read_csv(divFile, engine='python', index_col= 'Date', parse_dates=True)
+        split = pd.read_csv(splitFile, engine='python', index_col= 'Date', parse_dates=True)
+        prices = pd.read_csv(fileName, engine='python', index_col= 'Date', parse_dates=True)
+        temp = pd.concat([div,prices],axis=1).fillna(0)
+        interim=(temp['Close']-temp['Dividends'])/temp['Close']
+        multiplier1 = interim.sort_index(ascending=False).cumprod().sort_index(ascending=True) 
+        temp2 = split['Stock Splits'].str.split('/',expand=True)
+        if len(temp2.index) > 0:
+            temp_mult = pd.to_numeric(temp2[1])/pd.to_numeric(temp2[0])
+            multiplier2 = temp_mult.sort_index(ascending=False).cumprod().sort_index(ascending=True)
+        else:
+            multiplier2 = pd.Series(1, index = multiplier1.index)
+        multiplier = pd.concat([multiplier1,multiplier2],axis=1).fillna(method='bfill').fillna(1)
+        multiplier[1] = multiplier[1].shift(-1).fillna(1)
+        temp['Close'] = temp['Close']* multiplier[0]*multiplier[1]
+        temp['Open'] = temp['Open']* multiplier[0]*multiplier[1]
+        temp['High'] = temp['High']* multiplier[0]*multiplier[1]
+        temp['Low'] = temp['Low']* multiplier[0]*multiplier[1]
+        temp['Volume'] = temp['Volume']/multiplier[1]
 
-if __name__ == "__main__":
-    a = datetime.strptime('2017/06/30', "%Y/%m/%d")
-    print get_exp_date(a)
+        del temp['Dividends']
+        temp.to_csv(fileName)

@@ -27,12 +27,15 @@ class ProfitLossFeature(Feature):
     def computeForMarket(cls, featureParams, featureKey, currentMarketFeatures, instrumentManager):
         pnl = 0
         pnlDict = instrumentManager.getDataDf()[featureKey]
+        pnlKey = 'pnl'
+        if 'instrument_pnl_feature' in featureParams:
+           pnlKey = featureParams['instrument_pnl_feature']
         if len(pnlDict) < 1:
             return 0
         cumulativePnl = pnlDict.values[-1]
         allInstruments = instrumentManager.getAllInstrumentsByInstrumentId()
         for instrumentId in allInstruments:
             instrument = allInstruments[instrumentId]
-            pnl += instrument.getDataDf()[featureParams['instrument_pnl_feature']][-1]
+            pnl += instrument.getDataDf()[pnlKey][-1]
         cumulativePnl += pnl
         return cumulativePnl

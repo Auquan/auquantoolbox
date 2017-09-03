@@ -11,7 +11,7 @@ from difference_feature import DifferenceFeature
 from exp_moving_average_feature import ExpMovingAverageFeature
 from fees_feature import  FeesFeature
 from macd_feature import MACDFeature
-from ma_ribbon_feature import MARibbonFeature
+from ma_ribbon_feature import MARibbonHammingDistanceFeature
 from momentum_feature import MomentumFeature
 from moving_average_feature import MovingAverageFeature
 from moving_correlation import MovingCorrelationFeature
@@ -40,7 +40,7 @@ featureIdToFeatureCls = {'argmax' : ArgMaxFeature,
                          'exponential_moving_average': ExpMovingAverageFeature,
                          'fees' : FeesFeature, 
                          'macd': MACDFeature,
-                         'ma_ribbon': MARibbonFeature,
+                         'ma_ribbon_hammingdistance': MARibbonHammingDistanceFeature,
                          'momentum': MomentumFeature,
                          'moving_average': MovingAverageFeature,
                          'moving_correlation': MovingCorrelationFeature,

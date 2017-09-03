@@ -30,7 +30,7 @@ def plot(dir, marketFeatures, benchmark, price, startingCapital, excludeFiles):
         for fileName in listdir(dir):
             path = dir + '/' + fileName
             if (not isfile(path)) or (path in excludeFiles) or (fileName in excludeFiles):
-                print('excluding ', fileName)
+                logInfo('excluding ', fileName)
                 continue
             logInfo('Generating %s'%fileName)
             df, stats, benchmark_pnl = getDataReady(dir, path, benchmark, price, startingCapital, False)
@@ -50,7 +50,7 @@ def getDataReady(dir, features, benchmark, price, startingCapital, market=True):
         metrics.calculateMetrics(price, startingCapital)
         benchmark_pnl = None
         stats = metrics.getMetricsString()
-    logInfo(stats)
+    logInfo(stats, True)
     return df, stats, benchmark_pnl
 
 def generateGraph(df, fileName, stats, benchmark_pnl):

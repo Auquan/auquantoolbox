@@ -99,10 +99,10 @@ class TradingSystem:
         instrumentUpdates = self.dataParser.emitInstrumentUpdate()
 
         for instrumentUpdate in instrumentUpdates:
-            # logInfo('TimeOfUpdate: %s TradeSymbol: %s, Volume: %.2f' % (instrumentUpdate.getTimeOfUpdate(), instrumentUpdate.getTradeSymbol(), instrumentUpdate.getBookData()['volume']))
+            logInfo('TimeOfUpdate: %s TradeSymbol: %s' % (instrumentUpdate.getTimeOfUpdate(), instrumentUpdate.getTradeSymbol()))
             self.processInstrumentUpdate(instrumentUpdate, onlyAnalyze)
             if not onlyAnalyze and self.portfolioValue < 0:
-                logInfo('Trading will STOP - OUT OF MONEY!!!!')
+                logError('Trading will STOP - OUT OF MONEY!!!!')
                 break
 
         if not onlyAnalyze:

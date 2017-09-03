@@ -1,12 +1,18 @@
 from backtester.trading_system_parameters import TradingSystemParameters
 from datetime import timedelta
 from backtester.dataSource.google_data_source import GoogleStockDataSource
+from backtester.dataSource.yahoo_data_source import YahooStockDataSource
+from backtester.dataSource.nse_data_source import NSEStockDataSource
 from backtester.executionSystem.simple_execution_system import SimpleExecutionSystem
 from backtester.orderPlacer.backtesting_order_placer import BacktestingOrderPlacer
 from backtester.trading_system import TradingSystem
 from backtester.constants import *
 from my_custom_feature import MyCustomFeature
 
+start = '2010/01/01'
+end = '2017/06/30'
+assets = [ 'PNB', 'BANKBEES']#,'FEDERALBNK', 'ICICIBANK', 'CANBK', 'SBIN', 'YESBANK', 'KOTAKBANK', 
+          #'BANKBARODA', 'HDFCBANK', 'AXISBANK', 'INDUSINDBK', 'NIFTYBEES']
 
 class MyTradingParams(TradingSystemParameters):
     '''
@@ -14,10 +20,10 @@ class MyTradingParams(TradingSystemParameters):
     '''
 
     def getDataParser(self):
-        instrumentIds = ['AAPL']
-        startDateStr = '2011/01/10'
-        endDateStr = '2017/02/09'
-        return GoogleStockDataSource(cachedFolderName='googleData',
+        instrumentIds = assets
+        startDateStr = start
+        endDateStr = end
+        return NSEStockDataSource(cachedFolderName='nseData',
                                      instrumentIds=instrumentIds,
                                      startDateStr=startDateStr,
                                      endDateStr=endDateStr)
@@ -33,7 +39,7 @@ class MyTradingParams(TradingSystemParameters):
         return timedelta(0, 30)  # minutes, seconds
 
     def getBenchmark(self):
-        return 'AAPL'
+        return 'BANKBEES'
 
     '''
     This is a way to use any custom features you might have made.
@@ -87,7 +93,21 @@ class MyTradingParams(TradingSystemParameters):
                     'featureId': 'moving_sdev',
                     'params': {'period': 90,
                                'featureName': 'close'}}
-        return {INSTRUMENT_TYPE_STOCK: [ma1Dict, ma2Dict, sdevDict]}
+        momDict = {'featureKey': 'mom_90',
+                   'featureId': 'momentum',
+                   'params': {'period': 30,
+                              'featureName': 'close'}}
+        maRibbonDict = {'featureKey': 'ma_ribbon',
+                   'featureId': 'ma_ribbon',
+                   'params': {'startPeriod': 5,
+                              'endPeriod': 100,
+                              'numRibbons': 20,
+                              'featureName': 'close'}}
+        rsiDict = {'featureKey': 'rsi_30',
+                   'featureId': 'rsi',
+                   'params': {'period': 30,
+                              'featureName': 'close'}}
+        return {INSTRUMENT_TYPE_STOCK: [ma1Dict, ma2Dict, sdevDict,momDict, maRibbonDict, rsiDict]}
 
     '''
     Returns an array of market feature config dictionaries
@@ -116,24 +136,30 @@ class MyTradingParams(TradingSystemParameters):
     '''
 
     def getPrediction(self, time, currentMarketFeatures, instrumentManager):
-        instrument = instrumentManager.getInstrument('AAPL')
-        if instrument is None:
-            return {'AAPL': 0.5}
+        instrumentIds = instrumentManager.getAllInstrumentsByInstrumentId()
+        predictions = {}
+        for ids in instrumentIds:
+            instrument = instrumentManager.getInstrument(ids)
 
-        lookbackInstrumentFeatures = instrument.getDataDf().iloc[-1]
-        # IMPLEMENT THIS
-        if lookbackInstrumentFeatures['sdev_90'] != 0:
-            z_score = (lookbackInstrumentFeatures['ma_5'] - lookbackInstrumentFeatures['ma_90']) / lookbackInstrumentFeatures['sdev_90']
-        else:
-            z_score = 0
-        if z_score > 1:
-            return {'AAPL': 0.2}
-        elif z_score < -1:
-            return {'AAPL': 0.8}
-        elif (z_score > 0.5) or (z_score < -0.5) :
-            return {'AAPL': 0.6}
-        else:
-            return {'AAPL': 0.5}
+            if instrument is None:
+                predictions[ids] = 0.5
+
+            lookbackInstrumentFeatures = instrument.getDataDf().iloc[-1]
+            # IMPLEMENT THIS
+            if lookbackInstrumentFeatures['sdev_90'] != 0:
+                z_score = (lookbackInstrumentFeatures['ma_5'] - lookbackInstrumentFeatures['ma_90']) / lookbackInstrumentFeatures['sdev_90']
+            else:
+                z_score = 0
+            if z_score > 1:
+                predictions[ids] = 0.2
+            elif z_score < -1:
+                predictions[ids] = 0.8
+            elif (z_score > 0.5) or (z_score < -0.5) :
+                predictions[ids] = 0.6
+            else:
+                predictions[ids] = 0.5
+
+        return predictions
 
     '''
     Returns the type of execution system we want to use. Its an implementation of the class ExecutionSystem
@@ -170,4 +196,4 @@ class MyTradingParams(TradingSystemParameters):
 if __name__ == "__main__":
     tsParams = MyTradingParams()
     tradingSystem = TradingSystem(tsParams)
-    tradingSystem.startTrading()
+    tradingSystem.startTrading(onlyAnalyze=True, shouldPlot=False)
