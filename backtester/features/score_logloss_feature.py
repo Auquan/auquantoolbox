@@ -7,10 +7,15 @@ class ScoreLogLossFeature(Feature):
         lookbackDataDf = instrument.getDataDf()
         predictionKey = 'prediction'
         price = 'close'
+        countKey = 'count'
+        if len(lookbackDataDf) < 1:
+            return 0
         if 'predictionKey' in featureParams:
             predictionKey = featureParams['predictionKey']
         if 'price' in featureParams:
             price = featureParams['price']
+        if 'countKey' in featureParams:
+            countKey = featureParams['countKey']
         prevData = lookbackDataDf[featureKey].iloc[-1]
         prevCount = lookbackDataDf[countKey].iloc[-1]
         temp = prevCount*prevData

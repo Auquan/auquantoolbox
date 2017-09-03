@@ -4,6 +4,7 @@ from argmax_feature import ArgMaxFeature
 from argmin_feature import ArgMinFeature
 from bollinger_bands_feature import BollingerBandsFeature
 from capital_feature import CapitalFeature
+from count_feature import CountFeature
 from crossInstrument_correlation_feature import MovingInstrumentCorrelationFeature
 from crossSectionMomentum_feature import CrossSectionMomentumFeature
 from delay_feature import DelayFeature
@@ -26,6 +27,8 @@ from rank_feature import RankFeature
 from ratio_feature import RatioMarketFeature
 from rsi_feature import RSIFeature
 from scale_feature import ScaleFeature
+from score_fairvalue_feature import ScoreFairValueFeature
+from score_logloss_feature import ScoreLogLossFeature
 from vwap_price_feature import VwapPriceInstrumentFeature
 
 
@@ -33,6 +36,7 @@ featureIdToFeatureCls = {'argmax' : ArgMaxFeature,
                          'argmin' : ArgMinFeature,
                          'bollinger_bands': BollingerBandsFeature,
                          'capital' : CapitalFeature,
+                         'count' : CountFeature,
                          'cross_sectional_momentum' : CrossSectionMomentumFeature,
                          'cross_instrument_correlation' : MovingInstrumentCorrelationFeature,
                          'delay' : DelayFeature,
@@ -55,6 +59,8 @@ featureIdToFeatureCls = {'argmax' : ArgMaxFeature,
                          'ratio': RatioMarketFeature,
                          'rsi': RSIFeature,
                          'scale' : ScaleFeature,
+                         'score_fv' : ScoreFairValueFeature,
+                         'score_ll' : ScoreLogLossFeature,
                          'vwap': VwapPriceInstrumentFeature,
                          }
 
