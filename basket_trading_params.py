@@ -108,14 +108,6 @@ class MyTradingParams(TradingSystemParameters):
         return predictions
 
     def getExecutionSystem(self):
-        # return PairExecutionSystem(pair=['ADANIPOWER.BO', 'RPOWER.BO'],
-        #                            pairRatio=0.66,
-        #                            pairEnter_threshold=0.7, 
-        #                            pairExit_threshold=0.55,
-        #                            pairLongLimit=20000,
-        #                            pairShortLimit=20000,
-        #                            pairCapitalUsageLimit = 0.10*self.getStartingCapital(),
-        #                            pairLotSize=200)
         longLimit = {}
         shortLimit = {}
         lotSize = {}
