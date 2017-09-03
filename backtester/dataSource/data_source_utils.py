@@ -31,7 +31,7 @@ def getCookieForYahoo(instrumentId):
 
 def downloadFileFromYahoo(startDate, endDate, instrumentId, fileName, event='history'):
     logInfo('Downloading %s'%fileName)  
-    cookie, crumb = getCookie(instrumentId)
+    cookie, crumb = getCookieForYahoo(instrumentId)
     start = int(mktime(startDate.timetuple()))
     end = int(mktime(endDate.timetuple()))
     url = 'https://query1.finance.yahoo.com/v7/finance/download/%s?period1=%s&period2=%s&interval=1d&events=%s&crumb=%s'%(instrumentId, start, end, event,crumb)
