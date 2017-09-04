@@ -6,23 +6,30 @@ class ScoreLogLossFeature(Feature):
     def computeForInstrument(cls, featureParams, featureKey, currentFeatures, instrument, instrumentManager):      
         lookbackDataDf = instrument.getDataDf()
         predictionKey = 'prediction'
-        price = 'close'
+        target = 'y'
         countKey = 'count'
-        if len(lookbackDataDf) < 1:
+        if len(lookbackDataDf) < 1 or instrumentManager is None:
             return 0
+        lookbackMarketDataDf = instrumentManager.getDataDf()
         if 'predictionKey' in featureParams:
             predictionKey = featureParams['predictionKey']
-        if 'price' in featureParams:
-            price = featureParams['price']
+        if 'target' in featureParams:
+            target = featureParams['target']
         if 'countKey' in featureParams:
             countKey = featureParams['countKey']
+        predictionDict = lookbackMarketDataDf[predictionKey].iloc[-1]
+        prevCount = lookbackMarketDataDf[countKey].iloc[-1]
+        if len(predictionDict)==0 or prevCount==0:
+            return 0
         prevData = lookbackDataDf[featureKey].iloc[-1]
-        prevCount = lookbackDataDf[countKey].iloc[-1]
-        temp = prevCount*prevData
-        prevCount+=1
-        p = lookbackDataDf[prediction].iloc[-1]
-        y = 1 if lookbackDataDf[price].iloc[-1] < currentFeatures[price] else 0
-        temp = temp + (np.log(p)*y + log(1-p)*(1-y))
+        temp = (prevCount-1) * prevData
+
+        p = predictionDict[instrument.getInstrumentId()]
+        if np.isnan(p):
+            p = 0.5
+        y = (1+lookbackDataDf[target].iloc[-1])/2
+        temp = temp - (np.log(p)*float(y) + np.log(1-p)*float(1-y))
+
         return float(temp)/float(prevCount)
 
     '''

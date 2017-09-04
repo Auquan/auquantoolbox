@@ -27,6 +27,7 @@ class ScoreFairValueFeature(Feature):
         
         sqError = (predictionDict[instrument.getInstrumentId()] - lookbackDataDf[price].iloc[-1])**2
         temp = (temp + sqError)
+        print(currentFeatures[price],lookbackDataDf[price].iloc[-1])
         return np.sqrt(float(temp)/float(prevCount))
 
     '''

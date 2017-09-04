@@ -9,6 +9,7 @@ from crossInstrument_correlation_feature import MovingInstrumentCorrelationFeatu
 from crossSectionMomentum_feature import CrossSectionMomentumFeature
 from delay_feature import DelayFeature
 from difference_feature import DifferenceFeature
+from direction_feature import DirectionFeature
 from exp_moving_average_feature import ExpMovingAverageFeature
 from fees_feature import  FeesFeature
 from macd_feature import MACDFeature
@@ -41,6 +42,7 @@ featureIdToFeatureCls = {'argmax' : ArgMaxFeature,
                          'cross_instrument_correlation' : MovingInstrumentCorrelationFeature,
                          'delay' : DelayFeature,
                          'difference' : DifferenceFeature,
+                         'direction' : DirectionFeature,
                          'exponential_moving_average': ExpMovingAverageFeature,
                          'fees' : FeesFeature, 
                          'macd': MACDFeature,
