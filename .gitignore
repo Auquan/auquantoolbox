@@ -2,6 +2,9 @@
 googleData/*
 runLogs/*
 yahooData/*
+build/*
+dist/*
+auquan_toolbox.egg-info/*
 *csv.html
 nseData
 .DS_Store

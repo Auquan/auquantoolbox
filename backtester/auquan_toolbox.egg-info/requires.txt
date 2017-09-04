@@ -1,0 +1,4 @@
+plotly
+numpy
+pandas
+pandas-datareader
