@@ -75,7 +75,8 @@ class Metrics():
         stats['Profit/Loss Ratio'] = self.profit_factor(total_pnl)
         stats['Accuracy'] = self.accuracy(self.__marketFeaturesDf['pnl'])
         # TODO change reference to score
-        stats['Score'] = self.__marketFeaturesDf['score'].iloc[-1]
+        if 'score' in self.__marketFeaturesDf.columns:
+            stats['Score'] = self.__marketFeaturesDf['score'].iloc[-1]
         #stats['Log Loss']=logLoss(daily_return)
         self.__stats = stats
 

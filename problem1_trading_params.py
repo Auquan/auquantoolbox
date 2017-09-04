@@ -1,32 +1,30 @@
 from backtester.trading_system_parameters import TradingSystemParameters
 from datetime import timedelta
-from backtester.dataSource.google_data_source import GoogleStockDataSource
-from backtester.dataSource.yahoo_data_source import YahooStockDataSource
 from backtester.dataSource.nse_data_source import NSEStockDataSource
 from backtester.executionSystem.simple_execution_system_fairvalue import SimpleExecutionSystemWithFairValue
 from backtester.orderPlacer.backtesting_order_placer import BacktestingOrderPlacer
-from backtester.trading_system import TradingSystem
 from backtester.constants import *
-from my_custom_feature import MyCustomFeature
 
-start = '2010/01/01'
-end = '2017/06/30'
-assets = [ 'PNB', 'FEDERALBNK']#, 'ICICIBANK', 'CANBK', 'SBIN', 'YESBANK', 'KOTAKBANK', 
-          #'BANKBARODA', 'HDFCBANK', 'AXISBANK', 'INDUSINDBK', 'NIFTYBEES']
-price = 'close'
-class MyTradingParams(TradingSystemParameters):
+
+class FairValueTradingParams(TradingSystemParameters):
+
+    def __init__(self, problem1Solver):
+        self.__problem1Solver = problem1Solver
+        super(FairValueTradingParams, self).__init__()
+
     '''
     Returns an instance of class DataParser. Source of data for instruments
     '''
 
     def getDataParser(self):
-        instrumentIds = assets
-        startDateStr = start
-        endDateStr = end
+        instrumentIds = self.__problem1Solver.getSymbolsToTrade()
+        # TODO: get training data set
+        startDateStr = '2010/01/01'
+        endDateStr = '2017/06/30'
         return NSEStockDataSource(cachedFolderName='nseData',
-                                     instrumentIds=instrumentIds,
-                                     startDateStr=startDateStr,
-                                     endDateStr=endDateStr)
+                                  instrumentIds=instrumentIds,
+                                  startDateStr=startDateStr,
+                                  endDateStr=endDateStr)
 
     '''
     Returns a timedetla object to indicate frequency of updates to features
@@ -51,7 +49,7 @@ class MyTradingParams(TradingSystemParameters):
     '''
 
     def getCustomFeatures(self):
-        return {'my_custom_feature': MyCustomFeature}
+        return self.__problem1Solver.getCustomFeatures()
 
     '''
     Returns a dictionary with:
@@ -80,19 +78,12 @@ class MyTradingParams(TradingSystemParameters):
     '''
 
     def getInstrumentFeatureConfigDicts(self):
-        # ADD RELEVANT FEATURES HERE
-        ma1Dict = {'featureKey': 'ma_5',
-                   'featureId': 'moving_average',
-                   'params': {'period': 5,
-                              'featureName': price}}
-        sdevDict = {'featureKey': 'sdev_5',
-                    'featureId': 'moving_sdev',
-                    'params': {'period': 5,
-                               'featureName': price}}
+        stockFeatureConfigs = self.__problem1Solver.getFeatureConfigDicts()
         scoreDict = {'featureKey': 'score',
-                    'featureId': 'score_fv',
-                    'params': {'predictionKey': 'prediction'}}
-        return {INSTRUMENT_TYPE_STOCK: [ma1Dict, sdevDict,scoreDict]}
+                     'featureId': 'score_fv',
+                     'params': {'predictionKey': 'prediction'}}
+        stockFeatureConfigs.append(scoreDict)
+        return {INSTRUMENT_TYPE_STOCK: stockFeatureConfigs}
 
     '''
     Returns an array of market feature config dictionaries
@@ -109,12 +100,12 @@ class MyTradingParams(TradingSystemParameters):
         #                      'featureId': 'my_custom_mrkt_feature',
         #                      'params': {'param1': 'value1'}}
         countDict = {'featureKey': 'count',
-                    'featureId': 'count'}
-        scoreDict = {'featureKey': 'score_fv',
-                    'featureId': 'score_fv',
-                    'params': {'featureName': price,
-                               'instrument_score_feature':'score'}}
-        return [countDict,scoreDict]
+                     'featureId': 'count'}
+        scoreDict = {'featureKey': 'score',
+                     'featureId': 'score_fv',
+                     'params': {'featureName': 'close',
+                                'instrument_score_feature': 'score'}}
+        return [countDict, scoreDict]
 
     '''
     A function that returns your predicted value based on your heuristics.
@@ -131,13 +122,7 @@ class MyTradingParams(TradingSystemParameters):
         predictions = {}
         for ids in instrumentIds:
             instrument = instrumentManager.getInstrument(ids)
-
-            if instrument is not None:
-
-              lookbackInstrumentFeatures = instrument.getDataDf().iloc[-1]
-              # IMPLEMENT THIS
-              predictions[ids] = lookbackInstrumentFeatures['ma_5']
-
+            predictions[ids] = self.__problem1Solver.getFairValue(time, instrument, instrumentManager)
         return predictions
 
     '''
@@ -146,10 +131,10 @@ class MyTradingParams(TradingSystemParameters):
     '''
 
     def getExecutionSystem(self):
-        return SimpleExecutionSystemWithFairValue(enter_threshold_deviation=0.1, 
+        return SimpleExecutionSystemWithFairValue(enter_threshold_deviation=0.1,
                                                   exit_threshold_deviation=0.05, longLimit=10,
-                                                  shortLimit=10, capitalUsageLimit = 0.05,
-                                                  lotSize=1, limitType='L',price=price)
+                                                  shortLimit=10, capitalUsageLimit=0.05,
+                                                  lotSize=1, limitType='L', price='close')
 
     '''
     Returns the type of order placer we want to use. its an implementation of the class OrderPlacer.
@@ -168,9 +153,3 @@ class MyTradingParams(TradingSystemParameters):
 
     def getLookbackSize(self):
         return 90
-
-
-if __name__ == "__main__":
-    tsParams = MyTradingParams()
-    tradingSystem = TradingSystem(tsParams)
-    tradingSystem.startTrading(onlyAnalyze=True, shouldPlot=True)

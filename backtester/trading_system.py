@@ -65,9 +65,9 @@ class TradingSystem:
     def updateFeatures(self, timeOfUpdate):
         # tracking perf
         start = time.time()
-        if self.totalUpdates > 0:
-            # Dont call for the first time
-            self.instrumentManager.updateFeatures(timeOfUpdate)
+        # if self.totalUpdates > 0:
+        # Dont call for the first time
+        self.instrumentManager.updateFeatures(timeOfUpdate)
         end = time.time()
         diffms = (end - start) * 1000
         self.totalTimeUpdating = self.totalTimeUpdating + diffms
