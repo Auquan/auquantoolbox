@@ -25,8 +25,6 @@ class TradingSystem:
         self.stateWriter = StateWriter('runLogs', datetime.strftime(datetime.now(), '%Y%m%d_%H%M%S'))
 
     def processInstrumentUpdates(self, timeOfUpdate, instrumentUpdates, onlyAnalyze=False):
-        for placedOrder in self.orderPlacer.emitPlacedOrders():
-            self.processPlacedOrder(placedOrder)
         # Process instrument updates first
         for instrumentUpdate in instrumentUpdates:
             instrumentIdToUpdate = instrumentUpdate.getInstrumentId()
@@ -38,6 +36,9 @@ class TradingSystem:
                     return
                 self.instrumentManager.addInstrument(instrumentToUpdate)
             instrumentToUpdate.update(instrumentUpdate)
+        # update positions of placed orders
+        for placedOrder in self.orderPlacer.emitPlacedOrders():
+            self.processPlacedOrder(placedOrder)
         # Then we try to calculate features. 
         self.tryUpdateFeaturesAndExecute(timeOfUpdate, onlyAnalyze)
 
