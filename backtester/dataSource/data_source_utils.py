@@ -4,6 +4,7 @@ from backtester.logger import *
 import requests
 import re
 from time import mktime as mktime
+from itertools import groupby
 
 
 def getCookieForYahoo(instrumentId):
@@ -31,3 +32,22 @@ def downloadFileFromYahoo(startDate, endDate, instrumentId, fileName, event='his
     data = requests.get(url, cookies={'B': cookie})
     with open(fileName, 'w') as f:
         f.write(data.content)
+
+
+'''
+Takes list of instruments.
+Outputs them grouped by and sorted by time:
+ie [[t1, [i1,i2,i3]],
+    [t2, [i4]],
+    [t3, [i5, i6]] ], where t1<t2<t3
+'''
+def groupAndSortByTimeUpdates(instrumentUpdates):
+    instrumentUpdates.sort(key=lambda x: x.getTimeOfUpdate())
+    groupedInstruments = []
+    # groupby only works on already sorted elements, so we sorted first
+    for timeOfUpdate, sameTimeInstruments in groupby(instrumentUpdates, lambda x: x.getTimeOfUpdate()):
+        instruments = []
+        for sameTimeInstrument in sameTimeInstruments:
+            instruments.append(sameTimeInstrument)
+        groupedInstruments.append([timeOfUpdate, instruments])
+    return groupedInstruments

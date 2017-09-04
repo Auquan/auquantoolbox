@@ -24,19 +24,22 @@ class TradingSystem:
         self.orderPlacer = None
         self.stateWriter = StateWriter('runLogs', datetime.strftime(datetime.now(), '%Y%m%d_%H%M%S'))
 
-    def processInstrumentUpdate(self, instrumentUpdate, onlyAnalyze=False):
+    def processInstrumentUpdates(self, timeOfUpdate, instrumentUpdates, onlyAnalyze=False):
         for placedOrder in self.orderPlacer.emitPlacedOrders():
             self.processPlacedOrder(placedOrder)
-        self.tryUpdateFeaturesAndExecute(instrumentUpdate.getTimeOfUpdate(), onlyAnalyze)
-        instrumentIdToUpdate = instrumentUpdate.getInstrumentId()
-        instrumentToUpdate = self.instrumentManager.getInstrument(instrumentIdToUpdate)
-        # if not present try to create an instrument from this update first.
-        if instrumentToUpdate is None:
-            instrumentToUpdate = self.instrumentManager.createInstrumentFromUpdate(instrumentUpdate, self.tsParams)
+        # Process instrument updates first
+        for instrumentUpdate in instrumentUpdates:
+            instrumentIdToUpdate = instrumentUpdate.getInstrumentId()
+            instrumentToUpdate = self.instrumentManager.getInstrument(instrumentIdToUpdate)
+            # if not present try to create an instrument from this update first.
             if instrumentToUpdate is None:
-                return
-            self.instrumentManager.addInstrument(instrumentToUpdate)
-        instrumentToUpdate.update(instrumentUpdate)
+                instrumentToUpdate = self.instrumentManager.createInstrumentFromUpdate(instrumentUpdate, self.tsParams)
+                if instrumentToUpdate is None:
+                    return
+                self.instrumentManager.addInstrument(instrumentToUpdate)
+            instrumentToUpdate.update(instrumentUpdate)
+        # Then we try to calculate features. 
+        self.tryUpdateFeaturesAndExecute(timeOfUpdate, onlyAnalyze)
 
     def processPlacedOrder(self, placedOrder):
         instrumentId = placedOrder.getInstrumentId()
@@ -98,11 +101,12 @@ class TradingSystem:
     def startTrading(self, onlyAnalyze=False, shouldPlot=True):
         # TODO: Figure out a good way to handle order parsers with live data later on.
         self.initialize()
-        instrumentUpdates = self.dataParser.emitInstrumentUpdate()
+        groupedInstrumentUpdates = self.dataParser.emitInstrumentUpdates()
 
-        for instrumentUpdate in instrumentUpdates:
-            logInfo('TimeOfUpdate: %s TradeSymbol: %s' % (instrumentUpdate.getTimeOfUpdate(), instrumentUpdate.getTradeSymbol()))
-            self.processInstrumentUpdate(instrumentUpdate, onlyAnalyze)
+        for timeOfUpdate, instrumentUpdates in groupedInstrumentUpdates:
+            # logInfo('TimeOfUpdate: %s TradeSymbol: %s' % (instrumentUpdate.getTimeOfUpdate(), instrumentUpdate.getTradeSymbol()))
+            print timeOfUpdate
+            self.processInstrumentUpdates(timeOfUpdate, instrumentUpdates, onlyAnalyze)
             if not onlyAnalyze and self.portfolioValue < 0:
                 logError('Trading will STOP - OUT OF MONEY!!!!')
                 break

@@ -7,6 +7,7 @@ import os
 import os.path
 from pandas_datareader import data
 from backtester.dataSource.data_source_utils import downloadFileFromYahoo
+from data_source_utils import groupAndSortByTimeUpdates
 
 TYPE_LINE_UNDEFINED = 0
 TYPE_LINE_HEADER = 1
@@ -126,9 +127,10 @@ class GoogleStockDataSource(DataSource):
             fileHandler = InstrumentsFromFile(fileName=fileName, instrumentId=instrumentId)
             instrumentUpdates = fileHandler.processLinesIntoInstruments()
             allInstrumentUpdates = allInstrumentUpdates + instrumentUpdates
-        allInstrumentUpdates.sort(key=lambda x: x.getTimeOfUpdate())
-        for instrumentUpdate in allInstrumentUpdates:
-            yield(instrumentUpdate)
+
+        groupedInstrumentUpdates = groupAndSortByTimeUpdates(allInstrumentUpdates)
+        for timeOfUpdate, instrumentUpdates in groupedInstrumentUpdates:
+            yield([timeOfUpdate, instrumentUpdates])
 
     def adjustPriceForSplitAndDiv(self, instrumentId, fileName):
         divFile = self.getFileName('div', instrumentId)

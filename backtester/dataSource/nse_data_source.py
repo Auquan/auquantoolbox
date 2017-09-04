@@ -5,20 +5,12 @@ from backtester.logger import *
 from data_source import DataSource
 import os
 import os.path
-import requests
-import re
-try:
-    from urllib import urlretrieve, urlopen
-except ImportError:
-    from urllib.request import urlretrieve, urlopen
-from time import mktime as mktime
 import pandas as pd
 import csv
 from bs4 import BeautifulSoup
 import urllib2
-from urllib import urlencode, quote
-import dateutil.parser
 from backtester.dataSource.data_source_utils import downloadFileFromYahoo
+from data_source_utils import groupAndSortByTimeUpdates
 
 TYPE_LINE_UNDEFINED = 0
 TYPE_LINE_HEADER = 1
@@ -218,7 +210,7 @@ class NSEStockDataSource(DataSource):
     def getFileName(self, instrumentType, instrumentId):
         return '%s/%s_%s_%s_%s.csv' % (self.cachedFolderName, instrumentId, instrumentType, self.startDate.strftime("%Y%m%d"), self.endDate.strftime("%Y%m%d"))
 
-    def emitInstrumentUpdate(self, adjustPrice=True):
+    def emitInstrumentUpdates(self, adjustPrice=True):
         allInstrumentUpdates = []
 
         for instrumentId in self.instrumentIds:
@@ -235,10 +227,9 @@ class NSEStockDataSource(DataSource):
             fileHandler = InstrumentsFromFile(fileName=fileName, instrumentId=instrumentId)
             instrumentUpdates = fileHandler.processLinesIntoInstruments(self.lineLength)
             allInstrumentUpdates = allInstrumentUpdates + instrumentUpdates
-
-        allInstrumentUpdates.sort(key=lambda x: x.getTimeOfUpdate())
-        for instrumentUpdate in allInstrumentUpdates:
-            yield(instrumentUpdate)
+        groupedInstrumentUpdates = groupAndSortByTimeUpdates(allInstrumentUpdates)
+        for timeOfUpdate, instrumentUpdates in groupedInstrumentUpdates:
+            yield([timeOfUpdate, instrumentUpdates])
 
     def adjustPriceForSplitAndDiv(self, instrumentId, fileName):
         divFile = self.getFileName('div', instrumentId)
