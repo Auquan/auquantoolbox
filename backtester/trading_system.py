@@ -24,7 +24,7 @@ class TradingSystem:
         self.orderPlacer = None
         self.stateWriter = StateWriter('runLogs', datetime.strftime(datetime.now(), '%Y%m%d_%H%M%S'))
 
-    def processInstrumentUpdate(self, instrumentUpdate, onlyAnalyze = False):
+    def processInstrumentUpdate(self, instrumentUpdate, onlyAnalyze=False):
         for placedOrder in self.orderPlacer.emitPlacedOrders():
             self.processPlacedOrder(placedOrder)
         self.tryUpdateFeaturesAndExecute(instrumentUpdate.getTimeOfUpdate(), onlyAnalyze)
@@ -57,9 +57,9 @@ class TradingSystem:
             if not onlyAnalyze:
                 instrumentsToExecute = self.getInstrumentsToExecute(timeOfUpdate)
                 self.orderPlacer.placeOrders(timeOfUpdate, instrumentsToExecute, self.instrumentManager)
-                self.portfolioValue = self.instrumentManager.getDataDf()['portfolio_value'][-1] #TODO: find a better way to get this value
-                self.capital = self.instrumentManager.getDataDf()['capital'][-1] #TODO: find a better way to get this value
-            
+                self.portfolioValue = self.instrumentManager.getDataDf()['portfolio_value'][-1]  # TODO: find a better way to get this value
+                self.capital = self.instrumentManager.getDataDf()['capital'][-1]  # TODO: find a better way to get this value
+
             self.saveCurrentState()
 
     def updateFeatures(self, timeOfUpdate):
@@ -95,7 +95,7 @@ class TradingSystem:
         self.portfolioValue = self.tsParams.getStartingCapital()
         self.capital = self.tsParams.getStartingCapital()
 
-    def startTrading(self, onlyAnalyze = False, shouldPlot=True):
+    def startTrading(self, onlyAnalyze=False, shouldPlot=True):
         # TODO: Figure out a good way to handle order parsers with live data later on.
         self.initialize()
         instrumentUpdates = self.dataParser.emitInstrumentUpdate()
@@ -109,11 +109,11 @@ class TradingSystem:
 
         if not onlyAnalyze:
             self.closePositions(instrumentUpdate.getTimeOfUpdate())
-        
+
         self.stateWriter.closeStateWriter()
-        
+
         if shouldPlot:
-            plot(self.stateWriter.getFolderName(), None, \
-           self.tsParams.getBenchmark(), self.tsParams.getPriceFeatureKey(), self.tsParams.getStartingCapital(), [self.stateWriter.getMarketFeaturesFilename()])
-            plot(self.stateWriter.getFolderName(), self.stateWriter.getMarketFeaturesFilename(), \
-            self.tsParams.getBenchmark(), self.tsParams.getPriceFeatureKey(), self.tsParams.getStartingCapital(), [])
+            plot(self.stateWriter.getFolderName(), None,
+                 self.tsParams.getBenchmark(), self.tsParams.getPriceFeatureKey(), self.tsParams.getStartingCapital(), [self.stateWriter.getMarketFeaturesFilename()])
+            plot(self.stateWriter.getFolderName(), self.stateWriter.getMarketFeaturesFilename(),
+                 self.tsParams.getBenchmark(), self.tsParams.getPriceFeatureKey(), self.tsParams.getStartingCapital(), [])

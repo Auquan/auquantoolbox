@@ -68,13 +68,13 @@ class InstrumentsFromFile():
 
     def processLine(self, line, lineLength):
         lineItems = line.split(',')
-        lineItemType = validateLineItem(lineItems,lineLength)
+        lineItemType = validateLineItem(lineItems, lineLength)
         if (lineItemType == TYPE_LINE_DATA):
             inst = None
             if self.currentInstrumentSymbol is not None:
                 self.currentTimeOfUpdate = datetime.strptime(lineItems[0], "%Y-%m-%d")
                 self.currentInstrumentSymbol = self.instrumentId
-                self.currentBookData = parseDataLine(lineItems,lineLength)
+                self.currentBookData = parseDataLine(lineItems, lineLength)
                 if self.currentBookData is None:
                     return None
                 # right now only works for stocks
@@ -85,11 +85,11 @@ class InstrumentsFromFile():
                 return inst
         return None
 
-    def processLinesIntoInstruments(self,lineLength):
+    def processLinesIntoInstruments(self, lineLength):
         with open(self.fileName, "r") as ins:
             instruments = []
             for line in ins:
-                inst = self.processLine(line,lineLength)
+                inst = self.processLine(line, lineLength)
                 if inst is not None:
                     instruments.append(inst)
             return instruments
@@ -105,7 +105,7 @@ class GoogleStockDataSource(DataSource):
         self.lineLength = 6
 
     def downloadFile(self, instrumentId, fileName):
-        logInfo('Downloading %s'%fileName)
+        logInfo('Downloading %s' % fileName)
         pd = data.DataReader(instrumentId, 'google', self.startDate, self.endDate)
         pd.to_csv(fileName)
 
@@ -122,7 +122,7 @@ class GoogleStockDataSource(DataSource):
             if not os.path.isfile(fileName):
                 self.downloadFile(instrumentId, fileName)
                 if adjustPrice:
-                    self.adjustPriceForSplitAndDiv(instrumentId,fileName)
+                    self.adjustPriceForSplitAndDiv(instrumentId, fileName)
             fileHandler = InstrumentsFromFile(fileName=fileName, instrumentId=instrumentId)
             instrumentUpdates = fileHandler.processLinesIntoInstruments()
             allInstrumentUpdates = allInstrumentUpdates + instrumentUpdates
@@ -134,27 +134,27 @@ class GoogleStockDataSource(DataSource):
         divFile = self.getFileName('div', instrumentId)
         splitFile = self.getFileName('split', instrumentId)
         if not (os.path.isfile(divFile) and os.path.isfile(splitFile)):
-            downloadFileFromYahoo(self.startDate, self.endDate, '%s.NS'%instrumentId, divFile, event='div')
-            downloadFileFromYahoo(self.startDate, self.endDate, '%s.NS'%instrumentId, splitFile, event='split')
-        div = pd.read_csv(divFile, engine='python', index_col= 'Date', parse_dates=True)
-        split = pd.read_csv(splitFile, engine='python', index_col= 'Date', parse_dates=True)
-        prices = pd.read_csv(fileName, engine='python', index_col= 'Date', parse_dates=True)
-        temp = pd.concat([div,prices],axis=1).fillna(0)
-        interim=(temp['Close']-temp['Dividends'])/temp['Close']
-        multiplier1 = interim.sort_index(ascending=False).cumprod().sort_index(ascending=True) 
-        temp2 = split['Stock Splits'].str.split('/',expand=True)
+            downloadFileFromYahoo(self.startDate, self.endDate, '%s.NS' % instrumentId, divFile, event='div')
+            downloadFileFromYahoo(self.startDate, self.endDate, '%s.NS' % instrumentId, splitFile, event='split')
+        div = pd.read_csv(divFile, engine='python', index_col='Date', parse_dates=True)
+        split = pd.read_csv(splitFile, engine='python', index_col='Date', parse_dates=True)
+        prices = pd.read_csv(fileName, engine='python', index_col='Date', parse_dates=True)
+        temp = pd.concat([div, prices], axis=1).fillna(0)
+        interim = (temp['Close'] - temp['Dividends']) / temp['Close']
+        multiplier1 = interim.sort_index(ascending=False).cumprod().sort_index(ascending=True)
+        temp2 = split['Stock Splits'].str.split('/', expand=True)
         if len(temp2.index) > 0:
-            temp_mult = pd.to_numeric(temp2[1])/pd.to_numeric(temp2[0])
+            temp_mult = pd.to_numeric(temp2[1]) / pd.to_numeric(temp2[0])
             multiplier2 = temp_mult.sort_index(ascending=False).cumprod().sort_index(ascending=True)
         else:
-            multiplier2 = pd.Series(1, index = multiplier1.index)
-        multiplier = pd.concat([multiplier1,multiplier2],axis=1).fillna(method='bfill').fillna(1)
+            multiplier2 = pd.Series(1, index=multiplier1.index)
+        multiplier = pd.concat([multiplier1, multiplier2], axis=1).fillna(method='bfill').fillna(1)
         multiplier[1] = multiplier[1].shift(-1).fillna(1)
-        temp['Close'] = temp['Close']* multiplier[0]*multiplier[1]
-        temp['Open'] = temp['Open']* multiplier[0]*multiplier[1]
-        temp['High'] = temp['High']* multiplier[0]*multiplier[1]
-        temp['Low'] = temp['Low']* multiplier[0]*multiplier[1]
-        temp['Volume'] = temp['Volume']/multiplier[1]
+        temp['Close'] = temp['Close'] * multiplier[0] * multiplier[1]
+        temp['Open'] = temp['Open'] * multiplier[0] * multiplier[1]
+        temp['High'] = temp['High'] * multiplier[0] * multiplier[1]
+        temp['Low'] = temp['Low'] * multiplier[0] * multiplier[1]
+        temp['Volume'] = temp['Volume'] / multiplier[1]
 
         del temp['Dividends']
         temp.to_csv(fileName)
