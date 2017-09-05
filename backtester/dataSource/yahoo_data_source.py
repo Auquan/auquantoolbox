@@ -2,7 +2,7 @@ from datetime import datetime
 from backtester.instrumentUpdates import *
 from backtester.constants import *
 from backtester.logger import *
-from data_source import DataSource
+from backtester.dataSource.data_source import DataSource
 import os
 import os.path
 from time import mktime as mktime
@@ -115,7 +115,7 @@ class YahooStockDataSource(DataSource):
         for instrumentId in self.instrumentIds:
             fileName = self.getFileName(INSTRUMENT_TYPE_STOCK, instrumentId)
             if not os.path.exists(self.cachedFolderName):
-                os.mkdir(self.cachedFolderName, 0755)
+                os.mkdir(self.cachedFolderName, 0o755)
             if not os.path.isfile(fileName):
                 downloadFileFromYahoo(self.startDate, self.endDate,instrumentId, fileName, event='history')
             fileHandler = InstrumentsFromFile(fileName=fileName, instrumentId=instrumentId)

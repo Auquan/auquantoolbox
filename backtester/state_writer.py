@@ -6,10 +6,10 @@ class StateWriter:
     def __init__(self, parentFolderName, runName):
         self.__runName = runName
         if not os.path.exists(parentFolderName):
-            os.mkdir(parentFolderName, 0755)
+            os.mkdir(parentFolderName, 0o755)
         self.__folderName = parentFolderName + '/' + 'runLog_' + runName
         if not os.path.exists(self.__folderName):
-            os.mkdir(self.__folderName, 0755)
+            os.mkdir(self.__folderName, 0o755)
         self.__openFiles = []
         self.__marketFeaturesFilename = None
         self.__marketFeaturesWriter = None

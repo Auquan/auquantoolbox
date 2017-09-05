@@ -1,7 +1,7 @@
 from datetime import timedelta
-from features.feature_config import FeatureConfig
-from executionSystem.simple_execution_system import SimpleExecutionSystem
-from orderPlacer.backtesting_order_placer import BacktestingOrderPlacer
+from backtester.features.feature_config import FeatureConfig
+from backtester.executionSystem.simple_execution_system import SimpleExecutionSystem
+from backtester.orderPlacer.backtesting_order_placer import BacktestingOrderPlacer
 from backtester.constants import *
 
 
