@@ -87,7 +87,7 @@ class InstrumentManager:
     def updateFeatures(self, timeOfUpdate):
         for instrumentId in self.__instrumentsDict:
             instrument = self.__instrumentsDict[instrumentId]
-            instrument.updateFeatures(timeOfUpdate)
+            instrument.updateFeatures(timeOfUpdate, self)
 
         currentMarketFeatures = {}
         featureConfigs = self.tsParams.getMarketFeatureConfigs() + self.__compulsoryFeatureConfigs

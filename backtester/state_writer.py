@@ -31,6 +31,8 @@ class StateWriter:
         writer.writerow(toSaveColumns)
 
     def writeLastFeatures(self, writer, df):
+        if len(df) == 0:
+            return
         lastFeatures = df.iloc[-1]
         timeOfUpdate = lastFeatures.name
         featureValues = lastFeatures.values
