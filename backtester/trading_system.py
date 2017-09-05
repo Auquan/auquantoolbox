@@ -113,7 +113,7 @@ class TradingSystem:
                 break
 
         if not onlyAnalyze:
-            self.closePositions(instrumentUpdate.getTimeOfUpdate())
+            self.closePositions(timeOfUpdate)
 
         self.stateWriter.closeStateWriter()
 

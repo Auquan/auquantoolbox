@@ -11,6 +11,7 @@ from bs4 import BeautifulSoup
 import urllib2
 from backtester.dataSource.data_source_utils import downloadFileFromYahoo
 from data_source_utils import groupAndSortByTimeUpdates
+from urllib import quote
 
 TYPE_LINE_UNDEFINED = 0
 TYPE_LINE_HEADER = 1
