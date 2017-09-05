@@ -41,8 +41,6 @@ class SimpleExecutionSystem(BaseExecutionSystem):
             return value
         try:
             price = instrument.getDataDf()[self.priceFeature].iloc[-1]
-            print(instrument.getInstrumentId(),
-                  np.floor(np.float(value) / price))
             return np.floor(np.float(value) / price)
         except KeyError:
             logError(
