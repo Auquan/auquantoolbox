@@ -19,6 +19,9 @@ class ScoreLogLossFeature(Feature):
             target = featureParams['target']
         if 'countKey' in featureParams:
             countKey = featureParams['countKey']
+        if len(lookbackMarketDataDf) < 1:
+            # first iteration
+            return 0
         predictionDict = lookbackMarketDataDf[predictionKey].iloc[-1]
         prevCount = lookbackMarketDataDf[countKey].iloc[-1]
         if len(predictionDict) == 0 or prevCount == 0:

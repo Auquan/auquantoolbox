@@ -76,6 +76,7 @@ class Instrument(object):
 
     def updateFeatures(self, timeOfUpdate, instrumentManger):
         currentFeatures = copy.deepcopy(self.getCurrentBookData())
+        self.__lookbackFeatures.addData(timeOfUpdate, currentFeatures)
         featureConfigs = self.tsParams.getFeatureConfigsForInstrumentType(self.getInstrumentType())
         featureConfigs = featureConfigs + self.__compulsoryFeatureConfigs
         for featureConfig in featureConfigs:
@@ -90,5 +91,5 @@ class Instrument(object):
                                                          instrument=self,
                                                          instrumentManager=instrumentManger)
             currentFeatures[featureKey] = featureVal
+            self.__lookbackFeatures.addFeatureVal(timeOfUpdate, featureKey, featureVal)
         logInfo('Instrument Features: %s: %s' % (self.__instrumentId, str(currentFeatures)))
-        self.__lookbackFeatures.addData(timeOfUpdate, currentFeatures)
