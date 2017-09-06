@@ -29,3 +29,12 @@ class LookbackData:
 
     def getLastData(self):
         return self.__data.iloc[-1]
+
+    def addFeatureVal(self, timeOfUpdate, featureKey, featureVal):
+        # have to do this because in case featureVal is a dictionary and we have already set the first row
+        # for this column to Nan, it raises an error if you try to update the cell which has value Nan
+        # to dictionary.
+        # only need to do it once for the first update
+        if len(self.__data) == 1 and (isinstance(featureVal, dict)):
+            self.__data[featureKey] = self.__data[featureKey].astype(object)
+        self.__data.set_value(timeOfUpdate, featureKey, featureVal)

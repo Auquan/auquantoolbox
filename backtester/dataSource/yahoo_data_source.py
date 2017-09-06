@@ -5,9 +5,8 @@ from backtester.logger import *
 from backtester.dataSource.data_source import DataSource
 import os
 import os.path
-from time import mktime as mktime
-import pandas as pd
 from backtester.dataSource.data_source_utils import downloadFileFromYahoo
+from data_source_utils import groupAndSortByTimeUpdates
 
 TYPE_LINE_UNDEFINED = 0
 TYPE_LINE_HEADER = 1
@@ -121,9 +120,9 @@ class YahooStockDataSource(DataSource):
             fileHandler = InstrumentsFromFile(fileName=fileName, instrumentId=instrumentId)
             instrumentUpdates = fileHandler.processLinesIntoInstruments()
             allInstrumentUpdates = allInstrumentUpdates + instrumentUpdates
-        allInstrumentUpdates.sort(key=lambda x: x.getTimeOfUpdate())
-        for instrumentUpdate in allInstrumentUpdates:
-            yield(instrumentUpdate)
+        groupedInstrumentUpdates = groupAndSortByTimeUpdates(allInstrumentUpdates)
+        for timeOfUpdate, instrumentUpdates in groupedInstrumentUpdates:
+            yield([timeOfUpdate, instrumentUpdates])
 
 
 if __name__ == "__main__":

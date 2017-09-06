@@ -4,6 +4,7 @@ from backtester.instrumentUpdates import *
 from backtester.constants import *
 from backtester.dataSource.data_source import DataSource
 import os.path
+from data_source_utils import groupAndSortByTimeUpdates
 
 TYPE_LINE_UNDEFINED = 0
 TYPE_LINE_BOOK_DATA = 1
@@ -132,9 +133,9 @@ class AuquanDataSource(DataSource):
                     fileHandler = InstrumentsFromFile(fileName=fileName, instrumentId=instrumentId, expiryTime=expiryTime)
                     instrumentUpdates = fileHandler.processLinesIntoInstruments()
                     allInstrumentUpdates = allInstrumentUpdates + instrumentUpdates
-            allInstrumentUpdates.sort(key=lambda x: x.getTimeOfUpdate())
-            for instrumentUpdate in allInstrumentUpdates:
-                yield(instrumentUpdate)
+            groupedInstrumentUpdates = groupAndSortByTimeUpdates(allInstrumentUpdates)
+            for timeOfUpdate, instrumentUpdates in groupedInstrumentUpdates:
+                yield([timeOfUpdate, instrumentUpdates])
             self.currentDate = self.currentDate + timedelta(days=1)
 
 

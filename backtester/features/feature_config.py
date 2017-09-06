@@ -4,10 +4,12 @@ from backtester.features.argmax_feature import ArgMaxFeature
 from backtester.features.argmin_feature import ArgMinFeature
 from backtester.features.bollinger_bands_feature import BollingerBandsFeature
 from backtester.features.capital_feature import CapitalFeature
+from backtester.features.count_feature import CountFeature
 from backtester.features.crossInstrument_correlation_feature import MovingInstrumentCorrelationFeature
 from backtester.features.crossSectionMomentum_feature import CrossSectionMomentumFeature
 from backtester.features.delay_feature import DelayFeature
 from backtester.features.difference_feature import DifferenceFeature
+from backtester.features.direction_feature import DirectionFeature
 from backtester.features.exp_moving_average_feature import ExpMovingAverageFeature
 from backtester.features.fees_feature import  FeesFeature
 from backtester.features.macd_feature import MACDFeature
@@ -26,17 +28,20 @@ from backtester.features.rank_feature import RankFeature
 from backtester.features.ratio_feature import RatioMarketFeature
 from backtester.features.rsi_feature import RSIFeature
 from backtester.features.scale_feature import ScaleFeature
+from backtester.features.score_fairvalue_feature import ScoreFairValueFeature
+from backtester.features.score_logloss_feature import ScoreLogLossFeature
 from backtester.features.vwap_price_feature import VwapPriceInstrumentFeature
-
 
 featureIdToFeatureCls = {'argmax' : ArgMaxFeature,
                          'argmin' : ArgMinFeature,
                          'bollinger_bands': BollingerBandsFeature,
                          'capital' : CapitalFeature,
+                         'count' : CountFeature,
                          'cross_sectional_momentum' : CrossSectionMomentumFeature,
                          'cross_instrument_correlation' : MovingInstrumentCorrelationFeature,
                          'delay' : DelayFeature,
                          'difference' : DifferenceFeature,
+                         'direction' : DirectionFeature,
                          'exponential_moving_average': ExpMovingAverageFeature,
                          'fees' : FeesFeature, 
                          'macd': MACDFeature,
@@ -55,6 +60,8 @@ featureIdToFeatureCls = {'argmax' : ArgMaxFeature,
                          'ratio': RatioMarketFeature,
                          'rsi': RSIFeature,
                          'scale' : ScaleFeature,
+                         'score_fv' : ScoreFairValueFeature,
+                         'score_ll' : ScoreLogLossFeature,
                          'vwap': VwapPriceInstrumentFeature,
                          }
 
