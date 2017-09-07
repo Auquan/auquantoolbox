@@ -1,4 +1,4 @@
-from feature import Feature
+from backtester.features.feature import Feature
 from backtester.financial_fn import ma
 import numpy as np
 import pandas as pd
@@ -19,16 +19,16 @@ class CrossSectionMomentumFeature(Feature):
     '''
     @classmethod
     def computeForMarket(cls, featureParams, featureKey, currentMarketFeatures, instrumentManager):
-    	data = {}
-    	if 'instrumentIds' in featureParams:
-    		allInstruments = featureParams['instrumentIds']
-    	else:
-    		allInstruments = instrumentManager.getAllInstrumentsByInstrumentId()
+        data = {}
+        if 'instrumentIds' in featureParams:
+            allInstruments = featureParams['instrumentIds']
+        else:
+            allInstruments = instrumentManager.getAllInstrumentsByInstrumentId()
         for instrumentId in allInstruments:
             instrument = allInstruments[instrumentId]
             data[instrumentId] = instrument.getDataDf()[featureParams['featureName']]
         df = pd.DataFrame(data)
         R = (df / df.shift(featureParams['period']))
-    	ranks = (R.T - R.T.mean()).T.mean()
-    	return ranks
+        ranks = (R.T - R.T.mean()).T.mean()
+        return ranks
 

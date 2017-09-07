@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 import calendar
 from backtester.instrumentUpdates import *
 from backtester.constants import *
-from data_source import DataSource
+from backtester.dataSource.data_source import DataSource
 import os.path
 from data_source_utils import groupAndSortByTimeUpdates
 

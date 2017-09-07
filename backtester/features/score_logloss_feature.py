@@ -1,4 +1,4 @@
-from feature import Feature
+from backtester.features.feature import Feature
 import numpy as np
 
 

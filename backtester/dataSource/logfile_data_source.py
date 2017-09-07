@@ -1,5 +1,5 @@
 import time
-from data_source import DataSource
+from backtester.dataSource.data_source import DataSource
 
 
 class LogfileDataSource(DataSource):

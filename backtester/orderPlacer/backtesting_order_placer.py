@@ -1,4 +1,4 @@
-from base_order_placer import BaseOrderPlacer, PlacedOrder
+from backtester.orderPlacer.base_order_placer import BaseOrderPlacer, PlacedOrder
 from backtester.constants import *
 
 

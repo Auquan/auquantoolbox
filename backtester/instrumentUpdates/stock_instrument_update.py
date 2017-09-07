@@ -1,4 +1,4 @@
-from instrument_update import InstrumentUpdate
+from backtester.instrumentUpdates.instrument_update import InstrumentUpdate
 from backtester.constants import *
 
 

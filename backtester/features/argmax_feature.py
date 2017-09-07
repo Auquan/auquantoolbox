@@ -1,4 +1,6 @@
-from feature import Feature
+from backtester.features.feature import Feature
+from backtester.financial_fn import ma
+import numpy as np
 
 
 class ArgMaxFeature(Feature):

@@ -1,6 +1,6 @@
 def log(msg, verbose):
 	if verbose:
-		print msg
+		print(msg)
 
 
 def logError(msg, verbose=True):

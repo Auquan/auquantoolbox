@@ -1,9 +1,9 @@
 import time
 from backtester.logger import *
-from instruments_manager import InstrumentManager
+from backtester.instruments_manager import InstrumentManager
 from datetime import datetime
-from state_writer import StateWriter
-from plotter import plot
+from backtester.state_writer import StateWriter
+from backtester.plotter import plot
 
 
 class TradingSystem:

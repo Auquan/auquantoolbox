@@ -1,6 +1,9 @@
 from backtester.instrumentUpdates import *
 from backtester.constants import *
 from backtester.logger import *
+from backtester.dataSource.data_source import DataSource
+import os
+import os.path
 import requests
 import re
 from time import mktime as mktime
