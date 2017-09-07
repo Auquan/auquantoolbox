@@ -5,8 +5,7 @@ from backtester.logger import *
 from backtester.dataSource.data_source import DataSource
 import os
 import os.path
-from backtester.dataSource.data_source_utils import downloadFileFromYahoo
-from data_source_utils import groupAndSortByTimeUpdates
+from backtester.dataSource.data_source_utils import downloadFileFromYahoo, groupAndSortByTimeUpdates
 
 TYPE_LINE_UNDEFINED = 0
 TYPE_LINE_HEADER = 1

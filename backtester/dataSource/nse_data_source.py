@@ -9,8 +9,7 @@ import pandas as pd
 import csv
 from bs4 import BeautifulSoup
 import urllib2
-from backtester.dataSource.data_source_utils import downloadFileFromYahoo
-from data_source_utils import groupAndSortByTimeUpdates
+from backtester.dataSource.data_source_utils import downloadFileFromYahoo, groupAndSortByTimeUpdates
 from urllib import quote
 
 TYPE_LINE_UNDEFINED = 0

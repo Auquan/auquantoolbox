@@ -4,7 +4,7 @@ from backtester.instrumentUpdates import *
 from backtester.constants import *
 from backtester.dataSource.data_source import DataSource
 import os.path
-from data_source_utils import groupAndSortByTimeUpdates
+from backtester.dataSource.data_source_utils import groupAndSortByTimeUpdates
 
 TYPE_LINE_UNDEFINED = 0
 TYPE_LINE_BOOK_DATA = 1
