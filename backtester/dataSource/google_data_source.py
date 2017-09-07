@@ -113,7 +113,7 @@ class GoogleStockDataSource(DataSource):
     def getFileName(self, instrumentType, instrumentId):
         return '%s/%s_%s_%s_%s.csv' % (self.cachedFolderName, instrumentId, instrumentType, self.startDate.strftime("%Y%m%d"), self.endDate.strftime("%Y%m%d"))
 
-    def emitInstrumentUpdate(self, adjustPrice=True):
+    def emitInstrumentUpdates(self, adjustPrice=True):
         allInstrumentUpdates = []
 
         for instrumentId in self.instrumentIds:

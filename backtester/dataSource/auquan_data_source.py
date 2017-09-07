@@ -120,7 +120,7 @@ class AuquanDataSource(DataSource):
         dateStr = date.strftime("%Y%m%d")
         return '%s/%s/%s/%s_%s.txt' % (self.folderName, instrumentType, instrumentId, instrumentId, dateStr)
 
-    def emitInstrumentUpdate(self):
+    def emitInstrumentUpdates(self):
         while (self.currentDate <= self.endDate):
             allInstrumentUpdates = []
             for instrumentType in self.instrumentIdsByType:

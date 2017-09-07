@@ -109,7 +109,7 @@ class YahooStockDataSource(DataSource):
     def getFileName(self, instrumentType, instrumentId):
         return '%s/%s_%s_%s_%s.csv' % (self.cachedFolderName, instrumentId, instrumentType, self.startDate.strftime("%Y%m%d"), self.endDate.strftime("%Y%m%d"))
 
-    def emitInstrumentUpdate(self):
+    def emitInstrumentUpdates(self):
         allInstrumentUpdates = []
         for instrumentId in self.instrumentIds:
             fileName = self.getFileName(INSTRUMENT_TYPE_STOCK, instrumentId)

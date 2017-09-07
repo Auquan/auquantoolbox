@@ -16,7 +16,7 @@ class LogfileDataSource(DataSource):
     def processLineIntoInstrumentUpdate(self, line):
         return line
 
-    def emitInstrumentUpdate(self):
+    def emitInstrumentUpdates(self):
         while True:
             readLine = self.file.readline()
             if readLine:

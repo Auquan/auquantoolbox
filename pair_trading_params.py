@@ -141,7 +141,6 @@ class MyTradingParams(TradingSystemParameters):
         else:
             z_score = 0
         instrument = instrumentManager.getInstrument(instrumentIds[0])
-        print(instrument)
         #z_score = z_score + instrument.getDataDf()['position']/20000
         
         if currentMarketFeatures['correl_90'] < 0.5:
