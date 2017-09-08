@@ -10,10 +10,10 @@ class CapitalFeature(Feature):
     def computeForInstrument(cls, featureParams, featureKey, currentFeatures, instrument, instrumentManager):
 
         currentPosition = instrument.getCurrentPosition()
-        if len(instrument.getDataDf()['position']) < 1:
+        if len(instrument.getDataDf()['position']) <= 1:
             previousPosition = 0
         else:
-            previousPosition = instrument.getDataDf()['position'][-1]
+            previousPosition = instrument.getDataDf()['position'][-2]
         currentPrice = currentFeatures[featureParams['price']]
         changeInCapital = (currentPosition - previousPosition) * currentPrice + currentFeatures[featureParams['fees']]
         return changeInCapital
@@ -25,9 +25,9 @@ class CapitalFeature(Feature):
     def computeForMarket(cls, featureParams, featureKey, currentMarketFeatures, instrumentManager):
         changeInCapital = 0
         capitalDict = instrumentManager.getDataDf()[featureKey]
-        if len(capitalDict) < 1:
+        if len(capitalDict) <= 1:
             return featureParams['initial_capital']
-        capital = capitalDict.values[-1]
+        capital = capitalDict.values[-2]
         allInstruments = instrumentManager.getAllInstrumentsByInstrumentId()
         for instrumentId in allInstruments:
             instrument = allInstruments[instrumentId]

@@ -6,37 +6,37 @@ import numpy as np
 class SimpleExecutionSystemWithFairValue(SimpleExecutionSystem):
 	def __init__(self, enter_threshold_deviation=0.07, exit_threshold_deviation=0.05, longLimit=10, \
 				shortLimit=10, capitalUsageLimit = 0,lotSize=1, limitType='L',price=''):
-		super(SimpleExecutionSystemWithFairValue, self).__init__(enter_threshold=enter_threshold_deviation, 
-    				 exit_threshold=exit_threshold_deviation, 
+		super(SimpleExecutionSystemWithFairValue, self).__init__(enter_threshold=enter_threshold_deviation,
+    				 exit_threshold=exit_threshold_deviation,
     				 longLimit=longLimit, shortLimit=shortLimit,
-    				 capitalUsageLimit = capitalUsageLimit, 
+    				 capitalUsageLimit = capitalUsageLimit,
     				 lotSize=lotSize, limitType=limitType,price=price)
 
 	def getBuySell(self, instrument, currentPredictions):
 		instrumentId = instrument.getInstrumentId()
 		try:
-			currentPrice = instrument.getDataDf()[self.price].iloc[-1]
+			currentPrice = instrument.getDataDf()[self.priceFeature].iloc[-1]
 			fairValue = currentPredictions[instrumentId]
 			currentDeviationFromPrediction = fairValue/currentPrice
-			return -np.sign(currentDeviationFromPrediction) 
+			return -np.sign(currentDeviationFromPrediction)
 		except KeyError:
 			logError('You have specified FairValue Execution Type but Price Feature Key does not exist')
 
 	def enterCondition(self, instrumentsManager, instrument, currentPredictions):
 		instrumentId = instrument.getInstrumentId()
 		try:
-			currentPrice = instrument.getDataDf()[self.price].iloc[-1]
+			currentPrice = instrument.getDataDf()[self.priceFeature].iloc[-1]
 			fairValue = currentPredictions[instrumentId]
 			currentDeviationFromPrediction = fairValue/currentPrice
 			return np.abs(currentDeviationFromPrediction) > (self.enter_threshold)
 		except KeyError:
 			logError('You have specified FairValue Execution Type but Price Feature Key does not exist')
-		
+
 
 	def exitCondition(self, instrumentsManager, instrument, currentPredictions):
 		instrumentId = instrument.getInstrumentId()
 		try:
-			currentPrice = instrument.getDataDf()[self.price].iloc[-1]
+			currentPrice = instrument.getDataDf()[self.priceFeature].iloc[-1]
 			fairValue = currentPredictions[instrumentId]
 			currentDeviationFromPrediction = fairValue/currentPrice
 			return np.abs(currentDeviationFromPrediction) < (self.exit_threshold)
@@ -59,7 +59,7 @@ class SimpleExecutionSystemWithFairValue(SimpleExecutionSystem):
 	# 		if instrument is None:
 	# 			continue
 	# 		try:
-	# 			currentPrice = instrument.getDataDf()[self.price].iloc[-1]
+	# 			currentPrice = instrument.getDataDf()[self.priceFeature].iloc[-1]
 	# 		except KeyError:
 	# 			logError('You have specified FairValue Execution Type but Price Feature Key does not exist')
 

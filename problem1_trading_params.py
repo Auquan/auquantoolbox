@@ -37,7 +37,7 @@ class FairValueTradingParams(TradingSystemParameters):
         return timedelta(0, 30)  # minutes, seconds
 
     def getBenchmark(self):
-        return 'BANKBEES'
+        return None
 
     '''
     This is a way to use any custom features you might have made.
@@ -132,9 +132,9 @@ class FairValueTradingParams(TradingSystemParameters):
 
     def getExecutionSystem(self):
         return SimpleExecutionSystemWithFairValue(enter_threshold_deviation=0.1,
-                                                  exit_threshold_deviation=0.05, longLimit=10,
-                                                  shortLimit=10, capitalUsageLimit=0.05,
-                                                  lotSize=1, limitType='L', price='close')
+                                                  exit_threshold_deviation=0.05, longLimit=10000,
+                                                  shortLimit=10000, capitalUsageLimit=0.05,
+                                                  lotSize=100, limitType='L', price='close')
 
     '''
     Returns the type of order placer we want to use. its an implementation of the class OrderPlacer.

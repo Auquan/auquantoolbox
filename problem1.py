@@ -52,4 +52,4 @@ if __name__ == "__main__":
     problem1Solver = Problem1Solver()
     tsParams = FairValueTradingParams(problem1Solver)
     tradingSystem = TradingSystem(tsParams)
-    tradingSystem.startTrading(onlyAnalyze=True, shouldPlot=True)
+    tradingSystem.startTrading(onlyAnalyze=False, shouldPlot=True)
