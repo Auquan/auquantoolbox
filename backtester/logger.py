@@ -7,7 +7,7 @@ def logError(msg, verbose=True):
     log('Error: ' + msg, verbose)
 
 
-def logInfo(msg, verbose=False):
+def logInfo(msg, verbose=True):
     log('Info: ' + msg, verbose)
 
 

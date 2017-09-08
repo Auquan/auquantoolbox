@@ -11,11 +11,12 @@ class Metrics():
         self.__stats = {}
 
     def getMarketMetricsString(self):
+        # TODO add the snippet back once benchmark is fixed.
+        # + ' Benchmark: %0.2f%% ' % (100 * self.__stats['Base Return(%)']) \
         return \
             ' Total Pnl: %0.2f%% ' % (100 * self.__stats['Total Pnl(%)']) \
             + ' Ann. Return: %0.2f%% ' % (100 * self.__stats['Annual Return(%)']) \
             + ' Ann. Vol: %0.2f%% ' % (100 * self.__stats['Annual Vol(%)']) \
-            + ' Benchmark: %0.2f%% ' % (100 * self.__stats['Base Return(%)']) \
             + ' Sharpe Ratio: %0.2f ' % self.__stats['Sharpe Ratio'] \
             + ' Sortino Ratio: %0.2f ' % self.__stats['Sortino Ratio'] \
             + ' Max Drawdown: %0.2f%% ' % (100 * self.__stats['Max Drawdown(%)']) \
@@ -33,6 +34,9 @@ class Metrics():
 
     def getMetrics(self):
         return self.__stats
+
+    def getDf(self):
+        return self.__marketFeaturesDf
 
     def round(self, t, freq):
         freq = to_offset(freq)
@@ -53,7 +57,7 @@ class Metrics():
         total_pnl.dropna(inplace=True)
         portfolioValue.dropna(inplace=True)
         total_days = len(total_pnl)
-        total_return = total_pnl[total_days - 1] / startingCapital
+        total_return = total_pnl[total_days - 2] / startingCapital
         daily_return = (portfolioValue / portfolioValue.shift(1) - 1)
         daily_return.dropna(inplace=True)
         #prediction = self.__marketFeaturesDf['prediction']
@@ -62,8 +66,8 @@ class Metrics():
         stats['Total Pnl(%)'] = total_return
         stats['Annual Return(%)'] = self.annualized_return(
             total_return, total_days)
-        stats['Base Return(%)'] = self.annualized_return(
-            benchmark['total_return'], total_days)
+        # stats['Base Return(%)'] = self.annualized_return(
+        #     benchmark['total_return'], total_days)
         stats['Annual Vol(%)'] = self.annual_vol(daily_return)
         #stats['Beta'] = self.beta(daily_return,benchmark['daily_returns'])
         stats['Sharpe Ratio'] = self.sharpe_ratio(
@@ -172,6 +176,9 @@ class Metrics():
         return upside_return.sum() / total_return.sum()
 
     def getBenchmarkData(self, baseSymbol, priceFeature, folderName):
+        if (baseSymbol is None):
+            return None
+
         baseline_data = {}
         path = folderName + '/' + baseSymbol + '_features.csv'
         csv = pd.read_csv(path, engine='python')

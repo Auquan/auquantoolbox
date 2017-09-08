@@ -49,8 +49,8 @@ def getDataReady(dir, features, benchmark, price, startingCapital, market=True):
         df['Returns(%)'] = 100 * (df['pnl'] / startingCapital)
         metrics = Metrics(marketFeaturesDf=df)
         metrics.calculateMarketMetrics(benchmark, price, startingCapital, dir)
-        benchmark_pnl = metrics.getBenchmarkData(
-            benchmark, price, dir)['returns']
+        # TODO create benchamrks later
+        benchmark_pnl = None
         stats = metrics.getMarketMetricsString()
     else:
         metrics = Metrics(marketFeaturesDf=df)
