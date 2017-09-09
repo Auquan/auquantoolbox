@@ -106,7 +106,7 @@ class TradingSystem:
 
         for timeOfUpdate, instrumentUpdates in groupedInstrumentUpdates:
             # logInfo('TimeOfUpdate: %s TradeSymbol: %s' % (instrumentUpdate.getTimeOfUpdate(), instrumentUpdate.getTradeSymbol()))
-            print timeOfUpdate
+            print(timeOfUpdate)
             self.processInstrumentUpdates(timeOfUpdate, instrumentUpdates, onlyAnalyze)
             if not onlyAnalyze and self.portfolioValue < 0:
                 logError('Trading will STOP - OUT OF MONEY!!!!')

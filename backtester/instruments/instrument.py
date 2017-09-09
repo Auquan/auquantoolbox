@@ -3,6 +3,7 @@ from backtester.features.feature_config import FeatureConfig
 from backtester.lookback_data import LookbackData
 from backtester.constants import *
 import copy
+from itertools import chain
 
 
 def getCompulsoryInstrumentFeatureConfigs(tsParams, instrumentType):
@@ -43,7 +44,7 @@ class Instrument(object):
         featureConfigs = tsParams.getFeatureConfigsForInstrumentType(self.getInstrumentType())
         compulsoryFeatureColumns = map(lambda x: x.getFeatureKey(), self.__compulsoryFeatureConfigs)
         featureColumns = map(lambda x: x.getFeatureKey(), featureConfigs)
-        self.__lookbackFeatures = LookbackData(tsParams.getLookbackSize(), bookDataFeatures + featureColumns + compulsoryFeatureColumns)
+        self.__lookbackFeatures = LookbackData(tsParams.getLookbackSize(), list(chain(bookDataFeatures, featureColumns,compulsoryFeatureColumns)))
 
     def getInstrumentType(self):
         raise NotImplementedError
@@ -78,7 +79,7 @@ class Instrument(object):
         currentFeatures = copy.deepcopy(self.getCurrentBookData())
         self.__lookbackFeatures.addData(timeOfUpdate, currentFeatures)
         featureConfigs = self.tsParams.getFeatureConfigsForInstrumentType(self.getInstrumentType())
-        featureConfigs = featureConfigs + self.__compulsoryFeatureConfigs
+        featureConfigs = list(chain(featureConfigs, self.__compulsoryFeatureConfigs))
         for featureConfig in featureConfigs:
             featureKey = featureConfig.getFeatureKey()
             featureId = featureConfig.getFeatureId()

@@ -3,6 +3,7 @@ from backtester.lookback_data import LookbackData
 from backtester.features.feature_config import FeatureConfig
 from backtester.instruments import *
 from backtester.logger import *
+from itertools import chain
 
 
 def getCompulsoryMarketFeatureConfigs(tsParams):
@@ -31,7 +32,7 @@ class InstrumentManager:
         self.__compulsoryFeatureConfigs = getCompulsoryMarketFeatureConfigs(tsParams)
         columns = map(lambda x: x.getFeatureKey(), featureConfigs)
         compulsoryColumns = map(lambda x: x.getFeatureKey(), self.__compulsoryFeatureConfigs)
-        self.__lookbackMarketFeatures = LookbackData(tsParams.getLookbackSize(), columns + compulsoryColumns + ['prediction'])
+        self.__lookbackMarketFeatures = LookbackData(tsParams.getLookbackSize(), list(chain(columns, compulsoryColumns, ['prediction'])))
 
     def getInstrument(self, instrumentId):
         if instrumentId not in self.__instrumentsDict:
@@ -91,7 +92,7 @@ class InstrumentManager:
 
         currentMarketFeatures = {}
         self.__lookbackMarketFeatures.addData(timeOfUpdate, currentMarketFeatures)
-        featureConfigs = self.tsParams.getMarketFeatureConfigs() + self.__compulsoryFeatureConfigs
+        featureConfigs = list(chain(self.tsParams.getMarketFeatureConfigs(), self.__compulsoryFeatureConfigs))
         for featureConfig in featureConfigs:
             featureId = featureConfig.getFeatureId()
             featureKey = featureConfig.getFeatureKey()
