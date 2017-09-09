@@ -43,7 +43,7 @@ class StateWriter:
         marketFeaturesDf = instrumentManager.getDataDf()
         if self.__marketFeaturesWriter is None:
             self.__marketFeaturesFilename = self.__folderName + '/marketFeatures.csv'
-            marketFeaturesFile =  open(self.__marketFeaturesFilename, 'wb')
+            marketFeaturesFile =  open(self.__marketFeaturesFilename, 'w')
             self.__openFiles.append(marketFeaturesFile)
             self.__marketFeaturesWriter = csv.writer(marketFeaturesFile)
             self.writeColumns(self.__marketFeaturesWriter, marketFeaturesDf)
@@ -54,7 +54,7 @@ class StateWriter:
             instrumentFeaturesDf = instrument.getDataDf()
             if instrumentId not in self.__instrumentIdToWriters:
                 instrumentFeaturesFilename = self.__folderName + '/' + instrumentId + '_features.csv'
-                instrumentFeaturesFile = open(instrumentFeaturesFilename, 'wb')
+                instrumentFeaturesFile = open(instrumentFeaturesFilename, 'w')
                 self.__openFiles.append(instrumentFeaturesFile) 
                 self.__instrumentIdToWriters[instrumentId] = csv.writer(instrumentFeaturesFile)
                 self.writeColumns(self.__instrumentIdToWriters[instrumentId], instrumentFeaturesDf)
