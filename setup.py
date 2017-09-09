@@ -11,7 +11,7 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
 
 setup(
     name='auquan_toolbox',
-    version='1.1.4',
+    version='1.1.5',
 
     description='Auquan Toolbox for developing strategies and backtesting',
     long_description=long_description,
