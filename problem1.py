@@ -22,7 +22,7 @@ class Problem1Solver():
         return "trainingData1"
 
     def getSymbolsToTrade(self):
-        return ['PNB', 'FEDERALBNK']
+        return ['ADANIENT']
         # 'ICICIBANK', 'CANBK', 'SBIN', 'YESBANK', 'KOTAKBANK',
         # 'BANKBARODA', 'HDFCBANK', 'AXISBANK', 'INDUSINDBK', 'NIFTYBEES']
 
@@ -33,11 +33,11 @@ class Problem1Solver():
         ma1Dict = {'featureKey': 'ma_5',
                    'featureId': 'moving_average',
                    'params': {'period': 5,
-                              'featureName': 'close'}}
+                              'featureName': 'stockVWAP'}}
         sdevDict = {'featureKey': 'sdev_5',
                     'featureId': 'moving_sdev',
                     'params': {'period': 5,
-                               'featureName': 'close'}}
+                               'featureName': 'stockVWAP'}}
         customFeatureDict = {'featureKey': 'custom_inst_feature',
                              'featureId': 'my_custom_feature',
                              'params': {'param1': 'value1'}}

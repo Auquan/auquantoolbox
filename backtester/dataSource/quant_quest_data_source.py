@@ -7,6 +7,14 @@ import copy
 import csv
 
 
+def is_number(s):
+    try:
+        float(s)
+        return True
+    except ValueError:
+        return False
+
+
 class QuantQuestDataSource(DataSource):
     def __init__(self, cachedFolderName, dataSetId, instrumentIds):
         self.__instrumentIds = instrumentIds
@@ -21,9 +29,12 @@ class QuantQuestDataSource(DataSource):
 
     def getInstrumentUpdateFromRow(self, instrumentId, row):
         bookData = copy.deepcopy(row)
-        bookData.pop('time', None)
-        timeOfUpdate = datetime.strptime(row['time'], '%Y-%m-%d %H:%M:%S')
-        print timeOfUpdate
+        for key in bookData:
+            if is_number(bookData[key]):
+                bookData[key] = float(bookData[key])
+        timeKey = ''
+        bookData.pop(timeKey, None)
+        timeOfUpdate = datetime.strptime(row[timeKey], '%Y-%m-%d %H:%M:%S')
         inst = StockInstrumentUpdate(stockInstrumentId=instrumentId,
                                      tradeSymbol=instrumentId,
                                      timeOfUpdate=timeOfUpdate,

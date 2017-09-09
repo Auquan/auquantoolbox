@@ -1,6 +1,6 @@
 from backtester.trading_system_parameters import TradingSystemParameters
 from datetime import timedelta
-from backtester.dataSource.nse_data_source import NSEStockDataSource
+from backtester.dataSource.quant_quest_data_source import QuantQuestDataSource
 from backtester.executionSystem.simple_execution_system_fairvalue import SimpleExecutionSystemWithFairValue
 from backtester.orderPlacer.backtesting_order_placer import BacktestingOrderPlacer
 from backtester.constants import *
@@ -18,13 +18,9 @@ class FairValueTradingParams(TradingSystemParameters):
 
     def getDataParser(self):
         instrumentIds = self.__problem1Solver.getSymbolsToTrade()
-        # TODO: get training data set
-        startDateStr = '2010/01/01'
-        endDateStr = '2017/06/30'
-        return NSEStockDataSource(cachedFolderName='nseData',
-                                  instrumentIds=instrumentIds,
-                                  startDateStr=startDateStr,
-                                  endDateStr=endDateStr)
+        return QuantQuestDataSource(cachedFolderName='historicalData',
+                                    dataSetId=self.__problem1Solver.getTrainingDataSet(),
+                                    instrumentIds=instrumentIds)
 
     '''
     Returns a timedetla object to indicate frequency of updates to features
@@ -81,7 +77,8 @@ class FairValueTradingParams(TradingSystemParameters):
         stockFeatureConfigs = self.__problem1Solver.getFeatureConfigDicts()
         scoreDict = {'featureKey': 'score',
                      'featureId': 'score_fv',
-                     'params': {'predictionKey': 'prediction'}}
+                     'params': {'predictionKey': 'prediction',
+                                'price': self.getPriceFeatureKey()}}
         stockFeatureConfigs.append(scoreDict)
         return {INSTRUMENT_TYPE_STOCK: stockFeatureConfigs}
 
@@ -103,7 +100,7 @@ class FairValueTradingParams(TradingSystemParameters):
                      'featureId': 'count'}
         scoreDict = {'featureKey': 'score',
                      'featureId': 'score_fv',
-                     'params': {'featureName': 'close',
+                     'params': {'price': self.getPriceFeatureKey(),
                                 'instrument_score_feature': 'score'}}
         return [countDict, scoreDict]
 
@@ -134,7 +131,7 @@ class FairValueTradingParams(TradingSystemParameters):
         return SimpleExecutionSystemWithFairValue(enter_threshold_deviation=0.1,
                                                   exit_threshold_deviation=0.05, longLimit=10000,
                                                   shortLimit=10000, capitalUsageLimit=0.05,
-                                                  lotSize=100, limitType='L', price='close')
+                                                  lotSize=100, limitType='L', price=self.getPriceFeatureKey())
 
     '''
     Returns the type of order placer we want to use. its an implementation of the class OrderPlacer.
@@ -153,3 +150,6 @@ class FairValueTradingParams(TradingSystemParameters):
 
     def getLookbackSize(self):
         return 90
+
+    def getPriceFeatureKey(self):
+        return 'stockVWAP'
