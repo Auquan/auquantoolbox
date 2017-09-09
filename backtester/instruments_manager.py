@@ -87,9 +87,10 @@ class InstrumentManager:
     def updateFeatures(self, timeOfUpdate):
         for instrumentId in self.__instrumentsDict:
             instrument = self.__instrumentsDict[instrumentId]
-            instrument.updateFeatures(timeOfUpdate)
+            instrument.updateFeatures(timeOfUpdate, self)
 
         currentMarketFeatures = {}
+        self.__lookbackMarketFeatures.addData(timeOfUpdate, currentMarketFeatures)
         featureConfigs = self.tsParams.getMarketFeatureConfigs() + self.__compulsoryFeatureConfigs
         for featureConfig in featureConfigs:
             featureId = featureConfig.getFeatureId()
@@ -101,7 +102,8 @@ class InstrumentManager:
                                                      currentMarketFeatures=currentMarketFeatures,
                                                      instrumentManager=self)
             currentMarketFeatures[featureKey] = featureVal
+            self.__lookbackMarketFeatures.addFeatureVal(timeOfUpdate, featureKey, featureVal)
         currentMarketFeatures['prediction'] = self.tsParams.getPrediction(timeOfUpdate, currentMarketFeatures, self)
+        self.__lookbackMarketFeatures.addFeatureVal(timeOfUpdate, 'prediction', currentMarketFeatures['prediction'])
 
         logInfo('Market Features: %s' % str(currentMarketFeatures))
-        self.__lookbackMarketFeatures.addData(timeOfUpdate, currentMarketFeatures)

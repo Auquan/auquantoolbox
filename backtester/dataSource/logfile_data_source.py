@@ -1,5 +1,5 @@
 import time
-from data_source import DataSource
+from backtester.dataSource.data_source import DataSource
 
 
 class LogfileDataSource(DataSource):
@@ -16,7 +16,7 @@ class LogfileDataSource(DataSource):
     def processLineIntoInstrumentUpdate(self, line):
         return line
 
-    def emitInstrumentUpdate(self):
+    def emitInstrumentUpdates(self):
         while True:
             readLine = self.file.readline()
             if readLine:

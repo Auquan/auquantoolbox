@@ -1,46 +1,51 @@
-from feature import Feature
+from backtester.features.feature import Feature
 from backtester.logger import *
-from argmax_feature import ArgMaxFeature
-from argmin_feature import ArgMinFeature
-from bollinger_bands_feature import BollingerBandsFeature
-from capital_feature import CapitalFeature
-from crossInstrument_correlation_feature import MovingInstrumentCorrelationFeature
-from crossSectionMomentum_feature import CrossSectionMomentumFeature
-from delay_feature import DelayFeature
-from difference_feature import DifferenceFeature
-from exp_moving_average_feature import ExpMovingAverageFeature
-from fees_feature import  FeesFeature
-from macd_feature import MACDFeature
-from ma_ribbon_feature import MARibbonFeature
-from momentum_feature import MomentumFeature
-from moving_average_feature import MovingAverageFeature
-from moving_correlation import MovingCorrelationFeature
-from moving_max import MovingMaximumFeature
-from moving_min import MovingMinimumFeature
-from moving_sdev_feature import MovingSDevFeature
-from moving_sum import MovingSumFeature
-from portfolio_value_feature import PortfolioValueFeature
-from position_instrument_feature import PositionInstrumentFeature
-from profitloss_feature import  ProfitLossFeature
-from rank_feature import RankFeature
-from ratio_feature import RatioMarketFeature
-from rsi_feature import RSIFeature
-from scale_feature import ScaleFeature
-from vwap_price_feature import VwapPriceInstrumentFeature
-
+from backtester.features.argmax_feature import ArgMaxFeature
+from backtester.features.argmin_feature import ArgMinFeature
+from backtester.features.bollinger_bands_feature import BollingerBandsFeature
+from backtester.features.capital_feature import CapitalFeature
+from backtester.features.count_feature import CountFeature
+from backtester.features.crossInstrument_correlation_feature import MovingInstrumentCorrelationFeature
+from backtester.features.crossSectionMomentum_feature import CrossSectionMomentumFeature
+from backtester.features.delay_feature import DelayFeature
+from backtester.features.difference_feature import DifferenceFeature
+from backtester.features.direction_feature import DirectionFeature
+from backtester.features.exp_moving_average_feature import ExpMovingAverageFeature
+from backtester.features.fees_feature import  FeesFeature
+from backtester.features.macd_feature import MACDFeature
+from backtester.features.ma_ribbon_feature import MARibbonHammingDistanceFeature
+from backtester.features.momentum_feature import MomentumFeature
+from backtester.features.moving_average_feature import MovingAverageFeature
+from backtester.features.moving_correlation import MovingCorrelationFeature
+from backtester.features.moving_max import MovingMaximumFeature
+from backtester.features.moving_min import MovingMinimumFeature
+from backtester.features.moving_sdev_feature import MovingSDevFeature
+from backtester.features.moving_sum import MovingSumFeature
+from backtester.features.portfolio_value_feature import PortfolioValueFeature
+from backtester.features.position_instrument_feature import PositionInstrumentFeature
+from backtester.features.profitloss_feature import  ProfitLossFeature
+from backtester.features.rank_feature import RankFeature
+from backtester.features.ratio_feature import RatioMarketFeature
+from backtester.features.rsi_feature import RSIFeature
+from backtester.features.scale_feature import ScaleFeature
+from backtester.features.score_fairvalue_feature import ScoreFairValueFeature
+from backtester.features.score_logloss_feature import ScoreLogLossFeature
+from backtester.features.vwap_price_feature import VwapPriceInstrumentFeature
 
 featureIdToFeatureCls = {'argmax' : ArgMaxFeature,
                          'argmin' : ArgMinFeature,
                          'bollinger_bands': BollingerBandsFeature,
                          'capital' : CapitalFeature,
+                         'count' : CountFeature,
                          'cross_sectional_momentum' : CrossSectionMomentumFeature,
                          'cross_instrument_correlation' : MovingInstrumentCorrelationFeature,
                          'delay' : DelayFeature,
                          'difference' : DifferenceFeature,
+                         'direction' : DirectionFeature,
                          'exponential_moving_average': ExpMovingAverageFeature,
                          'fees' : FeesFeature, 
                          'macd': MACDFeature,
-                         'ma_ribbon': MARibbonFeature,
+                         'ma_ribbon_hammingdistance': MARibbonHammingDistanceFeature,
                          'momentum': MomentumFeature,
                          'moving_average': MovingAverageFeature,
                          'moving_correlation': MovingCorrelationFeature,
@@ -55,6 +60,8 @@ featureIdToFeatureCls = {'argmax' : ArgMaxFeature,
                          'ratio': RatioMarketFeature,
                          'rsi': RSIFeature,
                          'scale' : ScaleFeature,
+                         'score_fv' : ScoreFairValueFeature,
+                         'score_ll' : ScoreLogLossFeature,
                          'vwap': VwapPriceInstrumentFeature,
                          }
 

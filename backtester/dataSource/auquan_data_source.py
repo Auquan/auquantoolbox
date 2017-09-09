@@ -2,8 +2,9 @@ from datetime import datetime, timedelta
 import calendar
 from backtester.instrumentUpdates import *
 from backtester.constants import *
-from data_source import DataSource
+from backtester.dataSource.data_source import DataSource
 import os.path
+from backtester.dataSource.data_source_utils import groupAndSortByTimeUpdates
 
 TYPE_LINE_UNDEFINED = 0
 TYPE_LINE_BOOK_DATA = 1
@@ -119,7 +120,7 @@ class AuquanDataSource(DataSource):
         dateStr = date.strftime("%Y%m%d")
         return '%s/%s/%s/%s_%s.txt' % (self.folderName, instrumentType, instrumentId, instrumentId, dateStr)
 
-    def emitInstrumentUpdate(self):
+    def emitInstrumentUpdates(self):
         while (self.currentDate <= self.endDate):
             allInstrumentUpdates = []
             for instrumentType in self.instrumentIdsByType:
@@ -132,9 +133,9 @@ class AuquanDataSource(DataSource):
                     fileHandler = InstrumentsFromFile(fileName=fileName, instrumentId=instrumentId, expiryTime=expiryTime)
                     instrumentUpdates = fileHandler.processLinesIntoInstruments()
                     allInstrumentUpdates = allInstrumentUpdates + instrumentUpdates
-            allInstrumentUpdates.sort(key=lambda x: x.getTimeOfUpdate())
-            for instrumentUpdate in allInstrumentUpdates:
-                yield(instrumentUpdate)
+            groupedInstrumentUpdates = groupAndSortByTimeUpdates(allInstrumentUpdates)
+            for timeOfUpdate, instrumentUpdates in groupedInstrumentUpdates:
+                yield([timeOfUpdate, instrumentUpdates])
             self.currentDate = self.currentDate + timedelta(days=1)
 
 

@@ -1,4 +1,4 @@
-from instrument import Instrument
+from backtester.instruments.instrument import Instrument
 from backtester.constants import *
 
 

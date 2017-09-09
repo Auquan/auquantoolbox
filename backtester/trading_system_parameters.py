@@ -1,7 +1,7 @@
 from datetime import timedelta
-from features.feature_config import FeatureConfig
-from executionSystem.simple_execution_system import SimpleExecutionSystem
-from orderPlacer.backtesting_order_placer import BacktestingOrderPlacer
+from backtester.features.feature_config import FeatureConfig
+from backtester.executionSystem.simple_execution_system import SimpleExecutionSystem
+from backtester.orderPlacer.backtesting_order_placer import BacktestingOrderPlacer
 from backtester.constants import *
 
 
@@ -29,7 +29,7 @@ class TradingSystemParameters(object):
     Return starting capital
     '''
     def getStartingCapital(self):
-        return 1000000
+        return 10000000
 
     '''
     Returns a timedetla object to indicate frequency of updates to features

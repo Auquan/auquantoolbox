@@ -1,4 +1,4 @@
-from feature import Feature
+from backtester.features.feature import Feature
 import numpy as np
 
 class FeesFeature(Feature):
@@ -23,6 +23,5 @@ class FeesFeature(Feature):
 
     @classmethod
     def computeForMarket(cls, featureParams, featureKey, currentMarketFeatures, instrumentManager):
-    	raise NotImplementedError
+        raise NotImplementedError
         return None
-        

@@ -1,9 +1,9 @@
 import time
 from backtester.logger import *
-from instruments_manager import InstrumentManager
+from backtester.instruments_manager import InstrumentManager
 from datetime import datetime
-from state_writer import StateWriter
-from plotter import plot
+from backtester.state_writer import StateWriter
+from backtester.plotter import plot
 
 
 class TradingSystem:
@@ -24,19 +24,23 @@ class TradingSystem:
         self.orderPlacer = None
         self.stateWriter = StateWriter('runLogs', datetime.strftime(datetime.now(), '%Y%m%d_%H%M%S'))
 
-    def processInstrumentUpdate(self, instrumentUpdate, onlyAnalyze = False):
+    def processInstrumentUpdates(self, timeOfUpdate, instrumentUpdates, onlyAnalyze=False):
+        # Process instrument updates first
+        for instrumentUpdate in instrumentUpdates:
+            instrumentIdToUpdate = instrumentUpdate.getInstrumentId()
+            instrumentToUpdate = self.instrumentManager.getInstrument(instrumentIdToUpdate)
+            # if not present try to create an instrument from this update first.
+            if instrumentToUpdate is None:
+                instrumentToUpdate = self.instrumentManager.createInstrumentFromUpdate(instrumentUpdate, self.tsParams)
+                if instrumentToUpdate is None:
+                    return
+                self.instrumentManager.addInstrument(instrumentToUpdate)
+            instrumentToUpdate.update(instrumentUpdate)
+        # update positions of placed orders
         for placedOrder in self.orderPlacer.emitPlacedOrders():
             self.processPlacedOrder(placedOrder)
-        self.tryUpdateFeaturesAndExecute(instrumentUpdate.getTimeOfUpdate(), onlyAnalyze)
-        instrumentIdToUpdate = instrumentUpdate.getInstrumentId()
-        instrumentToUpdate = self.instrumentManager.getInstrument(instrumentIdToUpdate)
-        # if not present try to create an instrument from this update first.
-        if instrumentToUpdate is None:
-            instrumentToUpdate = self.instrumentManager.createInstrumentFromUpdate(instrumentUpdate, self.tsParams)
-            if instrumentToUpdate is None:
-                return
-            self.instrumentManager.addInstrument(instrumentToUpdate)
-        instrumentToUpdate.update(instrumentUpdate)
+        # Then we try to calculate features. 
+        self.tryUpdateFeaturesAndExecute(timeOfUpdate, onlyAnalyze)
 
     def processPlacedOrder(self, placedOrder):
         instrumentId = placedOrder.getInstrumentId()
@@ -57,14 +61,16 @@ class TradingSystem:
             if not onlyAnalyze:
                 instrumentsToExecute = self.getInstrumentsToExecute(timeOfUpdate)
                 self.orderPlacer.placeOrders(timeOfUpdate, instrumentsToExecute, self.instrumentManager)
-                self.portfolioValue = self.instrumentManager.getDataDf()['portfolio_value'][-1] #TODO: find a better way to get this value
-                self.capital = self.instrumentManager.getDataDf()['capital'][-1] #TODO: find a better way to get this value
-            
+                self.portfolioValue = self.instrumentManager.getDataDf()['portfolio_value'][-1]  # TODO: find a better way to get this value
+                self.capital = self.instrumentManager.getDataDf()['capital'][-1]  # TODO: find a better way to get this value
+
             self.saveCurrentState()
 
     def updateFeatures(self, timeOfUpdate):
         # tracking perf
         start = time.time()
+        # if self.totalUpdates > 0:
+        # Dont call for the first time
         self.instrumentManager.updateFeatures(timeOfUpdate)
         end = time.time()
         diffms = (end - start) * 1000
@@ -93,25 +99,26 @@ class TradingSystem:
         self.portfolioValue = self.tsParams.getStartingCapital()
         self.capital = self.tsParams.getStartingCapital()
 
-    def startTrading(self, onlyAnalyze = False, shouldPlot=True):
+    def startTrading(self, onlyAnalyze=False, shouldPlot=True):
         # TODO: Figure out a good way to handle order parsers with live data later on.
         self.initialize()
-        instrumentUpdates = self.dataParser.emitInstrumentUpdate()
+        groupedInstrumentUpdates = self.dataParser.emitInstrumentUpdates()
 
-        for instrumentUpdate in instrumentUpdates:
-            # logInfo('TimeOfUpdate: %s TradeSymbol: %s, Volume: %.2f' % (instrumentUpdate.getTimeOfUpdate(), instrumentUpdate.getTradeSymbol(), instrumentUpdate.getBookData()['volume']))
-            self.processInstrumentUpdate(instrumentUpdate, onlyAnalyze)
+        for timeOfUpdate, instrumentUpdates in groupedInstrumentUpdates:
+            # logInfo('TimeOfUpdate: %s TradeSymbol: %s' % (instrumentUpdate.getTimeOfUpdate(), instrumentUpdate.getTradeSymbol()))
+            print timeOfUpdate
+            self.processInstrumentUpdates(timeOfUpdate, instrumentUpdates, onlyAnalyze)
             if not onlyAnalyze and self.portfolioValue < 0:
-                logInfo('Trading will STOP - OUT OF MONEY!!!!')
+                logError('Trading will STOP - OUT OF MONEY!!!!')
                 break
 
         if not onlyAnalyze:
-            self.closePositions(instrumentUpdate.getTimeOfUpdate())
-        
+            self.closePositions(timeOfUpdate)
+
         self.stateWriter.closeStateWriter()
-        
+
         if shouldPlot:
-            plot(self.stateWriter.getFolderName(), None, \
-           self.tsParams.getBenchmark(), self.tsParams.getPriceFeatureKey(), self.tsParams.getStartingCapital(), [self.stateWriter.getMarketFeaturesFilename()])
-            plot(self.stateWriter.getFolderName(), self.stateWriter.getMarketFeaturesFilename(), \
-            self.tsParams.getBenchmark(), self.tsParams.getPriceFeatureKey(), self.tsParams.getStartingCapital(), [])
+            plot(self.stateWriter.getFolderName(), None,
+                 self.tsParams.getBenchmark(), self.tsParams.getPriceFeatureKey(), self.tsParams.getStartingCapital(), [self.stateWriter.getMarketFeaturesFilename()])
+            plot(self.stateWriter.getFolderName(), self.stateWriter.getMarketFeaturesFilename(),
+                 self.tsParams.getBenchmark(), self.tsParams.getPriceFeatureKey(), self.tsParams.getStartingCapital(), [])

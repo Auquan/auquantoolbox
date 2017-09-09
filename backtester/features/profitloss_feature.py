@@ -1,4 +1,4 @@
-from feature import Feature
+from backtester.features.feature import Feature
 
 
 class ProfitLossFeature(Feature):
@@ -14,8 +14,8 @@ class ProfitLossFeature(Feature):
             return 0
         fees = currentFeatures[featureParams['fees']]
         currentPosition = instrument.getCurrentPosition()
-        previousPosition = instrument.getDataDf()['position'][-1]
-        previousPrice = priceDict[-1]
+        previousPosition = instrument.getDataDf()['position'][-2] if (len(instrument.getDataDf()['position']) > 1) else 0
+        previousPrice = priceDict[-2 ] if (len(priceDict) > 1) else 0
         currentPrice = currentFeatures[featureParams['price']]
         pnl = previousPosition * (currentPrice - previousPrice) - fees
         return pnl
@@ -27,12 +27,15 @@ class ProfitLossFeature(Feature):
     def computeForMarket(cls, featureParams, featureKey, currentMarketFeatures, instrumentManager):
         pnl = 0
         pnlDict = instrumentManager.getDataDf()[featureKey]
+        pnlKey = 'pnl'
+        if 'instrument_pnl_feature' in featureParams:
+           pnlKey = featureParams['instrument_pnl_feature']
         if len(pnlDict) < 1:
             return 0
-        cumulativePnl = pnlDict.values[-1]
+        cumulativePnl = 0 if (len(pnlDict) == 1) else pnlDict.values[-2]
         allInstruments = instrumentManager.getAllInstrumentsByInstrumentId()
         for instrumentId in allInstruments:
             instrument = allInstruments[instrumentId]
-            pnl += instrument.getDataDf()[featureParams['instrument_pnl_feature']][-1]
+            pnl += instrument.getDataDf()[pnlKey][-1]
         cumulativePnl += pnl
         return cumulativePnl

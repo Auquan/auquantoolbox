@@ -1,14 +1,15 @@
-def log(msg):
-    print msg
+def log(msg, verbose):
+	if verbose:
+		print(msg)
 
 
-def logError(msg):
-    log('Error: ' + msg)
+def logError(msg, verbose=True):
+    log('Error: ' + msg, verbose)
 
 
-def logInfo(msg):
-    log('Info: ' + msg)
+def logInfo(msg, verbose=True):
+    log('Info: ' + msg, verbose)
 
 
-def logWarn(msg):
-    log('Warn: ' + msg)
+def logWarn(msg, verbose=True):
+    log('Warn: ' + msg, verbose)
