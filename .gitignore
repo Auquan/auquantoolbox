@@ -4,3 +4,5 @@ runLogs/*
 yahooData/*
 *csv.html
 .DS_Store
+*Data/*
+*_data.py
