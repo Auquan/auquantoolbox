@@ -1,6 +1,6 @@
 from backtester.features.feature import Feature
 from backtester.trading_system import TradingSystem
-from problem1_trading_params import FairValueTradingParams
+from backtester.sample_scripts.fair_value_params import FairValueTradingParams
 
 
 class MyCustomFeature(Feature):
