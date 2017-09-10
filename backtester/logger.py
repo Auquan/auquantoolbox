@@ -1,13 +1,13 @@
 def log(msg, verbose):
-	if verbose:
-		print(msg)
+    if verbose:
+        print(msg)
 
 
 def logError(msg, verbose=True):
     log('Error: ' + msg, verbose)
 
 
-def logInfo(msg, verbose=True):
+def logInfo(msg, verbose=False):
     log('Info: ' + msg, verbose)
 
 

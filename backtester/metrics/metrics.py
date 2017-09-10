@@ -87,7 +87,7 @@ class Metrics():
     def calculateMetrics(self, priceFeature, startingCapital):
 
         stats = {}
-
+        
         total_pnl = self.resampleData(
             self.__marketFeaturesDf['pnl'], '1D').last()
         price = self.resampleData(

@@ -16,7 +16,6 @@ class MyCustomFeature(Feature):
     currentFeatures: Dictionary with featurekey: featureValue of the (market or instrument) features which have been already calculated in this update
                      cycle. The features are computed sequentially in order of how they appear in your config.
     lookbackDataDf: Dataframe to hold lookback data for the features (could be either instrument or market features)
-    Note: currentFeatures is not yet a part of lookbackDataDf
     '''
     @classmethod
     def computeForLookbackData(cls, featureParams, featureKey, currentFeatures, lookbackDataDf):

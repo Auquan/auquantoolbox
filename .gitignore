@@ -7,3 +7,4 @@ nseData
 .DS_Store
 *Data/*
 *_data.py
+historicalData/*

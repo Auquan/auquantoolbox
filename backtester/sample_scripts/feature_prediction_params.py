@@ -1,30 +1,26 @@
 from backtester.trading_system_parameters import TradingSystemParameters
 from datetime import timedelta
-from backtester.dataSource.nse_data_source import NSEStockDataSource
-from backtester.executionSystem.simple_execution_system_fairvalue import SimpleExecutionSystemWithFairValue
+from backtester.dataSource.quant_quest_data_source import QuantQuestDataSource
+from backtester.executionSystem.simple_execution_system import SimpleExecutionSystem
 from backtester.orderPlacer.backtesting_order_placer import BacktestingOrderPlacer
+from backtester.trading_system import TradingSystem
 from backtester.constants import *
 
 
-class FairValueTradingParams(TradingSystemParameters):
+class FeaturePredictionTradingParams(TradingSystemParameters):
 
-    def __init__(self, problem1Solver):
-        self.__problem1Solver = problem1Solver
-        super(FairValueTradingParams, self).__init__()
-
+    def __init__(self, problem2Solver):
+        self.__problem2Solver = problem2Solver
+        super(FeaturePredictionTradingParams, self).__init__()
     '''
     Returns an instance of class DataParser. Source of data for instruments
     '''
 
     def getDataParser(self):
-        instrumentIds = self.__problem1Solver.getSymbolsToTrade()
-        # TODO: get training data set
-        startDateStr = '2010/01/01'
-        endDateStr = '2017/06/30'
-        return NSEStockDataSource(cachedFolderName='nseData',
-                                  instrumentIds=instrumentIds,
-                                  startDateStr=startDateStr,
-                                  endDateStr=endDateStr)
+        instrumentIds = self.__problem2Solver.getSymbolsToTrade()
+        return QuantQuestDataSource(cachedFolderName='historicalData/',
+                                    dataSetId=self.__problem2Solver.getTrainingDataSet(),
+                                    instrumentIds=instrumentIds)
 
     '''
     Returns a timedetla object to indicate frequency of updates to features
@@ -49,7 +45,7 @@ class FairValueTradingParams(TradingSystemParameters):
     '''
 
     def getCustomFeatures(self):
-        return self.__problem1Solver.getCustomFeatures()
+        return self.__problem2Solver.getCustomFeatures()
 
     '''
     Returns a dictionary with:
@@ -67,21 +63,28 @@ class FairValueTradingParams(TradingSystemParameters):
     movingAvg_30Dict = {'featureKey': 'mv_avg_30',
                           'featureId': 'moving_average',
                           'params': {'days': 30}}
-    movingAvg_90Dict = {'featureKey': 'mv_avg_90',
+    movingAvg_30Dict = {'featureKey': 'mv_avg_30',
                           'featureId': 'moving_average',
-                          'params': {'days': 90}}
+                          'params': {'days': 30}}
     return {INSTRUMENT_TYPE_FUTURE: [positionConfigDict, vwapConfigDict],
-            INSTRUMENT_TYPE_STOCK: [positionConfigDict, movingAvg_30Dict, movingAvg_90Dict]}
+            INSTRUMENT_TYPE_STOCK: [positionConfigDict, movingAvg_30Dict, movingAvg_30Dict]}
 
     For each future instrument, you will have features keyed by position and price.
-    For each stock instrument, you will have features keyed by position, mv_avg_30, mv_avg_90
+    For each stock instrument, you will have features keyed by position, mv_avg_30, mv_avg_30
     '''
 
     def getInstrumentFeatureConfigDicts(self):
-        stockFeatureConfigs = self.__problem1Solver.getFeatureConfigDicts()
+        # ADD RELEVANT FEATURES HERE
+        stockFeatureConfigs = self.__problem2Solver.getFeatureConfigDicts()
+        targetDict = {'featureKey': 'target',
+                      'featureId': 'direction',
+                      'params': {'featureName': self.getPriceFeatureKey(),
+                                 'period': 1}}
         scoreDict = {'featureKey': 'score',
-                     'featureId': 'score_fv',
-                     'params': {'predictionKey': 'prediction'}}
+                     'featureId': 'score_ll',
+                     'params': {'predictionKey': 'prediction',
+                                'target': 'target'}}
+        stockFeatureConfigs.append(targetDict)
         stockFeatureConfigs.append(scoreDict)
         return {INSTRUMENT_TYPE_STOCK: stockFeatureConfigs}
 
@@ -102,8 +105,8 @@ class FairValueTradingParams(TradingSystemParameters):
         countDict = {'featureKey': 'count',
                      'featureId': 'count'}
         scoreDict = {'featureKey': 'score',
-                     'featureId': 'score_fv',
-                     'params': {'featureName': 'close',
+                     'featureId': 'score_ll',
+                     'params': {'featureName': self.getPriceFeatureKey(),
                                 'instrument_score_feature': 'score'}}
         return [countDict, scoreDict]
 
@@ -122,7 +125,7 @@ class FairValueTradingParams(TradingSystemParameters):
         predictions = {}
         for ids in instrumentIds:
             instrument = instrumentManager.getInstrument(ids)
-            predictions[ids] = self.__problem1Solver.getFairValue(time, instrument, instrumentManager)
+            predictions[ids] = self.__problem2Solver.getPredictionForVariable(time, instrument, instrumentManager)
         return predictions
 
     '''
@@ -131,10 +134,9 @@ class FairValueTradingParams(TradingSystemParameters):
     '''
 
     def getExecutionSystem(self):
-        return SimpleExecutionSystemWithFairValue(enter_threshold_deviation=0.1,
-                                                  exit_threshold_deviation=0.05, longLimit=10000,
-                                                  shortLimit=10000, capitalUsageLimit=0.05,
-                                                  lotSize=100, limitType='L', price='close')
+        return SimpleExecutionSystem(enter_threshold=0.9, exit_threshold=0.6,
+                                     longLimit=10, shortLimit=10, capitalUsageLimit=0.05,
+                                     lotSize=1, limitType='L', price=self.getPriceFeatureKey())
 
     '''
     Returns the type of order placer we want to use. its an implementation of the class OrderPlacer.
@@ -152,4 +154,13 @@ class FairValueTradingParams(TradingSystemParameters):
     '''
 
     def getLookbackSize(self):
-        return 90
+        return 30
+
+    def getPriceFeatureKey(self):
+        return 'stockVWAP'
+
+
+if __name__ == "__main__":
+    tsParams = MyTradingParams()
+    tradingSystem = TradingSystem(tsParams)
+    tradingSystem.startTrading(onlyAnalyze=True, shouldPlot=True)

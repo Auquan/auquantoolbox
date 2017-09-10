@@ -1,6 +1,6 @@
 from backtester.features.feature import Feature
 from backtester.trading_system import TradingSystem
-from problem2_trading_params import FeaturePredictionTradingParams
+from backtester.sample_scripts.feature_prediction_params import FeaturePredictionTradingParams
 import scipy.stats as st
 import numpy as np
 
@@ -24,7 +24,7 @@ class Problem2Solver():
         return "trainingData1"
 
     def getSymbolsToTrade(self):
-        return ['PNB', 'FEDERALBNK']
+        return ['ADANIENT']
         # 'ICICIBANK', 'CANBK', 'SBIN', 'YESBANK', 'KOTAKBANK',
         # 'BANKBARODA', 'HDFCBANK', 'AXISBANK', 'INDUSINDBK', 'NIFTYBEES']
 
@@ -35,15 +35,15 @@ class Problem2Solver():
         ma1Dict = {'featureKey': 'ma_30',
                    'featureId': 'moving_average',
                    'params': {'period': 30,
-                              'featureName': 'close'}}
+                              'featureName': 'stockVWAP'}}
         ma2Dict = {'featureKey': 'ma_5',
                    'featureId': 'moving_average',
                    'params': {'period': 5,
-                              'featureName': 'close'}}
+                              'featureName': 'stockVWAP'}}
         sdevDict = {'featureKey': 'sdev_30',
                     'featureId': 'moving_sdev',
                     'params': {'period': 30,
-                               'featureName': 'close'}}
+                               'featureName': 'stockVWAP'}}
         customFeatureDict = {'featureKey': 'custom_inst_feature',
                              'featureId': 'my_custom_feature',
                              'params': {'param1': 'value1'}}

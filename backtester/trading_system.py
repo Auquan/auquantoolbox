@@ -39,7 +39,7 @@ class TradingSystem:
         # update positions of placed orders
         for placedOrder in self.orderPlacer.emitPlacedOrders():
             self.processPlacedOrder(placedOrder)
-        # Then we try to calculate features. 
+        # Then we try to calculate features.
         self.tryUpdateFeaturesAndExecute(timeOfUpdate, onlyAnalyze)
 
     def processPlacedOrder(self, placedOrder):
@@ -106,7 +106,7 @@ class TradingSystem:
 
         for timeOfUpdate, instrumentUpdates in groupedInstrumentUpdates:
             # logInfo('TimeOfUpdate: %s TradeSymbol: %s' % (instrumentUpdate.getTimeOfUpdate(), instrumentUpdate.getTradeSymbol()))
-            print timeOfUpdate
+            print(timeOfUpdate)
             self.processInstrumentUpdates(timeOfUpdate, instrumentUpdates, onlyAnalyze)
             if not onlyAnalyze and self.portfolioValue < 0:
                 logError('Trading will STOP - OUT OF MONEY!!!!')
@@ -120,5 +120,6 @@ class TradingSystem:
         if shouldPlot:
             plot(self.stateWriter.getFolderName(), None,
                  self.tsParams.getBenchmark(), self.tsParams.getPriceFeatureKey(), self.tsParams.getStartingCapital(), [self.stateWriter.getMarketFeaturesFilename()])
-            plot(self.stateWriter.getFolderName(), self.stateWriter.getMarketFeaturesFilename(),
+
+        plot(self.stateWriter.getFolderName(), self.stateWriter.getMarketFeaturesFilename(),
                  self.tsParams.getBenchmark(), self.tsParams.getPriceFeatureKey(), self.tsParams.getStartingCapital(), [])
