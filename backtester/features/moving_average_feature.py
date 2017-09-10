@@ -2,6 +2,8 @@ from backtester.features.feature import Feature
 from backtester.financial_fn import ma
 import numpy as np
 
+# Average of feature name over some number of previous data points including current.
+# number of data points specified by user
 
 class MovingAverageFeature(Feature):
 
