@@ -131,7 +131,7 @@ class MyCustomFeature(Feature):
 
 
 if __name__ == "__main__":
-    if not updateCheck():
+    if updateCheck():
         print 'Your version of the auquan toolbox package is old. Please update by running the following command:'
         print 'pip install -U auquan_toolbox'
     problem1Solver = Problem1Solver()
