@@ -18,7 +18,7 @@ class FeaturePredictionTradingParams(TradingSystemParameters):
 
     def getDataParser(self):
         instrumentIds = self.__problem2Solver.getSymbolsToTrade()
-        return QuantQuestDataSource(cachedFolderName='historicalData',
+        return QuantQuestDataSource(cachedFolderName='historicalData/',
                                     dataSetId=self.__problem2Solver.getTrainingDataSet(),
                                     instrumentIds=instrumentIds)
 

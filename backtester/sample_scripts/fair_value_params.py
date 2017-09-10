@@ -18,7 +18,7 @@ class FairValueTradingParams(TradingSystemParameters):
 
     def getDataParser(self):
         instrumentIds = self.__problem1Solver.getSymbolsToTrade()
-        return QuantQuestDataSource(cachedFolderName='historicalData',
+        return QuantQuestDataSource(cachedFolderName='historicalData/',
                                     dataSetId=self.__problem1Solver.getTrainingDataSet(),
                                     instrumentIds=instrumentIds)
 
