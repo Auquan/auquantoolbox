@@ -1,4 +1,5 @@
 from setuptools import setup, find_packages
+from backtester.version import __version__
 # To use a consistent encoding
 from codecs import open
 from os import path
@@ -11,7 +12,7 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
 
 setup(
     name='auquan_toolbox',
-    version='1.1.5',
+    version=__version__,
 
     description='Auquan Toolbox for developing strategies and backtesting',
     long_description=long_description,
