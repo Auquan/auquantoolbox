@@ -13,7 +13,7 @@ from backtester.features.direction_feature import DirectionFeature
 from backtester.features.exp_moving_average_feature import ExpMovingAverageFeature
 from backtester.features.fees_feature import  FeesFeature
 from backtester.features.macd_feature import MACDFeature
-from backtester.features.ma_ribbon_feature import MARibbonHammingDistanceFeature
+from backtester.features.ma_ribbon_distance_feature import MARibbonDistanceFeature
 from backtester.features.momentum_feature import MomentumFeature
 from backtester.features.moving_average_feature import MovingAverageFeature
 from backtester.features.moving_correlation import MovingCorrelationFeature
@@ -43,9 +43,9 @@ featureIdToFeatureCls = {'argmax' : ArgMaxFeature,
                          'difference' : DifferenceFeature,
                          'direction' : DirectionFeature,
                          'exponential_moving_average': ExpMovingAverageFeature,
-                         'fees' : FeesFeature, 
+                         'fees' : FeesFeature,
                          'macd': MACDFeature,
-                         'ma_ribbon_hammingdistance': MARibbonHammingDistanceFeature,
+                         'ma_ribbon_distance': MARibbonDistanceFeature,
                          'momentum': MomentumFeature,
                          'moving_average': MovingAverageFeature,
                          'moving_correlation': MovingCorrelationFeature,
