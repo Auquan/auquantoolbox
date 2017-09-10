@@ -12,6 +12,12 @@ class FeaturePredictionTradingParams(TradingSystemParameters):
     def __init__(self, problem2Solver):
         self.__problem2Solver = problem2Solver
         super(FeaturePredictionTradingParams, self).__init__()
+
+    def getStartingCapital(self):
+        instrumentIds = self.__problem1Solver.getSymbolsToTrade()
+        if instrumentIds and len(instrumentIds) > 0:
+            return len(instrumentIds) * 100000
+        return 10000000
     '''
     Returns an instance of class DataParser. Source of data for instruments
     '''

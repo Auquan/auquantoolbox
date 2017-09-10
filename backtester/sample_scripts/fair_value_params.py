@@ -12,6 +12,12 @@ class FairValueTradingParams(TradingSystemParameters):
         self.__problem1Solver = problem1Solver
         super(FairValueTradingParams, self).__init__()
 
+    def getStartingCapital(self):
+        instrumentIds = self.__problem1Solver.getSymbolsToTrade()
+        if instrumentIds and len(instrumentIds) > 0:
+            return len(instrumentIds) * 100000
+        return 10000000
+
     '''
     Returns an instance of class DataParser. Source of data for instruments
     '''

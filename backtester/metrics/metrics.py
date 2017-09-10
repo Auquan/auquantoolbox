@@ -19,6 +19,7 @@ class Metrics():
             + ' Ann. Vol: %0.2f%% ' % (100 * self.__stats['Annual Vol(%)']) \
             + ' Sharpe Ratio: %0.2f ' % self.__stats['Sharpe Ratio'] \
             + ' Sortino Ratio: %0.2f ' % self.__stats['Sortino Ratio'] \
+            + ' Score: %0.2f ' % self.__stats['Score'] \
             + ' Max Drawdown: %0.2f%% ' % (100 * self.__stats['Max Drawdown(%)']) \
             + ' Profit/Loss Ratio: %0.2f ' % self.__stats['Profit/Loss Ratio'] \
             + ' Accuracy: %0.2f ' % self.__stats['Accuracy']
@@ -28,6 +29,7 @@ class Metrics():
         return \
             ' Total Pnl: %0.2f%% ' % (100 * self.__stats['Total Pnl(%)']) \
             + ' Benchmark: %0.2f%% ' % (100 * self.__stats['Base Return(%)']) \
+            + ' Score: %0.2f ' % self.__stats['Score'] \
             + ' Profit/Loss Ratio: %0.2f ' % self.__stats['Profit/Loss Ratio'] \
             + ' Accuracy: %0.2f ' % self.__stats['Accuracy']
         #+ 'Log Loss         : %0.2f'%self.__stats['Log Loss']
@@ -74,6 +76,7 @@ class Metrics():
             total_return, total_days, daily_return)
         stats['Sortino Ratio'] = self.sortino_ratio(
             total_return, total_days, daily_return)
+        stats['Score'] = self.__marketFeaturesDf['score']
         stats['Max Drawdown(%)'] = self.max_drawdown(
             self.__marketFeaturesDf['portfolio_value'])
         stats['Profit/Loss Ratio'] = self.profit_factor(total_pnl)
@@ -103,6 +106,7 @@ class Metrics():
         stats['Total Pnl(%)'] = total_return
         stats['Base Return(%)'] = self.annualized_return(
             base_return, total_days)
+        stats['Score'] = self.__marketFeaturesDf['score']
         stats['Profit/Loss Ratio'] = self.profit_factor(total_pnl)
         stats['Accuracy'] = self.accuracy(self.__marketFeaturesDf['pnl'])
         #stats['Log Loss']=logLoss(daily_return)
