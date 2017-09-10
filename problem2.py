@@ -1,6 +1,7 @@
 from backtester.features.feature import Feature
 from backtester.trading_system import TradingSystem
 from backtester.sample_scripts.feature_prediction_params import FeaturePredictionTradingParams
+from backtester.version import updateCheck
 import scipy.stats as st
 import numpy as np
 
@@ -58,6 +59,8 @@ class Problem2Solver():
 
 
 if __name__ == "__main__":
+    if not updateCheck():
+        print 'please update'
     problem2Solver = Problem2Solver()
     tsParams = FeaturePredictionTradingParams(problem2Solver)
     tradingSystem = TradingSystem(tsParams)
