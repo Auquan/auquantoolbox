@@ -76,9 +76,9 @@ class FairValueTradingParams(TradingSystemParameters):
     def getInstrumentFeatureConfigDicts(self):
         stockFeatureConfigs = self.__problem1Solver.getFeatureConfigDicts()
         scoreDict = {'featureKey': 'score',
-                     'featureId': 'score_fv',
+                     'featureId': 'prob1_score',
                      'params': {'predictionKey': 'prediction',
-                                'price': self.getPriceFeatureKey()}}
+                                'price': 'FairValue'}}
         stockFeatureConfigs.append(scoreDict)
         return {INSTRUMENT_TYPE_STOCK: stockFeatureConfigs}
 

@@ -31,6 +31,7 @@ from backtester.features.scale_feature import ScaleFeature
 from backtester.features.score_fairvalue_feature import ScoreFairValueFeature
 from backtester.features.score_logloss_feature import ScoreLogLossFeature
 from backtester.features.vwap_price_feature import VwapPriceInstrumentFeature
+from backtester.features.score_problem1 import ProblemOneScore
 
 featureIdToFeatureCls = {'argmax' : ArgMaxFeature,
                          'argmin' : ArgMinFeature,
@@ -63,6 +64,7 @@ featureIdToFeatureCls = {'argmax' : ArgMaxFeature,
                          'score_fv' : ScoreFairValueFeature,
                          'score_ll' : ScoreLogLossFeature,
                          'vwap': VwapPriceInstrumentFeature,
+                         'prob1_score': ProblemOneScore
                          }
 
 
