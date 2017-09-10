@@ -46,7 +46,8 @@ class TradingSystem:
         instrumentId = placedOrder.getInstrumentId()
         changeInPosition = placedOrder.getChangeInPosition()
         placedInstrument = self.instrumentManager.getInstrument(instrumentId)
-        placedInstrument.updatePosition(changeInPosition)
+        tradePrice = placedOrder.getTradePrice()
+        placedInstrument.updatePositionAtPrice(changeInPosition, tradePrice)
 
     def tryUpdateFeaturesAndExecute(self, timeOfUpdate, onlyAnalyze=False):
         # TODO: Fix this to run independently of time of update of instrument and at regular frequency updates
@@ -85,7 +86,7 @@ class TradingSystem:
         self.stateWriter.writeCurrentState(self.instrumentManager)
 
     def closePositions(self, timeOfUpdate):
-        instrumentsToExecute = self.executionSystem.exitPosition(self.instrumentManager, [], True)
+        instrumentsToExecute = self.executionSystem.exitPosition(timeOfUpdate, self.instrumentManager, [], True)
         self.orderPlacer.placeOrders(timeOfUpdate, instrumentsToExecute, self.instrumentManager)
         for placedOrder in self.orderPlacer.emitPlacedOrders():
             self.processPlacedOrder(placedOrder)

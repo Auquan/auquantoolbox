@@ -34,6 +34,9 @@ class InstrumentManager:
         compulsoryColumns = map(lambda x: x.getFeatureKey(), self.__compulsoryFeatureConfigs)
         self.__lookbackMarketFeatures = LookbackData(tsParams.getLookbackSize(), list(chain(columns, compulsoryColumns, ['prediction'])))
 
+    def getTsParams(self):
+        return self.tsParams
+
     def getInstrument(self, instrumentId):
         if instrumentId not in self.__instrumentsDict:
             return None

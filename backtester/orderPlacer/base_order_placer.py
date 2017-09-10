@@ -1,13 +1,17 @@
 class PlacedOrder():
-    def __init__(self, instrumentId, changeInPosition):
+    def __init__(self, instrumentId, changeInPosition, tradePrice):
         self.__instrumentId = instrumentId
         self.__changeInPosition = changeInPosition
+        self.__tradePrice = tradePrice
 
     def getInstrumentId(self):
         return self.__instrumentId
 
     def getChangeInPosition(self):
         return self.__changeInPosition
+
+    def getTradePrice(self):
+        return self.__tradePrice
 
 
 # TODO: For live orders, we need a way to track what orders we have placed but havent gotten 

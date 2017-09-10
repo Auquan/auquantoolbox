@@ -15,9 +15,11 @@ class ProfitLossFeature(Feature):
         fees = currentFeatures[featureParams['fees']]
         currentPosition = instrument.getCurrentPosition()
         previousPosition = instrument.getDataDf()['position'][-2] if (len(instrument.getDataDf()['position']) > 1) else 0
-        previousPrice = priceDict[-2 ] if (len(priceDict) > 1) else 0
+        previousPrice = priceDict[-2] if (len(priceDict) > 1) else 0
         currentPrice = currentFeatures[featureParams['price']]
-        pnl = previousPosition * (currentPrice - previousPrice) - fees
+        changeInPosition = currentPosition - previousPosition
+        tradePrice = instrument.getLastTradePrice()
+        pnl = (previousPosition * (currentPrice - previousPrice)) + (changeInPosition * (currentPrice - tradePrice)) - fees
         return pnl
 
     '''
@@ -29,7 +31,7 @@ class ProfitLossFeature(Feature):
         pnlDict = instrumentManager.getDataDf()[featureKey]
         pnlKey = 'pnl'
         if 'instrument_pnl_feature' in featureParams:
-           pnlKey = featureParams['instrument_pnl_feature']
+            pnlKey = featureParams['instrument_pnl_feature']
         if len(pnlDict) < 1:
             return 0
         cumulativePnl = 0 if (len(pnlDict) == 1) else pnlDict.values[-2]

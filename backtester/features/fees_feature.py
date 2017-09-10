@@ -1,6 +1,7 @@
 from backtester.features.feature import Feature
 import numpy as np
 
+
 class FeesFeature(Feature):
 
     @classmethod
@@ -18,7 +19,7 @@ class FeesFeature(Feature):
         currentPosition = instrument.getCurrentPosition()
         previousPosition = positionDict.iloc[-1]
         changeInPosition = currentPosition - previousPosition
-        fees = np.abs(changeInPosition) * feesDict[np.sign(changeInPosition)] * currentPrice
+        fees = np.abs(changeInPosition) * feesDict[np.sign(changeInPosition)]
         return fees
 
     @classmethod

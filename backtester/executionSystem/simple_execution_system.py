@@ -53,12 +53,12 @@ class SimpleExecutionSystem(BaseExecutionSystem):
         currentPredictions = marketFeaturesDf['prediction'].iloc[-1]
         logInfo(str(currentPredictions))
         executions = []
-        executions += self.exitPosition(instrumentsManager, currentPredictions)
-        executions += self.enterPosition(instrumentsManager,
+        executions += self.exitPosition(time, instrumentsManager, currentPredictions)
+        executions += self.enterPosition(time, instrumentsManager,
                                          currentPredictions, capital)
         return executions
 
-    def exitPosition(self, instrumentsManager, currentPredictions, closeAllPositions=False):
+    def exitPosition(self, time, instrumentsManager, currentPredictions, closeAllPositions=False):
         executions = []
         instruments = instrumentsManager.getAllInstrumentsByInstrumentId().values()
         for instrument in instruments:
@@ -67,12 +67,12 @@ class SimpleExecutionSystem(BaseExecutionSystem):
                 continue
             if closeAllPositions:
                 instrumentExec = InstrumentExection(
-                    instrument.getInstrumentId(), np.abs(position), -np.sign(position))
+                    time, instrument.getInstrumentId(), np.abs(position), -np.sign(position))
                 executions.append(instrumentExec)
             # take Profits
             elif self.exitCondition(instrumentsManager, instrument, currentPredictions):
                 instrumentExec = InstrumentExection(
-                    instrument.getInstrumentId(), np.abs(position), -np.sign(position))
+                    time, instrument.getInstrumentId(), np.abs(position), -np.sign(position))
                 executions.append(instrumentExec)
                 logInfo('EXIT TRADE: %s Size: %.2f B/S: %i ' % (
                         instrument.getInstrumentId(), np.abs(position), -np.sign(position)))
@@ -80,13 +80,13 @@ class SimpleExecutionSystem(BaseExecutionSystem):
             # hack
             elif self.hackCondition(instrumentsManager):
                 instrumentExec = InstrumentExection(
-                    instrument.getInstrumentId(), np.abs(position), -np.sign(position))
+                    time, instrument.getInstrumentId(), np.abs(position), -np.sign(position))
                 executions.append(instrumentExec)
                 logInfo('HACK TRADE: %s Size: %.2f B/S: %i ' % (
                         instrument.getInstrumentId(), np.abs(position), -np.sign(position)))
         return executions
 
-    def enterPosition(self, instrumentsManager, currentPredictions, capital):
+    def enterPosition(self, time, instrumentsManager, currentPredictions, capital):
         executions = []
         for instrumentId in currentPredictions.keys():
             instrument = instrumentsManager.getInstrument(instrumentId)
@@ -100,7 +100,7 @@ class SimpleExecutionSystem(BaseExecutionSystem):
                 buySell = self.getBuySell(instrument, currentPredictions)
                 logInfo('ENTER TRADE: %s Size: %.2f B/S: %i ' % (
                         instrumentId, self.getLotSize(instrument), buySell))
-                instrumentExec = InstrumentExection(instrumentId,
+                instrumentExec = InstrumentExection(time, instrumentId,
                                                     self.getLotSize(instrument), buySell)
                 executions.append(instrumentExec)
         return executions

@@ -13,7 +13,7 @@ def getCompulsoryInstrumentFeatureConfigs(tsParams, instrumentType):
     feesConfigDict = {INSTRUMENT_TYPE_STOCK: {'featureKey': 'fees',
                                               'featureId': 'fees',
                                               'params': {'price': tsParams.getPriceFeatureKey(),
-                                                         'feesDict': {1: 0.00003985, -1: 0.00028985, 0: 0}}},
+                                                         'feesDict': {1: 0.05, -1: 0.05, 0: 0}}},
                       INSTRUMENT_TYPE_FUTURE: {'featureKey': 'fees',
                                                'featureId': 'fees',
                                                'params': {'price': tsParams.getPriceFeatureKey(),
@@ -40,6 +40,7 @@ class Instrument(object):
         self.__currentInstrumentUpdate = None
         self.tsParams = tsParams
         self.__position = 0
+        self.__lastTradePrice = 0
         self.__compulsoryFeatureConfigs = getCompulsoryInstrumentFeatureConfigs(tsParams, self.getInstrumentType())
         featureConfigs = tsParams.getFeatureConfigsForInstrumentType(self.getInstrumentType())
         compulsoryFeatureColumns = map(lambda x: x.getFeatureKey(), self.__compulsoryFeatureConfigs)
@@ -66,11 +67,15 @@ class Instrument(object):
 
         self.__currentInstrumentUpdate = instrumentUpdate
 
-    def updatePosition(self, changeInPosition):
+    def updatePositionAtPrice(self, changeInPosition, tradePrice):
         self.__position = self.__position + changeInPosition
+        self.__lastTradePrice = tradePrice
 
     def getCurrentPosition(self):
         return self.__position
+
+    def getLastTradePrice(self):
+        return self.__lastTradePrice
 
     def getCurrentBookData(self):
         return self.__currentInstrumentUpdate.getBookData()
