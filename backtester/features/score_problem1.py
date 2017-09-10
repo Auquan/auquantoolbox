@@ -23,6 +23,12 @@ class ProblemOneScore(Feature):
             # first iteration
             return 0
         predictionDict = lookbackMarketDataDf[predictionKey].iloc[-1]
+        # lookback market data is not updated yet since we are in instrument updates
+        # therefore the count is previous count.
+        prevCount = lookbackMarketDataDf[countKey].iloc[-1]
+        if len(predictionDict) == 0:
+            return 0
+        prevData = lookbackDataDf[featureKey].iloc[-2]
 
         temp = (prevCount) * (prevData**2)
 
