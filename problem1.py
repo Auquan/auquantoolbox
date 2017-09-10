@@ -1,6 +1,7 @@
 from backtester.features.feature import Feature
 from backtester.trading_system import TradingSystem
 from backtester.sample_scripts.fair_value_params import FairValueTradingParams
+from backtester.version import updateCheck
 
 
 class Problem1Solver():
@@ -130,6 +131,9 @@ class MyCustomFeature(Feature):
 
 
 if __name__ == "__main__":
+    if not updateCheck():
+        print 'Your version of the auquan toolbox package is old. Please update by running the following command:'
+        print 'pip install -U auquan_toolbox'
     problem1Solver = Problem1Solver()
     tsParams = FairValueTradingParams(problem1Solver)
     tradingSystem = TradingSystem(tsParams)
