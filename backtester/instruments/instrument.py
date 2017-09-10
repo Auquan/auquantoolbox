@@ -37,9 +37,8 @@ def getCompulsoryInstrumentFeatureConfigs(tsParams, instrumentType):
                                  'featureId': 'pl_ratio',
                                  'params': {'pnlKey': 'pnl',
                                             'countKey': 'count'}}
-    compulsoryConfigDicts = [positionConfigDict, feesConfigDict[instrumentType], profitlossConfigDict, capitalConfigDict,
-                             profitlossRatioConfigDict]
-    compulsoryInstrumentFeatureConfigs = map(lambda x: FeatureConfig(x), compulsoryConfigDicts)
+    compulsoryConfigDicts = [positionConfigDict, feesConfigDict[instrumentType], profitlossConfigDict, capitalConfigDict]
+    compulsoryInstrumentFeatureConfigs = list(map(lambda x: FeatureConfig(x), compulsoryConfigDicts))
     return compulsoryInstrumentFeatureConfigs
 
 
@@ -94,7 +93,7 @@ class Instrument(object):
         currentFeatures = copy.deepcopy(self.getCurrentBookData())
         self.__lookbackFeatures.addData(timeOfUpdate, currentFeatures)
         featureConfigs = self.tsParams.getFeatureConfigsForInstrumentType(self.getInstrumentType())
-        featureConfigs = list(chain(featureConfigs, self.__compulsoryFeatureConfigs))
+        featureConfigs = featureConfigs + self.__compulsoryFeatureConfigs
         for featureConfig in featureConfigs:
             featureKey = featureConfig.getFeatureKey()
             featureId = featureConfig.getFeatureId()
