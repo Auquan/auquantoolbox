@@ -15,8 +15,8 @@ class FairValueTradingParams(TradingSystemParameters):
     def getStartingCapital(self):
         instrumentIds = self.__problem1Solver.getSymbolsToTrade()
         if instrumentIds and len(instrumentIds) > 0:
-            return len(instrumentIds) * 100000
-        return 10000000
+            return len(instrumentIds) * 10000
+        return 1000000
 
     '''
     Returns an instance of class DataParser. Source of data for instruments
@@ -134,9 +134,9 @@ class FairValueTradingParams(TradingSystemParameters):
     '''
 
     def getExecutionSystem(self):
-        return QQExecutionSystem(basisEnter_threshold=0.1, basisExit_threshold=0.05,
-                                 basisLongLimit=5000, basisShortLimit=5000,
-                                 basisCapitalUsageLimit=0.05, basisLotSize=100,
+        return QQExecutionSystem(basisEnter_threshold=0.15, basisExit_threshold=0.05,
+                                 basisLongLimit=50000, basisShortLimit=50000,
+                                 basisCapitalUsageLimit=0.05, basisLotSize=5000,
                                  basisLimitType='L', price=self.getPriceFeatureKey())
 
     '''
