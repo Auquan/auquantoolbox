@@ -101,7 +101,7 @@ class QuantQuestDataSource(DataSource):
     def getGroupedInstrumentUpdates(self):
         allInstrumentUpdates = []
         for instrumentId in self.__instrumentIds:
-            logInfo('Processing data for stock: %s' % (instrumentId))
+            print('Processing data for stock: %s' % (instrumentId))
             fileName = self.getFileName(instrumentId)
             if not os.path.exists(self.__cachedFolderName):
                 os.mkdir(self.cachedFolderName, 0755)
