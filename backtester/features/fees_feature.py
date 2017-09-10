@@ -17,7 +17,7 @@ class FeesFeature(Feature):
         currentPrice = currentFeatures[featureParams['price']]
         feesDict = featureParams['feesDict']
         currentPosition = instrument.getCurrentPosition()
-        previousPosition = positionDict.iloc[-1]
+        previousPosition = 0 if len(positionDict) < 2 else positionDict.iloc[-2]
         changeInPosition = currentPosition - previousPosition
         fees = np.abs(changeInPosition) * feesDict[np.sign(changeInPosition)]
         return fees
