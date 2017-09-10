@@ -1,7 +1,7 @@
 from backtester.trading_system_parameters import TradingSystemParameters
 from datetime import timedelta
 from backtester.dataSource.quant_quest_data_source import QuantQuestDataSource
-from backtester.executionSystem.simple_execution_system_fairvalue import SimpleExecutionSystemWithFairValue
+from backtester.executionSystem.QQ_execution_system import QQExecutionSystem
 from backtester.orderPlacer.backtesting_order_placer import BacktestingOrderPlacer
 from backtester.constants import *
 
@@ -100,7 +100,7 @@ class FairValueTradingParams(TradingSystemParameters):
                      'featureId': 'count'}
         scoreDict = {'featureKey': 'score',
                      'featureId': 'score_fv',
-                     'params': {'price': self.getPriceFeatureKey(),
+                     'params': {'price': 'FairValue',
                                 'instrument_score_feature': 'score'}}
         return [countDict, scoreDict]
 
@@ -128,10 +128,10 @@ class FairValueTradingParams(TradingSystemParameters):
     '''
 
     def getExecutionSystem(self):
-        return SimpleExecutionSystemWithFairValue(enter_threshold_deviation=0.1,
-                                                  exit_threshold_deviation=0.05, longLimit=10000,
-                                                  shortLimit=10000, capitalUsageLimit=0.05,
-                                                  lotSize=100, limitType='L', price=self.getPriceFeatureKey())
+        return QQExecutionSystem(basisEnter_threshold=0.1, basisExit_threshold=0.05,
+                                 basisLongLimit=5000, basisShortLimit=5000,
+                                 basisCapitalUsageLimit=0.05, basisLotSize=100,
+                                 basisLimitType='L', price=self.getPriceFeatureKey())
 
     '''
     Returns the type of order placer we want to use. its an implementation of the class OrderPlacer.
@@ -152,4 +152,4 @@ class FairValueTradingParams(TradingSystemParameters):
         return 90
 
     def getPriceFeatureKey(self):
-        return 'stockVWAP'
+        return 'basis'
