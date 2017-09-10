@@ -8,11 +8,11 @@ class Problem1Solver():
 
     '''
     Specifies which training data set to use. Right now support
-    trainingData1, trainingData2, trainingData3.
+    sampleData, trainingData1, trainingData2, trainingData3.
     '''
 
     def getTrainingDataSet(self):
-        return "trainingData1"
+        return "sampleData"
 
     '''
     Returns the stocks to trade.
