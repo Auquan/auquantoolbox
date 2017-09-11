@@ -1,5 +1,8 @@
 __version__ = '1.2.0'
-import urllib2
+try:
+    from urllib.request import urlopen
+except ImportError:
+    from urllib2 import urlopen
 import json
 
 
@@ -11,7 +14,7 @@ def updateCheck():
     '''
     updateStr = ''
     try:
-        toolboxJson = urllib2.urlopen('https://pypi.python.org/pypi/auquan_toolbox/json')
+        toolboxJson = urlopen('https://pypi.python.org/pypi/auquan_toolbox/json')
     except Exception as e:
         return False
 

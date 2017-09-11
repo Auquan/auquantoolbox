@@ -12,7 +12,7 @@ class TradingSystemParameters(object):
         instrumentFeatureConfigDicts = self.getInstrumentFeatureConfigDicts()
         for instrumentType in instrumentFeatureConfigDicts:
             self.__instrumentFeatureConfigs[instrumentType] = list(map(lambda x: FeatureConfig(x), instrumentFeatureConfigDicts[instrumentType]))
-        self.__marketFeatureConfigs = map(lambda x: FeatureConfig(x), self.getMarketFeatureConfigDicts())
+        self.__marketFeatureConfigs = list(map(lambda x: FeatureConfig(x), self.getMarketFeatureConfigDicts()))
 
     #####################################################################
     ###      START OF OVERRIDING METHODS
