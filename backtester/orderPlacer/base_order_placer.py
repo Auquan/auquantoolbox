@@ -1,8 +1,12 @@
+from backtester.logger import *
+
+
 class PlacedOrder():
-    def __init__(self, instrumentId, changeInPosition, tradePrice):
+    def __init__(self, instrumentId, changeInPosition, timeOfExecution):
         self.__instrumentId = instrumentId
         self.__changeInPosition = changeInPosition
-        self.__tradePrice = tradePrice
+        self.__tradePrice = None
+        self.__timeOfExecution = timeOfExecution
 
     def getInstrumentId(self):
         return self.__instrumentId
@@ -11,10 +15,18 @@ class PlacedOrder():
         return self.__changeInPosition
 
     def getTradePrice(self):
-        return self.__tradePrice
+        if self.__tradePrice is None:
+            logError('tradePrice is not set yet')
+        return 0
+
+    def setTradePrice(self, tradePrice):
+        self.__tradePrice = tradePrice
+
+    def getTimeOfExecution(self):
+        return self.__timeOfExecution
 
 
-# TODO: For live orders, we need a way to track what orders we have placed but havent gotten 
+# TODO: For live orders, we need a way to track what orders we have placed but havent gotten
 # a confirmation for. Also, need something for failure of orders.
 class BaseOrderPlacer():
 

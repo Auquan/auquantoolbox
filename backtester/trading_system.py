@@ -37,7 +37,7 @@ class TradingSystem:
                 self.instrumentManager.addInstrument(instrumentToUpdate)
             instrumentToUpdate.update(instrumentUpdate)
         # update positions of placed orders
-        for placedOrder in self.orderPlacer.emitPlacedOrders():
+        for placedOrder in self.orderPlacer.emitPlacedOrders(timeOfUpdate, self.instrumentManager):
             self.processPlacedOrder(placedOrder)
         # Then we try to calculate features.
         self.tryUpdateFeaturesAndExecute(timeOfUpdate, onlyAnalyze)
@@ -88,7 +88,7 @@ class TradingSystem:
     def closePositions(self, timeOfUpdate):
         instrumentsToExecute = self.executionSystem.exitPosition(timeOfUpdate, self.instrumentManager, [], True)
         self.orderPlacer.placeOrders(timeOfUpdate, instrumentsToExecute, self.instrumentManager)
-        for placedOrder in self.orderPlacer.emitPlacedOrders():
+        for placedOrder in self.orderPlacer.emitPlacedOrders(timeOfUpdate, self.instrumentManager):
             self.processPlacedOrder(placedOrder)
         self.updateFeatures(timeOfUpdate)
         self.saveCurrentState()
