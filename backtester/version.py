@@ -1,4 +1,4 @@
-__version__ = '1.0.0'
+__version__ = '1.1.8'
 import urllib2
 import json
 
