@@ -14,7 +14,7 @@ class FeaturePredictionTradingParams(TradingSystemParameters):
         super(FeaturePredictionTradingParams, self).__init__()
 
     def getStartingCapital(self):
-        instrumentIds = self.__problem1Solver.getSymbolsToTrade()
+        instrumentIds = self.__problem2Solver.getSymbolsToTrade()
         if instrumentIds and len(instrumentIds) > 0:
             return len(instrumentIds) * 1000000
         return 50000000
