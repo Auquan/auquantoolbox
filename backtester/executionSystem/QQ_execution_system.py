@@ -4,13 +4,18 @@ import numpy as np
 
 
 class QQExecutionSystem(SimpleExecutionSystemWithFairValue):
-    def __init__(self, basisEnter_threshold=0.1, basisExit_threshold=0.05, basisLongLimit=5000, basisShortLimit=5000,
-                 basisCapitalUsageLimit=0.05, basisLotSize=100, basisLimitType='L', price=''):
+    def __init__(self, basisEnter_threshold=0.1, basisExit_threshold=0.05,
+                 basisLongLimit=5000, basisShortLimit=5000,
+                 basisCapitalUsageLimit=0.05, basisLotSize=100,
+                 basisLimitType='L', basis_thresholdParam='sdev',
+                 price='', feeDict=0.05):
         super(QQExecutionSystem, self).__init__(enter_threshold_deviation=basisEnter_threshold,
                                                 exit_threshold_deviation=basisExit_threshold,
                                                 longLimit=basisLongLimit, shortLimit=basisShortLimit,
                                                 capitalUsageLimit=basisCapitalUsageLimit, lotSize=basisLotSize,
                                                 limitType=basisLimitType, price=price)
+        self.fees = feeDict
+        self.thresholdParam = basis_thresholdParam
 
     def getBuySell(self, instrument, currentPredictions):
         instrumentId = instrument.getInstrumentId()
@@ -28,7 +33,8 @@ class QQExecutionSystem(SimpleExecutionSystemWithFairValue):
             currentPrice = instrument.getDataDf()[self.priceFeature].iloc[-1]
             fairValue = currentPredictions[instrumentId]
             currentDeviationFromPrediction = currentPrice - fairValue
-            return np.abs(currentDeviationFromPrediction) > (self.enter_threshold)
+            return np.abs(currentDeviationFromPrediction) -\
+                2 * self.fees > (self.enter_threshold) * np.abs(instrument.getDataDf()[self.thresholdParam].iloc[-1])
         except KeyError:
             logError('You have specified FairValue Execution Type but Price Feature Key does not exist')
 
@@ -38,7 +44,7 @@ class QQExecutionSystem(SimpleExecutionSystemWithFairValue):
             currentPrice = instrument.getDataDf()[self.priceFeature].iloc[-1]
             fairValue = currentPredictions[instrumentId]
             currentDeviationFromPrediction = currentPrice - fairValue
-            return np.abs(currentDeviationFromPrediction) < (self.exit_threshold)
+            return np.abs(currentDeviationFromPrediction) < (self.exit_threshold) * np.abs(instrument.getDataDf()[self.thresholdParam].iloc[-1])
         except KeyError:
             logError('You have specified FairValue Execution Type but Price Feature Key does not exist')
 

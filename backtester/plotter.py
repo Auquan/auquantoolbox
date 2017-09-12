@@ -23,11 +23,11 @@ TODO: 1) Support excluding columns for each files.
 '''
 
 
-def plot(dir, marketFeatures, benchmark, price, startingCapital, excludeFiles):
+def plot(dir, marketFeatures, benchmark, stats, startingCapital, excludeFiles):
     if marketFeatures is not None and isfile(marketFeatures):
         logInfo('Generating %s' % marketFeatures)
-        df, stats, benchmark_pnl = getDataReady(
-            dir, marketFeatures, benchmark, price, startingCapital, True)
+        df, benchmark_pnl = getDataReady(
+            dir, marketFeatures, benchmark, startingCapital, True)
         generateGraph(df, marketFeatures, stats, benchmark_pnl)
     else:
         for fileName in listdir(dir):
@@ -36,29 +36,27 @@ def plot(dir, marketFeatures, benchmark, price, startingCapital, excludeFiles):
                 logInfo('excluding ', fileName)
                 continue
             logInfo('Generating %s' % fileName)
-            df, stats, benchmark_pnl = getDataReady(
-                dir, path, benchmark, price, startingCapital, False)
+            df, benchmark_pnl = getDataReady(
+                dir, path, benchmark, startingCapital, False)
             generateGraph(df, path, fileName + ' ' + stats, benchmark_pnl)
 
 
-def getDataReady(dir, features, benchmark, price, startingCapital, market=True):
+def getDataReady(dir, features, benchmark, startingCapital, market=True):
     df = pd.read_csv(features, engine='python',
                      index_col='time', parse_dates=True)
 
     if market:
         df['Returns(%)'] = 100 * (df['pnl'] / startingCapital)
-        metrics = Metrics(marketFeaturesDf=df)
-        metrics.calculateMarketMetrics(benchmark, price, startingCapital, dir)
-        # TODO create benchamrks later
+        # metrics = Metrics(marketFeaturesDf=df)
+        # metrics.calculateMarketMetrics(benchmark, price, startingCapital, dir)
+        # # TODO create benchamrks later
         benchmark_pnl = None
-        stats = metrics.getMarketMetricsString()
     else:
-        metrics = Metrics(marketFeaturesDf=df)
-        metrics.calculateMetrics(price, startingCapital)
+        # metrics = Metrics(marketFeaturesDf=df)
+        # metrics.calculateMetrics(price, startingCapital)
         benchmark_pnl = None
-        stats = metrics.getMetricsString()
-    logInfo(stats, True)
-    return df, stats, benchmark_pnl
+    # logInfo(stats, True)
+    return df, benchmark_pnl
 
 
 def generateGraph(df, fileName, stats, benchmark_pnl):

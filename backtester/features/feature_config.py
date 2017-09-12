@@ -11,7 +11,7 @@ from backtester.features.delay_feature import DelayFeature
 from backtester.features.difference_feature import DifferenceFeature
 from backtester.features.direction_feature import DirectionFeature
 from backtester.features.exp_moving_average_feature import ExpMovingAverageFeature
-from backtester.features.fees_feature import  FeesFeature
+from backtester.features.fees_feature import FeesFeature
 from backtester.features.macd_feature import MACDFeature
 from backtester.features.ma_ribbon_distance_feature import MARibbonDistanceFeature
 from backtester.features.momentum_feature import MomentumFeature
@@ -23,7 +23,7 @@ from backtester.features.moving_sdev_feature import MovingSDevFeature
 from backtester.features.moving_sum import MovingSumFeature
 from backtester.features.portfolio_value_feature import PortfolioValueFeature
 from backtester.features.position_instrument_feature import PositionInstrumentFeature
-from backtester.features.profitloss_feature import  ProfitLossFeature
+from backtester.features.profitloss_feature import ProfitLossFeature
 from backtester.features.rank_feature import RankFeature
 from backtester.features.ratio_feature import RatioMarketFeature
 from backtester.features.rsi_feature import RSIFeature
@@ -32,19 +32,24 @@ from backtester.features.score_fairvalue_feature import ScoreFairValueFeature
 from backtester.features.score_logloss_feature import ScoreLogLossFeature
 from backtester.features.vwap_price_feature import VwapPriceInstrumentFeature
 from backtester.features.score_problem1 import ProblemOneScore
+from backtester.features.variance_feature import VarianceFeature
+from backtester.features.maxcapitalusage_feature import MaxCapitalUsageFeature
+from backtester.features.maxDrawdown_feature import MaxDrawdownFeature
+from backtester.features.profitlossratio_feature import ProfitLossRatioFeature
 
-featureIdToFeatureCls = {'argmax' : ArgMaxFeature,
-                         'argmin' : ArgMinFeature,
+
+featureIdToFeatureCls = {'argmax': ArgMaxFeature,
+                         'argmin': ArgMinFeature,
                          'bollinger_bands': BollingerBandsFeature,
-                         'capital' : CapitalFeature,
-                         'count' : CountFeature,
-                         'cross_sectional_momentum' : CrossSectionMomentumFeature,
-                         'cross_instrument_correlation' : MovingInstrumentCorrelationFeature,
-                         'delay' : DelayFeature,
-                         'difference' : DifferenceFeature,
-                         'direction' : DirectionFeature,
+                         'capital': CapitalFeature,
+                         'count': CountFeature,
+                         'cross_sectional_momentum': CrossSectionMomentumFeature,
+                         'cross_instrument_correlation': MovingInstrumentCorrelationFeature,
+                         'delay': DelayFeature,
+                         'difference': DifferenceFeature,
+                         'direction': DirectionFeature,
                          'exponential_moving_average': ExpMovingAverageFeature,
-                         'fees' : FeesFeature,
+                         'fees': FeesFeature,
                          'macd': MACDFeature,
                          'ma_ribbon_distance': MARibbonDistanceFeature,
                          'momentum': MomentumFeature,
@@ -53,18 +58,22 @@ featureIdToFeatureCls = {'argmax' : ArgMaxFeature,
                          'moving_max': MovingMaximumFeature,
                          'moving_min': MovingMinimumFeature,
                          'moving_sdev': MovingSDevFeature,
-                         'moving_sum' : MovingSumFeature,
-                         'portfolio_value' : PortfolioValueFeature,
+                         'moving_sum': MovingSumFeature,
+                         'portfolio_value': PortfolioValueFeature,
                          'position': PositionInstrumentFeature,
-                         'pnl' :  ProfitLossFeature,
-                         'rank' : RankFeature,
+                         'pnl': ProfitLossFeature,
+                         'rank': RankFeature,
                          'ratio': RatioMarketFeature,
                          'rsi': RSIFeature,
-                         'scale' : ScaleFeature,
-                         'score_fv' : ScoreFairValueFeature,
-                         'score_ll' : ScoreLogLossFeature,
+                         'scale': ScaleFeature,
+                         'score_fv': ScoreFairValueFeature,
+                         'score_ll': ScoreLogLossFeature,
                          'vwap': VwapPriceInstrumentFeature,
-                         'prob1_score': ProblemOneScore
+                         'prob1_score': ProblemOneScore,
+                         'PLratio': ProfitLossRatioFeature,
+                         'maxDrawdown': MaxDrawdownFeature,
+                         'variance': VarianceFeature,
+                         'maxCapitalUsage': MaxCapitalUsageFeature
                          }
 
 

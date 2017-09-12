@@ -7,6 +7,8 @@ from itertools import chain
 
 
 def getCompulsoryMarketFeatureConfigs(tsParams):
+    countDict = {'featureKey': 'count',
+                 'featureId': 'count'}
     profitlossConfigDict = {'featureKey': 'pnl',
                             'featureId': 'pnl',
                             'params': {'instrument_pnl_feature': 'pnl'}}
@@ -18,7 +20,23 @@ def getCompulsoryMarketFeatureConfigs(tsParams):
                                 'featureId': 'portfolio_value',
                                 'params': {'initial_capital': tsParams.getStartingCapital(),
                                            'pnl': 'pnl'}}
-    compulsoryConfigDicts = [profitlossConfigDict, capitalConfigDict, portfoliovalueConfigDict]
+    varianceConfigDict = {'featureKey': 'variance',
+                          'featureId': 'variance',
+                          'params': {'pnlKey': 'pnl',
+                                        'countKey': 'count'}}
+    maxCapitalUsageConfigDict = {'featureKey': 'capitalUsage',
+                                 'featureId': 'maxCapitalUsage',
+                                 'params': {'initial_capital': tsParams.getStartingCapital(),
+                                            'capitalKey': 'capital'}}
+    maxDrawdownConfigDict = {'featureKey': 'maxDrawdown',
+                             'featureId': 'maxDrawdown',
+                             'params': {'portfolioValueKey': 'portfolio_value'}}
+    profitlossRatioConfigDict = {'featureKey': 'PLRatio',
+                                 'featureId': 'PLRatio',
+                                 'params': {'pnlKey': 'pnl',
+                                            'countKey': 'count'}}
+    compulsoryConfigDicts = [countDict, profitlossConfigDict, capitalConfigDict, portfoliovalueConfigDict,
+                             varianceConfigDict, maxCapitalUsageConfigDict, maxDrawdownConfigDict, profitlossRatioConfigDict]
     compulsoryMarketFeatureConfigs = map(lambda x: FeatureConfig(x), compulsoryConfigDicts)
     return compulsoryMarketFeatureConfigs
 

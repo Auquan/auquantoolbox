@@ -29,12 +29,22 @@ def getCompulsoryInstrumentFeatureConfigs(tsParams, instrumentType):
     capitalConfigDict = {'featureKey': 'capital',
                          'featureId': 'capital',
                          'params': {'price': tsParams.getPriceFeatureKey(), 'fees': 'fees'}}
-    compulsoryConfigDicts = [positionConfigDict, feesConfigDict[instrumentType], profitlossConfigDict, capitalConfigDict]
+    varianceConfigDict = {'featureKey': 'variance',
+                          'featureId': 'variance',
+                          'params': {'pnlKey': 'pnl',
+                                     'countKey': 'count'}}
+    profitlossRatioConfigDict = {'featureKey': 'PLRatio',
+                                 'featureId': 'PLRatio',
+                                 'params': {'pnlKey': 'pnl',
+                                            'countKey': 'count'}}
+    compulsoryConfigDicts = [positionConfigDict, feesConfigDict[instrumentType], profitlossConfigDict, capitalConfigDict,
+                             varianceConfigDict, profitlossRatioConfigDict]
     compulsoryInstrumentFeatureConfigs = map(lambda x: FeatureConfig(x), compulsoryConfigDicts)
     return compulsoryInstrumentFeatureConfigs
 
 
 class Instrument(object):
+
     def __init__(self, instrumentId, bookDataFeatures, tsParams):
         self.__instrumentId = instrumentId
         self.__currentInstrumentUpdate = None

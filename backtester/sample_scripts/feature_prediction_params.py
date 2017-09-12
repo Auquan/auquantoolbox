@@ -16,8 +16,8 @@ class FeaturePredictionTradingParams(TradingSystemParameters):
     def getStartingCapital(self):
         instrumentIds = self.__problem1Solver.getSymbolsToTrade()
         if instrumentIds and len(instrumentIds) > 0:
-            return len(instrumentIds) * 10000
-        return 1000000
+            return len(instrumentIds) * 1000000
+        return 50000000
     '''
     Returns an instance of class DataParser. Source of data for instruments
     '''
@@ -141,8 +141,8 @@ class FeaturePredictionTradingParams(TradingSystemParameters):
 
     def getExecutionSystem(self):
         return SimpleExecutionSystem(enter_threshold=0.9, exit_threshold=0.6,
-                                     longLimit=10, shortLimit=10, capitalUsageLimit=0.05,
-                                     lotSize=1, limitType='L', price=self.getPriceFeatureKey())
+                                     longLimit=10000, shortLimit=10000, capitalUsageLimit=0.05,
+                                     lotSize=100, limitType='L', price=self.getPriceFeatureKey())
 
     '''
     Returns the type of order placer we want to use. its an implementation of the class OrderPlacer.
