@@ -81,19 +81,23 @@ class FairValueTradingParams(TradingSystemParameters):
 
     def getInstrumentFeatureConfigDicts(self):
         stockFeatureConfigs = self.__problem1Solver.getFeatureConfigDicts()
+        basePredDict = {'featureKey': 'base_prediction',
+                   'featureId': 'moving_average',
+                   'params': {'period': 5,
+                              'featureName': 'basis'}}
         scoreDict = {'featureKey': 'score',
                      'featureId': 'prob1_score',
                      'params': {'predictionKey': 'prediction',
                                 'price': 'FairValue'}}
         baseScoreDict = {'featureKey': 'baseScore',
                          'featureId': 'prob1_score',
-                         'params': {'predictionKey': 'ma_5',
+                         'params': {'predictionKey': 'base_prediction',
                                     'price': 'FairValue'}}
         normalizedScoreDict = {'featureKey': 'normalizedScore',
                                'featureId': 'ratio',
                                'params': {'featureName1': 'score',
                                           'featureName2': 'baseScore'}}
-        return {INSTRUMENT_TYPE_STOCK: stockFeatureConfigs + [scoreDict, baseScoreDict, normalizedScoreDict]}
+        return {INSTRUMENT_TYPE_STOCK: stockFeatureConfigs + [basePredDict, scoreDict]}
 
     '''
     Returns an array of market feature config dictionaries
@@ -112,7 +116,7 @@ class FairValueTradingParams(TradingSystemParameters):
         scoreDict = {'featureKey': 'score',
                      'featureId': 'score_fv',
                      'params': {'price': 'FairValue',
-                                'instrument_score_feature': 'normalizedScore'}}
+                                'instrument_score_feature': 'score'}}
         return [scoreDict]
 
     '''

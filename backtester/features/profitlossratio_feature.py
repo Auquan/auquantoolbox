@@ -4,7 +4,7 @@ from backtester.features.feature import Feature
 class ProfitLossRatioFeature(Feature):
 
     @classmethod
-    def computeForLookbackData(cls, featureParams, featureKey, currentFeatures, lookbackDataDf):
+    def computeForInstrument(cls, featureParams, featureKey, currentFeatures, instrument, instrumentManager):
         pnlKey = 'pnl'
         countKey = 'count'
         if 'pnlKey' in featureParams:
@@ -12,10 +12,47 @@ class ProfitLossRatioFeature(Feature):
         if 'countKey' in featureParams:
             countKey = featureParams['countKey']
 
-        prevData = lookbackDataDf[featureKey].iloc[-2]
-        prevCount = lookbackDataDf[countKey].iloc[-2]
+        lookbackDataDf = instrument.getDataDf()
+        lookbackMarketDataDf = instrumentManager.getDataDf()
+
+        if len(lookbackDataDf) <= 1:
+            prevData = 0
+            prevCount = 0
+            prevPnl = 0
+        else:
+            prevData = lookbackDataDf[featureKey].iloc[-2]
+            prevCount = lookbackMarketDataDf[countKey].iloc[-1]
+            prevPnl = lookbackDataDf[pnlKey].iloc[-2]
+
         profitCount = prevCount * prevData
-        if (lookbackDataDf[pnlKey].iloc[-1] - lookbackDataDf[pnlKey].iloc[-2] > 0):
+        if (lookbackDataDf[pnlKey].iloc[-1] - prevPnl > 0):
+            profitCount += 1
+        prevCount += 1
+        lossCount = prevCount - profitCount
+        return float(profitCount) / float(lossCount)
+
+    @classmethod
+    def computeForMarket(cls, featureParams, featureKey, currentMarketFeatures, instrumentManager):
+        pnlKey = 'pnl'
+        countKey = 'count'
+        if 'pnlKey' in featureParams:
+            pnlKey = featureParams['pnlKey']
+        if 'countKey' in featureParams:
+            countKey = featureParams['countKey']
+
+        lookbackMarketDataDf = instrumentManager.getDataDf()
+
+        if len(lookbackMarketDataDf) <= 1:
+            prevData = 0
+            prevCount = 0
+            prevPnl = 0
+        else:
+            prevData = lookbackMarketDataDf[featureKey].iloc[-2]
+            prevCount = lookbackMarketDataDf[countKey].iloc[-2]
+            prevPnl = lookbackMarketDataDf[pnlKey].iloc[-2]
+
+        profitCount = prevCount * prevData
+        if (lookbackMarketDataDf[pnlKey].iloc[-1] - prevPnl > 0):
             profitCount += 1
         prevCount += 1
         lossCount = prevCount - profitCount

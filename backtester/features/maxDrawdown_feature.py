@@ -29,9 +29,9 @@ class MaxDrawdownFeature(Feature):
             portfolioValueKey = featureParams['portfolioValueKey']
 
         portfolioValueDict = lookbackMarketDataDf[portfolioValueKey]
-        drawdownDict = lookbackMarketDataDf[featureKey].iloc[-1]
         if len(portfolioValueDict) <= 1:
             return {'maxPortfolioValue': 0, 'maxDrawdown': 0}
+        drawdownDict = lookbackMarketDataDf[featureKey].iloc[-2]
 
         maxPortfolioValue = portfolioValueDict.iloc[-1] if drawdownDict['maxPortfolioValue'] < portfolioValueDict.iloc[-1] \
             else drawdownDict['maxPortfolioValue']

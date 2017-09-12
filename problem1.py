@@ -20,7 +20,7 @@ class Problem1Solver():
     '''
 
     def getSymbolsToTrade(self):
-        return []
+        return ['AGW']
 
     '''
     [Optional] This is a way to use any custom features you might have made.
@@ -66,7 +66,7 @@ class Problem1Solver():
         ma1Dict = {'featureKey': 'ma_5',
                    'featureId': 'moving_average',
                    'params': {'period': 5,
-                              'featureName': 'basis'}} #
+                              'featureName': 'basis'}}
         expma = {'featureKey': 'exponential_moving_average',
                    'featureId': 'exponential_moving_average',
                    'params': {'period': 5,
@@ -78,7 +78,7 @@ class Problem1Solver():
         customFeatureDict = {'featureKey': 'custom_inst_feature',
                              'featureId': 'my_custom_feature',
                              'params': {'param1': 'value1'}}
-        return [ma1Dict, expma, sdevDict, customFeatureDict]
+        return [ma1Dict, sdevDict, customFeatureDict]
 
     '''
     Using all the features you have calculated in getFeatureConfigDicts, combine them in a meaningful way

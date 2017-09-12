@@ -20,17 +20,16 @@ class Metrics():
             + ' Sharpe Ratio: %0.2f ' % self.__stats['Sharpe Ratio'] \
             + ' Score: %0.2f ' % self.__stats['Score'] \
             + ' Max Drawdown: %0.2f%% ' % (100 * self.__stats['Max Drawdown(%)']) \
-            + ' Profit/Loss Ratio: %0.2f ' % self.__stats['Profit/Loss Ratio'] \
-            + ' Accuracy: %0.2f ' % self.__stats['Accuracy']
+            + ' Profit/Loss Ratio: %0.2f ' % self.__stats['Profit/Loss Ratio']
         # + 'Log Loss         : %0.2f'%self.__stats['Log Loss']
 
     def getMetricsString(self):
+        # Add back below once benchmark support
+        # + ' Benchmark: %0.2f%% ' % (100 * self.__stats['Base Return(%)']) \
         return \
             ' Total Pnl: %0.2f%% ' % (100 * self.__stats['Total Pnl(%)']) \
-            + ' Benchmark: %0.2f%% ' % (100 * self.__stats['Base Return(%)']) \
             + ' Score: %0.2f ' % self.__stats['Score'] \
-            + ' Profit/Loss Ratio: %0.2f ' % self.__stats['Profit/Loss Ratio'] \
-            + ' Accuracy: %0.2f ' % self.__stats['Accuracy']
+            + ' Profit/Loss Ratio: %0.2f ' % self.__stats['Profit/Loss Ratio']
         # + 'Log Loss         : %0.2f'%self.__stats['Log Loss']
 
     def getMetrics(self):
@@ -59,9 +58,9 @@ class Metrics():
         # total_pnl.dropna(inplace=True)
         # portfolioValue.dropna(inplace=True)
         total_days = len(pd.date_range(df.index[0], df.index[-1], freq=BDay()))
-        total_return = df.loc[- 1, 'pnl'] / startingCapital
+        total_return = df['pnl'].iloc[- 1] / startingCapital
 
-        benchmark = self.getBenchmarkData(baseSymbol, priceFeature)
+        benchmark = self.getBenchmarkData(None, priceFeature, '')
 
         stats['Total Pnl(%)'] = total_return
         stats['Annual Return(%)'] = self.annualized_return(
@@ -70,13 +69,13 @@ class Metrics():
             stats['Base Return(%)'] = self.annualized_return(
                 benchmark['total_return'], total_days)
 
-        stats['Annual Vol(%)'] = self.annual_vol(df.loc[-1, 'variance'])
+        stats['Annual Vol(%)'] = self.annual_vol(df['variance'].iloc[-1])
         # stats['Beta'] = self.beta(daily_return,benchmark['daily_returns'])
         stats['Sharpe Ratio'] = self.sharpe_ratio(stats['Annual Return(%)'], stats['Annual Vol(%)'])
-        stats['RoC(%)'] = self.roc(total_return, df.loc[-1, 'capitalUsage'])
-        stats['Score'] = df.loc[-1, 'score']
-        stats['Max Drawdown(%)'] = self.max_drawdown(df.loc[-1, 'maxDrawdown'], startingCapital)
-        stats['Profit/Loss Ratio'] = df.loc[-1, 'pl_ratio']
+        stats['RoC(%)'] = self.roc(total_return, df['capitalUsage'].iloc[-1])
+        stats['Score'] = df['score'].iloc[-1]
+        stats['Max Drawdown(%)'] = self.max_drawdown(df['maxDrawdown'].iloc[-1], startingCapital)
+        stats['Profit/Loss Ratio'] = df['pl_ratio'].iloc[-1]
         # stats['Accuracy'] = self.accuracy(self.__marketFeaturesDf['pnl'])
         # TODO change reference to score
         if 'score' in self.__marketFeaturesDf.columns:
@@ -96,14 +95,14 @@ class Metrics():
         # price.dropna(inplace=True)
         df = self.__marketFeaturesDf
         total_days = len(pd.date_range(df.index[0], df.index[-1], freq=BDay()))
-        total_return = df.loc[- 1, 'pnl'] / startingCapital
-        base_return = df.loc[total_days - 1, priceFeature] / df.loc[0, priceFeature] - 1
+        total_return = df['pnl'].iloc[- 1] / startingCapital
+        base_return = df[priceFeature].iloc[total_days - 1] / df[priceFeature].iloc[0] - 1
 
         stats['Total Pnl(%)'] = total_return
         stats['Base Return(%)'] = self.annualized_return(
             base_return, total_days)
-        stats['Score'] = df.loc[-1, 'score']
-        stats['Profit/Loss Ratio'] = df.loc[-1, 'pl_ratio']
+        stats['Score'] = df['score'].iloc[-1]
+        stats['Profit/Loss Ratio'] = df['pl_ratio'].iloc[-1]
         # stats['Accuracy'] = self.accuracy(self.__marketFeaturesDf['pnl'])
         # stats['Log Loss']=logLoss(daily_return)
         self.__stats = stats
@@ -138,7 +137,7 @@ class Metrics():
             return self.annualized_return(total_return, total_days) / stdev
 
     def max_drawdown(self, maxDrawdown, startingCapital):
-        return maxDrawdown['drawdown']/float(startingCapital)
+        return maxDrawdown['maxDrawdown']/float(startingCapital)
         # return np.max(np.maximum.accumulate(portfolioValue) - portfolioValue) / portfolioValue[0]
 
     def roc(self, total_return, capitalUsage):

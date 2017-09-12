@@ -99,16 +99,16 @@ class TradingSystem:
         for instrumentId in allInstruments:
             instrument = allInstruments[instrumentId]
             lookbackData = instrument.getDataDf()
-            metrics = Metrics(featuresDf=lookbackData)
+            metrics = Metrics(marketFeaturesDf=lookbackData)
             metrics.calculateMetrics(self.tsParams.getPriceFeatureKey(), self.tsParams.getStartingCapital())
             stats = metrics.getMetricsString()
             logInfo(stats, True)
             if shouldPlot:
                 plot(self.stateWriter.getFolderName(), None, None,
                      stats, self.tsParams.getStartingCapital(), [self.stateWriter.getMarketFeaturesFilename()])
-        metrics = Metrics(featuresDf=self.instrumentManager.getDataDf())
+        metrics = Metrics(marketFeaturesDf=self.instrumentManager.getDataDf())
         metrics.calculateMarketMetrics(None, self.tsParams.getPriceFeatureKey(), self.tsParams.getStartingCapital())
-        stats = metrics.getMetricsString()
+        stats = metrics.getMarketMetricsString()
         logInfo(stats, True)
         plot(self.stateWriter.getFolderName(), self.stateWriter.getMarketFeaturesFilename(),
              self.tsParams.getBenchmark(), stats, self.tsParams.getStartingCapital(), [])
