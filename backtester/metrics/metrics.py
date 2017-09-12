@@ -7,7 +7,6 @@ from pandas.tseries.frequencies import to_offset
 
 class Metrics():
     def __init__(self, marketFeaturesDf):
-        print a
         self.__marketFeaturesDf = marketFeaturesDf
         self.__stats = {}
 
