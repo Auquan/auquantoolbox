@@ -93,8 +93,7 @@ class FairValueTradingParams(TradingSystemParameters):
                                'featureId': 'ratio',
                                'params': {'featureName1': 'score',
                                           'featureName2': 'baseScore'}}
-        stockFeatureConfigs.append([scoreDict, baseScoreDict, normalizedScoreDict])
-        return {INSTRUMENT_TYPE_STOCK: stockFeatureConfigs}
+        return {INSTRUMENT_TYPE_STOCK: stockFeatureConfigs + [scoreDict, baseScoreDict, normalizedScoreDict]}
 
     '''
     Returns an array of market feature config dictionaries

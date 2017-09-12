@@ -70,7 +70,7 @@ featureIdToFeatureCls = {'argmax': ArgMaxFeature,
                          'score_ll': ScoreLogLossFeature,
                          'vwap': VwapPriceInstrumentFeature,
                          'prob1_score': ProblemOneScore,
-                         'PLratio': ProfitLossRatioFeature,
+                         'pl_ratio': ProfitLossRatioFeature,
                          'maxDrawdown': MaxDrawdownFeature,
                          'variance': VarianceFeature,
                          'maxCapitalUsage': MaxCapitalUsageFeature
@@ -83,7 +83,7 @@ class FeatureConfig:
 
     def __init__(self, configDict):
         if 'featureId' not in configDict:
-            logError('featureId missing in market feature config dictionary')
+            logError('featureId missing in market feature config dictionary %s', configDict['featureKey'])
         self.__featureIdentifier = configDict['featureId']
 
         if 'featureKey' in configDict:

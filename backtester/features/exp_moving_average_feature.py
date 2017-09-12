@@ -6,7 +6,6 @@ class ExpMovingAverageFeature(Feature):
 
     @classmethod
     def computeForLookbackData(cls, featureParams, featureKey, currentFeatures, lookbackDataDf):
-        import pdb; pdb.set_trace()
         data = lookbackDataDf[featureKey]
         if len(data.index) > 1:
             prev_ema = data[-2]

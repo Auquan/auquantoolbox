@@ -31,8 +31,8 @@ def getCompulsoryMarketFeatureConfigs(tsParams):
     maxDrawdownConfigDict = {'featureKey': 'maxDrawdown',
                              'featureId': 'maxDrawdown',
                              'params': {'portfolioValueKey': 'portfolio_value'}}
-    profitlossRatioConfigDict = {'featureKey': 'PLRatio',
-                                 'featureId': 'PLRatio',
+    profitlossRatioConfigDict = {'featureKey': 'pl_ratio',
+                                 'featureId': 'pl_ratio',
                                  'params': {'pnlKey': 'pnl',
                                             'countKey': 'count'}}
     compulsoryConfigDicts = [countDict, profitlossConfigDict, capitalConfigDict, portfoliovalueConfigDict,

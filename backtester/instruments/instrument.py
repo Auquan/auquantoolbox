@@ -33,8 +33,8 @@ def getCompulsoryInstrumentFeatureConfigs(tsParams, instrumentType):
                           'featureId': 'variance',
                           'params': {'pnlKey': 'pnl',
                                      'countKey': 'count'}}
-    profitlossRatioConfigDict = {'featureKey': 'PLRatio',
-                                 'featureId': 'PLRatio',
+    profitlossRatioConfigDict = {'featureKey': 'pl_ratio',
+                                 'featureId': 'pl_ratio',
                                  'params': {'pnlKey': 'pnl',
                                             'countKey': 'count'}}
     compulsoryConfigDicts = [positionConfigDict, feesConfigDict[instrumentType], profitlossConfigDict, capitalConfigDict,

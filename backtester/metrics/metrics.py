@@ -76,7 +76,7 @@ class Metrics():
         stats['RoC(%)'] = self.roc(total_return, df.loc[-1, 'capitalUsage'])
         stats['Score'] = df.loc[-1, 'score']
         stats['Max Drawdown(%)'] = self.max_drawdown(df.loc[-1, 'maxDrawdown'], startingCapital)
-        stats['Profit/Loss Ratio'] = df.loc[-1, 'PLRatio']
+        stats['Profit/Loss Ratio'] = df.loc[-1, 'pl_ratio']
         # stats['Accuracy'] = self.accuracy(self.__marketFeaturesDf['pnl'])
         # TODO change reference to score
         if 'score' in self.__marketFeaturesDf.columns:
@@ -103,7 +103,7 @@ class Metrics():
         stats['Base Return(%)'] = self.annualized_return(
             base_return, total_days)
         stats['Score'] = df.loc[-1, 'score']
-        stats['Profit/Loss Ratio'] = df.loc[-1, 'PLRatio']
+        stats['Profit/Loss Ratio'] = df.loc[-1, 'pl_ratio']
         # stats['Accuracy'] = self.accuracy(self.__marketFeaturesDf['pnl'])
         # stats['Log Loss']=logLoss(daily_return)
         self.__stats = stats
