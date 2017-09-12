@@ -59,8 +59,16 @@ class Problem1Solver():
     '''
 
     def getFeatureConfigDicts(self):
+        ma2Dict = {'featureKey': 'ma_5',
+                   'featureId': 'moving_average',
+                   'params': {'period': 5,
+                              'featureName': 'stockTopAskPrice'}}
         ma1Dict = {'featureKey': 'ma_5',
                    'featureId': 'moving_average',
+                   'params': {'period': 5,
+                              'featureName': 'basis'}} #
+        expma = {'featureKey': 'exponential_moving_average',
+                   'featureId': 'exponential_moving_average',
                    'params': {'period': 5,
                               'featureName': 'basis'}}
         sdevDict = {'featureKey': 'sdev_5',
@@ -70,7 +78,7 @@ class Problem1Solver():
         customFeatureDict = {'featureKey': 'custom_inst_feature',
                              'featureId': 'my_custom_feature',
                              'params': {'param1': 'value1'}}
-        return [ma1Dict, sdevDict, customFeatureDict]
+        return [ma1Dict, expma, sdevDict, customFeatureDict]
 
     '''
     Using all the features you have calculated in getFeatureConfigDicts, combine them in a meaningful way
