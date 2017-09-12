@@ -38,7 +38,7 @@ def getCompulsoryInstrumentFeatureConfigs(tsParams, instrumentType):
                                  'params': {'pnlKey': 'pnl',
                                             'countKey': 'count'}}
     compulsoryConfigDicts = [positionConfigDict, feesConfigDict[instrumentType], profitlossConfigDict, capitalConfigDict,
-                             varianceConfigDict, profitlossRatioConfigDict]
+                             profitlossRatioConfigDict]
     compulsoryInstrumentFeatureConfigs = map(lambda x: FeatureConfig(x), compulsoryConfigDicts)
     return compulsoryInstrumentFeatureConfigs
 

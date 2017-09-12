@@ -69,7 +69,7 @@ class Metrics():
             stats['Base Return(%)'] = self.annualized_return(
                 benchmark['total_return'], total_days)
 
-        stats['Annual Vol(%)'] = self.annual_vol(df['variance'].iloc[-1])
+        stats['Annual Vol(%)'] = self.annual_vol(df['variance'].iloc[-1], startingCapital)
         # stats['Beta'] = self.beta(daily_return,benchmark['daily_returns'])
         stats['Sharpe Ratio'] = self.sharpe_ratio(stats['Annual Return(%)'], stats['Annual Vol(%)'])
         stats['RoC(%)'] = self.roc(total_return, df['capitalUsage'].iloc[-1])
@@ -112,16 +112,16 @@ class Metrics():
                              (252.0 / np.float(total_days)) - 1)
         return annualized_return
 
-    def annualized_std(self, variance):
-        return np.sqrt(252) * np.sqrt(variance)
+    def annualized_std(self, variance, startingCapital):
+        return (np.sqrt(252) * np.sqrt(variance)) / startingCapital
 
     def annualized_downside_std(self, daily_return):
         downside_return = daily_return.copy()
         downside_return[downside_return > 0] = 0
         return np.sqrt(252) * np.std(downside_return)
 
-    def annual_vol(self, daily_return):
-        return self.annualized_std(daily_return)
+    def annual_vol(self, variance, startingCapital):
+        return self.annualized_std(variance, startingCapital)
 
     def sharpe_ratio(self, annual_return, annual_vol):
         if annual_vol == 0:

@@ -24,11 +24,13 @@ class ProfitLossRatioFeature(Feature):
             prevCount = lookbackMarketDataDf[countKey].iloc[-1]
             prevPnl = lookbackDataDf[pnlKey].iloc[-2]
 
-        profitCount = prevCount * prevData
+        lossCount = prevCount /(1+ prevData)
+        profitCount = prevCount - lossCount
         if (lookbackDataDf[pnlKey].iloc[-1] - prevPnl > 0):
             profitCount += 1
+        else:
+            lossCount += 1
         prevCount += 1
-        lossCount = prevCount - profitCount
         return float(profitCount) / float(lossCount)
 
     @classmethod

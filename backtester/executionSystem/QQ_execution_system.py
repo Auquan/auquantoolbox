@@ -44,7 +44,8 @@ class QQExecutionSystem(SimpleExecutionSystemWithFairValue):
             currentPrice = instrument.getDataDf()[self.priceFeature].iloc[-1]
             fairValue = currentPredictions[instrumentId]
             currentDeviationFromPrediction = currentPrice - fairValue
-            return np.abs(currentDeviationFromPrediction) < (self.exit_threshold) * np.abs(instrument.getDataDf()[self.thresholdParam].iloc[-1])
+            position = instrument.getCurrentPosition()
+            return -np.sign(position)*(currentDeviationFromPrediction) < (self.exit_threshold) * np.abs(instrument.getDataDf()[self.thresholdParam].iloc[-1])
         except KeyError:
             logError('You have specified FairValue Execution Type but Price Feature Key does not exist')
 

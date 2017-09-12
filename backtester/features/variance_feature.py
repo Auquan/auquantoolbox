@@ -26,7 +26,6 @@ class VarianceFeature(Feature):
         if len(varDict) <= 1:
             return 0
 
-        import pdb; pdb.set_trace()
         sqSum = 0 if (len(varDict) <= 1) else prevCount * varDict.iloc[-2]
 
         prevAvgPnl = pnlDict.iloc[-2] / float(prevCount)
@@ -44,7 +43,7 @@ class VarianceFeature(Feature):
         pnlKey = 'pnl'
         countKey = 'count'
         lookbackMarketDataDf = instrumentManager.getDataDf()
-        if len(lookbackMarketDataDf) <= 1 or instrumentManager is None:
+        if len(lookbackMarketDataDf) <= 2 or instrumentManager is None:
             # First Iteration
             return 0
         if 'pnlKey' in featureParams:
