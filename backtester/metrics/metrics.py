@@ -61,7 +61,6 @@ class Metrics():
         total_return = df['pnl'].iloc[- 1] / startingCapital
 
         benchmark = self.getBenchmarkData(None, priceFeature, '')
-
         stats['Total Pnl(%)'] = total_return
         stats['Annual Return(%)'] = self.annualized_return(
             total_return, total_days)
@@ -87,6 +86,7 @@ class Metrics():
 
         stats = {}
 
+<<<<<<< HEAD
         # total_pnl = self.resampleData(
         #     self.__marketFeaturesDf['pnl'], '1D').last()
         # price = self.resampleData(
@@ -97,6 +97,20 @@ class Metrics():
         total_days = len(pd.date_range(df.index[0], df.index[-1], freq=BDay()))
         total_return = df['pnl'].iloc[- 1] / startingCapital
         base_return = df[priceFeature].iloc[total_days - 1] / df[priceFeature].iloc[0] - 1
+=======
+        total_pnl = self.resampleData(
+            self.__marketFeaturesDf['pnl'], '1D').last()
+        price = self.resampleData(
+            self.__marketFeaturesDf[priceFeature], '1D').last()
+        
+        total_pnl.dropna(inplace=True)
+        price.dropna(inplace=True)
+        total_days = len(total_pnl)
+        total_return = total_pnl[total_days - 1] / startingCapital
+        base_return = price[total_days - 1] / price[0] - 1
+        daily_return = price / price.shift(1) - 1
+        daily_return.dropna(inplace=True)
+>>>>>>> 7d38eea314715417a4311cb9af412823beab824a
 
         stats['Total Pnl(%)'] = total_return
         stats['Base Return(%)'] = self.annualized_return(
