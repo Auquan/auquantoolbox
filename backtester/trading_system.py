@@ -4,6 +4,7 @@ from backtester.instruments_manager import InstrumentManager
 from datetime import datetime
 from backtester.state_writer import StateWriter
 from backtester.plotter import plot
+from backtester.metrics.metrics import Metrics
 
 
 class TradingSystem:
@@ -93,6 +94,25 @@ class TradingSystem:
         self.updateFeatures(timeOfUpdate)
         self.saveCurrentState()
 
+    def getFinalMetrics(self, shouldPlot=True):
+        allInstruments = self.instrumentManager.getAllInstrumentsByInstrumentId()
+        for instrumentId in allInstruments:
+            instrument = allInstruments[instrumentId]
+            lookbackData = instrument.getDataDf()
+            metrics = Metrics(marketFeaturesDf=lookbackData)
+            metrics.calculateMetrics(self.tsParams.getPriceFeatureKey(), self.tsParams.getStartingCapital())
+            stats = metrics.getMetricsString()
+            logInfo(stats, True)
+            if shouldPlot:
+                plot(self.stateWriter.getFolderName(), None, None,
+                     stats, self.tsParams.getStartingCapital(), [self.stateWriter.getMarketFeaturesFilename()])
+        metrics = Metrics(marketFeaturesDf=self.instrumentManager.getDataDf())
+        metrics.calculateMarketMetrics(None, self.tsParams.getPriceFeatureKey(), self.tsParams.getStartingCapital())
+        stats = metrics.getMarketMetricsString()
+        logInfo(stats, True)
+        plot(self.stateWriter.getFolderName(), self.stateWriter.getMarketFeaturesFilename(),
+             self.tsParams.getBenchmark(), stats, self.tsParams.getStartingCapital(), [])
+
     def initialize(self):
         self.dataParser = self.tsParams.getDataParser()
         self.executionSystem = self.tsParams.getExecutionSystem()
@@ -118,9 +138,4 @@ class TradingSystem:
 
         self.stateWriter.closeStateWriter()
 
-        if shouldPlot:
-            plot(self.stateWriter.getFolderName(), None,
-                 self.tsParams.getBenchmark(), self.tsParams.getPriceFeatureKey(), self.tsParams.getStartingCapital(), [self.stateWriter.getMarketFeaturesFilename()])
-
-        plot(self.stateWriter.getFolderName(), self.stateWriter.getMarketFeaturesFilename(),
-                 self.tsParams.getBenchmark(), self.tsParams.getPriceFeatureKey(), self.tsParams.getStartingCapital(), [])
+        self.getFinalMetrics(shouldPlot)

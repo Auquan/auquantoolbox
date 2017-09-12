@@ -81,12 +81,23 @@ class FairValueTradingParams(TradingSystemParameters):
 
     def getInstrumentFeatureConfigDicts(self):
         stockFeatureConfigs = self.__problem1Solver.getFeatureConfigDicts()
+        basePredDict = {'featureKey': 'base_prediction',
+                   'featureId': 'moving_average',
+                   'params': {'period': 5,
+                              'featureName': 'basis'}}
         scoreDict = {'featureKey': 'score',
                      'featureId': 'prob1_score',
                      'params': {'predictionKey': 'prediction',
                                 'price': 'FairValue'}}
-        stockFeatureConfigs.append(scoreDict)
-        return {INSTRUMENT_TYPE_STOCK: stockFeatureConfigs}
+        baseScoreDict = {'featureKey': 'baseScore',
+                         'featureId': 'prob1_score',
+                         'params': {'predictionKey': 'base_prediction',
+                                    'price': 'FairValue'}}
+        normalizedScoreDict = {'featureKey': 'normalizedScore',
+                               'featureId': 'ratio',
+                               'params': {'featureName1': 'score',
+                                          'featureName2': 'baseScore'}}
+        return {INSTRUMENT_TYPE_STOCK: stockFeatureConfigs + [basePredDict, scoreDict]}
 
     '''
     Returns an array of market feature config dictionaries
@@ -102,13 +113,11 @@ class FairValueTradingParams(TradingSystemParameters):
         # customFeatureDict = {'featureKey': 'custom_mrkt_feature',
         #                      'featureId': 'my_custom_mrkt_feature',
         #                      'params': {'param1': 'value1'}}
-        countDict = {'featureKey': 'count',
-                     'featureId': 'count'}
         scoreDict = {'featureKey': 'score',
                      'featureId': 'score_fv',
                      'params': {'price': 'FairValue',
                                 'instrument_score_feature': 'score'}}
-        return [countDict, scoreDict]
+        return [scoreDict]
 
     '''
     A function that returns your predicted value based on your heuristics.
@@ -134,10 +143,11 @@ class FairValueTradingParams(TradingSystemParameters):
     '''
 
     def getExecutionSystem(self):
-        return QQExecutionSystem(basisEnter_threshold=0.15, basisExit_threshold=0.05,
-                                 basisLongLimit=50000, basisShortLimit=50000,
-                                 basisCapitalUsageLimit=0.05, basisLotSize=5000,
-                                 basisLimitType='L', price=self.getPriceFeatureKey())
+        return QQExecutionSystem(basisEnter_threshold=0.5, basisExit_threshold=0.1,
+                                 basisLongLimit=10000, basisShortLimit=10000,
+                                 basisCapitalUsageLimit=0.05, basisLotSize=1000,
+                                 basisLimitType='L', basis_thresholdParam='sdev_5',
+                                 price=self.getPriceFeatureKey())
 
     '''
     Returns the type of order placer we want to use. its an implementation of the class OrderPlacer.

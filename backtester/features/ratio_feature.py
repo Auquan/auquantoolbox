@@ -8,7 +8,19 @@ class RatioMarketFeature(Feature):
     '''
     @classmethod
     def computeForInstrument(cls, featureParams, featureKey, currentFeatures, instrument, instrumentManager):
-        raise NotImplementedError
+        feature1 = featureParams['featureName1']
+        feature2 = featureParams['featureName2']
+        if (instrument):
+            return 0
+        lookbackData = instrument.getDataDf()
+        if len(lookbackData) < 1:
+            return 1
+        feature1 = lookbackData[featureParams['featureName1']].iloc[-1]
+        feature2 = lookbackData[featureParams['featureName2']].iloc[-1]
+        if feature2 is not 0:
+            return feature2 / feature1
+        else:
+            return 0
 
     '''
     Computing for Market. By default defers to computeForLookbackData

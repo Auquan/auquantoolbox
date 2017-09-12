@@ -59,8 +59,16 @@ class Problem1Solver():
     '''
 
     def getFeatureConfigDicts(self):
+        ma2Dict = {'featureKey': 'ma_5',
+                   'featureId': 'moving_average',
+                   'params': {'period': 5,
+                              'featureName': 'stockTopAskPrice'}}
         ma1Dict = {'featureKey': 'ma_5',
                    'featureId': 'moving_average',
+                   'params': {'period': 5,
+                              'featureName': 'basis'}}
+        expma = {'featureKey': 'exponential_moving_average',
+                   'featureId': 'exponential_moving_average',
                    'params': {'period': 5,
                               'featureName': 'basis'}}
         sdevDict = {'featureKey': 'sdev_5',

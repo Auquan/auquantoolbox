@@ -17,7 +17,8 @@ class PlacedOrder():
     def getTradePrice(self):
         if self.__tradePrice is None:
             logError('tradePrice is not set yet')
-        return 0
+            return 0
+        return self.__tradePrice
 
     def setTradePrice(self, tradePrice):
         self.__tradePrice = tradePrice

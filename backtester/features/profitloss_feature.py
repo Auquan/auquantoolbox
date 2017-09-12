@@ -10,8 +10,10 @@ class ProfitLossFeature(Feature):
     def computeForInstrument(cls, featureParams, featureKey, currentFeatures, instrument, instrumentManager):
 
         priceDict = instrument.getDataDf()[featureParams['price']]
+        pnlDict = instrument.getDataDf()[featureKey]
         if len(priceDict) < 1:
             return 0
+        cumulativePnl = 0 if (len(pnlDict) <= 1) else pnlDict.values[-2]
         fees = currentFeatures[featureParams['fees']]
         currentPosition = instrument.getCurrentPosition()
         previousPosition = instrument.getDataDf()['position'][-2] if (len(instrument.getDataDf()['position']) > 1) else 0
@@ -20,7 +22,8 @@ class ProfitLossFeature(Feature):
         changeInPosition = currentPosition - previousPosition
         tradePrice = instrument.getLastTradePrice()
         pnl = (previousPosition * (currentPrice - previousPrice)) + (changeInPosition * (currentPrice - tradePrice)) - fees
-        return pnl
+        cumulativePnl += pnl
+        return cumulativePnl
 
     '''
     Computing for Market. By default defers to computeForLookbackData
@@ -34,10 +37,8 @@ class ProfitLossFeature(Feature):
             pnlKey = featureParams['instrument_pnl_feature']
         if len(pnlDict) < 1:
             return 0
-        cumulativePnl = 0 if (len(pnlDict) == 1) else pnlDict.values[-2]
         allInstruments = instrumentManager.getAllInstrumentsByInstrumentId()
         for instrumentId in allInstruments:
             instrument = allInstruments[instrumentId]
             pnl += instrument.getDataDf()[pnlKey][-1]
-        cumulativePnl += pnl
-        return cumulativePnl
+        return pnl
