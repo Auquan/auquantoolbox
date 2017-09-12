@@ -1,4 +1,4 @@
-from simple_execution_system import SimpleExecutionSystem
+from backtester.executionSystem.simple_execution_system import SimpleExecutionSystem
 
 
 class PairExecutionSystem(SimpleExecutionSystem):

@@ -37,8 +37,8 @@ def getCompulsoryMarketFeatureConfigs(tsParams):
                                             'countKey': 'count'}}
     compulsoryConfigDicts = [countDict, profitlossConfigDict, capitalConfigDict, portfoliovalueConfigDict,
                              varianceConfigDict, maxCapitalUsageConfigDict, maxDrawdownConfigDict, profitlossRatioConfigDict]
-    compulsoryMarketFeatureConfigs = map(lambda x: FeatureConfig(x), compulsoryConfigDicts)
-    return list(compulsoryMarketFeatureConfigs)
+    compulsoryMarketFeatureConfigs = list(map(lambda x: FeatureConfig(x), compulsoryConfigDicts))
+    return compulsoryMarketFeatureConfigs
 
 
 class InstrumentManager:

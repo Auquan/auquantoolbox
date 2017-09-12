@@ -118,7 +118,7 @@ class GoogleStockDataSource(DataSource):
         for instrumentId in self.instrumentIds:
             fileName = self.getFileName(INSTRUMENT_TYPE_STOCK, instrumentId)
             if not os.path.exists(self.cachedFolderName):
-                os.mkdir(self.cachedFolderName, 0755)
+                os.mkdir(self.cachedFolderName, 0o755)
             if not os.path.isfile(fileName):
                 self.downloadFile(instrumentId, fileName)
                 if adjustPrice:
