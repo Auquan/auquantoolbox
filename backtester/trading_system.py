@@ -17,6 +17,7 @@ class TradingSystem:
         self.portfolioValue = 0
         self.capital = 0
         self.instrumentManager = InstrumentManager(self.tsParams)
+        self.startDate = None
         self.featuresUpdateTime = None
         self.totalTimeUpdating = 0  # for tracking perf
         self.totalUpdates = 0
@@ -94,7 +95,7 @@ class TradingSystem:
         self.updateFeatures(timeOfUpdate)
         self.saveCurrentState()
 
-    def getFinalMetrics(self, shouldPlot=True):
+    def getFinalMetrics(self, dateList, shouldPlot=True):
         allInstruments = self.instrumentManager.getAllInstrumentsByInstrumentId()
         for instrumentId in allInstruments:
             instrument = allInstruments[instrumentId]
@@ -103,11 +104,13 @@ class TradingSystem:
             metrics.calculateMetrics(self.tsParams.getPriceFeatureKey(), self.tsParams.getStartingCapital())
             stats = metrics.getMetricsString()
             logInfo(stats, True)
+            import pdb
+            pdb.set_trace()
             if shouldPlot:
                 plot(self.stateWriter.getFolderName(), None, None,
                      stats, self.tsParams.getStartingCapital(), [self.stateWriter.getMarketFeaturesFilename()])
         metrics = Metrics(marketFeaturesDf=self.instrumentManager.getDataDf())
-        metrics.calculateMarketMetrics(None, self.tsParams.getPriceFeatureKey(), self.tsParams.getStartingCapital())
+        metrics.calculateMarketMetrics(None, self.tsParams.getPriceFeatureKey(), self.tsParams.getStartingCapital(), dateList)
         stats = metrics.getMarketMetricsString()
         logInfo(stats, True)
         plot(self.stateWriter.getFolderName(), self.stateWriter.getMarketFeaturesFilename(),
@@ -128,6 +131,8 @@ class TradingSystem:
         for timeOfUpdate, instrumentUpdates in groupedInstrumentUpdates:
             # logInfo('TimeOfUpdate: %s TradeSymbol: %s' % (instrumentUpdate.getTimeOfUpdate(), instrumentUpdate.getTradeSymbol()))
             print(timeOfUpdate)
+            if self.startDate is None:
+                self.startDate = timeOfUpdate
             self.processInstrumentUpdates(timeOfUpdate, instrumentUpdates, onlyAnalyze)
             if not onlyAnalyze and self.portfolioValue < 0:
                 logError('Trading will STOP - OUT OF MONEY!!!!')
@@ -138,4 +143,4 @@ class TradingSystem:
 
         self.stateWriter.closeStateWriter()
 
-        self.getFinalMetrics(shouldPlot)
+        self.getFinalMetrics([self.startDate, timeOfUpdate], shouldPlot)
