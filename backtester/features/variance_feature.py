@@ -26,11 +26,11 @@ class VarianceFeature(Feature):
         if len(varDict) <= 1:
             return 0
 
-        sqSum = 0 if (len(varDict) <= 1) else prevCount * varDict.iloc[-2]
+        sqSum = 0 if (len(varDict) <= 1) else float(prevCount) * varDict.iloc[-2]
 
         prevAvgPnl = pnlDict.iloc[-2] / float(prevCount)
         newAvgPnl = pnlDict.iloc[-1] / float(prevCount + 1)
-        newSqSum = sqSum - prevCount * (newAvgPnl**2 - prevAvgPnl**2 + 2 * prevAvgPnl * (prevAvgPnl - newAvgPnl)) \
+        newSqSum = sqSum + prevCount * (prevAvgPnl**2 - newAvgPnl**2) \
             + (pnlDict.iloc[-2] - pnlDict.iloc[-1] - newAvgPnl)**2
 
         return newSqSum / float(prevCount + 1)
@@ -58,11 +58,11 @@ class VarianceFeature(Feature):
         if len(varDict) <= 1:
             return 0
 
-        sqSum = 0 if (len(varDict) <= 1) else prevCount * varDict.iloc[-2]
+        sqSum = 0 if (len(varDict) <= 1) else float(prevCount) * varDict.iloc[-2]
 
         prevAvgPnl = pnlDict.iloc[-2] / float(prevCount)
         newAvgPnl = pnlDict.iloc[-1] / float(prevCount + 1)
-        newSqSum = sqSum - prevCount * (newAvgPnl**2 - prevAvgPnl**2 + 2 * prevAvgPnl * (prevAvgPnl - newAvgPnl)) \
+        newSqSum = sqSum + prevCount * (prevAvgPnl**2 - newAvgPnl**2)\
             + (pnlDict.iloc[-2] - pnlDict.iloc[-1] - newAvgPnl)**2
 
         return newSqSum / float(prevCount + 1)
