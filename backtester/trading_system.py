@@ -104,8 +104,6 @@ class TradingSystem:
             metrics.calculateMetrics(self.tsParams.getPriceFeatureKey(), self.tsParams.getStartingCapital())
             stats = metrics.getMetricsString()
             logInfo(stats, True)
-            import pdb
-            pdb.set_trace()
             if shouldPlot:
                 plot(self.stateWriter.getFolderName(), None, None,
                      stats, self.tsParams.getStartingCapital(), [self.stateWriter.getMarketFeaturesFilename()])

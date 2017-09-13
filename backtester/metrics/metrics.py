@@ -20,8 +20,8 @@ class Metrics():
             + ' Sharpe Ratio: %0.2f ' % self.__stats['Sharpe Ratio'] \
             + ' Score: %0.2f ' % self.__stats['Score'] \
             + ' Max Drawdown: %0.2f%% ' % (100 * self.__stats['Max Drawdown(%)']) \
-            + ' Return on Capital: %0.2f%% ' % (100 * self.__stats['RoC(%)']) \
-            + ' Profit/Loss Ratio: %0.2f ' % self.__stats['Profit/Loss Ratio'] \
+            + ' RoC: %0.2f%% ' % (100 * self.__stats['RoC(%)']) \
+            + ' P/L Ratio: %0.2f ' % self.__stats['Profit/Loss Ratio'] \
             + ' Accuracy: %0.2f ' % self.__stats['Accuracy']
         # + 'Log Loss         : %0.2f'%self.__stats['Log Loss']
 
@@ -70,7 +70,6 @@ class Metrics():
         if benchmark is not None:
             stats['Base Return(%)'] = self.annualized_return(
                 benchmark['total_return'], total_days)
-
         stats['Annual Vol(%)'] = self.annual_vol(df['variance'].iloc[-1], startingCapital)
         # stats['Beta'] = self.beta(daily_return,benchmark['daily_returns'])
         stats['Sharpe Ratio'] = self.sharpe_ratio(stats['Annual Return(%)'], stats['Annual Vol(%)'])

@@ -143,7 +143,7 @@ class NSEStockDataSource(DataSource):
         req = urllib2.Request(url, headers=hdr)
         try:
             page = urlopen(req)
-            content = page.read()
+            content = page.read().decode('utf8')
             return content
         except urllib2.HTTPError as e:
             print(e.fp.read())

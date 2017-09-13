@@ -20,7 +20,7 @@ class Problem1Solver():
     '''
 
     def getSymbolsToTrade(self):
-        return ['AGW']
+        return []
 
     '''
     [Optional] This is a way to use any custom features you might have made.
@@ -68,8 +68,8 @@ class Problem1Solver():
                    'params': {'period': 5,
                               'featureName': 'basis'}}
         expma = {'featureKey': 'exponential_moving_average',
-                   'featureId': 'exponential_moving_average',
-                   'params': {'period': 5,
+                 'featureId': 'exponential_moving_average',
+                 'params': {'period': 20,
                               'featureName': 'basis'}}
         sdevDict = {'featureKey': 'sdev_5',
                     'featureId': 'moving_sdev',
@@ -78,7 +78,7 @@ class Problem1Solver():
         customFeatureDict = {'featureKey': 'custom_inst_feature',
                              'featureId': 'my_custom_feature',
                              'params': {'param1': 'value1'}}
-        return [ma1Dict, sdevDict, customFeatureDict]
+        return [ma1Dict, sdevDict, expma, customFeatureDict]
 
     '''
     Using all the features you have calculated in getFeatureConfigDicts, combine them in a meaningful way
@@ -95,7 +95,7 @@ class Problem1Solver():
         # The second to last row (if exists) would have the features for the previous
         # time update. Columns will be featureKeys for different features
         lookbackInstrumentFeatures = instrument.getDataDf()
-        basisFairValue = lookbackInstrumentFeatures.iloc[-1]['ma_5']
+        basisFairValue = lookbackInstrumentFeatures.iloc[-1]['exponential_moving_average']
 
         return basisFairValue
 
@@ -104,6 +104,8 @@ class Problem1Solver():
 We have already provided a bunch of commonly used features. But if you wish to make your own, define your own class like this.
 Write a class that inherits from Feature and implement the one method provided.
 '''
+
+
 class MyCustomFeature(Feature):
     ''''
     Custom Feature to implement for instrument. This function would return the value of the feature you want to implement.

@@ -82,9 +82,9 @@ class FairValueTradingParams(TradingSystemParameters):
     def getInstrumentFeatureConfigDicts(self):
         stockFeatureConfigs = self.__problem1Solver.getFeatureConfigDicts()
         basePredDict = {'featureKey': 'base_prediction',
-                   'featureId': 'moving_average',
-                   'params': {'period': 5,
-                              'featureName': 'basis'}}
+                        'featureId': 'moving_average',
+                        'params': {'period': 5,
+                                   'featureName': 'basis'}}
         scoreDict = {'featureKey': 'score',
                      'featureId': 'prob1_score',
                      'params': {'predictionKey': 'prediction',
@@ -97,7 +97,11 @@ class FairValueTradingParams(TradingSystemParameters):
                                'featureId': 'ratio',
                                'params': {'featureName1': 'score',
                                           'featureName2': 'baseScore'}}
-        return {INSTRUMENT_TYPE_STOCK: stockFeatureConfigs + [basePredDict, scoreDict]}
+        sdevDictForExec = {'featureKey': 'sdev_5_for_exec',
+                           'featureId': 'moving_sdev',
+                           'params': {'period': 5,
+                                      'featureName': 'basis'}}
+        return {INSTRUMENT_TYPE_STOCK: stockFeatureConfigs + [sdevDictForExec, scoreDict]}
 
     '''
     Returns an array of market feature config dictionaries
@@ -146,7 +150,7 @@ class FairValueTradingParams(TradingSystemParameters):
         return QQExecutionSystem(basisEnter_threshold=0.5, basisExit_threshold=0.1,
                                  basisLongLimit=10000, basisShortLimit=10000,
                                  basisCapitalUsageLimit=0.05, basisLotSize=1000,
-                                 basisLimitType='L', basis_thresholdParam='sdev_5',
+                                 basisLimitType='L', basis_thresholdParam='sdev_5_for_exec',
                                  price=self.getPriceFeatureKey())
 
     '''

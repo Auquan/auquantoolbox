@@ -52,7 +52,7 @@ class QuantQuestDataSource(DataSource):
         if status == 200:
             print('Downloading list of stocks to file: %s' % (stockListFileName))
             with open(stockListFileName, 'w') as f:
-                f.write(response.read())
+                f.write(response.read().decode('utf8'))
             return True
         else:
             logError('File not found. Please check internet')
@@ -78,7 +78,7 @@ class QuantQuestDataSource(DataSource):
         if status == 200:
             print('Downloading %s data to file: %s' % (instrumentId, downloadLocation))
             with open(downloadLocation, 'w') as f:
-                f.write(response.read())
+                f.write(response.read().decode('utf8'))
             return True
         else:
             logError('File not found. Please check settings!')
