@@ -18,7 +18,7 @@ def updateCheck():
     except Exception as e:
         return False
 
-    toolboxDict = json.loads(toolboxJson.read())
+    toolboxDict = json.loads(toolboxJson.read().decode('utf8'))
 
     if __version__ != toolboxDict['info']['version']:
         return True
