@@ -37,7 +37,7 @@ def getCompulsoryMarketFeatureConfigs(tsParams):
                                             'countKey': 'count'}}
     compulsoryConfigDicts = [countDict, profitlossConfigDict, capitalConfigDict, portfoliovalueConfigDict,
                              varianceConfigDict, maxCapitalUsageConfigDict, maxDrawdownConfigDict, profitlossRatioConfigDict]
-    compulsoryMarketFeatureConfigs = map(lambda x: FeatureConfig(x), compulsoryConfigDicts)
+    compulsoryMarketFeatureConfigs = list(map(lambda x: FeatureConfig(x), compulsoryConfigDicts))
     return compulsoryMarketFeatureConfigs
 
 
@@ -107,13 +107,14 @@ class InstrumentManager:
         self.__instrumentsDict[instrumentId] = instrument
 
     def updateFeatures(self, timeOfUpdate):
+
         for instrumentId in self.__instrumentsDict:
             instrument = self.__instrumentsDict[instrumentId]
             instrument.updateFeatures(timeOfUpdate, self)
 
         currentMarketFeatures = {}
         self.__lookbackMarketFeatures.addData(timeOfUpdate, currentMarketFeatures)
-        featureConfigs = list(chain(self.tsParams.getMarketFeatureConfigs(), self.__compulsoryFeatureConfigs))
+        featureConfigs = self.tsParams.getMarketFeatureConfigs() + self.__compulsoryFeatureConfigs
         for featureConfig in featureConfigs:
             featureId = featureConfig.getFeatureId()
             featureKey = featureConfig.getFeatureKey()

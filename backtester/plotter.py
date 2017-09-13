@@ -44,7 +44,6 @@ def plot(dir, marketFeatures, benchmark, stats, startingCapital, excludeFiles):
 def getDataReady(dir, features, benchmark, startingCapital, market=True):
     df = pd.read_csv(features, engine='python',
                      index_col='time', parse_dates=True)
-
     if market:
         df['Returns(%)'] = 100 * (df['pnl'] / startingCapital)
         # metrics = Metrics(marketFeaturesDf=df)

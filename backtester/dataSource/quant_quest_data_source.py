@@ -33,7 +33,7 @@ class QuantQuestDataSource(DataSource):
 
     def ensureDirectoryExists(self, cachedFolderName, dataSetId):
         if not os.path.exists(cachedFolderName):
-            os.mkdir(cachedFolderName, 0755)
+            os.mkdir(cachedFolderName, 0o755)
         if not os.path.exists(cachedFolderName + '/' + dataSetId):
             os.mkdir(cachedFolderName + '/' + dataSetId)
 
@@ -46,7 +46,7 @@ class QuantQuestDataSource(DataSource):
             return True
         url = 'https://raw.githubusercontent.com/Auquan/auquan-historical-data/master/qq2Data/%s/stock_list.txt' % (
             dataSetId)
-        print url
+        print(url)
         response = urlopen(url)
         status = response.getcode()
         if status == 200:
@@ -104,7 +104,7 @@ class QuantQuestDataSource(DataSource):
             print('Processing data for stock: %s' % (instrumentId))
             fileName = self.getFileName(instrumentId)
             if not os.path.exists(self.__cachedFolderName):
-                os.mkdir(self.cachedFolderName, 0755)
+                os.mkdir(self.cachedFolderName, 0o755)
             if not os.path.isfile(fileName):
                 if not self.downloadFile(self.__dataSetId, instrumentId, fileName):
                     logError('Skipping %s:' % (instrumentId))

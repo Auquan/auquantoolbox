@@ -8,9 +8,16 @@ import os.path
 import pandas as pd
 import csv
 from bs4 import BeautifulSoup
-import urllib2
+try:
+    import urllib.request as urllib2
+    from urllib.request import urlopen
+    import urllib.error as urllib2
+    from urllib.parse import quote
+except ImportError:
+    import urllib2
+    from urllib2 import urlopen
+    from urllib import quote
 from backtester.dataSource.data_source_utils import downloadFileFromYahoo, groupAndSortByTimeUpdates
-from urllib import quote
 
 TYPE_LINE_UNDEFINED = 0
 TYPE_LINE_HEADER = 1
@@ -135,11 +142,11 @@ class NSEStockDataSource(DataSource):
             hdr['X-Requested-With'] = 'XMLHttpRequest'
         req = urllib2.Request(url, headers=hdr)
         try:
-            page = urllib2.urlopen(req)
+            page = urlopen(req)
             content = page.read()
             return content
-        except urllib2.HTTPError, e:
-            print e.fp.read()
+        except urllib2.HTTPError as e:
+            print(e.fp.read())
             return None
 
     def getInitialSymbolCountUrl(self, stock):
@@ -171,7 +178,7 @@ class NSEStockDataSource(DataSource):
     def parseHtmlToCSV(self, soup, outputCsvFile):
         data = soup.find(id="csvContentDiv")
         if data is None:
-            print 'No data'
+            print('No data')
             return
         data = data.get_text()
         dataRows = data.split(":")
@@ -217,7 +224,7 @@ class NSEStockDataSource(DataSource):
             fileName = self.getFileName(INSTRUMENT_TYPE_STOCK, instrumentId)
 
             if not os.path.exists(self.cachedFolderName):
-                os.mkdir(self.cachedFolderName, 0755)
+                os.mkdir(self.cachedFolderName, 0o755)
 
             if not os.path.isfile(fileName):
                 self.downloadFile(instrumentId, fileName)

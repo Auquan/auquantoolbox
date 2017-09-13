@@ -61,7 +61,6 @@ class Metrics():
         total_return = df['pnl'].iloc[- 1] / startingCapital
 
         benchmark = self.getBenchmarkData(None, priceFeature, '')
-
         stats['Total Pnl(%)'] = total_return
         stats['Annual Return(%)'] = self.annualized_return(
             total_return, total_days)

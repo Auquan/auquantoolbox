@@ -141,4 +141,4 @@ class AuquanDataSource(DataSource):
 
 if __name__ == "__main__":
     a = datetime.strptime('2017/06/30', "%Y/%m/%d")
-    print get_exp_date(a)
+    print(get_exp_date(a))
