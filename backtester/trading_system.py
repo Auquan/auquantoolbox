@@ -3,7 +3,7 @@ from backtester.logger import *
 from backtester.instruments_manager import InstrumentManager
 from datetime import datetime
 from backtester.state_writer import StateWriter
-from backtester.plotter import plot
+from backtester.process_result import processResult
 from backtester.metrics.metrics import Metrics
 
 
@@ -95,24 +95,30 @@ class TradingSystem:
         self.updateFeatures(timeOfUpdate)
         self.saveCurrentState()
 
-    def getFinalMetrics(self, dateList, shouldPlot=True):
+    def getFinalMetrics(self, dateList, shouldPlotFeatures=True):
         allInstruments = self.instrumentManager.getAllInstrumentsByInstrumentId()
+        resultDict = {}
         for instrumentId in allInstruments:
             instrument = allInstruments[instrumentId]
             lookbackData = instrument.getDataDf()
             metrics = Metrics(marketFeaturesDf=lookbackData)
             metrics.calculateMetrics(self.tsParams.getPriceFeatureKey(), self.tsParams.getStartingCapital())
-            stats = metrics.getMetricsString()
-            logInfo(stats, True)
-            if shouldPlot:
-                plot(self.stateWriter.getFolderName(), None, None,
-                     stats, self.tsParams.getStartingCapital(), [self.stateWriter.getMarketFeaturesFilename()])
+            stats = metrics.getMetrics()
+            metricString = metrics.getMetricsString()
+            logInfo(metricString, True)
+            resultDict.update(processResult(self.stateWriter.getFolderName(), None, None,
+                 stats, metricString, self.tsParams.getStartingCapital(), [self.stateWriter.getMarketFeaturesFilename()], shouldPlotFeatures))
         metrics = Metrics(marketFeaturesDf=self.instrumentManager.getDataDf())
         metrics.calculateMarketMetrics(None, self.tsParams.getPriceFeatureKey(), self.tsParams.getStartingCapital(), dateList)
-        stats = metrics.getMarketMetricsString()
-        logInfo(stats, True)
-        plot(self.stateWriter.getFolderName(), self.stateWriter.getMarketFeaturesFilename(),
-             self.tsParams.getBenchmark(), stats, self.tsParams.getStartingCapital(), [])
+        stats = metrics.getMetrics()
+        metricString = metrics.getMarketMetricsString()
+        logInfo(metricString, True)
+        # Hack to always plot market
+        shouldPlotMarket = True
+        resultDict.update(processResult(self.stateWriter.getFolderName(), self.stateWriter.getMarketFeaturesFilename(),
+             self.tsParams.getBenchmark(), stats, metricString, self.tsParams.getStartingCapital(), [], shouldPlotMarket))
+        import pdb; pdb.set_trace()
+        return resultDict
 
     def initialize(self):
         self.dataParser = self.tsParams.getDataParser()
@@ -141,4 +147,4 @@ class TradingSystem:
 
         self.stateWriter.closeStateWriter()
 
-        self.getFinalMetrics([self.startDate, timeOfUpdate], shouldPlot)
+        return self.getFinalMetrics([self.startDate, timeOfUpdate], shouldPlot)
