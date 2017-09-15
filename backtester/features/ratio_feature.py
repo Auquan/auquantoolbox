@@ -17,10 +17,9 @@ class RatioMarketFeature(Feature):
             return 1
         feature1 = lookbackData[featureParams['featureName1']].iloc[-1]
         feature2 = lookbackData[featureParams['featureName2']].iloc[-1]
-        if feature2 is not 0:
-            return feature2 / feature1
-        else:
+        if feature2 == 0:
             return 0
+        return feature2 / float(feature1)
 
     '''
     Computing for Market. By default defers to computeForLookbackData
@@ -37,7 +36,6 @@ class RatioMarketFeature(Feature):
         else:
             instrument1Price = instrument1.getDataDf()[feature].iloc[-1]
             instrument2Price = instrument2.getDataDf()[feature].iloc[-1]
-            if instrument2Price is not 0:
-                return instrument1Price / instrument2Price
-            else:
+            if instrument2Price == 0:
                 return 0
+            return instrument1Price / float(instrument2Price)

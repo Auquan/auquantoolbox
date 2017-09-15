@@ -95,7 +95,11 @@ class TradingSystem:
         self.updateFeatures(timeOfUpdate)
         self.saveCurrentState()
 
+<<<<<<< 1f5de353fe843fd4f2e389ac5470fe78d13cd92b
     def getFinalMetrics(self, dateList, shouldPlotFeatures=True):
+=======
+    def getFinalMetrics(self, dateBounds, shouldPlot=True):
+>>>>>>> modified metrics for P1
         allInstruments = self.instrumentManager.getAllInstrumentsByInstrumentId()
         resultDict = {}
         for instrumentId in allInstruments:
@@ -109,6 +113,7 @@ class TradingSystem:
             resultDict.update(processResult(self.stateWriter.getFolderName(), None, None,
                  stats, metricString, self.tsParams.getStartingCapital(), [self.stateWriter.getMarketFeaturesFilename()], shouldPlotFeatures))
         metrics = Metrics(marketFeaturesDf=self.instrumentManager.getDataDf())
+<<<<<<< 1f5de353fe843fd4f2e389ac5470fe78d13cd92b
         metrics.calculateMarketMetrics(None, self.tsParams.getPriceFeatureKey(), self.tsParams.getStartingCapital(), dateList)
         stats = metrics.getMetrics()
         metricString = metrics.getMarketMetricsString()
@@ -117,8 +122,14 @@ class TradingSystem:
         shouldPlotMarket = True
         resultDict.update(processResult(self.stateWriter.getFolderName(), self.stateWriter.getMarketFeaturesFilename(),
              self.tsParams.getBenchmark(), stats, metricString, self.tsParams.getStartingCapital(), [], shouldPlotMarket))
-        import pdb; pdb.set_trace()
         return resultDict
+=======
+        metrics.calculateMarketMetrics(None, self.tsParams.getPriceFeatureKey(), self.tsParams.getStartingCapital(), dateBounds)
+        stats = metrics.getMarketMetricsString()
+        logInfo(stats, True)
+        plot(self.stateWriter.getFolderName(), self.stateWriter.getMarketFeaturesFilename(),
+             self.tsParams.getBenchmark(), stats, self.tsParams.getStartingCapital(), [])
+>>>>>>> modified metrics for P1
 
     def initialize(self):
         self.dataParser = self.tsParams.getDataParser()

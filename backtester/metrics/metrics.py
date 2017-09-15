@@ -13,17 +13,20 @@ class Metrics():
     def getMarketMetricsString(self):
         # TODO add the snippet back once benchmark is fixed.
         # + ' Benchmark: %0.2f%% ' % (100 * self.__stats['Base Return(%)']) \
-        return \
+        str = \
             ' Total Pnl: %0.2f%% ' % (100 * self.__stats['Total Pnl(%)']) \
-            + ' Ann. Return: %0.2f%% ' % (100 * self.__stats['Annual Return(%)']) \
-            + ' Ann. Vol: %0.2f%% ' % (100 * self.__stats['Annual Vol(%)']) \
-            + ' Sharpe Ratio: %0.2f ' % self.__stats['Sharpe Ratio'] \
             + ' Score: %0.2f ' % self.__stats['Score'] \
             + ' Max Drawdown: %0.2f%% ' % (100 * self.__stats['Max Drawdown(%)']) \
             + ' RoC: %0.2f%% ' % (100 * self.__stats['RoC(%)']) \
             + ' P/L Ratio: %0.2f ' % self.__stats['Profit/Loss Ratio'] \
             + ' Accuracy: %0.2f ' % self.__stats['Accuracy']
-        # + 'Log Loss         : %0.2f'%self.__stats['Log Loss']
+        if self.__stats['Trading Days'] > 252:
+            str = str \
+                + ' Ann. Return: %0.2f%% ' % (100 * self.__stats['Annual Return(%)']) \
+                + ' Ann. Vol: %0.2f%% ' % (100 * self.__stats['Annual Vol(%)']) \
+                + ' Sharpe Ratio: %0.2f ' % self.__stats['Sharpe Ratio'] \
+                # + 'Log Loss         : %0.2f'%self.__stats['Log Loss']
+        return str
 
     def getMetricsString(self):
         # Add back below once benchmark support
@@ -49,7 +52,7 @@ class Metrics():
         return series.groupby(partial(self.round, freq=period))
         # series.resample(period)
 
-    def calculateMarketMetrics(self, baseSymbol, priceFeature, startingCapital, dateList):
+    def calculateMarketMetrics(self, baseSymbol, priceFeature, startingCapital, dateBounds):
 
         stats = {}
         df = self.__marketFeaturesDf
@@ -60,10 +63,11 @@ class Metrics():
         #     self.__marketFeaturesDf['portfolio_value'], '1D').last()  # TODO change portfolio_value
         # total_pnl.dropna(inplace=True)
         # portfolioValue.dropna(inplace=True)
-        total_days = len(pd.date_range(dateList[0], dateList[1], freq=BDay()))
-        total_return = df['pnl'].iloc[- 1] / startingCapital
+        total_days = len(pd.date_range(dateBounds[0], dateBounds[1], freq=BDay()))
+        total_return = df['pnl'].iloc[- 1] / float(startingCapital)
 
         benchmark = self.getBenchmarkData(None, priceFeature, '')
+        stats['Trading Days'] = total_days
         stats['Total Pnl(%)'] = total_return
         stats['Annual Return(%)'] = self.annualized_return(
             total_return, total_days)
@@ -96,7 +100,7 @@ class Metrics():
         # price.dropna(inplace=True)
         df = self.__marketFeaturesDf
         total_days = len(pd.date_range(df.index[0], df.index[-1], freq=BDay()))
-        total_return = df['pnl'].iloc[- 1] / startingCapital
+        total_return = df['pnl'].iloc[- 1] / float(startingCapital)
         base_return = df[priceFeature].iloc[total_days - 1] / df[priceFeature].iloc[0] - 1
 
         stats['Total Pnl(%)'] = total_return
@@ -115,7 +119,7 @@ class Metrics():
         return annualized_return
 
     def annualized_std(self, variance, startingCapital):
-        return (np.sqrt(252) * np.sqrt(variance)) / startingCapital
+        return (np.sqrt(252) * np.sqrt(variance)) / float(startingCapital)
 
     def annualized_downside_std(self, daily_return):
         downside_return = daily_return.copy()
@@ -129,7 +133,7 @@ class Metrics():
         if annual_vol == 0:
             return np.nan
         else:
-            return annual_return / annual_vol
+            return annual_return / float(annual_vol)
 
     def sortino_ratio(self, total_return, total_days, daily_return):
         stdev = self.annualized_downside_std(daily_return)
@@ -144,7 +148,7 @@ class Metrics():
 
     def roc(self, total_pnl, capitalUsage):
         if capitalUsage > 0:
-            return total_pnl / capitalUsage
+            return total_pnl / float(capitalUsage)
         else:
             return np.nan
 
@@ -161,23 +165,24 @@ class Metrics():
     def profit_factor(self, plRatioDict):
         if plRatioDict['totalLoss'] == 0:
             return float('nan')
-        return plRatioDict['totalProfit'] / plRatioDict['totalLoss']
+        return plRatioDict['totalProfit'] / float(plRatioDict['totalLoss'])
 
     def profitability(self, plRatioDict, total_pnl):
         if total_pnl == 0:
             return 0
-        return plRatioDict['totalProfit'] / total_pnl
+        return plRatioDict['totalProfit'] / float(total_pnl)
 
     def profit_factor_avg(self, plRatioDict):
         if plRatioDict['totalLoss'] == 0:
             return float('nan')
-        return (plRatioDict['totalProfit'] / plRatioDict['countProfit']) / (plRatioDict['totalLoss'] / plRatioDict['countLoss'])
+        return (plRatioDict['totalProfit'] / float(plRatioDict['countProfit']))\
+            / (plRatioDict['totalLoss'] / float(plRatioDict['countLoss']))
 
     def accuracy(self, plRatioDict):
         total_count = (plRatioDict['countProfit'] + plRatioDict['countLoss'])
         if total_count == 0:
             return 0
-        return plRatioDict['countProfit'] / total_count
+        return plRatioDict['countProfit'] / float(total_count)
 
     def getBenchmarkData(self, baseSymbol, priceFeature, folderName):
         if (baseSymbol is None):
