@@ -117,7 +117,6 @@ class TradingSystem:
         shouldPlotMarket = True
         resultDict.update(processResult(self.stateWriter.getFolderName(), self.stateWriter.getMarketFeaturesFilename(),
              self.tsParams.getBenchmark(), stats, metricString, self.tsParams.getStartingCapital(), [], shouldPlotMarket))
-        import pdb; pdb.set_trace()
         return resultDict
 
     def initialize(self):
