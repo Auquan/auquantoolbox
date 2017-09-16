@@ -81,22 +81,10 @@ class FairValueTradingParams(TradingSystemParameters):
 
     def getInstrumentFeatureConfigDicts(self):
         stockFeatureConfigs = self.__problem1Solver.getFeatureConfigDicts()
-        basePredDict = {'featureKey': 'base_prediction',
-                        'featureId': 'moving_average',
-                        'params': {'period': 5,
-                                   'featureName': 'basis'}}
         scoreDict = {'featureKey': 'score',
-                     'featureId': 'prob1_score',
-                     'params': {'predictionKey': 'prediction',
-                                'price': 'FairValue'}}
-        baseScoreDict = {'featureKey': 'baseScore',
-                         'featureId': 'prob1_score',
-                         'params': {'predictionKey': 'base_prediction',
-                                    'price': 'FairValue'}}
-        normalizedScoreDict = {'featureKey': 'normalizedScore',
-                               'featureId': 'ratio',
-                               'params': {'featureName1': 'score',
-                                          'featureName2': 'baseScore'}}
+                           'featureId': 'prob1_score',
+                           'params': {'predictionKey': 'prediction',
+                                      'price': 'FairValue'}}
         sdevDictForExec = {'featureKey': 'sdev_5_for_exec',
                            'featureId': 'moving_sdev',
                            'params': {'period': 5,
@@ -118,9 +106,10 @@ class FairValueTradingParams(TradingSystemParameters):
         #                      'featureId': 'my_custom_mrkt_feature',
         #                      'params': {'param1': 'value1'}}
         scoreDict = {'featureKey': 'score',
-                     'featureId': 'score_fv',
+                     'featureId': 'prob1_score',
                      'params': {'price': 'FairValue',
-                                'instrument_score_feature': 'score'}}
+                                'instrument_score_feature': 'score',
+                                'benchmark_score_feature': 'benchmark_score'}}
         return [scoreDict]
 
     '''
@@ -149,7 +138,7 @@ class FairValueTradingParams(TradingSystemParameters):
     def getExecutionSystem(self):
         return QQExecutionSystem(basisEnter_threshold=0.5, basisExit_threshold=0.1,
                                  basisLongLimit=10000, basisShortLimit=10000,
-                                 basisCapitalUsageLimit=0.05, basisLotSize=1000,
+                                 basisCapitalUsageLimit=0.05, basisLotSize=100,
                                  basisLimitType='L', basis_thresholdParam='sdev_5_for_exec',
                                  price=self.getPriceFeatureKey())
 

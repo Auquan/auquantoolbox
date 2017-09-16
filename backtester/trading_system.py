@@ -95,7 +95,7 @@ class TradingSystem:
         self.updateFeatures(timeOfUpdate)
         self.saveCurrentState()
 
-    def getFinalMetrics(self, dateList, shouldPlotFeatures=True):
+    def getFinalMetrics(self, dateBounds, shouldPlotFeatures=True):
         allInstruments = self.instrumentManager.getAllInstrumentsByInstrumentId()
         resultDict = {}
         for instrumentId in allInstruments:
@@ -109,7 +109,7 @@ class TradingSystem:
             resultDict.update(processResult(self.stateWriter.getFolderName(), None, None,
                  stats, metricString, self.tsParams.getStartingCapital(), [self.stateWriter.getMarketFeaturesFilename()], shouldPlotFeatures))
         metrics = Metrics(marketFeaturesDf=self.instrumentManager.getDataDf())
-        metrics.calculateMarketMetrics(None, self.tsParams.getPriceFeatureKey(), self.tsParams.getStartingCapital(), dateList)
+        metrics.calculateMarketMetrics(None, self.tsParams.getPriceFeatureKey(), self.tsParams.getStartingCapital(), dateBounds)
         stats = metrics.getMetrics()
         metricString = metrics.getMarketMetricsString()
         logInfo(metricString, True)
