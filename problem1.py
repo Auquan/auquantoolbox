@@ -12,7 +12,7 @@ class Problem1Solver():
     '''
 
     def getTrainingDataSet(self):
-        return "sampleData"
+        return "trainingData1"
 
     '''
     Returns the stocks to trade.

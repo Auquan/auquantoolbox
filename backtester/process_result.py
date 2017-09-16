@@ -49,7 +49,6 @@ def processResult(dir, marketFeatures, benchmark, stats, metricString, startingC
                 logInfo('Generating %s' % fileName)
                 generateGraph(df, path, fileName + ' ' + metricString, benchmark_pnl)
             resultDict['instrument_names'] += [fileName.split('_')[0]]
-            import pdb; pdb.set_trace()
             resultDict['instrument_stats'] += [{'total_pnl': stats['Total Pnl(%)'], 'score': stats['Score']}]
     return resultDict
 
