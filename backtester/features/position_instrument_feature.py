@@ -6,9 +6,14 @@ class PositionInstrumentFeature(Feature):
     '''
     Computing for Instrument. By default defers to computeForLookbackData
     '''
+
     @classmethod
-    def computeForInstrument(cls, featureParams, featureKey, currentFeatures, instrument, instrumentManager):
-        return instrument.getCurrentPosition()
+    def computeForInstrument(cls, featureParams, featureKey, instrumentManager):
+        instrumentsDict = instrumentManager.getAllInstrumentsByInstrumentId()
+        positionDict = {}
+        for instrumentId in instrumentsDict:
+            positionDict[instrumentId] = instrumentManager.getInstrument(instrumentId).getCurrentPosition()
+        return positionDict
 
     '''
     Computing for Market. By default defers to computeForLookbackData

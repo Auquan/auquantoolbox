@@ -20,7 +20,7 @@ class Problem1Solver():
     '''
 
     def getSymbolsToTrade(self):
-        return ['AGW']
+        return ['AGW', 'CBT']
 
     '''
     [Optional] This is a way to use any custom features you might have made.
@@ -78,7 +78,7 @@ class Problem1Solver():
         customFeatureDict = {'featureKey': 'custom_inst_feature',
                              'featureId': 'my_custom_feature',
                              'params': {'param1': 'value1'}}
-        return [ma1Dict, sdevDict, expma, customFeatureDict]
+        return [ma1Dict, sdevDict, expma]
 
     '''
     Using all the features you have calculated in getFeatureConfigDicts, combine them in a meaningful way
@@ -94,8 +94,8 @@ class Problem1Solver():
         # would contain the features which are being calculated in this update cycle or for this time.
         # The second to last row (if exists) would have the features for the previous
         # time update. Columns will be featureKeys for different features
-        lookbackInstrumentFeatures = instrument.getDataDf()
-        basisFairValue = lookbackInstrumentFeatures.iloc[-1]['exponential_moving_average']
+        lookbackInstrumentFeatures = instrumentManager.getLookbackInstrumentFeatures()
+        basisFairValue = lookbackInstrumentFeatures.getDataForFeatureForAllInstruments('exponential_moving_average')[instrument.getInstrumentId()][-1]
 
         return basisFairValue
 
@@ -141,9 +141,9 @@ class MyCustomFeature(Feature):
 
 
 if __name__ == "__main__":
-    if updateCheck():
-        print('Your version of the auquan toolbox package is old. Please update by running the following command:')
-        print('pip install -U auquan_toolbox')
+    #if updateCheck():
+    #    print('Your version of the auquan toolbox package is old. Please update by running the following command:')
+    #    print('pip install -U auquan_toolbox')
     problem1Solver = Problem1Solver()
     tsParams = FairValueTradingParams(problem1Solver)
     tradingSystem = TradingSystem(tsParams)

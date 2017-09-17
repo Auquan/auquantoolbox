@@ -4,6 +4,7 @@ from backtester.features.feature_config import FeatureConfig
 from backtester.instruments import *
 from backtester.logger import *
 from itertools import chain
+from backtester.instruments_lookback_data import InstrumentsLookbackData
 
 
 def getCompulsoryMarketFeatureConfigs(tsParams):
@@ -41,8 +42,45 @@ def getCompulsoryMarketFeatureConfigs(tsParams):
     return compulsoryMarketFeatureConfigs
 
 
+def getCompulsoryInstrumentFeatureConfigs(tsParams, instrumentType):
+    positionConfigDict = {'featureKey': 'position',
+                          'featureId': 'position',
+                          'params': {}}
+    feesConfigDict = {INSTRUMENT_TYPE_STOCK: {'featureKey': 'fees',
+                                              'featureId': 'fees',
+                                              'params': {'price': tsParams.getPriceFeatureKey(),
+                                                         'feesDict': {1: 0.05, -1: 0.05, 0: 0}}},
+                      INSTRUMENT_TYPE_FUTURE: {'featureKey': 'fees',
+                                               'featureId': 'fees',
+                                               'params': {'price': tsParams.getPriceFeatureKey(),
+                                                          'feesDict': {1: 0.00002392, -1: 0.00012392, 0: 0}}},
+                      INSTRUMENT_TYPE_OPTION: {'featureKey': 'fees',
+                                               'featureId': 'fees',
+                                               'params': {'price': tsParams.getPriceFeatureKey(),
+                                                          'feesDict': {1: 0.0005915, -1: 0.0010915, 0: 0}}}}
+    profitlossConfigDict = {'featureKey': 'pnl',
+                            'featureId': 'pnl',
+                            'params': {'price': tsParams.getPriceFeatureKey(),
+                                       'fees': 'fees'}}
+    capitalConfigDict = {'featureKey': 'capital',
+                         'featureId': 'capital',
+                         'params': {'price': tsParams.getPriceFeatureKey(), 'fees': 'fees'}}
+    varianceConfigDict = {'featureKey': 'variance',
+                          'featureId': 'variance',
+                          'params': {'pnlKey': 'pnl',
+                                     'countKey': 'count'}}
+    profitlossRatioConfigDict = {'featureKey': 'pl_ratio',
+                                 'featureId': 'pl_ratio',
+                                 'params': {'pnlKey': 'pnl',
+                                            'countKey': 'count'}}
+    compulsoryConfigDicts = [positionConfigDict, feesConfigDict[instrumentType], profitlossConfigDict, capitalConfigDict,
+                             profitlossRatioConfigDict]
+    compulsoryInstrumentFeatureConfigs = list(map(lambda x: FeatureConfig(x), compulsoryConfigDicts))
+    return compulsoryInstrumentFeatureConfigs
+
+
 class InstrumentManager:
-    def __init__(self, tsParams):
+    def __init__(self, tsParams, bookDataFeatures, instrumentIds, bookDataByFeature, allTimes):
         self.tsParams = tsParams
         self.__instrumentsDict = {}
         # TODO: create a different place to hold different types of instruments
@@ -51,6 +89,17 @@ class InstrumentManager:
         columns = map(lambda x: x.getFeatureKey(), featureConfigs)
         compulsoryColumns = map(lambda x: x.getFeatureKey(), self.__compulsoryFeatureConfigs)
         self.__lookbackMarketFeatures = LookbackData(tsParams.getLookbackSize(), list(chain(columns, compulsoryColumns, ['prediction'])))
+
+        self.__bookDataFeatures = bookDataFeatures
+        self.__compulsoryInstrumentFeatureConfigs = getCompulsoryInstrumentFeatureConfigs(tsParams, INSTRUMENT_TYPE_STOCK)
+        instrumentFeatureConfigs = tsParams.getFeatureConfigsForInstrumentType(INSTRUMENT_TYPE_STOCK)
+        compulsoryInstrumentFeatureKeys = map(lambda x: x.getFeatureKey(), self.__compulsoryInstrumentFeatureConfigs)
+        instrumentFeatureKeys = map(lambda x: x.getFeatureKey(), instrumentFeatureConfigs)
+        self.__lookbackInstrumentFeatures = InstrumentsLookbackData(size=tsParams.getLookbackSize(),
+                                                                    features=list(chain(self.__bookDataFeatures, instrumentFeatureKeys, compulsoryInstrumentFeatureKeys)),
+                                                                    instrumentIds=instrumentIds,
+                                                                    times=allTimes)
+        self.__bookDataByFeature = bookDataByFeature
 
     def getTsParams(self):
         return self.tsParams
@@ -65,6 +114,12 @@ class InstrumentManager:
 
     def getLookbackMarketFeatures(self):
         return self.__lookbackMarketFeatures
+
+    def getLookbackInstrumentFeatures(self):
+        return self.__lookbackInstrumentFeatures
+
+    def getLookbackInstrumentFeaturesForFeature(self, featureKey):
+        return self.__lookbackInstrumentFeatures.getDataForFeatureForAllInstruments(featureKey)
 
     def getDataDf(self):
         return self.__lookbackMarketFeatures.getData()
@@ -106,11 +161,25 @@ class InstrumentManager:
         instrumentId = instrument.getInstrumentId()
         self.__instrumentsDict[instrumentId] = instrument
 
+    def updateInstrumentFeatures(self, timeOfUpdate):
+        for featureKey in self.__bookDataFeatures:
+            self.__lookbackInstrumentFeatures.addFeatureValueForAllInstruments(timeOfUpdate, featureKey, self.__bookDataByFeature[featureKey].loc[timeOfUpdate])
+        featureConfigs = self.tsParams.getFeatureConfigsForInstrumentType(INSTRUMENT_TYPE_STOCK)  # TODO:
+        featureConfigs = featureConfigs + self.__compulsoryInstrumentFeatureConfigs
+        for featureConfig in featureConfigs:
+            featureKey = featureConfig.getFeatureKey()
+            featureId = featureConfig.getFeatureId()
+            featureKey = featureConfig.getFeatureKey()
+            featureParams = featureConfig.getFeatureParams()
+            featureCls = FeatureConfig.getClassForFeatureId(featureId)
+            featureVal = featureCls.computeForInstrument(featureParams=featureParams,
+                                                         featureKey=featureKey,
+                                                         instrumentManager=self)
+            self.__lookbackInstrumentFeatures.addFeatureValueForAllInstruments(timeOfUpdate, featureKey, featureVal)
+
     def updateFeatures(self, timeOfUpdate):
 
-        for instrumentId in self.__instrumentsDict:
-            instrument = self.__instrumentsDict[instrumentId]
-            instrument.updateFeatures(timeOfUpdate, self)
+        self.updateInstrumentFeatures(timeOfUpdate)
 
         currentMarketFeatures = {}
         self.__lookbackMarketFeatures.addData(timeOfUpdate, currentMarketFeatures)

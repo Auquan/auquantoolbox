@@ -12,7 +12,7 @@ class SimpleExecutionSystemWithFairValue(SimpleExecutionSystem):
                                                                  capitalUsageLimit=capitalUsageLimit,
                                                                  lotSize=lotSize, limitType=limitType, price=price)
 
-    def getBuySell(self, instrument, currentPredictions):
+    def getBuySell(self, instrument, currentPredictions, instrumentsManager):
         instrumentId = instrument.getInstrumentId()
         try:
             currentPrice = instrument.getDataDf()[self.priceFeature].iloc[-1]

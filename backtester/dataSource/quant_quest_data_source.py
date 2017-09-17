@@ -9,6 +9,7 @@ try:
     from urllib2 import urlopen
 except ImportError:
     from urllib.request import urlopen
+import pandas as pd
 
 
 def is_number(s):
@@ -29,7 +30,9 @@ class QuantQuestDataSource(DataSource):
             self.__instrumentIds = instrumentIds
         else:
             self.__instrumentIds = self.getAllInstrumentIds()
+        self.__bookDataByFeature = {}
         self.__groupedInstrumentUpdates = self.getGroupedInstrumentUpdates()
+        self.processGroupedInstrumentUpdates()
 
     def ensureDirectoryExists(self, cachedFolderName, dataSetId):
         if not os.path.exists(cachedFolderName):
@@ -118,6 +121,39 @@ class QuantQuestDataSource(DataSource):
         groupedInstrumentUpdates = groupAndSortByTimeUpdates(allInstrumentUpdates)
         return groupedInstrumentUpdates
 
+    def processGroupedInstrumentUpdates(self):
+        timeUpdates = []
+        for timeOfUpdate, instrumentUpdates in self.__groupedInstrumentUpdates:
+            timeUpdates.append(timeOfUpdate)
+
+        for timeOfUpdate, instrumentUpdates in self.__groupedInstrumentUpdates:
+            for instrumentUpdate in instrumentUpdates:
+                bookData = instrumentUpdate.getBookData()
+                for featureKey in bookData:
+                    #TODO: Fix for python 3
+                    if featureKey not in self.__bookDataByFeature:
+                        self.__bookDataByFeature[featureKey] = pd.DataFrame(columns=self.__instrumentIds,
+                                                                            index=timeUpdates)
+                    self.__bookDataByFeature[featureKey].set_value(timeOfUpdate, instrumentUpdate.getInstrumentId(), bookData[featureKey])
+        for featureKey in self.__bookDataByFeature:
+            self.__bookDataByFeature[featureKey].fillna(method='pad', inplace=True)
+
+
     def emitInstrumentUpdates(self):
         for timeOfUpdate, instrumentUpdates in self.__groupedInstrumentUpdates:
             yield([timeOfUpdate, instrumentUpdates])
+
+    def getInstrumentIds(self):
+        return self.__instrumentIds
+
+    def getBookDataByFeature(self):
+        return self.__bookDataByFeature
+
+    def getAllTimes(self):
+        timeUpdates = []
+        for timeOfUpdate, instrumentUpdates in self.__groupedInstrumentUpdates:
+            timeUpdates.append(timeOfUpdate)
+        return timeUpdates
+
+    def getBookDataFeatures(self):
+        return 'stockVWAP,futureVWAP,basis,stockTopBidVol,stockTopAskVol,stockTopBidPrice,stockTopAskPrice,futureTopBidVol,futureTopAskVol,futureTopBidPrice,futureTopAskPrice,stockNextBidVol,stockNextAskVol,stockNextBidPrice,stockNextAskPrice,futureNextBidVol,futureNextAskVol,futureNextBidPrice,futureNextAskPrice,stockTotalBidVol,stockTotalAskVol,futureTotalBidVol,futureTotalAskVol,stockAverageBidPrice,stockAverageAskPrice,futureAverageBidPrice,futureAverageAskPrice,FairValue'.split(',')

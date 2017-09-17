@@ -1,10 +1,12 @@
 from backtester.features.feature import Feature
 
+
 class CountFeature(Feature):
 
     @classmethod
-    def computeForLookbackData(cls, featureParams, featureKey, currentFeatures, lookbackDataDf):
+    def computeForMarket(cls, featureParams, featureKey, currentMarketFeatures, instrumentManager):
+        lookbackDataDf = instrumentManager.getDataDf()
         data = lookbackDataDf[featureKey]
-        if len(data) <= 1:
+        if len(data.index) < 1:
             return 0
-        return data.iloc[-2]+1
+        return data.iloc[-1] + 1

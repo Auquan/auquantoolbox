@@ -16,7 +16,6 @@ class TradingSystem:
         self.tsParams = tsParams
         self.portfolioValue = 0
         self.capital = 0
-        self.instrumentManager = InstrumentManager(self.tsParams)
         self.startDate = None
         self.featuresUpdateTime = None
         self.totalTimeUpdating = 0  # for tracking perf
@@ -25,6 +24,12 @@ class TradingSystem:
         self.executionSystem = None
         self.orderPlacer = None
         self.stateWriter = StateWriter('runLogs', datetime.strftime(datetime.now(), '%Y%m%d_%H%M%S'))
+        self.dataParser = self.tsParams.getDataParser()
+        self.executionSystem = self.tsParams.getExecutionSystem()
+        self.orderPlacer = self.tsParams.getOrderPlacer()
+        self.portfolioValue = self.tsParams.getStartingCapital()
+        self.capital = self.tsParams.getStartingCapital()
+        self.instrumentManager = InstrumentManager(self.tsParams, self.dataParser.getBookDataFeatures(), self.dataParser.getInstrumentIds(), self.dataParser.getBookDataByFeature(), self.dataParser.getAllTimes())
 
     def processInstrumentUpdates(self, timeOfUpdate, instrumentUpdates, onlyAnalyze=False):
         # Process instrument updates first
@@ -119,16 +124,8 @@ class TradingSystem:
              self.tsParams.getBenchmark(), stats, metricString, self.tsParams.getStartingCapital(), [], shouldPlotMarket))
         return resultDict
 
-    def initialize(self):
-        self.dataParser = self.tsParams.getDataParser()
-        self.executionSystem = self.tsParams.getExecutionSystem()
-        self.orderPlacer = self.tsParams.getOrderPlacer()
-        self.portfolioValue = self.tsParams.getStartingCapital()
-        self.capital = self.tsParams.getStartingCapital()
-
     def startTrading(self, onlyAnalyze=False, shouldPlot=True):
         # TODO: Figure out a good way to handle order parsers with live data later on.
-        self.initialize()
         groupedInstrumentUpdates = self.dataParser.emitInstrumentUpdates()
 
         for timeOfUpdate, instrumentUpdates in groupedInstrumentUpdates:

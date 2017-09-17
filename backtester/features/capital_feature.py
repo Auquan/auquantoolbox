@@ -7,15 +7,18 @@ class CapitalFeature(Feature):
     Computing for Instrument. By default defers to computeForLookbackData
     '''
     @classmethod
-    def computeForInstrument(cls, featureParams, featureKey, currentFeatures, instrument, instrumentManager):
-
-        currentPosition = instrument.getCurrentPosition()
-        if len(instrument.getDataDf()['position']) <= 1:
-            previousPosition = 0
+    def computeForInstrument(cls, featureParams, featureKey, instrumentManager):
+        instrumentLookbackData = instrumentManager.getLookbackInstrumentFeatures()
+        positionData = instrumentLookbackData.getDataForFeatureForAllInstruments('position')
+        currentPosition = positionData.iloc[-1]
+        zeroSeries = currentPosition * 0
+        if (len(positionData.index) <= 1):
+            previousPosition = zeroSeries
         else:
-            previousPosition = instrument.getDataDf()['position'][-2]
-        currentPrice = currentFeatures[featureParams['price']]
-        changeInCapital = (currentPosition - previousPosition) * currentPrice + currentFeatures[featureParams['fees']]
+            previousPosition = positionData.iloc[-2]
+        currentPrice = instrumentLookbackData.getDataForFeatureForAllInstruments(featureParams['price']).iloc[-1]
+        currentFees = instrumentLookbackData.getDataForFeatureForAllInstruments(featureParams['fees']).iloc[-1]
+        changeInCapital = (currentPosition - previousPosition) * currentPrice + currentFees
         return changeInCapital
 
     '''
@@ -28,8 +31,6 @@ class CapitalFeature(Feature):
         if len(capitalDict) <= 1:
             return featureParams['initial_capital']
         capital = capitalDict.values[-2]
-        allInstruments = instrumentManager.getAllInstrumentsByInstrumentId()
-        for instrumentId in allInstruments:
-            instrument = allInstruments[instrumentId]
-            changeInCapital -= instrument.getDataDf()[featureKey][-1]
+        instrumentLookbackData = instrumentManager.getLookbackInstrumentFeatures()
+        changeInCapital = instrumentLookbackData.getDataForFeatureForAllInstruments(featureKey).iloc[-1].sum()
         return capital + changeInCapital

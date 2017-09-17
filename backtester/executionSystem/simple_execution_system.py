@@ -97,7 +97,7 @@ class SimpleExecutionSystem(BaseExecutionSystem):
                 continue
             # Enter position if condition met
             if self.enterCondition(instrumentsManager, instrument, currentPredictions):
-                buySell = self.getBuySell(instrument, currentPredictions)
+                buySell = self.getBuySell(instrument, currentPredictions, instrumentsManager)
                 logInfo('ENTER TRADE: %s Size: %.2f B/S: %i ' % (
                         instrumentId, self.getLotSize(instrument), buySell))
                 instrumentExec = InstrumentExection(time, instrumentId,
@@ -105,7 +105,7 @@ class SimpleExecutionSystem(BaseExecutionSystem):
                 executions.append(instrumentExec)
         return executions
 
-    def getBuySell(self, instrument, currentPredictions):
+    def getBuySell(self, instrument, currentPredictions, instrumentsManager):
         instrumentId = instrument.getInstrumentId()
         return np.sign(currentPredictions[instrumentId] - 0.5)
 

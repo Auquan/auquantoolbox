@@ -56,7 +56,7 @@ class StateWriter:
         instrumentsDict = instrumentManager.getAllInstrumentsByInstrumentId()
         for instrumentId in instrumentsDict:
             instrument = instrumentsDict[instrumentId]
-            instrumentFeaturesDf = instrument.getDataDf()
+            #instrumentFeaturesDf = instrument.getDataDf()
             if instrumentId not in self.__instrumentIdToWriters:
                 instrumentFeaturesFilename = self.__folderName + '/' + instrumentId + '_features.csv'
                 if sys.version_info >= (3,):
@@ -65,6 +65,6 @@ class StateWriter:
                     instrumentFeaturesFile =  open(instrumentFeaturesFilename, 'wb')
                 self.__openFiles.append(instrumentFeaturesFile) 
                 self.__instrumentIdToWriters[instrumentId] = csv.writer(instrumentFeaturesFile)
-                self.writeColumns(self.__instrumentIdToWriters[instrumentId], instrumentFeaturesDf)
+            #    self.writeColumns(self.__instrumentIdToWriters[instrumentId], instrumentFeaturesDf)
             instrumentFeaturesWriter = self.__instrumentIdToWriters[instrumentId]
-            self.writeLastFeatures(instrumentFeaturesWriter, instrumentFeaturesDf)
+            #self.writeLastFeatures(instrumentFeaturesWriter, instrumentFeaturesDf)

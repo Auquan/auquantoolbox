@@ -5,13 +5,27 @@ import math
 class ExpMovingAverageFeature(Feature):
 
     @classmethod
-    def computeForLookbackData(cls, featureParams, featureKey, currentFeatures, lookbackDataDf):
+    def computeForInstrument(cls, featureParams, featureKey, instrumentManager):
+        instrumentLookbackData = instrumentManager.getLookbackInstrumentFeatures()
+        data = instrumentLookbackData.getDataForFeatureForAllInstruments(featureKey)
+        if len(data.index) >= 1:
+            prev_ema = data.iloc[-1]
+        else:
+            prev_ema = instrumentLookbackData.getDataForFeatureForAllInstruments(featureParams['featureName']).iloc[-1]
+        halflife = featureParams['period']
+        alpha = 1 - math.exp(math.log(0.5) / halflife)
+        avg = instrumentLookbackData.getDataForFeatureForAllInstruments(featureParams['featureName']).iloc[-1] * alpha + prev_ema * (1 - alpha)
+        return avg
+
+    @classmethod
+    def computeForMarket(cls, featureParams, featureKey, currentMarketFeatures, instrumentManager):
+        lookbackDataDf = instrumentManager.getDataDf()
         data = lookbackDataDf[featureKey]
         if len(data.index) > 1:
             prev_ema = data[-2]
         else:
-            prev_ema = currentFeatures[featureParams['featureName']]
+            prev_ema = lookbackDataDf[featureParams['featureName']].iloc[-1]
         halflife = featureParams['period']
         alpha = 1 - math.exp(math.log(0.5) / halflife)
-        avg = currentFeatures[featureParams['featureName']] * alpha + prev_ema * (1 - alpha)
+        avg = lookbackDataDf[featureParams['featureName']].iloc[-1] * alpha + prev_ema * (1 - alpha)
         return avg
