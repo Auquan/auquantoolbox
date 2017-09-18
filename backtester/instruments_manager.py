@@ -38,7 +38,7 @@ def getCompulsoryMarketFeatureConfigs(tsParams):
                                  'params': {'pnlKey': 'pnl',
                                             'countKey': 'count'}}
     compulsoryConfigDicts = [countDict, profitlossConfigDict, capitalConfigDict, portfoliovalueConfigDict,
-                             varianceConfigDict, maxCapitalUsageConfigDict, maxDrawdownConfigDict]#, profitlossRatioConfigDict]
+                             varianceConfigDict, maxCapitalUsageConfigDict, maxDrawdownConfigDict, profitlossRatioConfigDict]
     compulsoryMarketFeatureConfigs = list(map(lambda x: FeatureConfig(x), compulsoryConfigDicts))
     return compulsoryMarketFeatureConfigs
 
@@ -75,7 +75,7 @@ def getCompulsoryInstrumentFeatureConfigs(tsParams, instrumentType):
                                  'params': {'pnlKey': 'pnl',
                                             'countKey': 'count'}}
     compulsoryConfigDicts = [positionConfigDict, feesConfigDict[instrumentType], profitlossConfigDict, capitalConfigDict,
-                             ]#profitlossRatioConfigDict]
+                             profitlossRatioConfigDict]
     compulsoryInstrumentFeatureConfigs = list(map(lambda x: FeatureConfig(x), compulsoryConfigDicts))
     return compulsoryInstrumentFeatureConfigs
 
@@ -89,8 +89,8 @@ class InstrumentManager:
         self.__compulsoryFeatureConfigs = getCompulsoryMarketFeatureConfigs(tsParams)
         columns = map(lambda x: x.getFeatureKey(), featureConfigs)
         compulsoryColumns = map(lambda x: x.getFeatureKey(), self.__compulsoryFeatureConfigs)
-        marketfeatureKeys = list(chain(columns, compulsoryColumns, ['prediction']))
-        self.__lookbackMarketFeatures = LookbackData(tsParams.getLookbackSize(), list(chain(columns, compulsoryColumns, ['prediction'])))
+        marketFeatureKeys = list(chain(columns, compulsoryColumns, ['prediction']))
+        self.__lookbackMarketFeatures = LookbackData(tsParams.getLookbackSize(), marketFeatureKeys)
 
         self.__bookDataFeatures = bookDataFeatures
         self.__compulsoryInstrumentFeatureConfigs = getCompulsoryInstrumentFeatureConfigs(tsParams, INSTRUMENT_TYPE_STOCK)
@@ -107,13 +107,10 @@ class InstrumentManager:
         self.__totalIter = 0
         self.__perfDict = {}
         self.__marketPerfDict = {}
-        for featureKey in marketfeatureKeys:
-            self.__marketPerfDict[featureKey] = {'iter': 0,
-                                           'time': 0}
+        for featureKey in marketFeatureKeys:
+            self.__marketPerfDict[featureKey] = 0
         for featureKey in featureKeys:
-            self.__perfDict[featureKey] = {'iter': 0,
-                                           'time': 0}
-
+            self.__perfDict[featureKey] = 0
 
     def getTsParams(self):
         return self.tsParams
@@ -182,8 +179,8 @@ class InstrumentManager:
             self.__lookbackInstrumentFeatures.addFeatureValueForAllInstruments(timeOfUpdate, featureKey, self.__bookDataByFeature[featureKey].loc[timeOfUpdate])
             end = time.time()
             diffms = (end - start) * 1000
-            self.__perfDict[featureKey]['time'] = self.__perfDict[featureKey]['time'] + diffms
-            print ('time for feature: %s : %.2f' % (featureKey, self.__perfDict[featureKey]['time']/self.__totalIter)) 
+            self.__perfDict[featureKey] = self.__perfDict[featureKey] + diffms
+            logPerf('Avg time for feature: %s : %.2f' % (featureKey, self.__perfDict[featureKey] / self.__totalIter))
         featureConfigs = self.tsParams.getFeatureConfigsForInstrumentType(INSTRUMENT_TYPE_STOCK)  # TODO:
         featureConfigs = featureConfigs + self.__compulsoryInstrumentFeatureConfigs
         for featureConfig in featureConfigs:
@@ -199,8 +196,8 @@ class InstrumentManager:
             self.__lookbackInstrumentFeatures.addFeatureValueForAllInstruments(timeOfUpdate, featureKey, featureVal)
             end = time.time()
             diffms = (end - start) * 1000
-            self.__perfDict[featureKey]['time'] = self.__perfDict[featureKey]['time'] + diffms
-            print ('time for feature: %s : %.2f' % (featureKey, self.__perfDict[featureKey]['time']/self.__totalIter))
+            self.__perfDict[featureKey] = self.__perfDict[featureKey] + diffms
+            logPerf('Avg time for feature: %s : %.2f' % (featureKey, self.__perfDict[featureKey] / self.__totalIter))
 
     def updateFeatures(self, timeOfUpdate):
 
@@ -223,14 +220,14 @@ class InstrumentManager:
             self.__lookbackMarketFeatures.addFeatureVal(timeOfUpdate, featureKey, featureVal)
             end = time.time()
             diffms = (end - start) * 1000
-            self.__marketPerfDict[featureKey]['time'] = self.__marketPerfDict[featureKey]['time'] + diffms
-            print ('time for feature: %s : %.2f' % (featureKey, self.__marketPerfDict[featureKey]['time']/self.__totalIter))
+            self.__marketPerfDict[featureKey] = self.__marketPerfDict[featureKey] + diffms
+            logPerf('Avg time for feature: %s : %.2f' % (featureKey, self.__marketPerfDict[featureKey] / self.__totalIter))
         start = time.time()
         currentMarketFeatures['prediction'] = self.tsParams.getPrediction(timeOfUpdate, currentMarketFeatures, self)
         self.__lookbackMarketFeatures.addFeatureVal(timeOfUpdate, 'prediction', currentMarketFeatures['prediction'])
         end = time.time()
         diffms = (end - start) * 1000
-        self.__marketPerfDict['prediction']['time'] = self.__marketPerfDict['prediction']['time'] + diffms
-        print ('time for feature: %s : %.2f' % ('prediction', self.__marketPerfDict['prediction']['time']/self.__totalIter))
+        self.__marketPerfDict['prediction'] = self.__marketPerfDict['prediction'] + diffms
+        logPerf('Avg time for feature: %s : %.2f' % ('prediction', self.__marketPerfDict['prediction'] / self.__totalIter))
 
         logInfo('Market Features: %s' % str(currentMarketFeatures))

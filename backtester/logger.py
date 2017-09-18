@@ -13,3 +13,7 @@ def logInfo(msg, verbose=False):
 
 def logWarn(msg, verbose=True):
     log('Warn: ' + msg, verbose)
+
+
+def logPerf(msg, verbose=True):
+    log('Perf: ' + msg, verbose)
