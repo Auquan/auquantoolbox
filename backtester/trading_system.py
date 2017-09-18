@@ -168,5 +168,7 @@ class TradingSystem:
         self.stateWriter.closeStateWriter()
 
         result = self.jsonify(self.getFinalMetrics([self.startDate, timeOfUpdate], shouldPlot))
-        with open('result.json', 'w') as outfile:
+        resultFileName = 'result' + self.tsParams.getDataSetId() + '.json'
+        with open(resultFileName, 'w') as outfile:
             json.dump(result, outfile)
+        return result

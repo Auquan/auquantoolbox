@@ -162,3 +162,6 @@ class FairValueTradingParams(TradingSystemParameters):
 
     def getPriceFeatureKey(self):
         return 'basis'
+
+    def getDataSetId(self):
+        return self.__problem1Solver.getTrainingDataSet()

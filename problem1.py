@@ -150,3 +150,12 @@ if __name__ == "__main__":
     # Set onlyAnalyze to True to quickly generate csv files with all the features
     # Set onlyAnalyze to False to run a full backtest
     tradingSystem.startTrading(onlyAnalyze=False, shouldPlot=False)
+    # import requests
+    # submissionId = '59bf2d598aa605000418f8c6'
+    # result = tradingSystem.startTrading(onlyAnalyze=False, shouldPlot=False)
+    # resultBody = {'secretKey': 'BALLE BALLE', 'result': result, 'submissionId': submissionId}
+    # print('sending result back')
+    # resultUrl ='https://auquan-backend.herokuapp.com/api/updateProcessedSubmission'
+    # r = requests.post(url=resultUrl, json=resultBody)
+    # print(r.text)
+    # print('sent successfully solution for submission: ' + submissionId)
