@@ -34,10 +34,11 @@ def processResult(dir, marketFeatures, benchmark, stats, metricString, startingC
             generateGraph(df, marketFeatures, metricString, benchmark_pnl)
         resultDict['metrics_values'] = stats.keys()
         resultDict['metrics'] = stats.values()
+        resultDict['score'] = stats['Score']
         sampledDf = resampleData(df['pnl'], '1H').last()
 
         resultDict['dates'] = sampledDf.index.values
-        resultDict['pnl'] = sampledDf.values
+        resultDict['total_pnl'] = sampledDf.values
     else:
         resultDict['instrument_names'] = []
         resultDict['instrument_stats'] = []
