@@ -1,4 +1,5 @@
 import time
+import json
 from backtester.logger import *
 from backtester.instruments_manager import InstrumentManager
 from datetime import datetime
@@ -126,6 +127,26 @@ class TradingSystem:
         self.portfolioValue = self.tsParams.getStartingCapital()
         self.capital = self.tsParams.getStartingCapital()
 
+    def jsonify(self, data):
+        json_data = dict()
+        for key, value in data.iteritems():
+            if isinstance(value, list): # for lists
+                value = [ self.jsonify(item) if isinstance(item, dict) else item for item in value ]
+            if isinstance(value, dict): # for nested lists
+                value = self.jsonify(value)
+            if isinstance(key, int): # if key is integer: > to string
+                key = str(key)
+            if type(value).__module__=='numpy': # if value is numpy.*: > to python list
+                if(key == 'dates'):
+                    dates = []
+                    for date in value:
+                        dates.append(str(date))
+                    value = dates
+                else:
+                    value = value.tolist()
+            json_data[key] = value
+        return json_data
+
     def startTrading(self, onlyAnalyze=False, shouldPlot=True):
         # TODO: Figure out a good way to handle order parsers with live data later on.
         self.initialize()
@@ -146,4 +167,6 @@ class TradingSystem:
 
         self.stateWriter.closeStateWriter()
 
-        return self.getFinalMetrics([self.startDate, timeOfUpdate], shouldPlot)
+        result = self.jsonify(self.getFinalMetrics([self.startDate, timeOfUpdate], shouldPlot))
+        with open('result.json', 'w') as outfile:
+            json.dump(result, outfile)
