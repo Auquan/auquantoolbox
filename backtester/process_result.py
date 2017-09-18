@@ -5,6 +5,8 @@ from os import listdir
 from os.path import isfile, join, basename
 from backtester.metrics.metrics import Metrics
 from backtester.logger import *
+from pandas.tseries.frequencies import to_offset
+from functools import partial
 
 '''
 Usage(to test in console):
@@ -32,8 +34,10 @@ def processResult(dir, marketFeatures, benchmark, stats, metricString, startingC
             generateGraph(df, marketFeatures, metricString, benchmark_pnl)
         resultDict['metrics_values'] = stats.keys()
         resultDict['metrics'] = stats.values()
-        resultDict['dates'] = df.index.values
-        resultDict['pnl'] = df['pnl'].values
+        sampledDf = resampleData(df['pnl'], '1H').last()
+
+        resultDict['dates'] = sampledDf.index.values
+        resultDict['pnl'] = sampledDf.values
     else:
         resultDict['instrument_names'] = []
         resultDict['instrument_stats'] = []
@@ -67,3 +71,10 @@ def getDataReady(dir, features, benchmark, startingCapital, market=True):
         benchmark_pnl = None
     # logInfo(stats, True)
     return df, benchmark_pnl
+
+def resampleData(series, period):
+    return series.groupby(partial(round, freq=period))
+
+def round(t, freq):
+    freq = to_offset(freq)
+    return pd.Timestamp((t.value // freq.delta.value) * freq.delta.value)
