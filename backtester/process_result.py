@@ -32,8 +32,8 @@ def processResult(dir, marketFeatures, benchmark, stats, metricString, startingC
         if shouldPlot:
             logInfo('Generating %s' % marketFeatures)
             generateGraph(df, marketFeatures, metricString, benchmark_pnl)
-        resultDict['metrics_values'] = stats.keys()
-        resultDict['metrics'] = stats.values()
+        resultDict['metrics'] = stats.keys()
+        resultDict['metrics_values'] = stats.values()
         resultDict['score'] = stats['Score']
         sampledDf = resampleData(df['pnl'], '1H').last()
 
