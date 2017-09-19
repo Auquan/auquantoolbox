@@ -82,9 +82,9 @@ class FairValueTradingParams(TradingSystemParameters):
     def getInstrumentFeatureConfigDicts(self):
         stockFeatureConfigs = self.__problem1Solver.getFeatureConfigDicts()
         scoreDict = {'featureKey': 'score',
-                           'featureId': 'prob1_score',
-                           'params': {'predictionKey': 'prediction',
-                                      'price': 'FairValue'}}
+                     'featureId': 'prob1_score',
+                     'params': {'predictionKey': 'prediction',
+                                'price': 'FairValue'}}
         sdevDictForExec = {'featureKey': 'sdev_5_for_exec',
                            'featureId': 'moving_sdev',
                            'params': {'period': 5,
@@ -124,6 +124,7 @@ class FairValueTradingParams(TradingSystemParameters):
 
     def getPrediction(self, time, currentMarketFeatures, instrumentManager):
         instrumentIds = instrumentManager.getAllInstrumentsByInstrumentId()
+        # TODO: Change this to Series
         predictions = {}
         for ids in instrumentIds:
             instrument = instrumentManager.getInstrument(ids)

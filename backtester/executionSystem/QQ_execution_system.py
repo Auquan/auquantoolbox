@@ -17,46 +17,32 @@ class QQExecutionSystem(SimpleExecutionSystemWithFairValue):
         self.fees = feeDict
         self.thresholdParam = basis_thresholdParam
 
-    def getBuySell(self, instrument, currentPredictions, instrumentsManager):
-        instrumentId = instrument.getInstrumentId()
+    def getDeviationFromPrediction(self, currentPredictions, instrumentsManager):
+        instrumentLookbackData = instrumentsManager.getLookbackInstrumentFeatures()
         try:
-            instrumentLookbackFeatures = instrumentsManager.getLookbackInstrumentFeatures()
-            currentPrice = instrumentLookbackFeatures.getDataForFeatureForAllInstruments(self.priceFeature)[instrument.getInstrumentId()][-1]
-            # currentPrice = instrument.getDataDf()[self.priceFeature].iloc[-1]
-            fairValue = currentPredictions[instrumentId]
-            currentDeviationFromPrediction = currentPrice - fairValue
-            return -np.sign(currentDeviationFromPrediction)
+            currentPrice = instrumentLookbackData.getDataForFeatureForAllInstruments(self.priceFeature).iloc[-1]
         except KeyError:
             logError('You have specified FairValue Execution Type but Price Feature Key does not exist')
 
-    def enterCondition(self, instrumentsManager, instrument, currentPredictions):
-        instrumentId = instrument.getInstrumentId()
-        try:
-            instrumentLookbackFeatures = instrumentsManager.getLookbackInstrumentFeatures()
-            currentPrice = instrumentLookbackFeatures.getDataForFeatureForAllInstruments(self.priceFeature)[instrument.getInstrumentId()][-1]
-            # currentPrice = instrument.getDataDf()[self.priceFeature].iloc[-1]
-            fairValue = currentPredictions[instrumentId]
-            currentDeviationFromPrediction = currentPrice - fairValue
-            return np.abs(currentDeviationFromPrediction) -\
-                2 * self.fees > (self.enter_threshold) * np.abs(instrumentLookbackFeatures.getDataForFeatureForAllInstruments(self.thresholdParam)[instrument.getInstrumentId()][-1])
-        except KeyError:
-            logError('You have specified FairValue Execution Type but Price Feature Key does not exist')
+        currentDeviationFromPrediction = currentPrice.transpose() - currentPredictions
+        return currentDeviationFromPrediction
 
-    def exitCondition(self, instrumentsManager, instrument, currentPredictions):
-        instrumentId = instrument.getInstrumentId()
-        try:
-            instrumentLookbackFeatures = instrumentsManager.getLookbackInstrumentFeatures()
-            currentPrice = instrumentLookbackFeatures.getDataForFeatureForAllInstruments(self.priceFeature)[instrument.getInstrumentId()][-1]
-            # currentPrice = instrument.getDataDf()[self.priceFeature].iloc[-1]
-            fairValue = currentPredictions[instrumentId]
-            currentDeviationFromPrediction = currentPrice - fairValue
-            position = instrument.getCurrentPosition()
-            return -np.sign(position)*(currentDeviationFromPrediction) < (self.exit_threshold) * np.abs(instrumentLookbackFeatures.getDataForFeatureForAllInstruments(self.thresholdParam)[instrument.getInstrumentId()][-1])
-        except KeyError:
-            logError('You have specified FairValue Execution Type but Price Feature Key does not exist')
+    def getBuySell(self, currentPredictions, instrumentsManager):
+        currentDeviationFromPrediction = self.getDeviationFromPrediction(currentPredictions, instrumentsManager)
+        return -np.sign(currentDeviationFromPrediction)
 
-    def hackCondition(self, instrumentsManager):
-        return False
+    def enterCondition(self, currentPredictions, instrumentsManager):
+        currentDeviationFromPrediction = self.getDeviationFromPrediction(currentPredictions, instrumentsManager)
+        return np.abs(currentDeviationFromPrediction) - 2 * self.fees > (self.enter_threshold) *\
+            np.abs(instrumentsManager.getLookbackInstrumentFeatures().getDataForFeatureForAllInstruments(self.thresholdParam).iloc[-1])
+
+    def exitCondition(self, currentPredictions, instrumentsManager):
+        currentDeviationFromPrediction = self.getDeviationFromPrediction(currentPredictions, instrumentsManager)
+        instrumentLookbackData = instrumentsManager.getLookbackInstrumentFeatures()
+        position = instrumentLookbackData.getDataForFeatureForAllInstruments('position').iloc[-1]
+        import pdb;pdb.set_trace()
+        return -np.sign(position) * (currentDeviationFromPrediction) < (self.exit_threshold) *\
+            np.abs(instrumentLookbackData.getDataForFeatureForAllInstruments(self.thresholdParam).iloc[-1])
 
     # def getExecutions(self, time, instrumentsManager, capital):
     #   # TODO:

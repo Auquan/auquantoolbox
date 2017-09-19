@@ -12,7 +12,7 @@ class Problem1Solver():
     '''
 
     def getTrainingDataSet(self):
-        return "trainingData1"
+        return "testData1"
 
     '''
     Returns the stocks to trade.
@@ -20,7 +20,7 @@ class Problem1Solver():
     '''
 
     def getSymbolsToTrade(self):
-        return []
+        return ['AIO','AUZ']
 
     '''
     [Optional] This is a way to use any custom features you might have made.

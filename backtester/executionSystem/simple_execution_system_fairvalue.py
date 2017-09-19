@@ -1,6 +1,7 @@
 from backtester.executionSystem.simple_execution_system import SimpleExecutionSystem
 from backtester.logger import *
 import numpy as np
+import pandas as pd
 
 
 class SimpleExecutionSystemWithFairValue(SimpleExecutionSystem):
@@ -12,38 +13,30 @@ class SimpleExecutionSystemWithFairValue(SimpleExecutionSystem):
                                                                  capitalUsageLimit=capitalUsageLimit,
                                                                  lotSize=lotSize, limitType=limitType, price=price)
 
-    def getBuySell(self, instrument, currentPredictions, instrumentsManager):
-        instrumentId = instrument.getInstrumentId()
+    def getDeviationFromPrediction(self, currentPredictions, instrumentsManager):
+        instrumentLookbackData = instrumentsManager.getLookbackInstrumentFeatures()
         try:
-            currentPrice = instrument.getDataDf()[self.priceFeature].iloc[-1]
-            fairValue = currentPredictions[instrumentId]
-            currentDeviationFromPrediction = fairValue / currentPrice
-            return -np.sign(currentDeviationFromPrediction)
+            currentPrice = instrumentLookbackData.getDataForFeatureForAllInstruments(self.priceFeature).iloc[-1]
         except KeyError:
             logError('You have specified FairValue Execution Type but Price Feature Key does not exist')
 
-    def enterCondition(self, instrumentsManager, instrument, currentPredictions):
-        instrumentId = instrument.getInstrumentId()
-        try:
-            currentPrice = instrument.getDataDf()[self.priceFeature].iloc[-1]
-            fairValue = currentPredictions[instrumentId]
-            currentDeviationFromPrediction = fairValue / currentPrice
-            return np.abs(currentDeviationFromPrediction) > (self.enter_threshold)
-        except KeyError:
-            logError('You have specified FairValue Execution Type but Price Feature Key does not exist')
+        currentDeviationFromPrediction = currentPredictions.transpose() / currentPrice
+        return currentDeviationFromPrediction
 
-    def exitCondition(self, instrumentsManager, instrument, currentPredictions):
-        instrumentId = instrument.getInstrumentId()
-        try:
-            currentPrice = instrument.getDataDf()[self.priceFeature].iloc[-1]
-            fairValue = currentPredictions[instrumentId]
-            currentDeviationFromPrediction = fairValue / currentPrice
-            return np.abs(currentDeviationFromPrediction) < (self.exit_threshold)
-        except KeyError:
-            logError('You have specified FairValue Execution Type but Price Feature Key does not exist')
+    def getBuySell(self, currentPredictions, instrumentsManager):
+        currentDeviationFromPrediction = self.getDeviationFromPrediction(currentPredictions, instrumentsManager)
+        return -np.sign(currentDeviationFromPrediction)
 
-    def hackCondition(self, instrumentsManager):
-        return False
+    def enterCondition(self, currentPredictions, instrumentsManager):
+        currentDeviationFromPrediction = self.getDeviationFromPrediction(currentPredictions, instrumentsManager)
+        return np.abs(currentDeviationFromPrediction) > (self.enter_threshold)
+
+    def exitCondition(self, currentPredictions, instrumentsManager):
+        currentDeviationFromPrediction = self.getDeviationFromPrediction(currentPredictions, instrumentsManager)
+        return np.abs(currentDeviationFromPrediction) < (self.exit_threshold)
+
+    def hackCondition(self, currentPredictions, instrumentsManager):
+        return pd.Series(False, index=currentPredictions.index)
 
     # def getExecutions(self, time, instrumentsManager, capital):
     # 	# TODO:
