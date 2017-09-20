@@ -40,7 +40,6 @@ class QQExecutionSystem(SimpleExecutionSystemWithFairValue):
         currentDeviationFromPrediction = self.getDeviationFromPrediction(currentPredictions, instrumentsManager)
         instrumentLookbackData = instrumentsManager.getLookbackInstrumentFeatures()
         position = instrumentLookbackData.getDataForFeatureForAllInstruments('position').iloc[-1]
-        import pdb;pdb.set_trace()
         return -np.sign(position) * (currentDeviationFromPrediction) < (self.exit_threshold) *\
             np.abs(instrumentLookbackData.getDataForFeatureForAllInstruments(self.thresholdParam).iloc[-1])
 

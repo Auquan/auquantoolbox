@@ -60,21 +60,19 @@ class SimpleExecutionSystem(BaseExecutionSystem):
         marketFeaturesDf = instrumentsManager.getDataDf()
         currentMarketFeatures = marketFeaturesDf.iloc[-1]
         predictionDict = marketFeaturesDf['prediction'].iloc[-1]
-        currentPredictions = pd.DataFrame(predictionDict.values(), index=predictionDict.keys())
-        logInfo(str(currentPredictions))
-        import pdb
-        pdb.set_trace()
+        currentPredictions = pd.Series(predictionDict.values(), index=predictionDict.keys())
         # executions = []
         executions = self.exitPosition(time, instrumentsManager, currentPredictions)
         executions += self.enterPosition(time, instrumentsManager, currentPredictions, capital)
         # executions is a series with stocknames as index and positions to execute as column (-10 means sell 10)
-        return executions
+        return []
 
     def exitPosition(self, time, instrumentsManager, currentPredictions, closeAllPositions=False):
 
         instrumentLookbackData = instrumentsManager.getLookbackInstrumentFeatures()
-        position = instrumentLookbackData.getDataForFeatureForAllInstruments('position').iloc[-1]
-        executions = position * 0
+        positionData = instrumentLookbackData.getDataForFeatureForAllInstruments('position')
+        position = positionData.iloc[-1]
+        executions = pd.Series([0] * len(positionData.columns), index=positionData.columns)
 
         if closeAllPositions:
             executions = -position
@@ -111,12 +109,13 @@ class SimpleExecutionSystem(BaseExecutionSystem):
 
     def enterPosition(self, time, instrumentsManager, currentPredictions, capital):
         instrumentLookbackData = instrumentsManager.getLookbackInstrumentFeatures()
-        position = instrumentLookbackData.getDataForFeatureForAllInstruments('position')
-        executions = position * 0
+        positionData = instrumentLookbackData.getDataForFeatureForAllInstruments('position')
+        position = positionData.iloc[-1]
+        executions = pd.Series([0] * len(positionData.columns), index=positionData.columns)
         executions[self.enterCondition(currentPredictions, instrumentsManager)] = \
-            self.getLotSize(position.columns) * self.getBuySell(currentPredictions, instrumentsManager)
+            self.getLotSize(positionData.columns) * self.getBuySell(currentPredictions, instrumentsManager)
         # No executions if at position limit
-        executions[self.atPositionLimit(capital, position)] = 0
+        executions[self.atPositionLimit(capital, positionData)] = 0
         # for instrumentId in currentPredictions.keys():
         #     instrument = instrumentsManager.getInstrument(instrumentId)
         #     if instrument is None:
@@ -145,7 +144,7 @@ class SimpleExecutionSystem(BaseExecutionSystem):
         # return np.abs(probBuy - 0.5) > (self.enter_threshold - 0.5)
         return (currentPredictions - 0.5).abs() > (self.enter_threshold - 0.5)
 
-    def atPositionLimit(self, capital, position):
+    def atPositionLimit(self, capital, positionData):
         # position = instrument.getCurrentPosition()
         # instrumentId = instrument.getInstrumentId()
         # if (position > self.getLongLimit(instrument)) or (position < -self.getShortLimit(instrument)):
@@ -153,8 +152,9 @@ class SimpleExecutionSystem(BaseExecutionSystem):
         #     return True
         if capital < self.capitalUsageLimit:
             logWarn('Not Enough Capital')
-            return pd.Series(True, index=currentPredictions.index)
-        return (position > self.getLongLimit(position.columns)) | (position < -self.getShortLimit(position.columns))
+            return pd.Series(True, index=positionData.columns)
+        position = positionData.iloc[-1]
+        return (position > self.getLongLimit(positionData.columns)) | (position < -self.getShortLimit(positionData.columns))
 
     def exitCondition(self, currentPredictions, instrumentsManager):
         # instrumentId = instrument.getInstrumentId()
