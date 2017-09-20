@@ -33,12 +33,21 @@ def getCompulsoryMarketFeatureConfigs(tsParams):
     maxDrawdownConfigDict = {'featureKey': 'maxDrawdown',
                              'featureId': 'maxDrawdown',
                              'params': {'portfolioValueKey': 'portfolio_value'}}
-    profitlossRatioConfigDict = {'featureKey': 'pl_ratio',
-                                 'featureId': 'pl_ratio',
-                                 'params': {'pnlKey': 'pnl',
-                                            'countKey': 'count'}}
+    totalProfitConfigDict = {'featureKey': 'total_profit',
+                             'featureId': 'total_profit',
+                             'params': {'pnlKey': 'pnl'}}
+    totalLossConfigDict = {'featureKey': 'total_loss',
+                           'featureId': 'total_loss',
+                           'params': {'pnlKey': 'pnl'}}
+    countProfitConfigDict = {'featureKey': 'count_profit',
+                             'featureId': 'count_profit',
+                             'params': {'pnlKey': 'pnl'}}
+    countLossConfigDict = {'featureKey': 'count_loss',
+                           'featureId': 'count_loss',
+                           'params': {'pnlKey': 'pnl'}}
     compulsoryConfigDicts = [countDict, profitlossConfigDict, capitalConfigDict, portfoliovalueConfigDict,
-                             varianceConfigDict, maxCapitalUsageConfigDict, maxDrawdownConfigDict, profitlossRatioConfigDict]
+                             varianceConfigDict, maxCapitalUsageConfigDict, maxDrawdownConfigDict,
+                             totalProfitConfigDict, totalLossConfigDict, countProfitConfigDict, countLossConfigDict]
     compulsoryMarketFeatureConfigs = list(map(lambda x: FeatureConfig(x), compulsoryConfigDicts))
     return compulsoryMarketFeatureConfigs
 
@@ -70,12 +79,20 @@ def getCompulsoryInstrumentFeatureConfigs(tsParams, instrumentType):
                           'featureId': 'variance',
                           'params': {'pnlKey': 'pnl',
                                      'countKey': 'count'}}
-    profitlossRatioConfigDict = {'featureKey': 'pl_ratio',
-                                 'featureId': 'pl_ratio',
-                                 'params': {'pnlKey': 'pnl',
-                                            'countKey': 'count'}}
+    totalProfitConfigDict = {'featureKey': 'total_profit',
+                             'featureId': 'total_profit',
+                             'params': {'pnlKey': 'pnl'}}
+    totalLossConfigDict = {'featureKey': 'total_loss',
+                           'featureId': 'total_loss',
+                           'params': {'pnlKey': 'pnl'}}
+    countProfitConfigDict = {'featureKey': 'count_profit',
+                             'featureId': 'count_profit',
+                             'params': {'pnlKey': 'pnl'}}
+    countLossConfigDict = {'featureKey': 'count_loss',
+                           'featureId': 'count_loss',
+                           'params': {'pnlKey': 'pnl'}}
     compulsoryConfigDicts = [positionConfigDict, feesConfigDict[instrumentType], profitlossConfigDict, capitalConfigDict,
-                             profitlossRatioConfigDict]
+                             totalProfitConfigDict, totalLossConfigDict, countProfitConfigDict, countLossConfigDict]
     compulsoryInstrumentFeatureConfigs = list(map(lambda x: FeatureConfig(x), compulsoryConfigDicts))
     return compulsoryInstrumentFeatureConfigs
 

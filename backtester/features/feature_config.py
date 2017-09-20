@@ -35,8 +35,10 @@ from backtester.features.score_problem1 import ProblemOneScore
 from backtester.features.variance_feature import VarianceFeature
 from backtester.features.maxcapitalusage_feature import MaxCapitalUsageFeature
 from backtester.features.maxDrawdown_feature import MaxDrawdownFeature
-from backtester.features.profitlossratio_feature import ProfitLossRatioFeature
-
+from backtester.features.total_profit_feature import TotalProfitFeature
+from backtester.features.total_loss_feature import TotalLossFeature
+from backtester.features.count_profit_feature import CountProfitFeature
+from backtester.features.count_loss_feature import CountLossFeature
 
 featureIdToFeatureCls = {'argmax': ArgMaxFeature,
                          'argmin': ArgMinFeature,
@@ -70,7 +72,10 @@ featureIdToFeatureCls = {'argmax': ArgMaxFeature,
                          'score_ll': ScoreLogLossFeature,
                          'vwap': VwapPriceInstrumentFeature,
                          'prob1_score': ProblemOneScore,
-                         'pl_ratio': ProfitLossRatioFeature,
+                         'total_loss': TotalLossFeature,
+                         'total_profit': TotalProfitFeature,
+                         'count_loss': CountLossFeature,
+                         'count_profit': CountProfitFeature,
                          'maxDrawdown': MaxDrawdownFeature,
                          'variance': VarianceFeature,
                          'maxCapitalUsage': MaxCapitalUsageFeature

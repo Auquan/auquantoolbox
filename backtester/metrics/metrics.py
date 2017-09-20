@@ -80,7 +80,7 @@ class Metrics():
         stats['RoC(%)'] = self.roc(df['pnl'].iloc[- 1], df['capitalUsage'].iloc[-1])
         stats['Score'] = df['score'].iloc[-1]
         stats['Max Drawdown(%)'] = self.max_drawdown(df['maxDrawdown'].iloc[-1], startingCapital)
-        stats['Profit/Loss Ratio'] = self.profit_factor(df['pl_ratio'].iloc[-1])
+        stats['Profit/Loss Ratio'] = self.profit_factor(df['total_profit'].iloc[-1], df['total_loss'].iloc[-1])
         stats['Accuracy'] = self.accuracy(df['pl_ratio'].iloc[-1])
         # TODO change reference to score
         if 'score' in self.__marketFeaturesDf.columns:
@@ -162,27 +162,27 @@ class Metrics():
     def alpha(self, daily_return, baseline_daily_return, beta):
         return self.annualized_return(daily_return) - beta * self.annualized_return(baseline_daily_return)
 
-    def profit_factor(self, plRatioDict):
-        if plRatioDict['totalLoss'] == 0:
+    def profit_factor(self, total_profit, total_loss):
+        if total_loss == 0:
             return float('nan')
-        return plRatioDict['totalProfit'] / float(plRatioDict['totalLoss'])
+        return total_profit / float(total_loss)
 
-    def profitability(self, plRatioDict, total_pnl):
+    def profitability(self, total_profit, total_pnl):
         if total_pnl == 0:
             return 0
-        return plRatioDict['totalProfit'] / float(total_pnl)
+        return total_profit / float(total_pnl)
 
-    def profit_factor_avg(self, plRatioDict):
-        if plRatioDict['totalLoss'] == 0:
+    def profit_factor_avg(self, total_profit, total_loss, count_profit, count_loss):
+        if total_loss == 0 or count_loss == 0:
             return float('nan')
-        return (plRatioDict['totalProfit'] / float(plRatioDict['countProfit']))\
-            / (plRatioDict['totalLoss'] / float(plRatioDict['countLoss']))
+        return (total_profit / float(count_profit))\
+            / (total_loss / float(count_loss))
 
-    def accuracy(self, plRatioDict):
-        total_count = (plRatioDict['countProfit'] + plRatioDict['countLoss'])
+    def accuracy(self, count_profit, count_loss):
+        total_count = count_profit + count_loss
         if total_count == 0:
             return 0
-        return plRatioDict['countProfit'] / float(total_count)
+        return count_profit / float(total_count)
 
     def getBenchmarkData(self, baseSymbol, priceFeature, folderName):
         if (baseSymbol is None):
