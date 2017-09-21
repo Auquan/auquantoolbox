@@ -7,7 +7,7 @@ class CapitalFeature(Feature):
     Computing for Instrument. By default defers to computeForLookbackData
     '''
     @classmethod
-    def computeForInstrument(cls, featureParams, featureKey, instrumentManager):
+    def computeForInstrument(cls, updateNum, time, featureParams, featureKey, instrumentManager):
         instrumentLookbackData = instrumentManager.getLookbackInstrumentFeatures()
         positionData = instrumentLookbackData.getDataForFeatureForAllInstruments('position')
         currentPosition = positionData.iloc[-1]
@@ -25,7 +25,7 @@ class CapitalFeature(Feature):
     Computing for Market. By default defers to computeForLookbackData
     '''
     @classmethod
-    def computeForMarket(cls, featureParams, featureKey, currentMarketFeatures, instrumentManager):
+    def computeForMarket(cls, updateNum, time, featureParams, featureKey, currentMarketFeatures, instrumentManager):
         changeInCapital = 0
         capitalDict = instrumentManager.getDataDf()[featureKey]
         if len(capitalDict) <= 1:

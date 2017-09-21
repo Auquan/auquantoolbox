@@ -6,38 +6,30 @@ import pandas as pd
 class ProblemOneScore(Feature):
 
     @classmethod
-    def computeForInstrument(cls, featureParams, featureKey, instrumentManager):
+    def computeForInstrument(cls, updateNum, time, featureParams, featureKey, instrumentManager):
         instrumentLookbackData = instrumentManager.getLookbackInstrumentFeatures()
-        numInstruments = len(instrumentManager.getAllInstrumentsByInstrumentId())
+        instrumentDict = instrumentManager.getAllInstrumentsByInstrumentId()
+        zeroSeries = pd.Series([0] * len(instrumentDict), index=instrumentDict.keys())
         predictionKey = 'prediction'
         price = 'close'
-        countKey = 'count'
-        lookbackMarketDataDf = instrumentManager.getDataDf()
         if 'predictionKey' in featureParams:
             predictionKey = featureParams['predictionKey']
         if 'price' in featureParams:
             price = featureParams['price']
-        if 'countKey' in featureParams:
-            countKey = featureParams['countKey']
-        if len(lookbackMarketDataDf) < 1:
-            # first iteration
-            return [0] * numInstruments
-        predictionDict = lookbackMarketDataDf[predictionKey].iloc[-1]
-        # lookback market data is not updated yet since we are in instrument updates
-        # therefore the count is previous count.
-        prevCount = lookbackMarketDataDf[countKey].iloc[-1]
-        if len(predictionDict) == 0:
-            return [0] * numInstruments
-        prevData = instrumentLookbackData.getDataForFeatureForAllInstruments(featureKey).iloc[-1]
-        temp = (prevCount) * (prevData**2)
-        sqError = (pd.Series(predictionDict) - instrumentLookbackData.getDataForFeatureForAllInstruments(price).iloc[-2])**2
+
+        predictionDf = instrumentLookbackData.getDataForFeatureForAllInstruments(predictionKey)
+        featureDf = instrumentLookbackData.getDataForFeatureForAllInstruments(featureKey)
+        priceDf = instrumentLookbackData.getDataForFeatureForAllInstruments(price)
+
+        currentPrediction = predictionDf.iloc[-1]  # will have this
+        prevFeatureData = featureDf.iloc[-1] if updateNum > 1 else zeroSeries  # might not have it
+        prevCount = updateNum - 1
+        temp = (prevCount) * (prevFeatureData**2)
+        sqError = (currentPrediction - priceDf.iloc[-1])**2
         temp = (temp + sqError)
-        # print(currentFeatures[price], lookbackDataDf[price].iloc[-1])
-        temp = temp/(prevCount + 1)
-        return temp
-        # TODO KANAV
+        temp = temp / updateNum
         return np.sqrt(temp)
-        #return np.sqrt(temp / (prevCount + 1))
+
 
 
     '''
@@ -79,7 +71,7 @@ class ProblemOneScore(Feature):
     Computing for Market. By default defers to computeForLookbackData
     '''
     @classmethod
-    def computeForMarket(cls, featureParams, featureKey, currentMarketFeatures, instrumentManager):
+    def computeForMarket(cls, updateNum, time, featureParams, featureKey, currentMarketFeatures, instrumentManager):
         score = 0
         scoreDict = instrumentManager.getDataDf()[featureKey]
         scoreKey = 'score'

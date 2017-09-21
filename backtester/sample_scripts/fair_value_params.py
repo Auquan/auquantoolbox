@@ -4,12 +4,14 @@ from backtester.dataSource.quant_quest_data_source import QuantQuestDataSource
 from backtester.executionSystem.QQ_execution_system import QQExecutionSystem
 from backtester.orderPlacer.backtesting_order_placer import BacktestingOrderPlacer
 from backtester.constants import *
+from backtester.features.feature import Feature
 
 
 class FairValueTradingParams(TradingSystemParameters):
 
     def __init__(self, problem1Solver):
         self.__problem1Solver = problem1Solver
+        Problem1PredictionFeature.setProblemSolver(problem1Solver)
         super(FairValueTradingParams, self).__init__()
 
     def getStartingCapital(self):
@@ -51,7 +53,7 @@ class FairValueTradingParams(TradingSystemParameters):
     '''
 
     def getCustomFeatures(self):
-        return self.__problem1Solver.getCustomFeatures()
+        return dict(self.__problem1Solver.getCustomFeatures(), **{'problem1_prediction': Problem1PredictionFeature})
 
     '''
     Returns a dictionary with:
@@ -81,6 +83,9 @@ class FairValueTradingParams(TradingSystemParameters):
 
     def getInstrumentFeatureConfigDicts(self):
         stockFeatureConfigs = self.__problem1Solver.getFeatureConfigDicts()
+        fairValuePrediction = {'featureKey': 'prediction',
+                               'featureId': 'problem1_prediction',
+                               'params': {}}
         scoreDict = {'featureKey': 'score',
                      'featureId': 'prob1_score',
                      'params': {'predictionKey': 'prediction',
@@ -89,7 +94,7 @@ class FairValueTradingParams(TradingSystemParameters):
                            'featureId': 'moving_sdev',
                            'params': {'period': 5,
                                       'featureName': 'basis'}}
-        return {INSTRUMENT_TYPE_STOCK: stockFeatureConfigs + [sdevDictForExec, scoreDict]}
+        return {INSTRUMENT_TYPE_STOCK: stockFeatureConfigs + [fairValuePrediction, sdevDictForExec, scoreDict]}
 
     '''
     Returns an array of market feature config dictionaries
@@ -163,3 +168,15 @@ class FairValueTradingParams(TradingSystemParameters):
 
     def getPriceFeatureKey(self):
         return 'basis'
+
+
+class Problem1PredictionFeature(Feature):
+    problem1Solver = None
+
+    @classmethod
+    def setProblemSolver(cls, problem1Solver):
+        Problem1PredictionFeature.problem1Solver = problem1Solver
+
+    @classmethod
+    def computeForInstrument(cls, updateNum, time, featureParams, featureKey, instrumentManager):
+        return Problem1PredictionFeature.problem1Solver.getFairValue(updateNum, time, instrumentManager)

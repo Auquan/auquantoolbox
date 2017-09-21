@@ -5,7 +5,7 @@ import pandas as pd
 class CountProfitFeature(Feature):
 
     @classmethod
-    def computeForInstrument(cls, featureParams, featureKey, instrumentManager):
+    def computeForInstrument(cls, updateNum, time, featureParams, featureKey, instrumentManager):
         instrumentLookbackData = instrumentManager.getLookbackInstrumentFeatures()
         pnlKey = 'pnl'
         if 'pnlKey' in featureParams:
@@ -25,7 +25,7 @@ class CountProfitFeature(Feature):
         return countProfit
 
     @classmethod
-    def computeForMarket(cls, featureParams, featureKey, currentMarketFeatures, instrumentManager):
+    def computeForMarket(cls, updateNum, time, featureParams, featureKey, currentMarketFeatures, instrumentManager):
         lookbackDataDf = instrumentManager.getDataDf()
 
         pnlKey = 'pnl'

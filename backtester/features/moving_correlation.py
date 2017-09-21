@@ -17,7 +17,7 @@ class MovingCorrelationFeature(Feature):
         return round(x.rolling(featureParams['period']).corr(y)[-1], 3)
 
     @classmethod
-    def computeForMarket(cls, featureParams, featureKey, currentMarketFeatures, instrumentManager):
+    def computeForMarket(cls, updateNum, time, featureParams, featureKey, currentMarketFeatures, instrumentManager):
         lookbackMarketFeaturesDf = instrumentManager.getDataDf()
         x = lookbackMarketFeaturesDf[featureParams['series1']]
         y = lookbackMarketFeaturesDf[featureParams['series2']]

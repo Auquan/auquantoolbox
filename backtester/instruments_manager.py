@@ -207,7 +207,9 @@ class InstrumentManager:
             featureKey = featureConfig.getFeatureKey()
             featureParams = featureConfig.getFeatureParams()
             featureCls = FeatureConfig.getClassForFeatureId(featureId)
-            featureVal = featureCls.computeForInstrument(featureParams=featureParams,
+            featureVal = featureCls.computeForInstrument(updateNum=self.__totalIter,
+                                                         time=timeOfUpdate,
+                                                         featureParams=featureParams,
                                                          featureKey=featureKey,
                                                          instrumentManager=self)
             self.__lookbackInstrumentFeatures.addFeatureValueForAllInstruments(timeOfUpdate, featureKey, featureVal)
@@ -217,7 +219,6 @@ class InstrumentManager:
             logPerf('Avg time for feature: %s : %.2f' % (featureKey, self.__perfDict[featureKey] / self.__totalIter))
 
     def updateFeatures(self, timeOfUpdate):
-
         self.updateInstrumentFeatures(timeOfUpdate)
 
         currentMarketFeatures = {}
@@ -229,7 +230,9 @@ class InstrumentManager:
             featureKey = featureConfig.getFeatureKey()
             featureParams = featureConfig.getFeatureParams()
             featureCls = FeatureConfig.getClassForFeatureId(featureId)
-            featureVal = featureCls.computeForMarket(featureParams=featureParams,
+            featureVal = featureCls.computeForMarket(updateNum=self.__totalIter,
+                                                     time=timeOfUpdate,
+                                                     featureParams=featureParams,
                                                      featureKey=featureKey,
                                                      currentMarketFeatures=currentMarketFeatures,
                                                      instrumentManager=self)
@@ -239,12 +242,5 @@ class InstrumentManager:
             diffms = (end - start) * 1000
             self.__marketPerfDict[featureKey] = self.__marketPerfDict[featureKey] + diffms
             logPerf('Avg time for feature: %s : %.2f' % (featureKey, self.__marketPerfDict[featureKey] / self.__totalIter))
-        start = time.time()
-        currentMarketFeatures['prediction'] = self.tsParams.getPrediction(timeOfUpdate, currentMarketFeatures, self)
-        self.__lookbackMarketFeatures.addFeatureVal(timeOfUpdate, 'prediction', currentMarketFeatures['prediction'])
-        end = time.time()
-        diffms = (end - start) * 1000
-        self.__marketPerfDict['prediction'] = self.__marketPerfDict['prediction'] + diffms
-        logPerf('Avg time for feature: %s : %.2f' % ('prediction', self.__marketPerfDict['prediction'] / self.__totalIter))
 
         logInfo('Market Features: %s' % str(currentMarketFeatures))

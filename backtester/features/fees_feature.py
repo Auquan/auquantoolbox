@@ -5,7 +5,7 @@ import numpy as np
 class FeesFeature(Feature):
 
     @classmethod
-    def computeForInstrument(cls, featureParams, featureKey, instrumentManager):
+    def computeForInstrument(cls, updateNum, time, featureParams, featureKey, instrumentManager):
         instrumentLookbackData = instrumentManager.getLookbackInstrumentFeatures()
         positionData = instrumentLookbackData.getDataForFeatureForAllInstruments('position')
         feesDict = featureParams['feesDict']
@@ -16,6 +16,6 @@ class FeesFeature(Feature):
         return fees
 
     @classmethod
-    def computeForMarket(cls, featureParams, featureKey, currentMarketFeatures, instrumentManager):
+    def computeForMarket(cls, updateNum, time, featureParams, featureKey, currentMarketFeatures, instrumentManager):
         raise NotImplementedError
         return None

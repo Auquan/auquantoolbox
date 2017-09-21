@@ -8,7 +8,7 @@ class PositionInstrumentFeature(Feature):
     '''
 
     @classmethod
-    def computeForInstrument(cls, featureParams, featureKey, instrumentManager):
+    def computeForInstrument(cls, updateNum, time, featureParams, featureKey, instrumentManager):
         instrumentsDict = instrumentManager.getAllInstrumentsByInstrumentId()
         positionDict = {}
         for instrumentId in instrumentsDict:
@@ -19,5 +19,5 @@ class PositionInstrumentFeature(Feature):
     Computing for Market. By default defers to computeForLookbackData
     '''
     @classmethod
-    def computeForMarket(cls, featureParams, featureKey, currentMarketFeatures, instrumentManager):
+    def computeForMarket(cls, updateNum, time, featureParams, featureKey, currentMarketFeatures, instrumentManager):
         raise NotImplementedError

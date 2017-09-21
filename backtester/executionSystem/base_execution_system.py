@@ -1,8 +1,8 @@
 class InstrumentExection:
-    def __init__(self, time, instrumentId, volumne, executionType):
+    def __init__(self, time, instrumentId, volume, executionType):
         self.__timeOfExecution = time
         self.__instrumentId = instrumentId
-        self.__volume = volumne
+        self.__volume = volume
         self.__executionType = executionType
 
     def getTimeOfExecution(self):

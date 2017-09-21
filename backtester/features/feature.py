@@ -4,7 +4,7 @@ class Feature(object):
     Computing for Instrument.
     '''
     @classmethod
-    def computeForInstrument(cls, featureParams, featureKey, instrumentManager):
+    def computeForInstrument(cls, updateNum, time, featureParams, featureKey, instrumentManager):
         raise NotImplementedError
         return None
 
@@ -12,6 +12,6 @@ class Feature(object):
     Computing for Market.
     '''
     @classmethod
-    def computeForMarket(cls, featureParams, featureKey, currentMarketFeatures, instrumentManager):
+    def computeForMarket(cls, updateNum, time, featureParams, featureKey, currentMarketFeatures, instrumentManager):
         raise NotImplementedError
         return None

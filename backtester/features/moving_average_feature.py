@@ -7,14 +7,14 @@ from backtester.features.feature import Feature
 class MovingAverageFeature(Feature):
 
     @classmethod
-    def computeForInstrument(cls, featureParams, featureKey, instrumentManager):
+    def computeForInstrument(cls, updateNum, time, featureParams, featureKey, instrumentManager):
         instrumentLookbackData = instrumentManager.getLookbackInstrumentFeatures()
         data = instrumentLookbackData.getDataForFeatureForAllInstruments(featureParams['featureName'])
         avg = data[-featureParams['period']:].mean()
         return avg
 
     @classmethod
-    def computeForMarket(cls, featureParams, featureKey, currentMarketFeatures, instrumentManager):
+    def computeForMarket(cls, updateNum, time, featureParams, featureKey, currentMarketFeatures, instrumentManager):
         lookbackDataDf = instrumentManager.getDataDf()
         data = lookbackDataDf[featureParams['featureName']]
         avg = data[-featureParams['period']:].mean()

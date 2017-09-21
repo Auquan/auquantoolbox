@@ -16,7 +16,7 @@ class MaxCapitalUsageFeature(Feature):
     Computing for Market. By default defers to computeForLookbackData
     '''
     @classmethod
-    def computeForMarket(cls, featureParams, featureKey, currentMarketFeatures, instrumentManager):
+    def computeForMarket(cls, updateNum, time, featureParams, featureKey, currentMarketFeatures, instrumentManager):
         maxUsage = 0
         capitalUsageDict = instrumentManager.getDataDf()[featureKey]
         capitalKey = 'capital'

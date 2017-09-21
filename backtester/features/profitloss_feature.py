@@ -8,7 +8,7 @@ class ProfitLossFeature(Feature):
     Computing for Instrument.
     '''
     @classmethod
-    def computeForInstrument(cls, featureParams, featureKey, instrumentManager):
+    def computeForInstrument(cls, updateNum, time, featureParams, featureKey, instrumentManager):
         instrumentLookbackData = instrumentManager.getLookbackInstrumentFeatures()
         priceDict = instrumentLookbackData.getDataForFeatureForAllInstruments(featureParams['price'])
         zeroSeries = priceDict.iloc[-1] * 0
@@ -30,7 +30,7 @@ class ProfitLossFeature(Feature):
     Computing for Market. By default defers to computeForLookbackData
     '''
     @classmethod
-    def computeForMarket(cls, featureParams, featureKey, currentMarketFeatures, instrumentManager):
+    def computeForMarket(cls, updateNum, time, featureParams, featureKey, currentMarketFeatures, instrumentManager):
         pnlDict = instrumentManager.getDataDf()[featureKey]
         pnlKey = 'pnl'
         if 'instrument_pnl_feature' in featureParams:

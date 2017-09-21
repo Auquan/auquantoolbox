@@ -12,7 +12,7 @@ class Problem1Solver():
     '''
 
     def getTrainingDataSet(self):
-        return "testData1"
+        return "trainingData1"
 
     '''
     Returns the stocks to trade.
@@ -20,7 +20,7 @@ class Problem1Solver():
     '''
 
     def getSymbolsToTrade(self):
-        return ['AIO','AUZ']
+        return []
 
     '''
     [Optional] This is a way to use any custom features you might have made.
@@ -82,22 +82,27 @@ class Problem1Solver():
 
     '''
     Using all the features you have calculated in getFeatureConfigDicts, combine them in a meaningful way
-    to compute the fair value as specified in the question for this instrument
+    to compute the fair value as specified in the question
     Params:
     time: time at which this is being calculated
-    instrument: Instrument for which this is being calculated
     instrumentManager: Holder for all the instruments
+    Returns:
+    A Pandas DataSeries with instrumentIds as the index, and the corresponding data your estimation of the fair value
+    for that stock/instrumentId
     '''
 
-    def getFairValue(self, time, instrument, instrumentManager):
-        # dataframe for historical instrument features. The last row of this data frame
-        # would contain the features which are being calculated in this update cycle or for this time.
-        # The second to last row (if exists) would have the features for the previous
-        # time update. Columns will be featureKeys for different features
+    def getFairValue(self, updateNum, time, instrumentManager):
+        # holder for all the instrument features
         lookbackInstrumentFeatures = instrumentManager.getLookbackInstrumentFeatures()
-        basisFairValue = lookbackInstrumentFeatures.getDataForFeatureForAllInstruments('exponential_moving_average')[instrument.getInstrumentId()][-1]
 
-        return basisFairValue
+        # dataframe for a historical instrument feature (exponential_moving_average in this case). The index is the timestamps
+        # atmost upto lookback data points. The columns of this dataframe are the stocks/instrumentIds.
+        expMovingAvgDf = lookbackInstrumentFeatures.getDataForFeatureForAllInstruments('exponential_moving_average')
+
+        # Returns a series with index as instrumentIds
+        currentExpMovingAvg = expMovingAvgDf.iloc[-1]
+
+        return currentExpMovingAvg
 
 
 '''
@@ -114,30 +119,37 @@ class MyCustomFeature(Feature):
     2. To finally use it in a meaningful way, specify this feature in getFeatureConfigDicts with appropirate feature params.
     Example for this is provided below.
     Params:
+    updateNum: current iteration of update. For first iteration, it will be 1.
+    time: time in datetime format when this update for feature will be run
     featureParams: A dictionary of parameter and parameter values your features computation might depend on.
                    You define the structure for this. just have to make sure these parameters are provided when
                    you wanted to actually use this feature in getFeatureConfigDicts
     featureKey: Name of the key this will feature will be mapped against.
-    currentFeatures: Dictionary with featurekey: featureValue of the instrument features which have been already calculated in this update
-                     cycle. The features are computed sequentially in order of how they appear in your config.
-    instrument: Instrument for which this feature is being calculated
     instrumentManager: A holder for all the instruments
+    Returns:
+    A Pandas series with stocks/instrumentIds as the index and the corresponding data the value of your custom feature
+    for that stock/instrumentId
     '''
     @classmethod
-    def computeForInstrument(cls, featureParams, featureKey, currentFeatures, instrument, instrumentManager):
-        # Current Book Data (dictionary) for the Instrument. This is the last update to the instrument
-        bookData = instrument.getCurrentBookData()
-
+    def computeForInstrument(cls, updateNum, time, featureParams, featureKey, instrumentManager):
         # Custom parameter which can be used as input to computation of this feature
         param1Value = featureParams['param1']
 
-        # dataframe for historical instrument features. The last row of this data frame
-        # would contain the features which are being calculated in this update cycle or for this time.
-        # The second to last row (if exists) would have the features for the previous
-        # time update. Columns will be featureKeys for different features
-        lookbackInstrumentFeaturesDf = instrument.getDataDf()
+        # A holder for the all the instrument features
+        lookbackInstrumentFeatures = instrumentManager.getLookbackInstrumentFeatures()
 
-        return 0
+        # dataframe for a historical instrument feature (basis in this case). The index is the timestamps
+        # atmost upto lookback data points. The columns of this dataframe are the stocks/instrumentIds.
+        lookbackInstrumentBasis = lookbackInstrumentFeatures.getDataForFeatureForAllInstruments('basis')
+
+        # The last row of the previous dataframe gives the last calculated value for that feature (basis in this case)
+        # This returns a series with stocks/instrumentIds as the index.
+        currentBasisValue = lookbackInstrumentBasis.iloc[-1]
+
+        if param1Value == 'value1':
+            return currentBasisValue * 0.1
+        else:
+            return currentBasisValue * 0.5
 
 
 if __name__ == "__main__":

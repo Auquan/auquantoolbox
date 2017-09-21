@@ -55,17 +55,25 @@ class SimpleExecutionSystem(BaseExecutionSystem):
         #     logError(
         #         'You have specified Dollar Limit but Price Feature Key does not exist')
 
+    def getInstrumentExecutionsFromExecutions(self, time, executions):
+        instrumentExecutions = []
+        for (instrumentId, position) in executions.iteritems():
+            if position == 0:
+                continue
+            instExecution = InstrumentExection(time=time,
+                                               instrumentId=instrumentId,
+                                               volume=np.abs(position),
+                                               executionType=-np.sign(position))
+            instrumentExecutions.append(instExecution)
+        return instrumentExecutions
+
     def getExecutions(self, time, instrumentsManager, capital):
-        # TODO:
-        marketFeaturesDf = instrumentsManager.getDataDf()
-        currentMarketFeatures = marketFeaturesDf.iloc[-1]
-        predictionDict = marketFeaturesDf['prediction'].iloc[-1]
-        currentPredictions = pd.Series(predictionDict.values(), index=predictionDict.keys())
-        # executions = []
+        instrumentLookbackData = instrumentsManager.getLookbackInstrumentFeatures()
+        currentPredictions = instrumentLookbackData.getDataForFeatureForAllInstruments('prediction').iloc[-1]
         executions = self.exitPosition(time, instrumentsManager, currentPredictions)
         executions += self.enterPosition(time, instrumentsManager, currentPredictions, capital)
         # executions is a series with stocknames as index and positions to execute as column (-10 means sell 10)
-        return []
+        return self.getInstrumentExecutionsFromExecutions(time, executions)
 
     def exitPosition(self, time, instrumentsManager, currentPredictions, closeAllPositions=False):
 

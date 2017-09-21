@@ -11,7 +11,7 @@ class ScoreRankFeature(Feature):
     Computing for Market. By default defers to computeForLookbackData
     '''
     @classmethod
-    def computeForMarket(cls, featureParams, featureKey, currentMarketFeatures, instrumentManager):
+    def computeForMarket(cls, updateNum, time, featureParams, featureKey, currentMarketFeatures, instrumentManager):
         score = 0
         scoreDict = instrumentManager.getDataDf()[featureKey]
         predictionKey = 'prediction'

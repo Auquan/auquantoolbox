@@ -19,7 +19,7 @@ class MaxDrawdownFeature(Feature):
     Computing for Market. By default defers to computeForLookbackData
     '''
     @classmethod
-    def computeForMarket(cls, featureParams, featureKey, currentMarketFeatures, instrumentManager):
+    def computeForMarket(cls, updateNum, time, featureParams, featureKey, currentMarketFeatures, instrumentManager):
         portfolioValueKey = 'portfolio_value'
         lookbackMarketDataDf = instrumentManager.getDataDf()
         if len(lookbackMarketDataDf) < 1 or instrumentManager is None:

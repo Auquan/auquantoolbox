@@ -91,7 +91,7 @@ class TradingSystem:
                 self.timeExecution = self.timeExecution + diffms
                 logPerf('Update Execution System: %d, Time: %.2f, Average: %.2f' % (self.totalUpdates, diffms, self.timeExecution / (self.totalUpdates)))
             start = time.time()
-            self.saveCurrentState()
+            # self.saveCurrentState()
             end = time.time()
             diffms = (end - start) * 1000
             self.timeSavingState = self.timeSavingState + diffms
