@@ -19,11 +19,12 @@ TODO: 1) Support excluding columns for each files.
 
 from pandas.tseries.frequencies import to_offset
 from functools import partial
+import os
 
 
 def processResult(stats, dir, marketFeatures):
     resultDict = {}
-    if marketFeatures is not None and isfile(marketFeatures):
+    if marketFeatures is not None and os.path.isfile(marketFeatures):
         df = pd.read_csv(marketFeatures, engine='python',
                          index_col='time', parse_dates=True)
         resultDict['metrics'] = stats.keys()

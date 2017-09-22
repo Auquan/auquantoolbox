@@ -15,6 +15,7 @@ class RatioMarketFeature(Feature):
 
         toRtn = feature1 / feature2
         toRtn[toRtn == np.Inf] = 0
+        return toRtn
 
     '''
     Computing for Market. By default defers to computeForLookbackData
