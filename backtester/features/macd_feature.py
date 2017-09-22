@@ -1,14 +1,19 @@
 from backtester.features.feature import Feature
-from backtester.financial_fn import ma
 
 
 class MACDFeature(Feature):
 
+    def computeForInstrument(cls, updateNum, time, featureParams, featureKey, instrumentManager):
+        instrumentLookbackData = instrumentManager.getLookbackInstrumentFeatures()
+        dataDf = instrumentLookbackData.getDataForFeatureForAllInstruments(featureParams['featureName'])
+        avg1 = dataDf[-featureParams['period1']:].mean()
+        avg2 = dataDf[-featureParams['period2']:].mean()
+        return avg1 - avg2
+
     @classmethod
-    def computeForLookbackData(cls, featureParams, featureKey, currentFeatures, lookbackDataDf):
+    def computeForMarket(cls, updateNum, time, featureParams, featureKey, currentMarketFeatures, instrumentManager):
+        lookbackDataDf = instrumentManager.getDataDf()
         data = lookbackDataDf[featureParams['featureName']]
         avg1 = data[-featureParams['period1']:].mean()
         avg2 = data[-featureParams['period2']:].mean()
-        if len(data) < 1:
-        	return 0
         return (avg1 - avg2)
