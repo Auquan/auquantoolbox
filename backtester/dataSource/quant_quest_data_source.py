@@ -157,6 +157,4 @@ class QuantQuestDataSource(DataSource):
         return self.__allTimes[-1]
 
     def getBookDataFeatures(self):
-
-        return 'stockVWAP,futureVWAP,basis,stockTopBidVol,stockTopAskVol,stockTopBidPrice,stockTopAskPrice,futureTopBidVol,futureTopAskVol,futureTopBidPrice,futureTopAskPrice,stockNextBidVol,stockNextAskVol,stockNextBidPrice,stockNextAskPrice,futureNextBidVol,futureNextAskVol,futureNextBidPrice,futureNextAskPrice,stockTotalBidVol,stockTotalAskVol,futureTotalBidVol,futureTotalAskVol,stockAverageBidPrice,stockAverageAskPrice,futureAverageBidPrice,futureAverageAskPrice,FairValue,benchmark_score,Y'.split(',')
-
+        return self.__bookDataByFeature.keys()
