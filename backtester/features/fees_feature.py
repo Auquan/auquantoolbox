@@ -12,8 +12,6 @@ class FeesFeature(Feature):
         currentPosition = positionData.iloc[-1]
         previousPosition = 0 if updateNum < 2 else positionData.iloc[-2]
         changeInPosition = currentPosition - previousPosition
-        print currentPosition
-        print previousPosition
         fees = np.abs(changeInPosition) * [feesDict[np.sign(x)] for x in changeInPosition]
         return fees
 

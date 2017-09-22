@@ -33,7 +33,8 @@ class Metrics():
         # + ' Benchmark: %0.2f%% ' % (100 * self.__stats['Base Return(%)']) \
         return \
             ' Total Pnl: %0.2f%% ' % (100 * self.__stats['Total Pnl(%)']) \
-            + ' Score: %0.2f ' % self.__stats['Score']
+            + ' Score: %0.2f ' % self.__stats['Score'] \
+            + ' Normalized Score: %0.2f ' % self.__stats['Normalized Score']
         # + 'Log Loss         : %0.2f'%self.__stats['Log Loss']
 
     def getMetrics(self):
@@ -90,10 +91,12 @@ class Metrics():
         stats = {}
         pnl = instrumentLookbackData.getDataForFeatureForAllInstruments('pnl').iloc[-1]
         score = instrumentLookbackData.getDataForFeatureForAllInstruments('score').iloc[-1]
+        benchmarkScore = instrumentLookbackData.getDataForFeatureForAllInstruments('benchmark_score').iloc[-1]
 
         totalReturn = pnl / float(startingCapital)
         stats['Total Pnl(%)'] = totalReturn.loc[instrumentId]
         stats['Score'] = score.loc[instrumentId]
+        stats['Normalized Score'] = 1000 * score.loc[instrumentId] / benchmarkScore.loc[instrumentId]
         self.__stats = stats
 
     def annualized_return(self, total_return, total_days):
