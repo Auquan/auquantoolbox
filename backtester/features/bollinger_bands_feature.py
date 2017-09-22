@@ -11,6 +11,6 @@ class BollingerBandsFeature(Feature):
         avg = data[-featureParams['period']:].mean()
         sdev = data[-featureParams['period']:].std()
         if len(data) < 1:
-        	return [0,0]
+            return [0,0]
         return [(avg - sdev), (avg + sdev)]
-            
+ 

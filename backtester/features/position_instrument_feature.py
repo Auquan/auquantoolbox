@@ -14,10 +14,3 @@ class PositionInstrumentFeature(Feature):
         for instrumentId in instrumentsDict:
             positionDict[instrumentId] = instrumentManager.getInstrument(instrumentId).getCurrentPosition()
         return positionDict
-
-    '''
-    Computing for Market. By default defers to computeForLookbackData
-    '''
-    @classmethod
-    def computeForMarket(cls, updateNum, time, featureParams, featureKey, currentMarketFeatures, instrumentManager):
-        raise NotImplementedError

@@ -88,6 +88,17 @@ class Metrics():
         # stats['Log Loss']=logLoss(daily_return)
         self.__stats = stats
 
+    def calculateInstrumentFeatureMetrics(self, priceFeature, startingCapital, instrumentLookbackData, dateBounds):
+        stats = {}
+        pnl = instrumentLookbackData.getDataForFeatureForAllInstruments('pnl').iloc[-1]
+        totalDays = len(pd.date_range(dateBounds[0], dateBounds[1], freq=BDay()))
+        score = instrumentLookbackData.getDataForFeatureForAllInstruments('score').iloc[-1]
+
+        totalReturn = pnl / float(startingCapital)
+        # TODO (KANAV)
+
+
+
     def calculateMetrics(self, priceFeature, startingCapital):
 
         stats = {}

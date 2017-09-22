@@ -36,7 +36,7 @@ class TradingSystem:
         self.instrumentManager = InstrumentManager(self.tsParams, self.dataParser.getBookDataFeatures(), self.dataParser.getInstrumentIds(),
                                                    self.dataParser.getBookDataByFeature(), self.dataParser.getAllTimes())
 
-    def processInstrumentUpdates(self, timeOfUpdate, instrumentUpdates, onlyAnalyze=False):
+    def processInstrumentUpdates(self, timeOfUpdate, instrumentUpdates, onlyAnalyze=False, isClose=False):
         start = time.time()
         # Process instrument updates first
         for instrumentUpdate in instrumentUpdates:
@@ -56,8 +56,16 @@ class TradingSystem:
         # update positions of placed orders
         for placedOrder in self.orderPlacer.emitPlacedOrders(timeOfUpdate, self.instrumentManager):
             self.processPlacedOrder(placedOrder)
+
+        # close remaining positions too.
+        if (isClose):
+            instrumentsToExecute = self.executionSystem.getExecutionsAtClose(timeOfUpdate, self.instrumentManager)
+            self.orderPlacer.placeOrders(timeOfUpdate, instrumentsToExecute, self.instrumentManager)
+            for placedOrder in self.orderPlacer.emitPlacedOrders(timeOfUpdate, self.instrumentManager):
+                self.processPlacedOrder(placedOrder)
+
         # Then we try to calculate features.
-        self.tryUpdateFeaturesAndExecute(timeOfUpdate, onlyAnalyze)
+        self.tryUpdateFeaturesAndExecute(timeOfUpdate, isClose, onlyAnalyze)
         end = time.time()
         diffms = (end - start) * 1000
         self.totalTimeUpdating = self.totalTimeUpdating + diffms
@@ -70,7 +78,7 @@ class TradingSystem:
         tradePrice = placedOrder.getTradePrice()
         placedInstrument.updatePositionAtPrice(changeInPosition, tradePrice)
 
-    def tryUpdateFeaturesAndExecute(self, timeOfUpdate, onlyAnalyze=False):
+    def tryUpdateFeaturesAndExecute(self, timeOfUpdate, isClose, onlyAnalyze=False):
         # TODO: Fix this to run independently of time of update of instrument and at regular frequency updates
         shouldUpdateFeatures = False
         if self.featuresUpdateTime is None:
@@ -82,8 +90,9 @@ class TradingSystem:
             self.updateFeatures(timeOfUpdate)
             if not onlyAnalyze:
                 start = time.time()
-                instrumentsToExecute = self.getInstrumentsToExecute(timeOfUpdate)
-                self.orderPlacer.placeOrders(timeOfUpdate, instrumentsToExecute, self.instrumentManager)
+                if not isClose:
+                    instrumentsToExecute = self.getInstrumentsToExecute(timeOfUpdate)
+                    self.orderPlacer.placeOrders(timeOfUpdate, instrumentsToExecute, self.instrumentManager)
                 self.portfolioValue = self.instrumentManager.getDataDf()['portfolio_value'][-1]  # TODO: find a better way to get this value
                 self.capital = self.instrumentManager.getDataDf()['capital'][-1]  # TODO: find a better way to get this value
                 end = time.time()
@@ -115,14 +124,6 @@ class TradingSystem:
     def saveCurrentState(self):
         self.stateWriter.writeCurrentState(self.instrumentManager)
 
-    def closePositions(self, timeOfUpdate):
-        instrumentsToExecute = self.executionSystem.exitPosition(timeOfUpdate, self.instrumentManager, [], True)
-        self.orderPlacer.placeOrders(timeOfUpdate, instrumentsToExecute, self.instrumentManager)
-        for placedOrder in self.orderPlacer.emitPlacedOrders(timeOfUpdate, self.instrumentManager):
-            self.processPlacedOrder(placedOrder)
-        self.updateFeatures(timeOfUpdate)
-        self.saveCurrentState()
-
     def getFinalMetrics(self, dateBounds, shouldPlotFeatures=True):
         allInstruments = self.instrumentManager.getAllInstrumentsByInstrumentId()
         resultDict = {}
@@ -150,19 +151,17 @@ class TradingSystem:
     def startTrading(self, onlyAnalyze=False, shouldPlot=True):
         # TODO: Figure out a good way to handle order parsers with live data later on.
         groupedInstrumentUpdates = self.dataParser.emitInstrumentUpdates()
+        self.closingTime = self.dataParser.getClosingTime()
 
         for timeOfUpdate, instrumentUpdates in groupedInstrumentUpdates:
             # logInfo('TimeOfUpdate: %s TradeSymbol: %s' % (instrumentUpdate.getTimeOfUpdate(), instrumentUpdate.getTradeSymbol()))
             print(timeOfUpdate)
             if self.startDate is None:
                 self.startDate = timeOfUpdate
-            self.processInstrumentUpdates(timeOfUpdate, instrumentUpdates, onlyAnalyze)
+            self.processInstrumentUpdates(timeOfUpdate, instrumentUpdates, onlyAnalyze, (closingTime == timeOfUpdate))
             if not onlyAnalyze and self.portfolioValue < 0:
                 logError('Trading will STOP - OUT OF MONEY!!!!')
                 break
-
-        if not onlyAnalyze:
-            self.closePositions(timeOfUpdate)
 
         self.stateWriter.closeStateWriter()
 

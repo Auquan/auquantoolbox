@@ -75,6 +75,20 @@ class SimpleExecutionSystem(BaseExecutionSystem):
         # executions is a series with stocknames as index and positions to execute as column (-10 means sell 10)
         return self.getInstrumentExecutionsFromExecutions(time, executions)
 
+    def getExecutionsAtClose(self, time, instrumentsManager):
+        instrumentExecutions = []
+        instruments = instrumentsManager.getAllInstrumentsByInstrumentId().values()
+        for instrument in instruments:
+            position = instrument.getCurrentPosition()
+            if position == 0:
+                continue
+            instrumentExec = InstrumentExection(time=time,
+                                                instrumentId=instrumentId,
+                                                volume=np.abs(position),
+                                                executionType=-np.sign(position))
+            instrumentExecutions.append(instrumentExec)
+        return instrumentExecutions
+
     def exitPosition(self, time, instrumentsManager, currentPredictions, closeAllPositions=False):
 
         instrumentLookbackData = instrumentsManager.getLookbackInstrumentFeatures()

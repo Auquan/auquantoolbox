@@ -9,8 +9,6 @@ import time
 
 
 def getCompulsoryMarketFeatureConfigs(tsParams):
-    countDict = {'featureKey': 'count',
-                 'featureId': 'count'}
     profitlossConfigDict = {'featureKey': 'pnl',
                             'featureId': 'pnl',
                             'params': {'instrument_pnl_feature': 'pnl'}}
@@ -24,8 +22,7 @@ def getCompulsoryMarketFeatureConfigs(tsParams):
                                            'pnl': 'pnl'}}
     varianceConfigDict = {'featureKey': 'variance',
                           'featureId': 'variance',
-                          'params': {'pnlKey': 'pnl',
-                                        'countKey': 'count'}}
+                          'params': {'pnlKey': 'pnl'}}
     maxCapitalUsageConfigDict = {'featureKey': 'capitalUsage',
                                  'featureId': 'maxCapitalUsage',
                                  'params': {'initial_capital': tsParams.getStartingCapital(),
@@ -45,7 +42,7 @@ def getCompulsoryMarketFeatureConfigs(tsParams):
     countLossConfigDict = {'featureKey': 'count_loss',
                            'featureId': 'count_loss',
                            'params': {'pnlKey': 'pnl'}}
-    compulsoryConfigDicts = [countDict, profitlossConfigDict, capitalConfigDict, portfoliovalueConfigDict,
+    compulsoryConfigDicts = [profitlossConfigDict, capitalConfigDict, portfoliovalueConfigDict,
                              varianceConfigDict, maxCapitalUsageConfigDict, maxDrawdownConfigDict,
                              totalProfitConfigDict, totalLossConfigDict, countProfitConfigDict, countLossConfigDict]
     compulsoryMarketFeatureConfigs = list(map(lambda x: FeatureConfig(x), compulsoryConfigDicts))
@@ -75,10 +72,6 @@ def getCompulsoryInstrumentFeatureConfigs(tsParams, instrumentType):
     capitalConfigDict = {'featureKey': 'capital',
                          'featureId': 'capital',
                          'params': {'price': tsParams.getPriceFeatureKey(), 'fees': 'fees'}}
-    varianceConfigDict = {'featureKey': 'variance',
-                          'featureId': 'variance',
-                          'params': {'pnlKey': 'pnl',
-                                     'countKey': 'count'}}
     totalProfitConfigDict = {'featureKey': 'total_profit',
                              'featureId': 'total_profit',
                              'params': {'pnlKey': 'pnl'}}

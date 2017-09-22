@@ -1,13 +1,7 @@
 from backtester.features.feature import Feature
-from backtester.financial_fn import ma
-import numpy as np
 
 
 class MovingInstrumentCorrelationFeature(Feature):
-
-    @classmethod
-    def computeForInstrument(cls, featureParams, featureKey, currentFeatures, instrument, instrumentManager):
-        raise NotImplementedError
 
     @classmethod
     def computeForMarket(cls, updateNum, time, featureParams, featureKey, currentMarketFeatures, instrumentManager):
@@ -23,5 +17,5 @@ class MovingInstrumentCorrelationFeature(Feature):
             y = instrument2.getDataDf()[feature]
 
         if (len(x) < 1) or (len(y) < 1):
-        	return 0 
+            return 0
         return x.rolling(featureParams['period']).corr(y)[-1]

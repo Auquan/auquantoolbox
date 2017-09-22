@@ -32,6 +32,7 @@ class QuantQuestDataSource(DataSource):
             self.__instrumentIds = self.getAllInstrumentIds()
         self.__bookDataByFeature = {}
         self.__groupedInstrumentUpdates = self.getGroupedInstrumentUpdates()
+        self.__allTimes = None
         self.processGroupedInstrumentUpdates()
 
     def ensureDirectoryExists(self, cachedFolderName, dataSetId):
@@ -125,6 +126,7 @@ class QuantQuestDataSource(DataSource):
         timeUpdates = []
         for timeOfUpdate, instrumentUpdates in self.__groupedInstrumentUpdates:
             timeUpdates.append(timeOfUpdate)
+        self.__allTimes = timeUpdates
 
         for timeOfUpdate, instrumentUpdates in self.__groupedInstrumentUpdates:
             for instrumentUpdate in instrumentUpdates:
@@ -138,7 +140,6 @@ class QuantQuestDataSource(DataSource):
         for featureKey in self.__bookDataByFeature:
             self.__bookDataByFeature[featureKey].fillna(method='pad', inplace=True)
 
-
     def emitInstrumentUpdates(self):
         for timeOfUpdate, instrumentUpdates in self.__groupedInstrumentUpdates:
             yield([timeOfUpdate, instrumentUpdates])
@@ -150,10 +151,10 @@ class QuantQuestDataSource(DataSource):
         return self.__bookDataByFeature
 
     def getAllTimes(self):
-        timeUpdates = []
-        for timeOfUpdate, instrumentUpdates in self.__groupedInstrumentUpdates:
-            timeUpdates.append(timeOfUpdate)
-        return timeUpdates
+        return self.__allTimes
+
+    def getClosingTime(self):
+        return self.__allTimes[-1]
 
     def getBookDataFeatures(self):
         return 'stockVWAP,futureVWAP,basis,stockTopBidVol,stockTopAskVol,stockTopBidPrice,stockTopAskPrice,futureTopBidVol,futureTopAskVol,futureTopBidPrice,futureTopAskPrice,stockNextBidVol,stockNextAskVol,stockNextBidPrice,stockNextAskPrice,futureNextBidVol,futureNextAskVol,futureNextBidPrice,futureNextAskPrice,stockTotalBidVol,stockTotalAskVol,futureTotalBidVol,futureTotalAskVol,stockAverageBidPrice,stockAverageAskPrice,futureAverageBidPrice,futureAverageAskPrice,FairValue'.split(',')

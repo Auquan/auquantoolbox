@@ -25,3 +25,6 @@ class BaseExecutionSystem(object):
     '''
     def getExecutions(self, time, instrumentsManager, capital):
         return []
+
+    def getExecutionsAtClose(self, time, instrumentsManager):
+        return []

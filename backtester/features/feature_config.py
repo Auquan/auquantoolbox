@@ -4,7 +4,6 @@ from backtester.features.argmax_feature import ArgMaxFeature
 from backtester.features.argmin_feature import ArgMinFeature
 from backtester.features.bollinger_bands_feature import BollingerBandsFeature
 from backtester.features.capital_feature import CapitalFeature
-from backtester.features.count_feature import CountFeature
 from backtester.features.crossInstrument_correlation_feature import MovingInstrumentCorrelationFeature
 from backtester.features.crossSectionMomentum_feature import CrossSectionMomentumFeature
 from backtester.features.delay_feature import DelayFeature
@@ -44,7 +43,6 @@ featureIdToFeatureCls = {'argmax': ArgMaxFeature,
                          'argmin': ArgMinFeature,
                          'bollinger_bands': BollingerBandsFeature,
                          'capital': CapitalFeature,
-                         'count': CountFeature,
                          'cross_sectional_momentum': CrossSectionMomentumFeature,
                          'cross_instrument_correlation': MovingInstrumentCorrelationFeature,
                          'delay': DelayFeature,

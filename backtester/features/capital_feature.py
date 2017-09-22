@@ -12,7 +12,7 @@ class CapitalFeature(Feature):
         positionData = instrumentLookbackData.getDataForFeatureForAllInstruments('position')
         currentPosition = positionData.iloc[-1]
         zeroSeries = currentPosition * 0
-        if (len(positionData.index) <= 1):
+        if (updateNum == 1):
             previousPosition = zeroSeries
         else:
             previousPosition = positionData.iloc[-2]

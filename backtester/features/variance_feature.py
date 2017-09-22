@@ -1,57 +1,50 @@
 from backtester.features.feature import Feature
+import pandas as pd
 
 
 class VarianceFeature(Feature):
-    # Computing for Instrument. By default defers to computeForLookbackData
+    # Computing for Instrument.
     # MAKE SURE PNL is calculated BEFORE this feature
     @classmethod
-    def computeForInstrument(cls, featureParams, featureKey, currentFeatures, instrument, instrumentManager):
-        lookbackDataDf = instrument.getDataDf()
+    def computeForInstrument(cls, updateNum, time, featureParams, featureKey, instrumentManager):
+        instrumentLookbackData = instrumentManager.getLookbackInstrumentFeatures()
+        instrumentDict = instrumentManager.getAllInstrumentsByInstrumentId()
+        zeroSeries = pd.Series([0] * len(instrumentDict), index=instrumentDict.keys())
         pnlKey = 'pnl'
-        countKey = 'count'
-        if len(lookbackDataDf) <= 1 or instrumentManager is None:
-            return 0
-        lookbackMarketDataDf = instrumentManager.getDataDf()
         if 'pnlKey' in featureParams:
             pnlKey = featureParams['pnlKey']
-        if 'countKey' in featureParams:
-            countKey = featureParams['countKey']
-        if len(lookbackMarketDataDf) <= 1:
-            # first iteration
-            return 0
-        prevCount = lookbackMarketDataDf[countKey].iloc[-1]
 
-        pnlDict = lookbackDataDf[pnlKey]
-        varDict = lookbackDataDf[featureKey]
-        if len(varDict) <= 1:
-            return 0
+        if updateNum == 1:
+            return zeroSeries
+        prevCount = updateNum - 1
 
-        sqSum = 0 if (len(varDict) <= 1) else float(prevCount) * varDict.iloc[-2]
+        pnlDataDf = instrumentLookbackData.getDataForFeatureForAllInstruments(pnlKey)
+        varDataDf = instrumentLookbackData.getDataForFeatureForAllInstruments(featureKey)
 
-        prevAvgPnl = pnlDict.iloc[-2] / float(prevCount)
-        newAvgPnl = pnlDict.iloc[-1] / float(prevCount + 1)
+        sqSum = float(prevCount) * varDataDf.iloc[-1]
+
+        prevAvgPnl = pnlDataDf.iloc[-2] / float(prevCount)
+        newAvgPnl = pnlDataDf.iloc[-1] / float(updateNum)
         newSqSum = sqSum + prevCount * (prevAvgPnl**2 - newAvgPnl**2) \
-            + (pnlDict.iloc[-2] - pnlDict.iloc[-1] - newAvgPnl)**2
+            + (pnlDataDf.iloc[-2] - pnlDataDf.iloc[-1] - newAvgPnl)**2
 
-        return newSqSum / float(prevCount + 1)
+        return newSqSum / float(updateNum)
+
 
     '''
-    Computing for Market. By default defers to computeForLookbackData
+    Computing for Market. 
     '''
     @classmethod
     def computeForMarket(cls, updateNum, time, featureParams, featureKey, currentMarketFeatures, instrumentManager):
         pnlKey = 'pnl'
-        countKey = 'count'
         lookbackMarketDataDf = instrumentManager.getDataDf()
         if len(lookbackMarketDataDf) <= 2 or instrumentManager is None:
             # First Iteration
             return 0
         if 'pnlKey' in featureParams:
             pnlKey = featureParams['pnlKey']
-        if 'countKey' in featureParams:
-            countKey = featureParams['countKey']
 
-        prevCount = lookbackMarketDataDf[countKey].iloc[-2]
+        prevCount = updateNum - 1
 
         pnlDict = lookbackMarketDataDf[pnlKey]
         varDict = lookbackMarketDataDf[featureKey]
