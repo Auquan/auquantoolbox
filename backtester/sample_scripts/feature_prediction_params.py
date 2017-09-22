@@ -5,12 +5,14 @@ from backtester.executionSystem.simple_execution_system import SimpleExecutionSy
 from backtester.orderPlacer.backtesting_order_placer import BacktestingOrderPlacer
 from backtester.trading_system import TradingSystem
 from backtester.constants import *
+from backtester.features.feature import Feature
 
 
 class FeaturePredictionTradingParams(TradingSystemParameters):
 
     def __init__(self, problem2Solver):
         self.__problem2Solver = problem2Solver
+        Problem2PredictionFeature.setProblemSolver(problem2Solver)
         super(FeaturePredictionTradingParams, self).__init__()
 
     def getStartingCapital(self):
@@ -51,7 +53,7 @@ class FeaturePredictionTradingParams(TradingSystemParameters):
     '''
 
     def getCustomFeatures(self):
-        return self.__problem2Solver.getCustomFeatures()
+        return dict(self.__problem2Solver.getCustomFeatures(), **{'problem2_prediction': Problem2PredictionFeature})
 
     '''
     Returns a dictionary with:
@@ -82,18 +84,15 @@ class FeaturePredictionTradingParams(TradingSystemParameters):
     def getInstrumentFeatureConfigDicts(self):
         # ADD RELEVANT FEATURES HERE
         stockFeatureConfigs = self.__problem2Solver.getFeatureConfigDicts()
-        targetDict = {'featureKey': 'target',
-                      'featureId': 'direction',
-                      'params': {'featureName': self.getPriceFeatureKey(),
-                                 'period': 1}}
+        classifierPrediction = {'featureKey': 'prediction',
+                                'featureId': 'problem2_prediction',
+                                'params': {}}
         scoreDict = {'featureKey': 'score',
                      'featureId': 'score_ll',
                      'params': {'predictionKey': 'prediction',
-                                'target': 'target'}}
-        stockFeatureConfigs.append(targetDict)
-        stockFeatureConfigs.append(scoreDict)
-        return {INSTRUMENT_TYPE_STOCK: stockFeatureConfigs}
+                                'target': 'Y'}}
 
+        return {INSTRUMENT_TYPE_STOCK: stockFeatureConfigs + [classifierPrediction, scoreDict]}
     '''
     Returns an array of market feature config dictionaries
         market feature config Dictionary has the following keys:
@@ -108,13 +107,11 @@ class FeaturePredictionTradingParams(TradingSystemParameters):
         # customFeatureDict = {'featureKey': 'custom_mrkt_feature',
         #                      'featureId': 'my_custom_mrkt_feature',
         #                      'params': {'param1': 'value1'}}
-        countDict = {'featureKey': 'count',
-                     'featureId': 'count'}
         scoreDict = {'featureKey': 'score',
                      'featureId': 'score_ll',
                      'params': {'featureName': self.getPriceFeatureKey(),
                                 'instrument_score_feature': 'score'}}
-        return [countDict, scoreDict]
+        return [scoreDict]
 
     '''
     A function that returns your predicted value based on your heuristics.
@@ -140,9 +137,9 @@ class FeaturePredictionTradingParams(TradingSystemParameters):
     '''
 
     def getExecutionSystem(self):
-        return SimpleExecutionSystem(enter_threshold=0.9, exit_threshold=0.6,
+        return SimpleExecutionSystem(enter_threshold=0.8, exit_threshold=0.6,
                                      longLimit=10000, shortLimit=10000, capitalUsageLimit=0.05,
-                                     lotSize=100, limitType='L', price=self.getPriceFeatureKey())
+                                     lotSize=500, limitType='L', price=self.getPriceFeatureKey())
 
     '''
     Returns the type of order placer we want to use. its an implementation of the class OrderPlacer.
@@ -160,10 +157,22 @@ class FeaturePredictionTradingParams(TradingSystemParameters):
     '''
 
     def getLookbackSize(self):
-        return 30
+        return 90
 
     def getPriceFeatureKey(self):
         return 'stockVWAP'
+
+
+class Problem2PredictionFeature(Feature):
+    problem2Solver = None
+
+    @classmethod
+    def setProblemSolver(cls, problem2Solver):
+        Problem2PredictionFeature.problem2Solver = problem2Solver
+
+    @classmethod
+    def computeForInstrument(cls, updateNum, time, featureParams, featureKey, instrumentManager):
+        return Problem2PredictionFeature.problem2Solver.getClassifierProbability(updateNum, time, instrumentManager)
 
 
 if __name__ == "__main__":

@@ -132,7 +132,7 @@ class QuantQuestDataSource(DataSource):
             for instrumentUpdate in instrumentUpdates:
                 bookData = instrumentUpdate.getBookData()
                 for featureKey in bookData:
-                    #TODO: Fix for python 3
+                    # TODO: Fix for python 3
                     if featureKey not in self.__bookDataByFeature:
                         self.__bookDataByFeature[featureKey] = pd.DataFrame(columns=self.__instrumentIds,
                                                                             index=timeUpdates)
@@ -157,5 +157,6 @@ class QuantQuestDataSource(DataSource):
         return self.__allTimes[-1]
 
     def getBookDataFeatures(self):
-        # TODO KANAV
-        return 'stockVWAP,futureVWAP,basis,stockTopBidVol,stockTopAskVol,stockTopBidPrice,stockTopAskPrice,futureTopBidVol,futureTopAskVol,futureTopBidPrice,futureTopAskPrice,stockNextBidVol,stockNextAskVol,stockNextBidPrice,stockNextAskPrice,futureNextBidVol,futureNextAskVol,futureNextBidPrice,futureNextAskPrice,stockTotalBidVol,stockTotalAskVol,futureTotalBidVol,futureTotalAskVol,stockAverageBidPrice,stockAverageAskPrice,futureAverageBidPrice,futureAverageAskPrice,FairValue,benchmark_score'.split(',')
+
+        return 'stockVWAP,futureVWAP,basis,stockTopBidVol,stockTopAskVol,stockTopBidPrice,stockTopAskPrice,futureTopBidVol,futureTopAskVol,futureTopBidPrice,futureTopAskPrice,stockNextBidVol,stockNextAskVol,stockNextBidPrice,stockNextAskPrice,futureNextBidVol,futureNextAskVol,futureNextBidPrice,futureNextAskPrice,stockTotalBidVol,stockTotalAskVol,futureTotalBidVol,futureTotalAskVol,stockAverageBidPrice,stockAverageAskPrice,futureAverageBidPrice,futureAverageAskPrice,FairValue,benchmark_score,Y'.split(',')
+

@@ -22,12 +22,10 @@ class MyCustomFeature(Feature):
 class Problem2Solver():
 
     def getTrainingDataSet(self):
-        return "trainingData1"
+        return "testDataP2"
 
     def getSymbolsToTrade(self):
-        return ['ADANIENT']
-        # 'ICICIBANK', 'CANBK', 'SBIN', 'YESBANK', 'KOTAKBANK',
-        # 'BANKBARODA', 'HDFCBANK', 'AXISBANK', 'INDUSINDBK', 'NIFTYBEES']
+        return ['JYW']
 
     def getCustomFeatures(self):
         return {'my_custom_feature': MyCustomFeature}
