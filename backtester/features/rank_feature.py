@@ -1,11 +1,16 @@
 from backtester.features.feature import Feature
-from backtester.financial_fn import ma
-import numpy as np
 
 
 class RankFeature(Feature):
 
     @classmethod
-    def computeForLookbackData(cls, featureParams, featureKey, currentFeatures, lookbackDataDf):
-    	data = lookbackDataDf[featureParams['featureName']]
-    	return data[-featureParams['period']:].rank(pct=True)
+    def computeForInstrument(cls, updateNum, time, featureParams, featureKey, instrumentManager):
+        instrumentLookbackData = instrumentManager.getLookbackInstrumentFeatures()
+        dataDf = instrumentLookbackData.getDataForFeatureForAllInstruments(featureParams['featureName'])
+        return dataDf[-featureParams['period']:].rank(pct=True)
+
+    @classmethod
+    def computeForMarket(cls, updateNum, time, featureParams, featureKey, currentMarketFeatures, instrumentManager):
+        lookbackDataDf = instrumentManager.getDataDf()
+        data = lookbackDataDf[featureParams['featureName']]
+        return data[-featureParams['period']:].rank(pct=True)
