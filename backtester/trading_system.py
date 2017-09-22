@@ -127,25 +127,25 @@ class TradingSystem:
     def getFinalMetrics(self, dateBounds, shouldPlotFeatures=True):
         allInstruments = self.instrumentManager.getAllInstrumentsByInstrumentId()
         resultDict = {}
+        resultDict['instrument_names'] = []
+        resultDict['instrument_stats'] = []
         for instrumentId in allInstruments:
-            instrument = allInstruments[instrumentId]
-            lookbackData = instrument.getDataDf()
-            metrics = Metrics(marketFeaturesDf=lookbackData)
-            metrics.calculateMetrics(self.tsParams.getPriceFeatureKey(), self.tsParams.getStartingCapital())
+            metrics = Metrics(marketFeaturesDf=None)
+            metrics.calculateInstrumentFeatureMetrics(instrumentId=instrumentId,
+                                                      priceFeature=self.tsParams.getPriceFeatureKey(),
+                                                      startingCapital=self.tsParams.getStartingCapital(),
+                                                      instrumentLookbackData=self.instrumentManager.getLookbackInstrumentFeatures())
             stats = metrics.getMetrics()
-            metricString = metrics.getMetricsString()
+            metricString = metrics.getInstrumentMetricsString()
             logInfo(metricString, True)
-            resultDict.update(processResult(self.stateWriter.getFolderName(), None, None,
-                                            stats, metricString, self.tsParams.getStartingCapital(), [self.stateWriter.getMarketFeaturesFilename()], shouldPlotFeatures))
+            resultDict['instrument_names'] += [instrumentId]
+            resultDict['instrument_stats'] += [{'total_pnl': stats['Total Pnl(%)'], 'score': stats['Score']}]
         metrics = Metrics(marketFeaturesDf=self.instrumentManager.getDataDf())
         metrics.calculateMarketMetrics(None, self.tsParams.getPriceFeatureKey(), self.tsParams.getStartingCapital(), dateBounds)
         stats = metrics.getMetrics()
         metricString = metrics.getMarketMetricsString()
         logInfo(metricString, True)
-        # Hack to always plot market
-        shouldPlotMarket = True
-        resultDict.update(processResult(self.stateWriter.getFolderName(), self.stateWriter.getMarketFeaturesFilename(),
-                                        self.tsParams.getBenchmark(), stats, metricString, self.tsParams.getStartingCapital(), [], shouldPlotMarket))
+        resultDict.update(processResult(stats, self.stateWriter.getFolderName(), self.stateWriter.getMarketFeaturesFilename()))
         return resultDict
 
     def startTrading(self, onlyAnalyze=False, shouldPlot=True):
@@ -158,7 +158,7 @@ class TradingSystem:
             print(timeOfUpdate)
             if self.startDate is None:
                 self.startDate = timeOfUpdate
-            self.processInstrumentUpdates(timeOfUpdate, instrumentUpdates, onlyAnalyze, (closingTime == timeOfUpdate))
+            self.processInstrumentUpdates(timeOfUpdate, instrumentUpdates, onlyAnalyze, (self.closingTime == timeOfUpdate))
             if not onlyAnalyze and self.portfolioValue < 0:
                 logError('Trading will STOP - OUT OF MONEY!!!!')
                 break

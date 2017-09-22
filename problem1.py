@@ -20,7 +20,7 @@ class Problem1Solver():
     '''
 
     def getSymbolsToTrade(self):
-        return []
+        return ['AGW', 'AIO']
 
     '''
     [Optional] This is a way to use any custom features you might have made.
@@ -95,14 +95,14 @@ class Problem1Solver():
         # holder for all the instrument features
         lookbackInstrumentFeatures = instrumentManager.getLookbackInstrumentFeatures()
 
-        # dataframe for a historical instrument feature (exponential_moving_average in this case). The index is the timestamps
+        # dataframe for a historical instrument feature (ma_5 in this case). The index is the timestamps
         # atmost upto lookback data points. The columns of this dataframe are the stocks/instrumentIds.
-        expMovingAvgDf = lookbackInstrumentFeatures.getDataForFeatureForAllInstruments('exponential_moving_average')
+        ma5Data = lookbackInstrumentFeatures.getDataForFeatureForAllInstruments('ma_5')
 
         # Returns a series with index as instrumentIds
-        currentExpMovingAvg = expMovingAvgDf.iloc[-1]
+        ma5 = ma5Data.iloc[-1]
 
-        return currentExpMovingAvg
+        return ma5
 
 
 '''

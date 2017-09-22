@@ -28,14 +28,12 @@ class Metrics():
                 # + 'Log Loss         : %0.2f'%self.__stats['Log Loss']
         return str
 
-    def getMetricsString(self):
+    def getInstrumentMetricsString(self):
         # Add back below once benchmark support
         # + ' Benchmark: %0.2f%% ' % (100 * self.__stats['Base Return(%)']) \
         return \
             ' Total Pnl: %0.2f%% ' % (100 * self.__stats['Total Pnl(%)']) \
-            + ' Score: %0.2f ' % self.__stats['Score'] \
-            + ' Profit/Loss Ratio: %0.2f ' % self.__stats['Profit/Loss Ratio'] \
-            + ' Accuracy: %0.2f ' % self.__stats['Accuracy']
+            + ' Score: %0.2f ' % self.__stats['Score']
         # + 'Log Loss         : %0.2f'%self.__stats['Log Loss']
 
     def getMetrics(self):
@@ -81,46 +79,21 @@ class Metrics():
         stats['Score'] = df['score'].iloc[-1]
         stats['Max Drawdown(%)'] = self.max_drawdown(df['maxDrawdown'].iloc[-1], startingCapital)
         stats['Profit/Loss Ratio'] = self.profit_factor(df['total_profit'].iloc[-1], df['total_loss'].iloc[-1])
-        stats['Accuracy'] = self.accuracy(df['pl_ratio'].iloc[-1])
+        stats['Accuracy'] = self.accuracy(df['total_profit'].iloc[-1], df['total_loss'].iloc[-1])
         # TODO change reference to score
         if 'score' in self.__marketFeaturesDf.columns:
             stats['Score'] = self.__marketFeaturesDf['score'].iloc[-1]
         # stats['Log Loss']=logLoss(daily_return)
         self.__stats = stats
 
-    def calculateInstrumentFeatureMetrics(self, priceFeature, startingCapital, instrumentLookbackData, dateBounds):
+    def calculateInstrumentFeatureMetrics(self, instrumentId, priceFeature, startingCapital, instrumentLookbackData):
         stats = {}
         pnl = instrumentLookbackData.getDataForFeatureForAllInstruments('pnl').iloc[-1]
-        totalDays = len(pd.date_range(dateBounds[0], dateBounds[1], freq=BDay()))
         score = instrumentLookbackData.getDataForFeatureForAllInstruments('score').iloc[-1]
 
         totalReturn = pnl / float(startingCapital)
-        # TODO (KANAV)
-
-
-
-    def calculateMetrics(self, priceFeature, startingCapital):
-
-        stats = {}
-
-        # total_pnl = self.resampleData(
-        #     self.__marketFeaturesDf['pnl'], '1D').last()
-        # price = self.resampleData(
-        #     self.__marketFeaturesDf[priceFeature], '1D').last()
-        # total_pnl.dropna(inplace=True)
-        # price.dropna(inplace=True)
-        df = self.__marketFeaturesDf
-        total_days = len(pd.date_range(df.index[0], df.index[-1], freq=BDay()))
-        total_return = df['pnl'].iloc[- 1] / float(startingCapital)
-        base_return = df[priceFeature].iloc[total_days - 1] / df[priceFeature].iloc[0] - 1
-
-        stats['Total Pnl(%)'] = total_return
-        stats['Base Return(%)'] = self.annualized_return(
-            base_return, total_days)
-        stats['Score'] = df['score'].iloc[-1]
-        stats['Profit/Loss Ratio'] = self.profit_factor(df['pl_ratio'].iloc[-1])
-        stats['Accuracy'] = self.accuracy(df['pl_ratio'].iloc[-1])
-        # stats['Log Loss']=logLoss(daily_return)
+        stats['Total Pnl(%)'] = totalReturn.loc[instrumentId]
+        stats['Score'] = score.loc[instrumentId]
         self.__stats = stats
 
     def annualized_return(self, total_return, total_days):
