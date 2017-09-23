@@ -80,7 +80,7 @@ class Metrics():
         stats['Score'] = df['score'].iloc[-1]
         stats['Max Drawdown(%)'] = self.max_drawdown(df['maxDrawdown'].iloc[-1], startingCapital)
         stats['Profit/Loss Ratio'] = self.profit_factor(df['total_profit'].iloc[-1], df['total_loss'].iloc[-1])
-        stats['Accuracy'] = self.accuracy(df['total_profit'].iloc[-1], df['total_loss'].iloc[-1])
+        stats['Accuracy'] = self.accuracy(df['count_profit'].iloc[-1], df['count_loss'].iloc[-1])
         # TODO change reference to score
         if 'score' in self.__marketFeaturesDf.columns:
             stats['Score'] = self.__marketFeaturesDf['score'].iloc[-1]
