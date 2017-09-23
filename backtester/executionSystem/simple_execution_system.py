@@ -63,7 +63,7 @@ class SimpleExecutionSystem(BaseExecutionSystem):
             instExecution = InstrumentExection(time=time,
                                                instrumentId=instrumentId,
                                                volume=np.abs(position),
-                                               executionType=-np.sign(position))
+                                               executionType=np.sign(position))
             instrumentExecutions.append(instExecution)
         return instrumentExecutions
 

@@ -1,6 +1,6 @@
 from backtester.features.feature import Feature
 import pandas as pd
-
+import numpy as np
 
 class TotalLossFeature(Feature):
 
@@ -22,7 +22,7 @@ class TotalLossFeature(Feature):
 
         pnl = pnlData.iloc[-1] - prevPnl
 
-        totalLoss[pnl < 0] = totalLoss + pnl
+        totalLoss[pnl < 0] = totalLoss + np.abs(pnl)
 
         return totalLoss
 
@@ -44,6 +44,6 @@ class TotalLossFeature(Feature):
         pnl = lookbackDataDf[pnlKey].iloc[-1] - prevPnl
 
         if (pnl < 0):
-            totalLoss += pnl
+            totalLoss += np.abs(pnl)
 
         return totalLoss

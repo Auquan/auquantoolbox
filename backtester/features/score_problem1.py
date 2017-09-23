@@ -82,9 +82,9 @@ class ProblemOneScore(Feature):
             normalizationKey = featureParams['benchmark_score_feature']
         if len(scoreDict) <= 1:
             return 0
-        cumulativeScore = scoreDict.values[-2]
         instrumentLookbackData = instrumentManager.getLookbackInstrumentFeatures()
-        score = instrumentLookbackData.getDataForFeatureForAllInstruments(scoreKey).iloc[-1].sum()
+        score = instrumentLookbackData.getDataForFeatureForAllInstruments(scoreKey).iloc[-1]
+        normalized_score = score / (instrumentLookbackData.getDataForFeatureForAllInstruments(normalizationKey).iloc[-1] / 1000)
         allInstruments = instrumentManager.getAllInstrumentsByInstrumentId()
         '''
         for instrumentId in allInstruments:
@@ -95,5 +95,4 @@ class ProblemOneScore(Feature):
             else:
                 score += lookbackDataDf[scoreKey].iloc[-1] / (lookbackDataDf[normalizationKey].iloc[-1] / 1000)
          '''
-        cumulativeScore += score / len(allInstruments)
-        return score / float(len(allInstruments))
+        return normalized_score.sum() / float(len(allInstruments))
