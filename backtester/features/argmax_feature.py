@@ -15,7 +15,7 @@ class ArgMaxFeature(Feature):
             instrumentDict = instrumentManager.getAllInstrumentsByInstrumentId()
             zeroSeries = pd.Series([0] * len(instrumentDict), index=instrumentDict.keys())
             return zeroSeries
-        return featureDataDf[-featureParams['prediod']:].idxmax()
+        return featureDataDf[-featureParams['period']:].idxmax()
 
     '''
     Computing for Market.
