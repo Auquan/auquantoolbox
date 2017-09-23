@@ -1,5 +1,6 @@
 import pandas as pd
 from collections import deque
+import numpy as np
 
 SIZE_FACTOR = 3
 MIN_THRESHOLD = 500
@@ -43,7 +44,6 @@ class LookbackDataEfficient:
             self.__startLookbackData = 0
             self.__endLookbackData = self.__lookbackSize
             self.__data = newData
-
         self.__data.loc[timeOfUpdate] = data
         self.__endLookbackData = self.__endLookbackData + 1
         if (self.__endLookbackData - self.__startLookbackData) > self.__lookbackSize:
@@ -95,4 +95,4 @@ if __name__ == "__main__":
     lookbackData = LookbackDataEfficient(3, ['A', 'B'], range(20))
     for i in range(20):
         lookbackData.addData(i, {'A': i, 'B': i})
-        print lookbackData.getData()
+        print(lookbackData.getData())
