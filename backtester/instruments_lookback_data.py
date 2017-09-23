@@ -11,6 +11,9 @@ class InstrumentsLookbackData:
             self.__data[feature] = LookbackDataEfficient(size, instrumentIds, times)
 
     def addFeatureValueForAllInstruments(self, timeOfUpdate, featureKey, values):
+        print("$$$$$$$$")
+        print(featureKey)
+        print("@@@@@@")
         self.__data[featureKey].addData(timeOfUpdate, values)
 
     def getFeatureDf(self, featureKey):

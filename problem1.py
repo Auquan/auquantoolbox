@@ -20,7 +20,7 @@ class Problem1Solver():
     '''
 
     def getSymbolsToTrade(self):
-        return ['AGW', 'AIO']
+        return ['AGW']
 
     '''
     [Optional] This is a way to use any custom features you might have made.
@@ -78,7 +78,42 @@ class Problem1Solver():
         customFeatureDict = {'featureKey': 'custom_inst_feature',
                              'featureId': 'my_custom_feature',
                              'params': {'param1': 'value1'}}
-        return [ma1Dict, sdevDict, expma]
+
+        moving_max = {'featureKey': 'moving_max',
+                  'featureId': 'moving_max',
+                  'params': {'period': 5,
+                             'featureName': 'stockTopAskPrice'}}
+        moving_min = {'featureKey': 'moving_min',
+                          'featureId': 'moving_min',
+                          'params': {'period': 5,
+                                     'featureName': 'basis'}}
+        moving_sdev = {'featureKey': 'moving_sdev',
+                          'featureId': 'moving_sdev',
+                          'params': {'period': 5,
+                                     'featureName': 'basis'}}
+        moving_sum = {'featureKey': 'moving_sum',
+                          'featureId': 'moving_sum',
+                          'params': {'period': 5,
+                                     'featureName': 'basis'}}
+        delay = {'featureKey': 'delay',
+                          'featureId': 'delay',
+                          'params': {'period': 5,
+                                     'featureName': 'basis'}}
+        diff = {'featureKey': 'difference',
+                          'featureId': 'difference',
+                          'params': {'period': 5,
+                                     'featureName': 'basis'}}
+        bband = {'featureKey': 'bollinger_bands',
+                          'featureId': 'bollinger_bands',
+                          'params': {'period': 5,
+                                     'featureName': 'basis'}}
+        rsi = {'featureKey': 'rsi',
+                          'featureId': 'rsi',
+                          'params': {'period': 5,
+                                     'featureName': 'basis'}}
+        fees = {'featureKey': 'fees',
+                          'featureId': 'fees'}
+        return [ma1Dict, moving_max, moving_min, moving_sum,delay, diff, bband, rsi, fees]
 
     '''
     Using all the features you have calculated in getFeatureConfigDicts, combine them in a meaningful way
