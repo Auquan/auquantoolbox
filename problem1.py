@@ -96,10 +96,11 @@ class Problem1Solver():
         lookbackInstrumentFeatures = instrumentManager.getLookbackInstrumentFeatures()
 
         # dataframe for a historical instrument feature (ma_5 in this case). The index is the timestamps
-        # atmost upto lookback data points. The columns of this dataframe are the stocks/instrumentIds.
-        ma5Data = lookbackInstrumentFeatures.getDataForFeatureForAllInstruments('ma_5')
+        # atmost upto lookback data points. The columns of this dataframe are the stock symbols/instrumentIds.
+        ma5Data = lookbackInstrumentFeatures.getFeatureDf('ma_5')
 
-        # Returns a series with index as instrumentIds
+        # Returns a series with index as all the instrumentIds. This returns the value of the feature at the last
+        # time update.
         ma5 = ma5Data.iloc[-1]
 
         return ma5
@@ -140,7 +141,7 @@ class MyCustomFeature(Feature):
 
         # dataframe for a historical instrument feature (basis in this case). The index is the timestamps
         # atmost upto lookback data points. The columns of this dataframe are the stocks/instrumentIds.
-        lookbackInstrumentBasis = lookbackInstrumentFeatures.getDataForFeatureForAllInstruments('basis')
+        lookbackInstrumentBasis = lookbackInstrumentFeatures.getFeatureDf('basis')
 
         # The last row of the previous dataframe gives the last calculated value for that feature (basis in this case)
         # This returns a series with stocks/instrumentIds as the index.
@@ -161,4 +162,5 @@ if __name__ == "__main__":
     tradingSystem = TradingSystem(tsParams)
     # Set onlyAnalyze to True to quickly generate csv files with all the features
     # Set onlyAnalyze to False to run a full backtest
-    tradingSystem.startTrading(onlyAnalyze=False, shouldPlot=False)
+    # Set makeInstrumentCsvs to False to not make instrument specific csvs in runLogs. This improves the performance BY A LOT
+    tradingSystem.startTrading(onlyAnalyze=False, shouldPlot=False, makeInstrumentCsvs=True)
