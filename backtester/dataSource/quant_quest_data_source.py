@@ -10,6 +10,7 @@ try:
 except ImportError:
     from urllib.request import urlopen
 import pandas as pd
+import time
 
 
 def is_number(s):
@@ -33,6 +34,7 @@ class QuantQuestDataSource(DataSource):
         self.__bookDataByFeature = {}
         self.__groupedInstrumentUpdates = self.getGroupedInstrumentUpdates()
         self.__allTimes = None
+        print ('Processing instruments before beginning backtesting. This could take some time...')
         self.processGroupedInstrumentUpdates()
 
     def ensureDirectoryExists(self, cachedFolderName, dataSetId):
@@ -128,7 +130,16 @@ class QuantQuestDataSource(DataSource):
             timeUpdates.append(timeOfUpdate)
         self.__allTimes = timeUpdates
 
+        limits = [0.20, 0.40, 0.60, 0.80, 1.0]
+        if (len(self.__instrumentIds) > 30):
+            limits = [0.10, 0.20, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90, 1.0]
+        currentLimitIdx = 0
+        idx = 0.0
         for timeOfUpdate, instrumentUpdates in self.__groupedInstrumentUpdates:
+            idx = idx + 1.0
+            if (idx / len(timeUpdates)) > limits[currentLimitIdx]:
+                print ('%d%% done...' % (limits[currentLimitIdx] * 100))
+                currentLimitIdx = currentLimitIdx + 1
             for instrumentUpdate in instrumentUpdates:
                 bookData = instrumentUpdate.getBookData()
                 for featureKey in bookData:
