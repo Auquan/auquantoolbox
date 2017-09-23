@@ -83,7 +83,7 @@ class SimpleExecutionSystem(BaseExecutionSystem):
             if position == 0:
                 continue
             instrumentExec = InstrumentExection(time=time,
-                                                instrumentId=instrumentId,
+                                                instrumentId=instrument.getInstrumentId(),
                                                 volume=np.abs(position),
                                                 executionType=-np.sign(position))
             instrumentExecutions.append(instrumentExec)
