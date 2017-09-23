@@ -27,14 +27,13 @@ class ScoreLogLossFeature(Feature):
 
         temp = (prevCount) * prevFeatureData
 
-        currentPrediction.fillna(0.5)
+        currentPrediction = currentPrediction.fillna(0.5)
+        currentPrediction = currentPrediction.astype(float)
 
         y = targetDf.iloc[-1]
 
-        temp = temp - (np.log(np.float64(currentPrediction)) * float(y) +
-                       np.log(np.float64(1 - currentPrediction)) * float(1 - y))
-
-        return float(temp) / float(updateNum)
+        temp = temp - (np.log(currentPrediction) * y.astype(float) + np.log(1 - currentPrediction) * (1 - y.astype(float)))
+        return temp / float(updateNum)
 
     '''
     Computing for Market. By default defers to computeForLookbackData
