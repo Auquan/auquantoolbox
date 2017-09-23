@@ -33,4 +33,4 @@ class CapitalFeature(Feature):
         capital = capitalDict.values[-2]
         instrumentLookbackData = instrumentManager.getLookbackInstrumentFeatures()
         changeInCapital = instrumentLookbackData.getFeatureDf(featureKey).iloc[-1].sum()
-        return capital + changeInCapital
+        return capital - changeInCapital
