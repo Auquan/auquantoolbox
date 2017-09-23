@@ -12,8 +12,8 @@ class RSIFeature(Feature):
         data_downside = data_upside.copy()
         data_downside[data_upside > 0] = 0
         data_upside[data_upside < 0] = 0
-        avg_upside = ma(data_upside, featureParams['period'])[-1]
-        avg_downside = - ma(data_downside, featureParams['period'])[-1]
+        avg_upside = data_upside[-featureParams['period']:].mean()
+        avg_downside = - data_downside[-featureParams['period']:].mean()
         rs = avg_upside / avg_downside
 
         return 100 - (100 * avg_downside / (avg_downside + avg_upside))
@@ -27,8 +27,8 @@ class RSIFeature(Feature):
         data_downside[data_upside > 0] = 0
         data_upside[data_upside < 0] = 0
         if len(data.index) > 0:
-            avg_upside = ma(data_upside, featureParams['period'])[-1]
-            avg_downside = - ma(data_downside, featureParams['period'])[-1]
+            avg_upside = data_upside[-featureParams['period']:].mean()
+            avg_downside = - data_downside[-featureParams['period']:].mean()
             rs = avg_upside / avg_downside
         else:
             return 0
