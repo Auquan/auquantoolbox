@@ -95,4 +95,4 @@ if __name__ == "__main__":
     lookbackData = LookbackDataEfficient(3, ['A', 'B'], range(20))
     for i in range(20):
         lookbackData.addData(i, {'A': i, 'B': i})
-        print lookbackData.getData()
+        print(lookbackData.getData())

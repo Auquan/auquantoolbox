@@ -1,4 +1,4 @@
-from lookback_data import LookbackDataEfficient
+from backtester.lookback_data import LookbackDataEfficient
 
 
 class InstrumentsLookbackData:
