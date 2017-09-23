@@ -102,31 +102,6 @@ class SimpleExecutionSystem(BaseExecutionSystem):
         executions[self.exitCondition(currentPredictions, instrumentsManager)] = -position
         executions[self.hackCondition(currentPredictions, instrumentsManager)] = -position
 
-        # executions = []
-
-        # for instrument in instruments:
-        #     position = instrument.getCurrentPosition()
-        #     if position == 0:
-        #         continue
-        #     if closeAllPositions:
-        #         instrumentExec = InstrumentExection(
-        #             time, instrument.getInstrumentId(), np.abs(position), -np.sign(position))
-        #         executions.append(instrumentExec)
-        #     # take Profits
-        #     elif self.exitCondition(instrumentsManager, instrument, currentPredictions):
-        #         instrumentExec = InstrumentExection(
-        #             time, instrument.getInstrumentId(), np.abs(position), -np.sign(position))
-        #         executions.append(instrumentExec)
-        #         logInfo('EXIT TRADE: %s Size: %.2f B/S: %i ' % (
-        #                 instrument.getInstrumentId(), np.abs(position), -np.sign(position)))
-
-        #     # hack
-        #     elif self.hackCondition(instrumentsManager):
-        #         instrumentExec = InstrumentExection(
-        #             time, instrument.getInstrumentId(), np.abs(position), -np.sign(position))
-        #         executions.append(instrumentExec)
-        #         logInfo('HACK TRADE: %s Size: %.2f B/S: %i ' % (
-        #                 instrument.getInstrumentId(), np.abs(position), -np.sign(position)))
         return executions
 
     def enterPosition(self, time, instrumentsManager, currentPredictions, capital):
@@ -138,40 +113,17 @@ class SimpleExecutionSystem(BaseExecutionSystem):
             self.getLotSize(positionData.columns) * self.getBuySell(currentPredictions, instrumentsManager)
         # No executions if at position limit
         executions[self.atPositionLimit(capital, positionData)] = 0
-        # for instrumentId in currentPredictions.keys():
-        #     instrument = instrumentsManager.getInstrument(instrumentId)
-        #     if instrument is None:
-        #         continue
-        #     # Dont add if already at limit
-        #     if self.atPositionLimit(capital, instrumentsManager, instrument):
-        #         continue
-        #     # Enter position if condition met
-        #     if self.enterCondition(instrumentsManager, instrument, currentPredictions):
-        #         buySell = self.getBuySell(instrument, currentPredictions, instrumentsManager)
-        #         logInfo('ENTER TRADE: %s Size: %.2f B/S: %i ' % (
-        #                 instrumentId, self.getLotSize(instrument), buySell))
-        #         instrumentExec = InstrumentExection(time, instrumentId,
-        #                                             self.getLotSize(instrument), buySell)
-        #         executions.append(instrumentExec)
+
         return executions
 
     def getBuySell(self, currentPredictions, instrumentsManager):
-        # instrumentId = instrument.getInstrumentId()
-        # return np.sign(currentPredictions[instrumentId] - 0.5)
         return np.sign(currentPredictions - 0.5)
 
     def enterCondition(self, currentPredictions, instrumentsManager):
-        # instrumentId = instrument.getInstrumentId()
-        # probBuy = currentPredictions[instrumentId]
-        # return np.abs(probBuy - 0.5) > (self.enter_threshold - 0.5)
+
         return (currentPredictions - 0.5).abs() > (self.enter_threshold - 0.5)
 
     def atPositionLimit(self, capital, positionData):
-        # position = instrument.getCurrentPosition()
-        # instrumentId = instrument.getInstrumentId()
-        # if (position > self.getLongLimit(instrument)) or (position < -self.getShortLimit(instrument)):
-        #     logWarn('At Position Limit for %s' % instrumentId)
-        #     return True
         if capital < self.capitalUsageLimit:
             logWarn('Not Enough Capital')
             return pd.Series(True, index=positionData.columns)
@@ -179,10 +131,7 @@ class SimpleExecutionSystem(BaseExecutionSystem):
         return (position > self.getLongLimit(positionData.columns)) | (position < -self.getShortLimit(positionData.columns))
 
     def exitCondition(self, currentPredictions, instrumentsManager):
-        # instrumentId = instrument.getInstrumentId()
-        # probBuy = currentPredictions[instrumentId]
-        # return np.abs(probBuy - 0.5) < (self.exit_threshold - 0.5)
         return (currentPredictions - 0.5).abs() < (self.exit_threshold - 0.5)
 
-    def hackCondition(self, currentPredictions):
+    def hackCondition(self, currentPredictions, instrumentsManager):
         return pd.Series(False, index=currentPredictions.index)
