@@ -28,7 +28,7 @@ class ProblemOneScore(Feature):
         sqError = (currentPrediction - priceDf.iloc[-1])**2
         temp = (temp + sqError)
         temp = temp / updateNum
-        return np.sqrt(temp)
+        return np.sqrt(pd.to_numeric(temp))
 
     '''
     Computing for Market. By default defers to computeForLookbackData
