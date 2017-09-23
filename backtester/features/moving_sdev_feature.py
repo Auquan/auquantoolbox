@@ -6,7 +6,7 @@ class MovingSDevFeature(Feature):
     @classmethod
     def computeForInstrument(cls, updateNum, time, featureParams, featureKey, instrumentManager):
         instrumentLookbackData = instrumentManager.getLookbackInstrumentFeatures()
-        data = instrumentLookbackData.getDataForFeatureForAllInstruments(featureParams['featureName'])
+        data = instrumentLookbackData.getFeatureDf(featureParams['featureName'])
         sdev = data[-featureParams['period']:].std()
         return sdev
 

@@ -18,8 +18,8 @@ class VarianceFeature(Feature):
             return zeroSeries
         prevCount = updateNum - 1
 
-        pnlDataDf = instrumentLookbackData.getDataForFeatureForAllInstruments(pnlKey)
-        varDataDf = instrumentLookbackData.getDataForFeatureForAllInstruments(featureKey)
+        pnlDataDf = instrumentLookbackData.getFeatureDf(pnlKey)
+        varDataDf = instrumentLookbackData.getFeatureDf(featureKey)
 
         sqSum = float(prevCount) * varDataDf.iloc[-1]
 

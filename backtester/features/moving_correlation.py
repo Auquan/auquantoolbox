@@ -8,8 +8,8 @@ class MovingCorrelationFeature(Feature):
     @classmethod
     def computeForInstrument(cls, updateNum, time, featureParams, featureKey, instrumentManager):
         instrumentLookbackData = instrumentManager.getLookbackInstrumentFeatures()
-        x = instrumentLookbackData.getDataForFeatureForAllInstruments(featureParams['series1'])
-        y = instrumentLookbackData.getDataForFeatureForAllInstruments(featureParams['series2'])
+        x = instrumentLookbackData.getFeatureDf(featureParams['series1'])
+        y = instrumentLookbackData.getFeatureDf(featureParams['series2'])
 
         return (x.rolling(featureParams['period']).corr(y)).iloc[-1]
 

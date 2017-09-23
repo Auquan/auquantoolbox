@@ -7,14 +7,14 @@ class ExpMovingAverageFeature(Feature):
     @classmethod
     def computeForInstrument(cls, updateNum, time, featureParams, featureKey, instrumentManager):
         instrumentLookbackData = instrumentManager.getLookbackInstrumentFeatures()
-        data = instrumentLookbackData.getDataForFeatureForAllInstruments(featureKey)
+        data = instrumentLookbackData.getFeatureDf(featureKey)
         if len(data.index) >= 1:
             prev_ema = data.iloc[-1]
         else:
-            prev_ema = instrumentLookbackData.getDataForFeatureForAllInstruments(featureParams['featureName']).iloc[-1]
+            prev_ema = instrumentLookbackData.getFeatureDf(featureParams['featureName']).iloc[-1]
         halflife = featureParams['period']
         alpha = 1 - math.exp(math.log(0.5) / halflife)
-        avg = instrumentLookbackData.getDataForFeatureForAllInstruments(featureParams['featureName']).iloc[-1] * alpha + prev_ema * (1 - alpha)
+        avg = instrumentLookbackData.getFeatureDf(featureParams['featureName']).iloc[-1] * alpha + prev_ema * (1 - alpha)
         return avg
 
     @classmethod

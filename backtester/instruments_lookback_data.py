@@ -13,5 +13,8 @@ class InstrumentsLookbackData:
     def addFeatureValueForAllInstruments(self, timeOfUpdate, featureKey, values):
         self.__data[featureKey].addData(timeOfUpdate, values)
 
-    def getDataForFeatureForAllInstruments(self, featureKey):
+    def getFeatureDf(self, featureKey):
         return self.__data[featureKey].getData()
+
+    def getAllFeatures(self):
+        return self.__features

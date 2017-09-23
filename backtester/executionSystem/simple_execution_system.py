@@ -69,7 +69,7 @@ class SimpleExecutionSystem(BaseExecutionSystem):
 
     def getExecutions(self, time, instrumentsManager, capital):
         instrumentLookbackData = instrumentsManager.getLookbackInstrumentFeatures()
-        currentPredictions = instrumentLookbackData.getDataForFeatureForAllInstruments('prediction').iloc[-1]
+        currentPredictions = instrumentLookbackData.getFeatureDf('prediction').iloc[-1]
         executions = self.exitPosition(time, instrumentsManager, currentPredictions)
         executions += self.enterPosition(time, instrumentsManager, currentPredictions, capital)
         # executions is a series with stocknames as index and positions to execute as column (-10 means sell 10)
@@ -92,7 +92,7 @@ class SimpleExecutionSystem(BaseExecutionSystem):
     def exitPosition(self, time, instrumentsManager, currentPredictions, closeAllPositions=False):
 
         instrumentLookbackData = instrumentsManager.getLookbackInstrumentFeatures()
-        positionData = instrumentLookbackData.getDataForFeatureForAllInstruments('position')
+        positionData = instrumentLookbackData.getFeatureDf('position')
         position = positionData.iloc[-1]
         executions = pd.Series([0] * len(positionData.columns), index=positionData.columns)
 
@@ -131,7 +131,7 @@ class SimpleExecutionSystem(BaseExecutionSystem):
 
     def enterPosition(self, time, instrumentsManager, currentPredictions, capital):
         instrumentLookbackData = instrumentsManager.getLookbackInstrumentFeatures()
-        positionData = instrumentLookbackData.getDataForFeatureForAllInstruments('position')
+        positionData = instrumentLookbackData.getFeatureDf('position')
         position = positionData.iloc[-1]
         executions = pd.Series([0] * len(positionData.columns), index=positionData.columns)
         executions[self.enterCondition(currentPredictions, instrumentsManager)] = \

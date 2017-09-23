@@ -16,7 +16,7 @@ class SimpleExecutionSystemWithFairValue(SimpleExecutionSystem):
     def getDeviationFromPrediction(self, currentPredictions, instrumentsManager):
         instrumentLookbackData = instrumentsManager.getLookbackInstrumentFeatures()
         try:
-            currentPrice = instrumentLookbackData.getDataForFeatureForAllInstruments(self.priceFeature).iloc[-1]
+            currentPrice = instrumentLookbackData.getFeatureDf(self.priceFeature).iloc[-1]
         except KeyError:
             logError('You have specified FairValue Execution Type but Price Feature Key does not exist')
 

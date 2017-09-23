@@ -99,7 +99,7 @@ class InstrumentManager:
         self.__compulsoryFeatureConfigs = getCompulsoryMarketFeatureConfigs(tsParams)
         columns = map(lambda x: x.getFeatureKey(), featureConfigs)
         compulsoryColumns = map(lambda x: x.getFeatureKey(), self.__compulsoryFeatureConfigs)
-        marketFeatureKeys = list(chain(columns, compulsoryColumns, ['prediction']))
+        marketFeatureKeys = list(chain(columns, compulsoryColumns))
         self.__lookbackMarketFeatures = LookbackData(tsParams.getLookbackSize(), marketFeatureKeys)
 
         self.__bookDataFeatures = bookDataFeatures
@@ -140,7 +140,7 @@ class InstrumentManager:
         return self.__lookbackInstrumentFeatures
 
     def getLookbackInstrumentFeaturesForFeature(self, featureKey):
-        return self.__lookbackInstrumentFeatures.getDataForFeatureForAllInstruments(featureKey)
+        return self.__lookbackInstrumentFeatures.getFeatureDf(featureKey)
 
     def getDataDf(self):
         return self.__lookbackMarketFeatures.getData()

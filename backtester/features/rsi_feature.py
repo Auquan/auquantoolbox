@@ -7,7 +7,7 @@ class RSIFeature(Feature):
     @classmethod
     def computeForInstrument(cls, updateNum, time, featureParams, featureKey, instrumentManager):
         instrumentLookbackData = instrumentManager.getLookbackInstrumentFeatures()
-        data = instrumentLookbackData.getDataForFeatureForAllInstruments(featureParams['featureName'])
+        data = instrumentLookbackData.getFeatureDf(featureParams['featureName'])
         data_upside = data.sub(data.shift(1), fill_value=0)
         data_downside = data_upside.copy()
         data_downside[data_upside > 0] = 0

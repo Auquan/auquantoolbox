@@ -89,9 +89,9 @@ class Metrics():
 
     def calculateInstrumentFeatureMetrics(self, instrumentId, priceFeature, startingCapital, instrumentLookbackData):
         stats = {}
-        pnl = instrumentLookbackData.getDataForFeatureForAllInstruments('pnl').iloc[-1]
-        score = instrumentLookbackData.getDataForFeatureForAllInstruments('score').iloc[-1]
-        benchmarkScore = instrumentLookbackData.getDataForFeatureForAllInstruments('benchmark_score').iloc[-1]
+        pnl = instrumentLookbackData.getFeatureDf('pnl').iloc[-1]
+        score = instrumentLookbackData.getFeatureDf('score').iloc[-1]
+        benchmarkScore = instrumentLookbackData.getFeatureDf('benchmark_score').iloc[-1]
 
         totalReturn = pnl / float(startingCapital)
         stats['Total Pnl(%)'] = totalReturn.loc[instrumentId]

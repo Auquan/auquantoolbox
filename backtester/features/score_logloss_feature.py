@@ -17,9 +17,9 @@ class ScoreLogLossFeature(Feature):
         if 'target' in featureParams:
             target = featureParams['target']
 
-        predictionDf = instrumentLookbackData.getDataForFeatureForAllInstruments(predictionKey)
-        featureDf = instrumentLookbackData.getDataForFeatureForAllInstruments(featureKey)
-        targetDf = instrumentLookbackData.getDataForFeatureForAllInstruments(target)
+        predictionDf = instrumentLookbackData.getFeatureDf(predictionKey)
+        featureDf = instrumentLookbackData.getFeatureDf(featureKey)
+        targetDf = instrumentLookbackData.getFeatureDf(target)
 
         currentPrediction = predictionDf.iloc[-1]  # will have this
         prevFeatureData = featureDf.iloc[-1] if updateNum > 1 else zeroSeries  # might not have it
@@ -47,6 +47,6 @@ class ScoreLogLossFeature(Feature):
         if len(scoreDict) < 1:
             return 0
         instrumentLookbackData = instrumentManager.getLookbackInstrumentFeatures()
-        score = instrumentLookbackData.getDataForFeatureForAllInstruments(scoreKey).iloc[-1].sum()
+        score = instrumentLookbackData.getFeatureDf(scoreKey).iloc[-1].sum()
         allInstruments = instrumentManager.getAllInstrumentsByInstrumentId()
         return score / float(len(allInstruments))

@@ -10,7 +10,7 @@ class ArgMaxFeature(Feature):
     @classmethod
     def computeForInstrument(cls, updateNum, time, featureParams, featureKey, instrumentManager):
         instrumentLookbackData = instrumentManager.getLookbackInstrumentFeatures()
-        featureDataDf = instrumentLookbackData.getDataForFeatureForAllInstruments(featureParams['featureName'])
+        featureDataDf = instrumentLookbackData.getFeatureDf(featureParams['featureName'])
         if len(featureDataDf) < 1:
             instrumentDict = instrumentManager.getAllInstrumentsByInstrumentId()
             zeroSeries = pd.Series([0] * len(instrumentDict), index=instrumentDict.keys())

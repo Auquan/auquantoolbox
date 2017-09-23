@@ -27,7 +27,7 @@ class TradingSystem:
         self.dataParser = None
         self.executionSystem = None
         self.orderPlacer = None
-        self.stateWriter = StateWriter('runLogs', datetime.strftime(datetime.now(), '%Y%m%d_%H%M%S'))
+        self.stateWriter = None
         self.dataParser = self.tsParams.getDataParser()
         self.executionSystem = self.tsParams.getExecutionSystem()
         self.orderPlacer = self.tsParams.getOrderPlacer()
@@ -100,7 +100,7 @@ class TradingSystem:
                 self.timeExecution = self.timeExecution + diffms
                 logPerf('Update Execution System: %d, Time: %.2f, Average: %.2f' % (self.totalUpdates, diffms, self.timeExecution / (self.totalUpdates)))
             start = time.time()
-            self.saveCurrentState()
+            self.saveCurrentState(timeOfUpdate)
             end = time.time()
             diffms = (end - start) * 1000
             self.timeSavingState = self.timeSavingState + diffms
@@ -121,8 +121,8 @@ class TradingSystem:
     def getInstrumentsToExecute(self, time):
         return self.executionSystem.getExecutions(time, self.instrumentManager, self.capital)
 
-    def saveCurrentState(self):
-        self.stateWriter.writeCurrentState(self.instrumentManager)
+    def saveCurrentState(self, timeOfUpdate):
+        self.stateWriter.writeCurrentState(timeOfUpdate, self.instrumentManager)
 
     def getFinalMetrics(self, dateBounds, shouldPlotFeatures=True):
         allInstruments = self.instrumentManager.getAllInstrumentsByInstrumentId()
@@ -148,7 +148,8 @@ class TradingSystem:
         resultDict.update(processResult(stats, self.stateWriter.getFolderName(), self.stateWriter.getMarketFeaturesFilename()))
         return resultDict
 
-    def startTrading(self, onlyAnalyze=False, shouldPlot=True):
+    def startTrading(self, onlyAnalyze=False, shouldPlot=True, makeInstrumentCsvs=True):
+        self.stateWriter = StateWriter('runLogs', datetime.strftime(datetime.now(), '%Y%m%d_%H%M%S'), not makeInstrumentCsvs)
         # TODO: Figure out a good way to handle order parsers with live data later on.
         groupedInstrumentUpdates = self.dataParser.emitInstrumentUpdates()
         self.closingTime = self.dataParser.getClosingTime()

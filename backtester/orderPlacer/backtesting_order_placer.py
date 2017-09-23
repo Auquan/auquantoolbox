@@ -10,7 +10,7 @@ class BacktestingOrderPlacer(BaseOrderPlacer):
     def mimicPriceOfConfirmation(self, instrument, timeOfExecution, timeOfConfirmation, instrumentsManager):
         tsParams = instrumentsManager.getTsParams()
         instrumentLookbackFeatures = instrumentsManager.getLookbackInstrumentFeatures()
-        priceAtExecution = instrumentLookbackFeatures.getDataForFeatureForAllInstruments(tsParams.getPriceFeatureKey())[instrument.getInstrumentId()][-1]
+        priceAtExecution = instrumentLookbackFeatures.getFeatureDf(tsParams.getPriceFeatureKey())[instrument.getInstrumentId()][-1]
 
         # priceAtExecution = instrument.getDataDf().iloc[-1][tsParams.getPriceFeatureKey()]
         # TODO: this price feature key should be present in book data

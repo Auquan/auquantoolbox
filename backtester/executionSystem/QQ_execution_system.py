@@ -20,7 +20,7 @@ class QQExecutionSystem(SimpleExecutionSystemWithFairValue):
     def getDeviationFromPrediction(self, currentPredictions, instrumentsManager):
         instrumentLookbackData = instrumentsManager.getLookbackInstrumentFeatures()
         try:
-            currentPrice = instrumentLookbackData.getDataForFeatureForAllInstruments(self.priceFeature).iloc[-1]
+            currentPrice = instrumentLookbackData.getFeatureDf(self.priceFeature).iloc[-1]
         except KeyError:
             logError('You have specified FairValue Execution Type but Price Feature Key does not exist')
 
@@ -34,14 +34,14 @@ class QQExecutionSystem(SimpleExecutionSystemWithFairValue):
     def enterCondition(self, currentPredictions, instrumentsManager):
         currentDeviationFromPrediction = self.getDeviationFromPrediction(currentPredictions, instrumentsManager)
         return np.abs(currentDeviationFromPrediction) - 2 * self.fees > (self.enter_threshold) *\
-            np.abs(instrumentsManager.getLookbackInstrumentFeatures().getDataForFeatureForAllInstruments(self.thresholdParam).iloc[-1])
+            np.abs(instrumentsManager.getLookbackInstrumentFeatures().getFeatureDf(self.thresholdParam).iloc[-1])
 
     def exitCondition(self, currentPredictions, instrumentsManager):
         currentDeviationFromPrediction = self.getDeviationFromPrediction(currentPredictions, instrumentsManager)
         instrumentLookbackData = instrumentsManager.getLookbackInstrumentFeatures()
-        position = instrumentLookbackData.getDataForFeatureForAllInstruments('position').iloc[-1]
+        position = instrumentLookbackData.getFeatureDf('position').iloc[-1]
         return -np.sign(position) * (currentDeviationFromPrediction) < (self.exit_threshold) *\
-            np.abs(instrumentLookbackData.getDataForFeatureForAllInstruments(self.thresholdParam).iloc[-1])
+            np.abs(instrumentLookbackData.getFeatureDf(self.thresholdParam).iloc[-1])
 
     # def getExecutions(self, time, instrumentsManager, capital):
     #   # TODO:

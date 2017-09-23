@@ -9,8 +9,8 @@ class TotalProfitFeature(Feature):
         pnlKey = 'pnl'
         if 'pnlKey' in featureParams:
             pnlKey = featureParams['pnlKey']
-        prevData = instrumentLookbackData.getDataForFeatureForAllInstruments(featureKey)
-        pnlData = instrumentLookbackData.getDataForFeatureForAllInstruments(pnlKey)
+        prevData = instrumentLookbackData.getFeatureDf(featureKey)
+        pnlData = instrumentLookbackData.getFeatureDf(pnlKey)
 
         if len(prevData) <= 1:
             totalProfit = pd.Series([0] * len(pnlData.columns), index=pnlData.columns)

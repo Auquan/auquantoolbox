@@ -10,7 +10,7 @@ class MomentumFeature(Feature):
     @classmethod
     def computeForInstrument(cls, updateNum, time, featureParams, featureKey, instrumentManager):
         instrumentLookbackData = instrumentManager.getLookbackInstrumentFeatures()
-        dataDf = instrumentLookbackData.getDataForFeatureForAllInstruments(featureParams['featureName'])
+        dataDf = instrumentLookbackData.getFeatureDf(featureParams['featureName'])
         if len(dataDf.index) > featureParams['period']:
             m = ((dataDf.iloc[-1] / dataDf.iloc[-featureParams['period']]) - 1) * 100
             return m

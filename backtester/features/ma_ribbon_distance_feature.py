@@ -13,7 +13,7 @@ class MARibbonDistanceFeature(Feature):
     @classmethod
     def computeForInstrument(cls, updateNum, time, featureParams, featureKey, instrumentManager):
         instrumentLookbackData = instrumentManager.getLookbackInstrumentFeatures()
-        dataDf = instrumentLookbackData.getDataForFeatureForAllInstruments(featureParams['featureName'])
+        dataDf = instrumentLookbackData.getFeatureDf(featureParams['featureName'])
         instrumentDict = instrumentManager.getAllInstrumentsByInstrumentId()
         instrumentIds = instrumentDict.keys()
         rolling_means = pd.Series([np.zeros(featureParams['numRibbons'])] * len(instrumentDict), index=instrumentIds)

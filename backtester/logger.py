@@ -15,5 +15,5 @@ def logWarn(msg, verbose=True):
     log('Warn: ' + msg, verbose)
 
 
-def logPerf(msg, verbose=True):
+def logPerf(msg, verbose=False):
     log('Perf: ' + msg, verbose)

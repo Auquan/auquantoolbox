@@ -8,72 +8,27 @@ class ScoreFairValueFeature(Feature):
     @classmethod
     def computeForInstrument(cls, updateNum, time, featureParams, featureKey, instrumentManager):
         instrumentLookbackData = instrumentManager.getLookbackInstrumentFeatures()
-        numInstruments = len(instrumentManager.getAllInstrumentsByInstrumentId())
+        instrumentDict = instrumentManager.getAllInstrumentsByInstrumentId()
+        zeroSeries = pd.Series([0] * len(instrumentDict), index=instrumentDict.keys())
         predictionKey = 'prediction'
         price = 'close'
-        countKey = 'count'
-        lookbackMarketDataDf = instrumentManager.getDataDf()
         if 'predictionKey' in featureParams:
             predictionKey = featureParams['predictionKey']
         if 'price' in featureParams:
             price = featureParams['price']
-        if 'countKey' in featureParams:
-            countKey = featureParams['countKey']
-        if len(lookbackMarketDataDf) < 1:
-            # first iteration
-            return [0] * numInstruments
-        predictionDict = lookbackMarketDataDf[predictionKey].iloc[-1]
-        # lookback market data is not updated yet since we are in instrument updates
-        # therefore the count is previous count.
-        prevCount = lookbackMarketDataDf[countKey].iloc[-1]
-        if len(predictionDict) == 0:
-            return [0] * numInstruments
-        prevData = instrumentLookbackData.getDataForFeatureForAllInstruments(featureKey).iloc[-1]
-        temp = (prevCount) * (prevData**2)
-        sqError = (pd.Series(predictionDict) - instrumentLookbackData.getDataForFeatureForAllInstruments(price).iloc[-2])**2
+
+        predictionDf = instrumentLookbackData.getFeatureDf(predictionKey)
+        featureDf = instrumentLookbackData.getFeatureDf(featureKey)
+        priceDf = instrumentLookbackData.getFeatureDf(price)
+
+        currentPrediction = predictionDf.iloc[-1]  # will have this
+        prevFeatureData = featureDf.iloc[-1] if updateNum > 1 else zeroSeries  # might not have it
+        prevCount = updateNum - 1
+        temp = (prevCount) * (prevFeatureData**2)
+        sqError = (currentPrediction - priceDf.iloc[-1])**2
         temp = (temp + sqError)
-        # print(currentFeatures[price], lookbackDataDf[price].iloc[-1])
-        temp = temp/(prevCount + 1)
-        return temp
-        # TODO KANAV
+        temp = temp / updateNum
         return np.sqrt(temp)
-        #return np.sqrt(temp / (prevCount + 1))
-
-
-    '''
-    @classmethod
-    def computeForInstrument(cls, featureParams, featureKey, currentFeatures, instrument, instrumentManager):
-        lookbackDataDf = instrument.getDataDf()
-        predictionKey = 'prediction'
-        price = 'close'
-        countKey = 'count'
-        if len(lookbackDataDf) < 1 or instrumentManager is None:
-            return 0
-        lookbackMarketDataDf = instrumentManager.getDataDf()
-        if 'predictionKey' in featureParams:
-            predictionKey = featureParams['predictionKey']
-        if 'price' in featureParams:
-            price = featureParams['price']
-        if 'countKey' in featureParams:
-            countKey = featureParams['countKey']
-        if len(lookbackMarketDataDf) < 1:
-            # first iteration
-            return 0
-        predictionDict = lookbackMarketDataDf[predictionKey].iloc[-1]
-        # lookback market data is not updated yet since we are in instrument updates
-        # therefore the count is previous count.
-        prevCount = lookbackMarketDataDf[countKey].iloc[-1]
-        if len(predictionDict) == 0:
-            return 0
-        prevData = lookbackDataDf[featureKey].iloc[-2]
-
-        temp = (prevCount) * (prevData**2)
-
-        sqError = (predictionDict[instrument.getInstrumentId()] - lookbackDataDf[price].iloc[-2])**2
-        temp = (temp + sqError)
-        # print(currentFeatures[price], lookbackDataDf[price].iloc[-1])
-        return np.sqrt(float(temp) / float(prevCount+1))
-    '''
 
     '''
     Computing for Market. By default defers to computeForLookbackData
@@ -89,7 +44,7 @@ class ScoreFairValueFeature(Feature):
             return 0
         cumulativeScore = scoreDict.values[-2]
         instrumentLookbackData = instrumentManager.getLookbackInstrumentFeatures()
-        score = instrumentLookbackData.getDataForFeatureForAllInstruments(scoreKey).iloc[-1].sum()
+        score = instrumentLookbackData.getFeatureDf(scoreKey).iloc[-1].sum()
         allInstruments = instrumentManager.getAllInstrumentsByInstrumentId()
         cumulativeScore += score / len(allInstruments)
         return score

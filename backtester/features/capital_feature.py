@@ -9,15 +9,15 @@ class CapitalFeature(Feature):
     @classmethod
     def computeForInstrument(cls, updateNum, time, featureParams, featureKey, instrumentManager):
         instrumentLookbackData = instrumentManager.getLookbackInstrumentFeatures()
-        positionData = instrumentLookbackData.getDataForFeatureForAllInstruments('position')
+        positionData = instrumentLookbackData.getFeatureDf('position')
         currentPosition = positionData.iloc[-1]
         zeroSeries = currentPosition * 0
         if (updateNum == 1):
             previousPosition = zeroSeries
         else:
             previousPosition = positionData.iloc[-2]
-        currentPrice = instrumentLookbackData.getDataForFeatureForAllInstruments(featureParams['price']).iloc[-1]
-        currentFees = instrumentLookbackData.getDataForFeatureForAllInstruments(featureParams['fees']).iloc[-1]
+        currentPrice = instrumentLookbackData.getFeatureDf(featureParams['price']).iloc[-1]
+        currentFees = instrumentLookbackData.getFeatureDf(featureParams['fees']).iloc[-1]
         changeInCapital = (currentPosition - previousPosition) * currentPrice + currentFees
         return changeInCapital
 
@@ -32,5 +32,5 @@ class CapitalFeature(Feature):
             return featureParams['initial_capital']
         capital = capitalDict.values[-2]
         instrumentLookbackData = instrumentManager.getLookbackInstrumentFeatures()
-        changeInCapital = instrumentLookbackData.getDataForFeatureForAllInstruments(featureKey).iloc[-1].sum()
+        changeInCapital = instrumentLookbackData.getFeatureDf(featureKey).iloc[-1].sum()
         return capital + changeInCapital

@@ -9,7 +9,7 @@ class MovingAverageFeature(Feature):
     @classmethod
     def computeForInstrument(cls, updateNum, time, featureParams, featureKey, instrumentManager):
         instrumentLookbackData = instrumentManager.getLookbackInstrumentFeatures()
-        data = instrumentLookbackData.getDataForFeatureForAllInstruments(featureParams['featureName'])
+        data = instrumentLookbackData.getFeatureDf(featureParams['featureName'])
         avg = data[-featureParams['period']:].mean()
         return avg
 

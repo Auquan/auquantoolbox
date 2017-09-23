@@ -10,12 +10,12 @@ class ProfitLossFeature(Feature):
     @classmethod
     def computeForInstrument(cls, updateNum, time, featureParams, featureKey, instrumentManager):
         instrumentLookbackData = instrumentManager.getLookbackInstrumentFeatures()
-        priceDict = instrumentLookbackData.getDataForFeatureForAllInstruments(featureParams['price'])
+        priceDict = instrumentLookbackData.getFeatureDf(featureParams['price'])
         zeroSeries = priceDict.iloc[-1] * 0
-        pnlDict = instrumentLookbackData.getDataForFeatureForAllInstruments(featureKey)
+        pnlDict = instrumentLookbackData.getFeatureDf(featureKey)
         cumulativePnl = zeroSeries if (len(pnlDict.index) < 1) else pnlDict.iloc[-1]
-        fees = instrumentLookbackData.getDataForFeatureForAllInstruments(featureParams['fees']).iloc[-1]
-        positionDict = instrumentLookbackData.getDataForFeatureForAllInstruments('position')
+        fees = instrumentLookbackData.getFeatureDf(featureParams['fees']).iloc[-1]
+        positionDict = instrumentLookbackData.getFeatureDf('position')
         currentPosition = positionDict.iloc[-1]
         previousPosition = positionDict.iloc[-2] if (len(positionDict.index) > 1) else zeroSeries
         previousPrice = priceDict.iloc[-2] if (len(priceDict.index) > 1) else zeroSeries
@@ -37,4 +37,4 @@ class ProfitLossFeature(Feature):
             pnlKey = featureParams['instrument_pnl_feature']
         if len(pnlDict) < 1:
             return 0
-        return instrumentManager.getLookbackInstrumentFeatures().getDataForFeatureForAllInstruments(pnlKey).iloc[-1].sum()
+        return instrumentManager.getLookbackInstrumentFeatures().getFeatureDf(pnlKey).iloc[-1].sum()

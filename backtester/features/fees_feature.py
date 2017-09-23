@@ -7,7 +7,7 @@ class FeesFeature(Feature):
     @classmethod
     def computeForInstrument(cls, updateNum, time, featureParams, featureKey, instrumentManager):
         instrumentLookbackData = instrumentManager.getLookbackInstrumentFeatures()
-        positionData = instrumentLookbackData.getDataForFeatureForAllInstruments('position')
+        positionData = instrumentLookbackData.getFeatureDf('position')
         feesDict = featureParams['feesDict']
         currentPosition = positionData.iloc[-1]
         previousPosition = 0 if updateNum < 2 else positionData.iloc[-2]

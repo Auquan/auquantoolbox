@@ -6,7 +6,7 @@ class MovingMaximumFeature(Feature):
     @classmethod
     def computeForInstrument(cls, updateNum, time, featureParams, featureKey, instrumentManager):
         instrumentLookbackData = instrumentManager.getLookbackInstrumentFeatures()
-        dataDf = instrumentLookbackData.getDataForFeatureForAllInstruments(featureParams['featureName'])
+        dataDf = instrumentLookbackData.getFeatureDf(featureParams['featureName'])
         return dataDf[-featureParams['period']:].max()
 
     @classmethod

@@ -5,7 +5,7 @@ class MACDFeature(Feature):
 
     def computeForInstrument(cls, updateNum, time, featureParams, featureKey, instrumentManager):
         instrumentLookbackData = instrumentManager.getLookbackInstrumentFeatures()
-        dataDf = instrumentLookbackData.getDataForFeatureForAllInstruments(featureParams['featureName'])
+        dataDf = instrumentLookbackData.getFeatureDf(featureParams['featureName'])
         avg1 = dataDf[-featureParams['period1']:].mean()
         avg2 = dataDf[-featureParams['period2']:].mean()
         return avg1 - avg2

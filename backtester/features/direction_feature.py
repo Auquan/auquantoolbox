@@ -11,7 +11,7 @@ class DirectionFeature(Feature):
     @classmethod
     def computeForInstrument(cls, updateNum, time, featureParams, featureKey, instrumentManager):
         instrumentLookbackData = instrumentManager.getLookbackInstrumentFeatures()
-        dataDf = instrumentLookbackData.getDataForFeatureForAllInstruments(featureParams['featureName'])
+        dataDf = instrumentLookbackData.getFeatureDf(featureParams['featureName'])
         if len(dataDf.index) < featureParams['period']:
             instrumentDict = instrumentManager.getAllInstrumentsByInstrumentId()
             zeroSeries = pd.Series([0] * len(instrumentDict), index=instrumentDict.keys())
