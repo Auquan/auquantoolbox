@@ -154,13 +154,14 @@ class MyCustomFeature(Feature):
 
 
 if __name__ == "__main__":
-    #if updateCheck():
-    #    print('Your version of the auquan toolbox package is old. Please update by running the following command:')
-    #    print('pip install -U auquan_toolbox')
-    problem1Solver = Problem1Solver()
-    tsParams = FairValueTradingParams(problem1Solver)
-    tradingSystem = TradingSystem(tsParams)
-    # Set onlyAnalyze to True to quickly generate csv files with all the features
-    # Set onlyAnalyze to False to run a full backtest
-    # Set makeInstrumentCsvs to False to not make instrument specific csvs in runLogs. This improves the performance BY A LOT
-    tradingSystem.startTrading(onlyAnalyze=False, shouldPlot=False, makeInstrumentCsvs=True)
+    if updateCheck():
+        print('Your version of the auquan toolbox package is old. Please update by running the following command:')
+        print('pip install -U auquan_toolbox')
+    else:
+        problem1Solver = Problem1Solver()
+        tsParams = FairValueTradingParams(problem1Solver)
+        tradingSystem = TradingSystem(tsParams)
+        # Set onlyAnalyze to True to quickly generate csv files with all the features
+        # Set onlyAnalyze to False to run a full backtest
+        # Set makeInstrumentCsvs to False to not make instrument specific csvs in runLogs. This improves the performance BY A LOT
+        tradingSystem.startTrading(onlyAnalyze=False, shouldPlot=False, makeInstrumentCsvs=True)
