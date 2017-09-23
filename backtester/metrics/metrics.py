@@ -20,22 +20,28 @@ class Metrics():
             + ' RoC: %0.2f%% ' % (100 * self.__stats['RoC(%)']) \
             + ' P/L Ratio: %0.2f ' % self.__stats['Profit/Loss Ratio'] \
             + ' Accuracy: %0.2f ' % self.__stats['Accuracy']
+        if 'Score' in self.__stats:
+            str = str + ' Score: %0.2f ' % self.__stats['Score']
         if self.__stats['Trading Days'] > 252:
             str = str \
                 + ' Ann. Return: %0.2f%% ' % (100 * self.__stats['Annual Return(%)']) \
                 + ' Ann. Vol: %0.2f%% ' % (100 * self.__stats['Annual Vol(%)']) \
-                + ' Sharpe Ratio: %0.2f ' % self.__stats['Sharpe Ratio'] \
-                # + 'Log Loss         : %0.2f'%self.__stats['Log Loss']
+                + ' Sharpe Ratio: %0.2f ' % self.__stats['Sharpe Ratio']
+
         return str
 
     def getInstrumentMetricsString(self):
         # Add back below once benchmark support
         # + ' Benchmark: %0.2f%% ' % (100 * self.__stats['Base Return(%)']) \
-        return \
+        str = \
             ' Total Pnl: %0.2f%% ' % (100 * self.__stats['Total Pnl(%)']) \
-            + ' Score: %0.2f ' % self.__stats['Score'] \
-            + ' Normalized Score: %0.2f ' % self.__stats['Normalized Score']
-        # + 'Log Loss         : %0.2f'%self.__stats['Log Loss']
+            + ' Profit/Loss Ratio: %0.2f ' % self.__stats['Profit/Loss Ratio'] \
+            + ' Accuracy: %0.2f ' % self.__stats['Accuracy']
+        if 'Score' in self.__stats:
+            str = str + ' Score: %0.2f ' % self.__stats['Score']
+        if 'Normalized Score' in self.__stats:
+            str = str + ' Normalized Score: %0.2f ' % self.__stats['Normalized Score']
+        return str
 
     def getMetrics(self):
         return self.__stats
@@ -68,35 +74,47 @@ class Metrics():
         benchmark = self.getBenchmarkData(None, priceFeature, '')
         stats['Trading Days'] = total_days
         stats['Total Pnl(%)'] = total_return
-        stats['Annual Return(%)'] = self.annualized_return(
-            total_return, total_days)
-        if benchmark is not None:
-            stats['Base Return(%)'] = self.annualized_return(
-                benchmark['total_return'], total_days)
-        stats['Annual Vol(%)'] = self.annual_vol(df['variance'].iloc[-1], startingCapital)
-        # stats['Beta'] = self.beta(daily_return,benchmark['daily_returns'])
-        stats['Sharpe Ratio'] = self.sharpe_ratio(stats['Annual Return(%)'], stats['Annual Vol(%)'])
         stats['RoC(%)'] = self.roc(df['pnl'].iloc[- 1], df['capitalUsage'].iloc[-1])
-        stats['Score'] = df['score'].iloc[-1]
         stats['Max Drawdown(%)'] = self.max_drawdown(df['maxDrawdown'].iloc[-1], startingCapital)
         stats['Profit/Loss Ratio'] = self.profit_factor(df['total_profit'].iloc[-1], df['total_loss'].iloc[-1])
         stats['Accuracy'] = self.accuracy(df['count_profit'].iloc[-1], df['count_loss'].iloc[-1])
+        if total_days > 252:
+            stats['Annual Return(%)'] = self.annualized_return(
+                total_return, total_days)
+            if benchmark is not None:
+                stats['Base Return(%)'] = self.annualized_return(
+                    benchmark['total_return'], total_days)
+            stats['Annual Vol(%)'] = self.annual_vol(df['variance'].iloc[-1], startingCapital)
+            stats['Sharpe Ratio'] = self.sharpe_ratio(stats['Annual Return(%)'], stats['Annual Vol(%)'])
+
         # TODO change reference to score
-        if 'score' in self.__marketFeaturesDf.columns:
-            stats['Score'] = self.__marketFeaturesDf['score'].iloc[-1]
-        # stats['Log Loss']=logLoss(daily_return)
+        if 'score' in df.columns:
+            stats['Score'] = df['score'].iloc[-1]
         self.__stats = stats
 
     def calculateInstrumentFeatureMetrics(self, instrumentId, priceFeature, startingCapital, instrumentLookbackData):
         stats = {}
         pnl = instrumentLookbackData.getFeatureDf('pnl').iloc[-1]
-        score = instrumentLookbackData.getFeatureDf('score').iloc[-1]
-        benchmarkScore = instrumentLookbackData.getFeatureDf('benchmark_score').iloc[-1]
+        total_profit = instrumentLookbackData.getFeatureDf('total_profit').iloc[-1]
+        total_loss = instrumentLookbackData.getFeatureDf('total_loss').iloc[-1]
+        count_profit = instrumentLookbackData.getFeatureDf('count_profit').iloc[-1]
+        count_loss = instrumentLookbackData.getFeatureDf('count_loss').iloc[-1]
 
         totalReturn = pnl / float(startingCapital)
         stats['Total Pnl(%)'] = totalReturn.loc[instrumentId]
-        stats['Score'] = score.loc[instrumentId]
-        stats['Normalized Score'] = 1000 * score.loc[instrumentId] / benchmarkScore.loc[instrumentId]
+        stats['Profit/Loss Ratio'] = self.profit_factor(total_profit.loc[instrumentId], total_loss.loc[instrumentId])
+        stats['Accuracy'] = self.accuracy(count_profit.loc[instrumentId], count_loss.loc[instrumentId])
+        try:
+            score = instrumentLookbackData.getFeatureDf('score').iloc[-1]
+            stats['Score'] = score.loc[instrumentId]
+            try:
+                benchmarkScore = instrumentLookbackData.getFeatureDf('benchmark_score').iloc[-1]
+                stats['Normalized Score'] = 1000 * score.loc[instrumentId] / benchmarkScore.loc[instrumentId]
+            except KeyError:
+                pass
+        except KeyError:
+            pass
+
         self.__stats = stats
 
     def annualized_return(self, total_return, total_days):

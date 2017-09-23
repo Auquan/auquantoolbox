@@ -6,11 +6,11 @@ from backtester.financial_fn import msdev
 class BollingerBandsFeature(Feature):
 
     @classmethod
-    def computeForLookbackData(cls, featureParams, featureKey, currentFeatures, lookbackDataDf):
-        data = lookbackDataDf[featureParams['featureName']]
-        avg = data[-featureParams['period']:].mean()
-        sdev = data[-featureParams['period']:].std()
-        if len(data) < 1:
-            return [0,0]
-        return [(avg - sdev), (avg + sdev)]
- 
+    def computeForInstrument(cls, updateNum, time, featureParams, featureKey, instrumentManager):
+        raise NotImplementedError
+        return 'Please use bollinger_bands_lower and bollinger_bands_upper'
+
+    @classmethod
+    def computeForMarket(cls, updateNum, time, featureParams, featureKey, currentMarketFeatures, instrumentManager):
+        raise NotImplementedError
+        return 'Please use bollinger_bands_lower and bollinger_bands_upper'

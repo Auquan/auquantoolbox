@@ -139,7 +139,9 @@ class TradingSystem:
             metricString = metrics.getInstrumentMetricsString()
             logInfo('%s: %s' % (instrumentId, metricString), True)
             resultDict['instrument_names'] += [instrumentId]
-            resultDict['instrument_stats'] += [{'total_pnl': stats['Total Pnl(%)'], 'score': stats['Score'], 'normalized_score': stats['Normalized Score']}]
+            resultDict['instrument_stats'] += [{'total_pnl': stats['Total Pnl(%)'], 'score': stats['Score']}]
+            if 'Normalized Score' in stats:
+                resultDict['instrument_stats'][-1]['normalized_score'] = stats['Normalized Score']
         metrics = Metrics(marketFeaturesDf=self.instrumentManager.getDataDf())
         metrics.calculateMarketMetrics(None, self.tsParams.getPriceFeatureKey(), self.tsParams.getStartingCapital(), dateBounds)
         stats = metrics.getMetrics()

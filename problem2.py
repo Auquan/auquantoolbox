@@ -30,10 +30,22 @@ class Problem2Solver():
                     'featureId': 'moving_sdev',
                     'params': {'period': 30,
                                'featureName': 'stockVWAP'}}
+        rankDict = {'featureKey': 'rank',
+                    'featureId': 'rank',
+                    'params': {'period': 5,
+                               'featureName': 'stockVWAP'}}
+        bbandlowerDict = {'featureKey': 'bollinger_bands_lower',
+                          'featureId': 'bollinger_bands_lower',
+                          'params': {'period': 30,
+                                     'featureName': 'stockVWAP'}}
+        bbandupperDict = {'featureKey': 'bollinger_bands_upper',
+                          'featureId': 'bollinger_bands_upper',
+                          'params': {'period': 30,
+                                     'featureName': 'stockVWAP'}}
         customFeatureDict = {'featureKey': 'custom_inst_feature',
                              'featureId': 'my_custom_feature',
                              'params': {'param1': 'value1'}}
-        return [ma1Dict, ma2Dict, sdevDict, customFeatureDict]
+        return [ma1Dict, ma2Dict, sdevDict, rankDict, bbandlowerDict, bbandupperDict, customFeatureDict]
 
     def getClassifierProbability(self, updateNum, time, instrumentManager):
         # holder for all the instrument features

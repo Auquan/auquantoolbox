@@ -47,7 +47,10 @@ class ProblemOneScore(Feature):
             return 0
         instrumentLookbackData = instrumentManager.getLookbackInstrumentFeatures()
         score = instrumentLookbackData.getFeatureDf(scoreKey).iloc[-1]
-        normalized_score = score / (instrumentLookbackData.getFeatureDf(normalizationKey).iloc[-1] / 1000)
+        normalization = instrumentLookbackData.getFeatureDf(normalizationKey).iloc[-1]
+        normalized_score = score * 0
+        normalized_score[normalization != 0] = score / (normalization / 1000)
+        normalized_score[normalization == 0] = 1
         allInstruments = instrumentManager.getAllInstrumentsByInstrumentId()
         '''
         for instrumentId in allInstruments:

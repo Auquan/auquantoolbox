@@ -30,7 +30,9 @@ class ScoreLogLossFeature(Feature):
         currentPrediction.fillna(0.5)
 
         y = targetDf.iloc[-1]
-        temp = temp - (np.log(currentPrediction) * float(y) + np.log(1 - currentPrediction) * float(1 - y))
+
+        temp = temp - (np.log(np.float64(currentPrediction)) * float(y) +
+                       np.log(np.float64(1 - currentPrediction)) * float(1 - y))
 
         return float(temp) / float(updateNum)
 
