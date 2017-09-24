@@ -1,5 +1,7 @@
 import time
 import json
+import os
+import os.path
 from backtester.logger import *
 from backtester.instruments_manager import InstrumentManager
 from datetime import datetime
@@ -154,7 +156,32 @@ class TradingSystem:
             generateGraph(self.instrumentManager.getDataDf(), self.stateWriter.getMarketFeaturesFilename(), stats, None)
         return resultDict
 
+    def jsonify(self, data):
+        json_data = dict()
+        for key, value in data.iteritems():
+            if isinstance(value, list):  # for lists
+                value = [self.jsonify(item) if isinstance(item, dict) else item for item in value]
+            if isinstance(value, dict):  # for nested lists
+                value = self.jsonify(value)
+            if isinstance(key, int):  # if key is integer: > to string
+                key = str(key)
+            if type(value).__module__ == 'numpy':  # if value is numpy.*: > to python list
+                if(key == 'dates'):
+                    dates = []
+                    for date in value:
+                        dates.append(str(date))
+                    value = dates
+                else:
+                    value = value.tolist()
+            json_data[key] = value
+        return json_data
+
     def startTrading(self, onlyAnalyze=False, shouldPlot=True, makeInstrumentCsvs=True):
+        resultFileName = 'result' + self.tsParams.getDataSetId() + self.tsParams.getSubmissionId() + '.json'
+        if os.path.isfile(resultFileName) and self.tsParams.getSubmissionId() != '':
+            print(resultFileName)
+            print('Result file for data set and submission already exists, skipping data set.')
+            return
         self.stateWriter = StateWriter('runLogs', datetime.strftime(datetime.now(), '%Y%m%d_%H%M%S'), not makeInstrumentCsvs)
         # TODO: Figure out a good way to handle order parsers with live data later on.
         groupedInstrumentUpdates = self.dataParser.emitInstrumentUpdates()
@@ -173,4 +200,7 @@ class TradingSystem:
         self.stateWriter.closeStateWriter()
 
         result = self.getFinalMetrics([self.startDate, timeOfUpdate], shouldPlot)
+        if self.tsParams.getSubmissionId() != '':
+            with open(resultFileName, 'w') as outfile:
+                json.dump(self.jsonify(result), outfile)
         return result
