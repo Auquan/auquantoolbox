@@ -7,3 +7,4 @@ auquan_toolbox.egg-info/*
 .DS_Store
 *Data/*
 historicalData/*
+*.json

@@ -20,7 +20,7 @@ class Problem1Solver():
     '''
 
     def getSymbolsToTrade(self):
-        return ['AGW', 'AIO']
+        return ['AGW', 'CHV']
 
     '''
     [Optional] This is a way to use any custom features you might have made.

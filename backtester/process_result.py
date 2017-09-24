@@ -1,5 +1,7 @@
 import pandas as pd
 from backtester.logger import *
+from pandas.tseries.frequencies import to_offset
+from functools import partial
 
 '''
 Usage(to test in console):
@@ -36,10 +38,8 @@ def processResult(stats, dir, marketFeatures):
         resultDict['total_pnl'] = sampledDf.values
     return resultDict
 
-
 def resampleData(series, period):
     return series.groupby(partial(round, freq=period))
-
 
 def round(t, freq):
     freq = to_offset(freq)

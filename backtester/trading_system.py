@@ -1,4 +1,5 @@
 import time
+import json
 from backtester.logger import *
 from backtester.instruments_manager import InstrumentManager
 from datetime import datetime
@@ -168,4 +169,8 @@ class TradingSystem:
 
         self.stateWriter.closeStateWriter()
 
-        return self.getFinalMetrics([self.startDate, timeOfUpdate], shouldPlot)
+        result = self.jsonify(self.getFinalMetrics([self.startDate, timeOfUpdate], shouldPlot))
+        resultFileName = 'result' + self.tsParams.getDataSetId() + '.json'
+        with open(resultFileName, 'w') as outfile:
+            json.dump(result, outfile)
+        return result
