@@ -9,7 +9,7 @@ import scipy.stats as st
 class Problem2Solver():
 
     def getTrainingDataSet(self):
-        return "testDataP2"
+        return "trainingDataP2_1"
 
     def getSymbolsToTrade(self):
         return ['JYW']
