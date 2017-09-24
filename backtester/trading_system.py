@@ -6,6 +6,7 @@ from datetime import datetime
 from backtester.state_writer import StateWriter
 from backtester.process_result import processResult
 from backtester.metrics.metrics import Metrics
+from backtester.plotter import generateGraph
 
 
 class TradingSystem:
@@ -149,6 +150,8 @@ class TradingSystem:
         metricString = metrics.getMarketMetricsString()
         logInfo(metricString, True)
         resultDict.update(processResult(stats, self.stateWriter.getFolderName(), self.stateWriter.getMarketFeaturesFilename()))
+        if shouldPlotFeatures:
+            generateGraph(self.instrumentManager.getDataDf(), self.stateWriter.getMarketFeaturesFilename(), stats, None)
         return resultDict
 
     def startTrading(self, onlyAnalyze=False, shouldPlot=True, makeInstrumentCsvs=True):
@@ -169,8 +172,5 @@ class TradingSystem:
 
         self.stateWriter.closeStateWriter()
 
-        result = self.jsonify(self.getFinalMetrics([self.startDate, timeOfUpdate], shouldPlot))
-        resultFileName = 'result' + self.tsParams.getDataSetId() + '.json'
-        with open(resultFileName, 'w') as outfile:
-            json.dump(result, outfile)
+        result = self.getFinalMetrics([self.startDate, timeOfUpdate], shouldPlot)
         return result
