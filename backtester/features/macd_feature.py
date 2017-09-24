@@ -3,6 +3,7 @@ from backtester.features.feature import Feature
 
 class MACDFeature(Feature):
 
+    @classmethod
     def computeForInstrument(cls, updateNum, time, featureParams, featureKey, instrumentManager):
         instrumentLookbackData = instrumentManager.getLookbackInstrumentFeatures()
         dataDf = instrumentLookbackData.getFeatureDf(featureParams['featureName'])
