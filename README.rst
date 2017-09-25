@@ -17,6 +17,8 @@
 and then start implementing the methods in that file. Use pair_trading_params.py and meanreversion_trading_params.py as exmaples for motivations.
 Detailed explanation for the trading system can be found [here](https://bitbucket.org/auquan/auquantoolbox/src/master/backtester/README.md)
 
+Please delete the dist folder before you do this.
+
 PIP Package:
 Bump version in setup.py then run the following commands:
 python setup.py sdist
