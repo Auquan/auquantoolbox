@@ -45,6 +45,7 @@ class LookbackDataEfficient:
             self.__startLookbackData = 0
             self.__endLookbackData = self.__lookbackSize
             self.__data = newData
+            self.__hasSetOnce = False
         self.__data.loc[timeOfUpdate] = data
         self.__endLookbackData = self.__endLookbackData + 1
         if (self.__endLookbackData - self.__startLookbackData) > self.__lookbackSize:
