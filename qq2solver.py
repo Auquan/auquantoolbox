@@ -8,7 +8,7 @@ import time
 from backtester.features.feature import Feature
 from backtester.trading_system import TradingSystem
 from backtester.sample_scripts.fair_value_params import FairValueTradingParams
-from backtester.json_utils import getFinalJSON
+from json_utils import getFinalJSON
 
 SECRET_KEY = 'BALLE BALLE'
 
@@ -107,12 +107,19 @@ def simulateTradingSystem(tradingSystem, problemId, submissionId):
         tsParams.setSubmissionId(submissionId)
 
         for i in ['1', '2', '3']:
+            resultFileName = submissionId+ 'result' + i + '.json'
+            print(resultFileName)
+            if os.path.isfile(resultFileName):
+                print('Result file for data set and submission already exists, skipping data set.')
+                continue
             tsParams.setDataSetId('testData' + i)
             tradingSystem = TradingSystem(tsParams)
-            tradingSystem.startTrading(onlyAnalyze=False, shouldPlot=False)
+            result = tradingSystem.startTrading(onlyAnalyze=False, shouldPlot=False, makeInstrumentCsvs = False)
+            with open(resultFileName, 'w') as outfile:
+                json.dump(jsonify(result), outfile)
 
         print('Combining result files')
-        result = getFinalJSON('testData', submissionId)
+        result = getFinalJSON(submissionId)
         if 'score' in result:
             print(result['score'])
         return result
@@ -125,6 +132,25 @@ def simulateTradingSystem(tradingSystem, problemId, submissionId):
             return {'error' : 'Error while running backtest: You are on old version of Auquan Toolbox. Please update your toolbox to version 2.0.0 by running pip install -U auquan_toolbox'}
         return {'error' : 'Error while running backtest: ' + message}
 
+def jsonify(data):
+    json_data = dict()
+    for key, value in data.iteritems():
+        if isinstance(value, list):  # for lists
+            value = [jsonify(item) if isinstance(item, dict) else item for item in value]
+        if isinstance(value, dict):  # for nested lists
+            value = jsonify(value)
+        if isinstance(key, int):  # if key is integer: > to string
+            key = str(key)
+        if type(value).__module__ == 'numpy':  # if value is numpy.*: > to python list
+            if(key == 'dates'):
+                dates = []
+                for date in value:
+                    dates.append(str(date))
+                value = dates
+            else:
+                value = value.tolist()
+        json_data[key] = value
+    return json_data
 
 def triggerContinous():
     while True:

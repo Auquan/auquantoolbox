@@ -3,11 +3,11 @@ import datetime
 import numpy as np
 
 
-def getFinalJSON(dataSet, submissionId):
+def getFinalJSON(submissionId):
     dict = {}
     # import pdb; pdb.set_trace()
     for i in range(3):
-        fileName = 'result' + dataSet + str(i+1) + submissionId + '.json'
+        fileName = submissionId + 'result' + str(i+1) + '.json'
         with open(fileName) as json_data:
             dict[i] = json.load(json_data)
 
