@@ -13,6 +13,7 @@ class FeaturePredictionTradingParams(TradingSystemParameters):
     def __init__(self, problem2Solver):
         self.__problem2Solver = problem2Solver
         Problem2PredictionFeature.setProblemSolver(problem2Solver)
+        self.__dataSetId = problem2Solver.getTrainingDataSet()
         super(FeaturePredictionTradingParams, self).__init__()
 
     def getStartingCapital(self):
@@ -27,7 +28,7 @@ class FeaturePredictionTradingParams(TradingSystemParameters):
     def getDataParser(self):
         instrumentIds = self.__problem2Solver.getSymbolsToTrade()
         return QuantQuestDataSource(cachedFolderName='historicalData/',
-                                    dataSetId=self.__problem2Solver.getTrainingDataSet(),
+                                    dataSetId=self.__dataSetId,
                                     instrumentIds=instrumentIds)
 
     '''
@@ -162,6 +163,11 @@ class FeaturePredictionTradingParams(TradingSystemParameters):
     def getPriceFeatureKey(self):
         return 'stockVWAP'
 
+    def getDataSetId(self):
+        return self.__dataSetId
+
+    def setDataSetId(self, dataSetId):
+        self.__dataSetId = dataSetId
 
 class Problem2PredictionFeature(Feature):
     problem2Solver = None

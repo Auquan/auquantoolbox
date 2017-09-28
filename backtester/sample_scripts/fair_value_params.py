@@ -13,7 +13,6 @@ class FairValueTradingParams(TradingSystemParameters):
         self.__problem1Solver = problem1Solver
         Problem1PredictionFeature.setProblemSolver(problem1Solver)
         self.__dataSetId = problem1Solver.getTrainingDataSet()
-        self.__submissionId = ''
         super(FairValueTradingParams, self).__init__()
 
     def getStartingCapital(self):
@@ -157,12 +156,6 @@ class FairValueTradingParams(TradingSystemParameters):
 
     def setDataSetId(self, dataSetId):
         self.__dataSetId = dataSetId
-
-    def getSubmissionId(self):
-        return self.__submissionId
-
-    def setSubmissionId(self, submissionId):
-        self.__submissionId = submissionId
 
 class Problem1PredictionFeature(Feature):
     problem1Solver = None
