@@ -10,7 +10,7 @@ class BollingerBandsUpperFeature(Feature):
         instrumentLookbackData = instrumentManager.getLookbackInstrumentFeatures()
         data = instrumentLookbackData.getFeatureDf(featureParams['featureName'])
         avg = data[-featureParams['period']:].mean()
-        sdev = data[-featureParams['period']:].std()
+        sdev = data[-featureParams['period']:].std().fillna(0)
         return avg + sdev
 
     @classmethod
@@ -18,8 +18,7 @@ class BollingerBandsUpperFeature(Feature):
         lookbackDataDf = instrumentManager.getDataDf()
         data = lookbackDataDf[featureParams['featureName']]
         avg = data[-featureParams['period']:].mean()
-        sdev = data[-featureParams['period']:].std()
+        sdev = data[-featureParams['period']:].std().fillna(0)
         if len(data) < 1:
             return 0
         return avg + sdev
-
