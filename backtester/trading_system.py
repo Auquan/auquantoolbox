@@ -1,5 +1,7 @@
 import time
 import json
+import os
+import os.path
 from backtester.logger import *
 from backtester.instruments_manager import InstrumentManager
 from datetime import datetime
@@ -172,5 +174,4 @@ class TradingSystem:
 
         self.stateWriter.closeStateWriter()
 
-        result = self.getFinalMetrics([self.startDate, timeOfUpdate], shouldPlot)
-        return result
+        return self.getFinalMetrics([self.startDate, timeOfUpdate], shouldPlot)

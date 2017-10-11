@@ -15,7 +15,7 @@ class ArgMinFeature(Feature):
             instrumentDict = instrumentManager.getAllInstrumentsByInstrumentId()
             zeroSeries = pd.Series([0] * len(instrumentDict), index=instrumentDict.keys())
             return zeroSeries
-        return featureDataDf[-featureParams['period']:].idxmin()
+        return featureDataDf[-featureParams['period']:].idxmin().astype(object)
 
     '''
     Computing for Market.

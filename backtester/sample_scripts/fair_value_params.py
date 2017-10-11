@@ -12,6 +12,7 @@ class FairValueTradingParams(TradingSystemParameters):
     def __init__(self, problem1Solver):
         self.__problem1Solver = problem1Solver
         Problem1PredictionFeature.setProblemSolver(problem1Solver)
+        self.__dataSetId = problem1Solver.getTrainingDataSet()
         super(FairValueTradingParams, self).__init__()
 
     def getStartingCapital(self):
@@ -27,7 +28,7 @@ class FairValueTradingParams(TradingSystemParameters):
     def getDataParser(self):
         instrumentIds = self.__problem1Solver.getSymbolsToTrade()
         return QuantQuestDataSource(cachedFolderName='historicalData/',
-                                    dataSetId=self.__problem1Solver.getTrainingDataSet(),
+                                    dataSetId=self.__dataSetId,
                                     instrumentIds=instrumentIds)
 
     '''
@@ -150,6 +151,11 @@ class FairValueTradingParams(TradingSystemParameters):
     def getPriceFeatureKey(self):
         return 'basis'
 
+    def getDataSetId(self):
+        return self.__dataSetId
+
+    def setDataSetId(self, dataSetId):
+        self.__dataSetId = dataSetId
 
 class Problem1PredictionFeature(Feature):
     problem1Solver = None
