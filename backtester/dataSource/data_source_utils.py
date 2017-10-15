@@ -35,7 +35,8 @@ def downloadFileFromYahoo(startDate, endDate, instrumentId, fileName, event='his
     data = requests.get(url, cookies={'B': cookie})
     with open(fileName, 'w') as f:
         f.write(data.content)
-
+        return True
+    return False
 
 '''
 Takes list of instruments.
@@ -54,3 +55,25 @@ def groupAndSortByTimeUpdates(instrumentUpdates):
             instruments.append(sameTimeInstrument)
         groupedInstruments.append([timeOfUpdate, instruments])
     return groupedInstruments
+
+def getMultipliers(self, instrumentId, fileName):
+        divFile = self.getFileName('div', instrumentId)
+        splitFile = self.getFileName('split', instrumentId)
+        if not (os.path.isfile(divFile) and os.path.isfile(splitFile)):
+            downloadFileFromYahoo(self.startDate, self.endDate, '%s.NS' % instrumentId, divFile, event='div')
+            downloadFileFromYahoo(self.startDate, self.endDate, '%s.NS' % instrumentId, splitFile, event='split')
+        div = pd.read_csv(divFile, engine='python', index_col='Date', parse_dates=True)
+        split = pd.read_csv(splitFile, engine='python', index_col='Date', parse_dates=True)
+        prices = pd.read_csv(fileName, engine='python', index_col='Date', parse_dates=True)
+        temp = pd.concat([div, prices], axis=1).fillna(0)
+        interim = (temp['Close'] - temp['Dividends']) / temp['Close']
+        multiplier1 = interim.sort_index(ascending=False).cumprod().sort_index(ascending=True)
+        temp2 = split['Stock Splits'].str.split('/', expand=True)
+        if len(temp2.index) > 0:
+            temp_mult = pd.to_numeric(temp2[1]) / pd.to_numeric(temp2[0])
+            multiplier2 = temp_mult.sort_index(ascending=False).cumprod().sort_index(ascending=True)
+        else:
+            multiplier2 = pd.Series(1, index=multiplier1.index)
+        multiplier = pd.concat([multiplier1, multiplier2], axis=1).fillna(method='bfill').fillna(1)
+        multiplier[1] = multiplier[1].shift(-1).fillna(1)
+        return multiplier
