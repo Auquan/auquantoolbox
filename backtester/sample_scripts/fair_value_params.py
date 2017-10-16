@@ -54,7 +54,10 @@ class FairValueTradingParams(TradingSystemParameters):
     '''
 
     def getCustomFeatures(self):
-        return dict(self.__problem1Solver.getCustomFeatures(), **{'problem1_prediction': Problem1PredictionFeature})
+        return dict(self.__problem1Solver.getCustomFeatures(),
+                    **{'problem1_prediction': Problem1PredictionFeature,
+                       'spread': SpreadCalculator,
+                       'total_fees': TotalFeesCalculator})
 
     '''
     Returns a dictionary with:
@@ -95,7 +98,28 @@ class FairValueTradingParams(TradingSystemParameters):
                            'featureId': 'moving_sdev',
                            'params': {'period': 5,
                                       'featureName': 'basis'}}
-        return {INSTRUMENT_TYPE_STOCK: stockFeatureConfigs + [fairValuePrediction, sdevDictForExec, scoreDict]}
+        percentfeesConfigDict = {'featureKey': 'percent_fees',
+                                 'featureId': 'fees',
+                                 'params': {'price': tsParams.getPriceFeatureKey(),
+                                            'feesDict': {1: 0.0001, -1: 0.0001, 0: 0}}}
+        spreadConfigDict = {'featureKey': 'spread',
+                            'featureId': 'spread',
+                            'params': {}}
+        totalfeesConfigDict = {'featureKey': 'total_fees',
+                               'featureId': 'total_fees',
+                               'params': {'fees': 'percent_fees',
+                                          'spread': 'spread',
+                                          'price': 'stockVWAP'}}
+        profitlossConfigDict = {'featureKey': 'pnl',
+                                'featureId': 'pnl',
+                                'params': {'price': tsParams.getPriceFeatureKey(),
+                                           'fees': 'total_fees'}}
+        # capitalConfigDict = {'featureKey': 'capital',
+        #                      'featureId': 'capital',
+        #                      'params': {'price': tsParams.getPriceFeatureKey(), 'fees': 'total_fees'}}
+        return {INSTRUMENT_TYPE_STOCK: stockFeatureConfigs +
+                [fairValuePrediction, sdevDictForExec, scoreDict,
+                 percentfeesConfigDict, spreadConfigDict, totalfeesConfigDict, profitlossConfigDict]}
 
     '''
     Returns an array of market feature config dictionaries
@@ -157,6 +181,7 @@ class FairValueTradingParams(TradingSystemParameters):
     def setDataSetId(self, dataSetId):
         self.__dataSetId = dataSetId
 
+
 class Problem1PredictionFeature(Feature):
     problem1Solver = None
 
@@ -167,3 +192,48 @@ class Problem1PredictionFeature(Feature):
     @classmethod
     def computeForInstrument(cls, updateNum, time, featureParams, featureKey, instrumentManager):
         return Problem1PredictionFeature.problem1Solver.getFairValue(updateNum, time, instrumentManager)
+
+
+class SpreadCalculator(Feature):
+    problem2Solver = None
+
+    @classmethod
+    def setProblemSolver(cls, problem2Solver):
+        Problem2PredictionFeature.problem2Solver = problem2Solver
+
+    @classmethod
+    def computeForInstrument(cls, updateNum, time, featureParams, featureKey, instrumentManager):
+        instrumentLookbackData = instrumentsManager.getLookbackInstrumentFeatures()
+        try:
+            # TODO: Change the hard key references
+            currentStockBidPrice = instrumentLookbackData.getFeatureDf('stockTopBidPrice').iloc[-1]
+            currentStockAskPrice = instrumentLookbackData.getFeatureDf('stockTopAskPrice').iloc[-1]
+            currentFutureBidPrice = instrumentLookbackData.getFeatureDf('futureTopBidPrice').iloc[-1]
+            currentFutureAskPrice = instrumentLookbackData.getFeatureDf('futureTopAskPrice').iloc[-1]
+        except KeyError:
+            logError('Bid and Ask Price Feature Key does not exist')
+
+        currentSpread = currentStockAskPrice - currentStockBidPrice + currentFutureAskPrice - currentFutureBidPrice
+        return currentSpread / 2.0
+
+
+class TotalFeesCalculator(Feature):
+    problem2Solver = None
+
+    @classmethod
+    def setProblemSolver(cls, problem2Solver):
+        Problem2PredictionFeature.problem2Solver = problem2Solver
+
+    @classmethod
+    def computeForInstrument(cls, updateNum, time, featureParams, featureKey, instrumentManager):
+        instrumentLookbackData = instrumentsManager.getLookbackInstrumentFeatures()
+
+        try:
+            # TODO: Change the hard key references
+            currentStockPrice = instrumentLookbackData.getFeatureDf(featureParams['price']).iloc[-1]
+        except KeyError:
+            logError('VWAP Price Feature Key does not exist')
+
+        total = featureParams['spread'] + featureParams['fees'] * currentStockPrice
+
+        return total
