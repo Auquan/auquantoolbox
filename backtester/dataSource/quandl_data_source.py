@@ -21,10 +21,22 @@ def is_number(s):
     except ValueError:
         return False
 
+def checkDate(lineItem):
+    try:
+        datetime.strptime(lineItem, '%Y-%m-%d')
+        return True
+    except ValueError:
+        return False
+
 class QuandlDataSource(DataSource):
-    def __init__(self, cachedFolderName, dataSetId, instrumentIds):
+    def __init__(self, cachedFolderName, dataSetId, instrumentIds, startDate, endDate):
         self.__cachedFolderName = cachedFolderName
         self.__dataSetId = dataSetId
+        if(not checkDate(startDate)):
+            self.__startDate = datetime.strptime(startDate, '%Y/%m/%d').strftime('%Y-%m-%d')
+        if(not checkDate(endDate)):
+            self.__endDate = datetime.strptime(endDate, '%Y/%m/%d').strftime('%Y-%m-%d')
+        print self.__startDate, self.__endDate, "\n"
         self.ensureDirectoryExists(cachedFolderName, dataSetId)
         if instrumentIds is not None and len(instrumentIds) > 0:
             self.__instrumentIds = instrumentIds
@@ -36,8 +48,8 @@ class QuandlDataSource(DataSource):
         print ('Processing instruments before beginning backtesting. This could take some time...')
         self.processGroupedInstrumentUpdates()
 
-    def downloadFile(self, dataSetId, instrumentId, downloadLocation):
-        url = 'https://www.quandl.com/api/v3/datasets/WIKI/%s.csv'%(instrumentId)
+    def downloadFile(self, instrumentId, downloadLocation):
+        url = 'https://www.quandl.com/api/v3/datasets/WIKI/%s.csv?start_date=%s&end_date=%s'%(instrumentId,self.__startDate,self.__endDate)
         try:
             response = urlopen(url)
         except ue.HTTPError:
@@ -73,8 +85,6 @@ class QuandlDataSource(DataSource):
                 if not self.downloadFile(instrumentId, fileName):
                     logError('Skipping %s:' % (instrumentId))
                     continue
-                if(self.adjustPrice):
-                    adjustPriceForSplitAndDiv(instrumentId,fileName)
             with open(self.getFileName(instrumentId)) as f:
                 records = csv.DictReader(f)
                 for row in records:
