@@ -129,9 +129,10 @@ class InstrumentsFromFile():
 
 
 class NSEStockDataSource(DataSource):
-    def __init__(self, cachedFolderName, dataSetId, instrumentIds, startDateStr, endDateStr, adjustPrice=True):
+    def __init__(self, cachedFolderName, dataSetId, instrumentIds, startDateStr, endDateStr, adjustPrice=True, downloadId = ".NS"):
         self.startDate = datetime.strptime(startDateStr, "%Y/%m/%d")
         self.endDate = datetime.strptime(endDateStr, "%Y/%m/%d")
+        self.__downloadId = downloadId
         self.currentDate = self.startDate
         self.__cachedFolderName = cachedFolderName
         self.__dataSetId = dataSetId
@@ -249,6 +250,8 @@ class NSEStockDataSource(DataSource):
                 if not self.downloadFile(instrumentId, fileName):
                     logError('Skipping %s:' % (instrumentId))
                     continue
+                if(self.adjustPrice):
+                    self.adjustPriceForSplitAndDiv(instrumentId,fileName)
             with open(self.getFileName(instrumentId)) as f:
                 records = csv.DictReader(f)
                 for row in records:
@@ -319,7 +322,7 @@ class NSEStockDataSource(DataSource):
         return self.__bookDataByFeature.keys()
 
     def adjustPriceForSplitAndDiv(self, instrumentId, fileName):
-        multiplier = data_source_utils.getMultipliers(instrumentId,fileName)
+        multiplier = data_source_utils.getMultipliers(self,instrumentId,fileName,self.__downloadId)
         temp['Close'] = temp['Close'] * multiplier[0] * multiplier[1]
         temp['Open'] = temp['Open'] * multiplier[0] * multiplier[1]
         temp['High'] = temp['High'] * multiplier[0] * multiplier[1]

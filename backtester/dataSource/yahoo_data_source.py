@@ -8,6 +8,7 @@ import pandas as pd
 import os
 import os.path
 from backtester.dataSource.data_source_utils import downloadFileFromYahoo, groupAndSortByTimeUpdates
+import backtester.dataSource.data_source_utils as data_source_utils
 
 TYPE_LINE_UNDEFINED = 0
 TYPE_LINE_HEADER = 1
@@ -105,12 +106,13 @@ class InstrumentsFromFile():
 
 
 class YahooStockDataSource(DataSource):
-    def __init__(self, cachedFolderName, dataSetId, instrumentIds, startDateStr, endDateStr,event='history',adjustPrice=True):
+    def __init__(self, cachedFolderName, dataSetId, instrumentIds, startDateStr, endDateStr,event='history',adjustPrice=True,downloadId=".NS"):
         self.startDate = datetime.strptime(startDateStr, "%Y/%m/%d")
         self.endDate = datetime.strptime(endDateStr, "%Y/%m/%d")
         self.__cachedFolderName = cachedFolderName
         self.__dataSetId = dataSetId
         self.ensureDirectoryExists(self.__cachedFolderName,self.__dataSetId)
+        self.__downloadId = downloadId
         if instrumentIds is not None and len(instrumentIds) > 0:
             self.__instrumentIds = instrumentIds
         else:
@@ -143,7 +145,7 @@ class YahooStockDataSource(DataSource):
                     logError('Skipping %s:' % (instrumentId))
                     continue
                 if(self.adjustPrice):
-                    adjustPriceForSplitAndDiv(instrumentId,fileName)
+                    self.adjustPriceForSplitAndDiv(instrumentId,fileName)
             with open(self.getFileName(instrumentId)) as f:
                 records = csv.DictReader(f)
                 for row in records:
@@ -214,7 +216,7 @@ class YahooStockDataSource(DataSource):
         return self.__bookDataByFeature.keys()
 
     def adjustPriceForSplitAndDiv(self, instrumentId, fileName):
-        multiplier = data_source_utils.getMultipliers(instrumentId,fileName)
+        multiplier = data_source_utils.getMultipliers(self,instrumentId,fileName,self.__downloadId)
         temp['Close'] = temp['Close'] * multiplier[0] * multiplier[1]
         temp['Open'] = temp['Open'] * multiplier[0] * multiplier[1]
         temp['High'] = temp['High'] * multiplier[0] * multiplier[1]
