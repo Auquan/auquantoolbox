@@ -105,10 +105,11 @@ class InstrumentsFromFile():
 
 
 class GoogleStockDataSource(DataSource):
-    def __init__(self, cachedFolderName, dataSetId, instrumentIds, startDateStr, endDateStr, adjustPrice=True, downloadId = ".NS"):
+    def __init__(self, cachedFolderName, dataSetId, instrumentIds, startDateStr, endDateStr, adjustPrice=False, downloadId = ".NS"):
         self.__downloadId = downloadId
         self.startDate = datetime.strptime(startDateStr, "%Y/%m/%d")
         self.endDate = datetime.strptime(endDateStr, "%Y/%m/%d")
+        self.dateAppend = "_%sto%s"%(datetime.strptime(startDateStr, '%Y/%m/%d').strftime('%Y-%m-%d'),datetime.strptime(startDateStr, '%Y/%m/%d').strftime('%Y-%m-%d'))
         self.currentDate = self.startDate
         self.__cachedFolderName = cachedFolderName
         self.__dataSetId = dataSetId
@@ -130,8 +131,8 @@ class GoogleStockDataSource(DataSource):
         return True
 
 
-    def getFileName(self, instrumentId):
-        return self.__cachedFolderName + self.__dataSetId + '/' + instrumentId + '.csv'
+    def getFileName(self, dataSetId, instrumentId):
+        return self.__cachedFolderName + dataSetId + '/' + instrumentId + '%s.csv'%self.dateAppend
 
     def ensureDirectoryExists(self, cachedFolderName, dataSetId):
         if not os.path.exists(cachedFolderName):
@@ -143,7 +144,7 @@ class GoogleStockDataSource(DataSource):
         allInstrumentUpdates = []
         for instrumentId in self.__instrumentIds:
             print('Processing data for stock: %s' % (instrumentId))
-            fileName = self.getFileName(instrumentId)
+            fileName = self.getFileName(self.__dataSetId, instrumentId)
             if not os.path.exists(self.__cachedFolderName):
                 os.mkdir(self.__cachedFolderName, 0o755)
             if not os.path.isfile(fileName):
@@ -152,7 +153,7 @@ class GoogleStockDataSource(DataSource):
                     continue
                 if(self.adjustPrice):
                     self.adjustPriceForSplitAndDiv(instrumentId,fileName)
-            with open(self.getFileName(instrumentId)) as f:
+            with open(self.getFileName(self.__dataSetId, instrumentId)) as f:
                 records = csv.DictReader(f)
                 for row in records:
                     inst = self.getInstrumentUpdateFromRow(instrumentId, row)

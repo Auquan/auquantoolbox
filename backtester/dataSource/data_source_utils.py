@@ -60,6 +60,8 @@ def getMultipliers(self,instrumentId, fileName, downloadId):
         divFile = self.getFileName('div', instrumentId)
         splitFile = self.getFileName('split', instrumentId)
         if not (os.path.isfile(divFile) and os.path.isfile(splitFile)):
+            self.ensureDirectoryExists('div')
+            self.ensureDirectoryExists('split')
             downloadFileFromYahoo(self.startDate, self.endDate, '%s%s'%(instrumentId,downloadId), divFile, event='div')
             downloadFileFromYahoo(self.startDate, self.endDate, '%s%s'%(instrumentId,downloadId), splitFile, event='split')
         div = pd.read_csv(divFile, engine='python', index_col='Date', parse_dates=True)

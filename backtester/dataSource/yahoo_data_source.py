@@ -106,12 +106,13 @@ class InstrumentsFromFile():
 
 
 class YahooStockDataSource(DataSource):
-    def __init__(self, cachedFolderName, dataSetId, instrumentIds, startDateStr, endDateStr,event='history',adjustPrice=True,downloadId=".NS"):
+    def __init__(self, cachedFolderName, dataSetId, instrumentIds, startDateStr, endDateStr,event='history',adjustPrice=False,downloadId=".NS"):
         self.startDate = datetime.strptime(startDateStr, "%Y/%m/%d")
         self.endDate = datetime.strptime(endDateStr, "%Y/%m/%d")
+        self.dateAppend = "_%sto%s"%(datetime.strptime(startDateStr, '%Y/%m/%d').strftime('%Y-%m-%d'),datetime.strptime(startDateStr, '%Y/%m/%d').strftime('%Y-%m-%d'))
         self.__cachedFolderName = cachedFolderName
         self.__dataSetId = dataSetId
-        self.ensureDirectoryExists(self.__cachedFolderName,self.__dataSetId)
+        self.ensureDirectoryExists(self.__dataSetId)
         self.__downloadId = downloadId
         if instrumentIds is not None and len(instrumentIds) > 0:
             self.__instrumentIds = instrumentIds
@@ -124,20 +125,20 @@ class YahooStockDataSource(DataSource):
         self.__groupedInstrumentUpdates = self.getGroupedInstrumentUpdates()
         self.processGroupedInstrumentUpdates()
 
-    def getFileName(self, instrumentId):
-        return self.__cachedFolderName + self.__dataSetId + '/' + instrumentId + '.csv'
+    def getFileName(self, dataSetId, instrumentId):
+        return self.__cachedFolderName + dataSetId + '/' + instrumentId + '%s.csv'%self.dateAppend
 
-    def ensureDirectoryExists(self, cachedFolderName, dataSetId):
-        if not os.path.exists(cachedFolderName):
-            os.mkdir(cachedFolderName, 0o755)
-        if not os.path.exists(cachedFolderName + '/' + dataSetId):
-            os.mkdir(cachedFolderName + '/' + dataSetId)
+    def ensureDirectoryExists(self, dataSetId):
+        if not os.path.exists(self.__cachedFolderName):
+            os.mkdir(self.__cachedFolderName, 0o755)
+        if not os.path.exists(self.__cachedFolderName + '/' + dataSetId):
+            os.mkdir(self.__cachedFolderName + '/' + dataSetId)
 
     def getGroupedInstrumentUpdates(self):
         allInstrumentUpdates = []
         for instrumentId in self.__instrumentIds:
             print('Processing data for stock: %s' % (instrumentId))
-            fileName = self.getFileName(instrumentId)
+            fileName = self.getFileName(self.__dataSetId, instrumentId)
             if not os.path.exists(self.__cachedFolderName):
                 os.mkdir(self.__cachedFolderName, 0o755)
             if not os.path.isfile(fileName):
@@ -146,7 +147,7 @@ class YahooStockDataSource(DataSource):
                     continue
                 if(self.adjustPrice):
                     self.adjustPriceForSplitAndDiv(instrumentId,fileName)
-            with open(self.getFileName(instrumentId)) as f:
+            with open(self.getFileName(self.__dataSetId, instrumentId)) as f:
                 records = csv.DictReader(f)
                 for row in records:
                     inst = self.getInstrumentUpdateFromRow(instrumentId, row)

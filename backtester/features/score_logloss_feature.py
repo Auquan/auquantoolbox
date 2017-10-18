@@ -31,7 +31,7 @@ class ScoreLogLossFeature(Feature):
         currentPrediction = currentPrediction.astype(float)
 
         y = targetDf.iloc[-1]
-
+        y.replace('', np.nan, inplace=True)
         temp = temp - (np.log(currentPrediction) * y.astype(float) + np.log(1 - currentPrediction) * (1 - y.astype(float)))
         return temp / float(updateNum)
 

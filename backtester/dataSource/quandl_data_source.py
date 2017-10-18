@@ -36,7 +36,7 @@ class QuandlDataSource(DataSource):
             self.__startDate = datetime.strptime(startDate, '%Y/%m/%d').strftime('%Y-%m-%d')
         if(not checkDate(endDate)):
             self.__endDate = datetime.strptime(endDate, '%Y/%m/%d').strftime('%Y-%m-%d')
-        print self.__startDate, self.__endDate, "\n"
+        self.dateAppend = "_%sto%s"%(datetime.strptime(startDate, '%Y/%m/%d').strftime('%Y-%m-%d'),datetime.strptime(startDate, '%Y/%m/%d').strftime('%Y-%m-%d'))    
         self.ensureDirectoryExists(cachedFolderName, dataSetId)
         if instrumentIds is not None and len(instrumentIds) > 0:
             self.__instrumentIds = instrumentIds
@@ -65,8 +65,8 @@ class QuandlDataSource(DataSource):
             logError('File not found. Please check settings!')
             return False
 
-    def getFileName(self, instrumentId):
-        return self.__cachedFolderName + self.__dataSetId + '/' + instrumentId + '.csv'
+    def getFileName(self, dataSetId, instrumentId):
+        return self.__cachedFolderName + dataSetId + '/' + instrumentId + '%s.csv'%self.dateAppend
 
     def ensureDirectoryExists(self, cachedFolderName, dataSetId):
         if not os.path.exists(cachedFolderName):
@@ -78,14 +78,14 @@ class QuandlDataSource(DataSource):
         allInstrumentUpdates = []
         for instrumentId in self.__instrumentIds:
             print('Processing data for stock: %s' % (instrumentId))
-            fileName = self.getFileName(instrumentId)
+            fileName = self.getFileName(self.__dataSetId, instrumentId)
             if not os.path.exists(self.__cachedFolderName):
                 os.mkdir(self.__cachedFolderName, 0o755)
             if not os.path.isfile(fileName):
                 if not self.downloadFile(instrumentId, fileName):
                     logError('Skipping %s:' % (instrumentId))
                     continue
-            with open(self.getFileName(instrumentId)) as f:
+            with open(self.getFileName(self.__dataSetId, instrumentId)) as f:
                 records = csv.DictReader(f)
                 for row in records:
                     inst = self.getInstrumentUpdateFromRow(instrumentId, row)
