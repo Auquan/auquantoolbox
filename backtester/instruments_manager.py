@@ -192,7 +192,18 @@ class InstrumentManager:
             self.__perfDict[featureKey] = self.__perfDict[featureKey] + diffms
             logPerf('Avg time for feature: %s : %.2f' % (featureKey, self.__perfDict[featureKey] / self.__totalIter))
         featureConfigs = self.tsParams.getFeatureConfigsForInstrumentType(INSTRUMENT_TYPE_STOCK)  # TODO:
-        featureConfigs = featureConfigs + self.__compulsoryInstrumentFeatureConfigs
+        featureConfigKeys = [featureConfig.getFeatureKey() for featureConfig in featureConfigs]
+        for featureConfig in self.__compulsoryInstrumentFeatureConfigs:  # TODO: Find a better way to handle compulsory dicts
+            featureKey = featureConfig.getFeatureKey()
+            if featureKey in featureConfigKeys:
+                i = featureConfigKeys.index(featureKey)
+                customFeatureConfig = featureConfigs.pop(i)
+                featureConfigKeys.pop(i)
+                featureConfigs.append(customFeatureConfig)
+            else:
+                featureConfigs.append(featureConfig)
+
+        featureConfigKeys = [featureConfig.getFeatureKey() for featureConfig in featureConfigs]
         for featureConfig in featureConfigs:
             start = time.time()
             featureKey = featureConfig.getFeatureKey()
@@ -216,7 +227,17 @@ class InstrumentManager:
 
         currentMarketFeatures = {}
         self.__lookbackMarketFeatures.addData(timeOfUpdate, currentMarketFeatures)
-        featureConfigs = self.tsParams.getMarketFeatureConfigs() + self.__compulsoryFeatureConfigs
+        featureConfigs = self.tsParams.getMarketFeatureConfigs()
+        featureConfigKeys = [featureConfig.getFeatureKey() for featureConfig in featureConfigs]
+        for featureConfig in self.__compulsoryFeatureConfigs:  # TODO: Find a better way to handle compulsory dicts
+            featureKey = featureConfig.getFeatureKey()
+            if featureKey in featureConfigKeys:
+                i = featureConfigKeys.index(featureKey)
+                customFeatureConfig = featureConfigs.pop(i)
+                featureConfigKeys.pop(i)
+                featureConfigs.append(customFeatureConfig)
+            else:
+                featureConfigs.append(featureConfig)
         for featureConfig in featureConfigs:
             start = time.time()
             featureId = featureConfig.getFeatureId()
