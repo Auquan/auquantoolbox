@@ -27,15 +27,6 @@ class MyTradingParams(TradingSystemParameters):
                               startDateStr=startDateStr,
                               endDateStr=endDateStr)
 
-  '''
-    Returns a timedetla object to indicate frequency of updates to features
-    Any updates within this frequncy to instruments do not trigger feature updates.
-    Consequently any trading decisions that need to take place happen with the same
-    frequency
-    '''
-
-  def getFrequencyOfFeatureUpdates(self):
-    return timedelta(0, 30)  # minutes, seconds
 
   def getBenchmark(self):
     return 'BANKBEES'

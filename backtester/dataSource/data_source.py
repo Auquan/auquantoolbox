@@ -4,3 +4,11 @@ class DataSource(object):
     # emits [t1, [i1, i2, i3]], where i1, i2, i3 are updates happening at time t1
     def emitInstrumentUpdates(self):
         raise NotImplementedError
+
+    # returns a list of instrument identifiers
+    def getInstrumentIds(self):
+        raise NotImplementedError
+
+    # returns a list of feature keys which are already present in the data.
+    def getBookDataFeatures(self):
+        raise NotImplementedError

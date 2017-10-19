@@ -9,8 +9,6 @@ try:
     from urllib2 import urlopen
 except ImportError:
     from urllib.request import urlopen
-import pandas as pd
-import time
 
 
 def is_number(s):
@@ -31,11 +29,8 @@ class QuantQuestDataSource(DataSource):
             self.__instrumentIds = instrumentIds
         else:
             self.__instrumentIds = self.getAllInstrumentIds()
-        self.__bookDataByFeature = {}
+        self.__bookDataFeatureKeys = None
         self.__groupedInstrumentUpdates = self.getGroupedInstrumentUpdates()
-        self.__allTimes = None
-        print ('Processing instruments before beginning backtesting. This could take some time...')
-        self.processGroupedInstrumentUpdates()
 
     def ensureDirectoryExists(self, cachedFolderName, dataSetId):
         if not os.path.exists(cachedFolderName):
@@ -102,6 +97,8 @@ class QuantQuestDataSource(DataSource):
                                      tradeSymbol=instrumentId,
                                      timeOfUpdate=timeOfUpdate,
                                      bookData=bookData)
+        if self.__bookDataFeatureKeys is None:
+            self.__bookDataFeatureKeys = bookData.keys()  # just setting to the first one we encounter
         return inst
 
     def getGroupedInstrumentUpdates(self):
@@ -124,33 +121,6 @@ class QuantQuestDataSource(DataSource):
         groupedInstrumentUpdates = groupAndSortByTimeUpdates(allInstrumentUpdates)
         return groupedInstrumentUpdates
 
-    def processGroupedInstrumentUpdates(self):
-        timeUpdates = []
-        for timeOfUpdate, instrumentUpdates in self.__groupedInstrumentUpdates:
-            timeUpdates.append(timeOfUpdate)
-        self.__allTimes = timeUpdates
-
-        limits = [0.20, 0.40, 0.60, 0.80, 1.0]
-        if (len(self.__instrumentIds) > 30):
-            limits = [0.10, 0.20, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90, 1.0]
-        currentLimitIdx = 0
-        idx = 0.0
-        for timeOfUpdate, instrumentUpdates in self.__groupedInstrumentUpdates:
-            idx = idx + 1.0
-            if (idx / len(timeUpdates)) > limits[currentLimitIdx]:
-                print ('%d%% done...' % (limits[currentLimitIdx] * 100))
-                currentLimitIdx = currentLimitIdx + 1
-            for instrumentUpdate in instrumentUpdates:
-                bookData = instrumentUpdate.getBookData()
-                for featureKey in bookData:
-                    # TODO: Fix for python 3
-                    if featureKey not in self.__bookDataByFeature:
-                        self.__bookDataByFeature[featureKey] = pd.DataFrame(columns=self.__instrumentIds,
-                                                                            index=timeUpdates)
-                    self.__bookDataByFeature[featureKey].set_value(timeOfUpdate, instrumentUpdate.getInstrumentId(), bookData[featureKey])
-        for featureKey in self.__bookDataByFeature:
-            self.__bookDataByFeature[featureKey].fillna(method='pad', inplace=True)
-
     def emitInstrumentUpdates(self):
         for timeOfUpdate, instrumentUpdates in self.__groupedInstrumentUpdates:
             yield([timeOfUpdate, instrumentUpdates])
@@ -158,14 +128,5 @@ class QuantQuestDataSource(DataSource):
     def getInstrumentIds(self):
         return self.__instrumentIds
 
-    def getBookDataByFeature(self):
-        return self.__bookDataByFeature
-
-    def getAllTimes(self):
-        return self.__allTimes
-
-    def getClosingTime(self):
-        return self.__allTimes[-1]
-
     def getBookDataFeatures(self):
-        return self.__bookDataByFeature.keys()
+        return self.__bookDataFeatureKeys

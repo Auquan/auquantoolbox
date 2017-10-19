@@ -91,7 +91,7 @@ def getCompulsoryInstrumentFeatureConfigs(tsParams, instrumentType):
 
 
 class InstrumentManager:
-    def __init__(self, tsParams, bookDataFeatures, instrumentIds, bookDataByFeature, allTimes):
+    def __init__(self, tsParams, bookDataFeatures, instrumentIds, frequencyGetter):
         self.tsParams = tsParams
         self.__instrumentsDict = {}
         # TODO: create a different place to hold different types of instruments
@@ -111,8 +111,7 @@ class InstrumentManager:
         self.__lookbackInstrumentFeatures = InstrumentsLookbackData(size=tsParams.getLookbackSize(),
                                                                     features=featureKeys,
                                                                     instrumentIds=instrumentIds,
-                                                                    times=allTimes)
-        self.__bookDataByFeature = bookDataByFeature
+                                                                    frequencyGetter=frequencyGetter)
 
         self.__totalIter = 0
         self.__perfDict = {}
@@ -184,9 +183,20 @@ class InstrumentManager:
 
     def updateInstrumentFeatures(self, timeOfUpdate):
         self.__totalIter = self.__totalIter + 1
+
+        # populate current book data
+        currentBookDataByFeature = {}
+        for featureKey in self.__bookDataFeatures:
+            currentBookDataByFeature[featureKey] = {}
+        for instrument in self.__instrumentsDict.values():
+            instrumentId = instrument.getInstrumentId()
+            currentInstrumentBookData = instrument.getCurrentBookData()
+            for featureKey in self.__bookDataFeatures:
+                currentBookDataByFeature[featureKey][instrumentId] = currentInstrumentBookData[featureKey]
+
         for featureKey in self.__bookDataFeatures:
             start = time.time()
-            self.__lookbackInstrumentFeatures.addFeatureValueForAllInstruments(timeOfUpdate, featureKey, self.__bookDataByFeature[featureKey].loc[timeOfUpdate])
+            self.__lookbackInstrumentFeatures.addFeatureValueForAllInstruments(timeOfUpdate, featureKey, currentBookDataByFeature[featureKey])
             end = time.time()
             diffms = (end - start) * 1000
             self.__perfDict[featureKey] = self.__perfDict[featureKey] + diffms
