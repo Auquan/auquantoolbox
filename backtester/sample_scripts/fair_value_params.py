@@ -1,10 +1,13 @@
 from backtester.trading_system_parameters import TradingSystemParameters
 from datetime import timedelta
 from backtester.dataSource.quant_quest_data_source import QuantQuestDataSource
+from backtester.executionSystem.basis_execution_system import BasisExecutionSystem
 from backtester.executionSystem.QQ_execution_system import QQExecutionSystem
 from backtester.orderPlacer.backtesting_order_placer import BacktestingOrderPlacer
 from backtester.constants import *
 from backtester.features.feature import Feature
+from backtester.logger import *
+import numpy as np
 
 
 class FairValueTradingParams(TradingSystemParameters):
@@ -18,8 +21,8 @@ class FairValueTradingParams(TradingSystemParameters):
     def getStartingCapital(self):
         instrumentIds = self.__problem1Solver.getSymbolsToTrade()
         if instrumentIds and len(instrumentIds) > 0:
-            return len(instrumentIds) * 10000
-        return 1000000
+            return len(instrumentIds) * 50000
+        return 2000000
 
     '''
     Returns an instance of class DataParser. Source of data for instruments
@@ -54,7 +57,10 @@ class FairValueTradingParams(TradingSystemParameters):
     '''
 
     def getCustomFeatures(self):
-        return dict(self.__problem1Solver.getCustomFeatures(), **{'problem1_prediction': Problem1PredictionFeature})
+        return dict(self.__problem1Solver.getCustomFeatures(),
+                    **{'problem1_prediction': Problem1PredictionFeature,
+                       'spread': SpreadCalculator,
+                       'total_fees': TotalFeesCalculator})
 
     '''
     Returns a dictionary with:
@@ -95,7 +101,27 @@ class FairValueTradingParams(TradingSystemParameters):
                            'featureId': 'moving_sdev',
                            'params': {'period': 5,
                                       'featureName': 'basis'}}
-        return {INSTRUMENT_TYPE_STOCK: stockFeatureConfigs + [fairValuePrediction, sdevDictForExec, scoreDict]}
+        spreadConfigDict = {'featureKey': 'spread',
+                            'featureId': 'spread',
+                            'params': {}}
+        feesConfigDict = {'featureKey': 'fees',
+                          'featureId': 'total_fees',
+                          'params': {'price': 'stockVWAP',
+                                     'feesDict': {1: 0.0001, -1: 0.0001, 0: 0},
+                                     'spread': 'spread'}}
+        profitlossConfigDict = {'featureKey': 'pnl',
+                                'featureId': 'pnl',
+                                'params': {'price': self.getPriceFeatureKey(),
+                                           'fees': 'fees'}}
+        capitalConfigDict = {'featureKey': 'capital',
+                             'featureId': 'capital',
+                             'params': {'price': 'stockVWAP',
+                                        'fees': 'fees',
+                                        'capitalReqPercent': 0.15}}
+        return {INSTRUMENT_TYPE_STOCK: stockFeatureConfigs +
+                [fairValuePrediction, sdevDictForExec, scoreDict,
+                 spreadConfigDict, feesConfigDict,
+                 profitlossConfigDict, capitalConfigDict]}
 
     '''
     Returns an array of market feature config dictionaries
@@ -124,11 +150,11 @@ class FairValueTradingParams(TradingSystemParameters):
     '''
 
     def getExecutionSystem(self):
-        return QQExecutionSystem(basisEnter_threshold=0.5, basisExit_threshold=0.1,
-                                 basisLongLimit=10000, basisShortLimit=10000,
-                                 basisCapitalUsageLimit=0.05, basisLotSize=100,
-                                 basisLimitType='L', basis_thresholdParam='sdev_5_for_exec',
-                                 price=self.getPriceFeatureKey())
+        return BasisExecutionSystem(basisEnter_threshold=0.25, basisExit_threshold=0.01,
+                                    basisLongLimit=5000, basisShortLimit=5000,
+                                    basisCapitalUsageLimit=0.05, basisLotSize=100,
+                                    basisLimitType='L', basis_thresholdParam='sdev_5_for_exec',
+                                    price=self.getPriceFeatureKey())
 
     '''
     Returns the type of order placer we want to use. its an implementation of the class OrderPlacer.
@@ -146,7 +172,7 @@ class FairValueTradingParams(TradingSystemParameters):
     '''
 
     def getLookbackSize(self):
-        return 90
+        return 120
 
     def getPriceFeatureKey(self):
         return 'basis'
@@ -156,6 +182,7 @@ class FairValueTradingParams(TradingSystemParameters):
 
     def setDataSetId(self, dataSetId):
         self.__dataSetId = dataSetId
+
 
 class Problem1PredictionFeature(Feature):
     problem1Solver = None
@@ -167,3 +194,57 @@ class Problem1PredictionFeature(Feature):
     @classmethod
     def computeForInstrument(cls, updateNum, time, featureParams, featureKey, instrumentManager):
         return Problem1PredictionFeature.problem1Solver.getFairValue(updateNum, time, instrumentManager)
+
+
+class SpreadCalculator(Feature):
+    problem1Solver = None
+
+    @classmethod
+    def setProblemSolver(cls, problem1Solver):
+        Problem1PredictionFeature.problem1Solver = problem1Solver
+
+    @classmethod
+    def computeForInstrument(cls, updateNum, time, featureParams, featureKey, instrumentManager):
+        instrumentLookbackData = instrumentManager.getLookbackInstrumentFeatures()
+        try:
+            # TODO: Change the hard key references
+            currentStockBidPrice = instrumentLookbackData.getFeatureDf('stockTopBidPrice').iloc[-1]
+            currentStockAskPrice = instrumentLookbackData.getFeatureDf('stockTopAskPrice').iloc[-1]
+            currentFutureBidPrice = instrumentLookbackData.getFeatureDf('futureTopBidPrice').iloc[-1]
+            currentFutureAskPrice = instrumentLookbackData.getFeatureDf('futureTopAskPrice').iloc[-1]
+        except KeyError:
+            logError('Bid and Ask Price Feature Key does not exist')
+
+        currentSpread = currentStockAskPrice - currentStockBidPrice + currentFutureAskPrice - currentFutureBidPrice
+        return np.minimum(currentSpread / 8.0, 0.025)
+
+
+class TotalFeesCalculator(Feature):
+    problem1Solver = None
+
+    @classmethod
+    def setProblemSolver(cls, problem1Solver):
+        Problem1PredictionFeature.problem1Solver = problem1Solver
+
+    @classmethod
+    def computeForInstrument(cls, updateNum, time, featureParams, featureKey, instrumentManager):
+        instrumentLookbackData = instrumentManager.getLookbackInstrumentFeatures()
+
+        positionData = instrumentLookbackData.getFeatureDf('position')
+        feesDict = featureParams['feesDict']
+        currentPosition = positionData.iloc[-1]
+        previousPosition = 0 if updateNum < 2 else positionData.iloc[-2]
+        changeInPosition = currentPosition - previousPosition
+        fees = np.abs(changeInPosition) * [feesDict[np.sign(x)] for x in changeInPosition]
+        if 'price' in featureParams:
+            try:
+                priceData = instrumentLookbackData.getFeatureDf(featureParams['price'])
+                currentPrice = priceData.iloc[-1]
+            except KeyError:
+                logError('Price Feature Key does not exist')
+
+            fees = fees * currentPrice
+
+        total = 2 * fees \
+                + (np.abs(changeInPosition) * instrumentLookbackData.getFeatureDf(featureParams['spread']).iloc[-1])
+        return total

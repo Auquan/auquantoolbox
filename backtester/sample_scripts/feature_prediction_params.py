@@ -54,7 +54,8 @@ class FeaturePredictionTradingParams(TradingSystemParameters):
     '''
 
     def getCustomFeatures(self):
-        return dict(self.__problem2Solver.getCustomFeatures(), **{'problem2_prediction': Problem2PredictionFeature})
+        return dict(self.__problem2Solver.getCustomFeatures(),
+                    **{'problem2_prediction': Problem2PredictionFeature})
 
     '''
     Returns a dictionary with:
@@ -115,24 +116,6 @@ class FeaturePredictionTradingParams(TradingSystemParameters):
         return [scoreDict]
 
     '''
-    A function that returns your predicted value based on your heuristics.
-    If you are just trading one asset like a stock, it could be the predicted value of the stock.
-    If you are doing pair trading, the prediction could be the difference in the prices of the stocks.
-    Arguments:
-    time - When this prediction is being calculated
-    currentMarketFeatures - Dictionary of market features which have been calculated at this update cycle.
-    instrumentManager - Holder for all instruments and everything else if you need.
-    '''
-
-    def getPrediction(self, time, currentMarketFeatures, instrumentManager):
-        instrumentIds = instrumentManager.getAllInstrumentsByInstrumentId()
-        predictions = {}
-        for ids in instrumentIds:
-            instrument = instrumentManager.getInstrument(ids)
-            predictions[ids] = self.__problem2Solver.getPredictionForVariable(time, instrument, instrumentManager)
-        return predictions
-
-    '''
     Returns the type of execution system we want to use. Its an implementation of the class ExecutionSystem
     It converts prediction to intended positions for different instruments.
     '''
@@ -168,6 +151,7 @@ class FeaturePredictionTradingParams(TradingSystemParameters):
 
     def setDataSetId(self, dataSetId):
         self.__dataSetId = dataSetId
+
 
 class Problem2PredictionFeature(Feature):
     problem2Solver = None

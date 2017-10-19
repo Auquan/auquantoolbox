@@ -1,4 +1,5 @@
 from backtester.features.feature import Feature
+import numpy as np
 
 
 class CapitalFeature(Feature):
@@ -10,15 +11,25 @@ class CapitalFeature(Feature):
     def computeForInstrument(cls, updateNum, time, featureParams, featureKey, instrumentManager):
         instrumentLookbackData = instrumentManager.getLookbackInstrumentFeatures()
         positionData = instrumentLookbackData.getFeatureDf('position')
+        priceData = instrumentLookbackData.getFeatureDf(featureParams['price'])
         currentPosition = positionData.iloc[-1]
+        currentPrice = priceData.iloc[-1]
         zeroSeries = currentPosition * 0
         if (updateNum == 1):
             previousPosition = zeroSeries
+            previousPrice = zeroSeries
         else:
             previousPosition = positionData.iloc[-2]
-        currentPrice = instrumentLookbackData.getFeatureDf(featureParams['price']).iloc[-1]
+            previousPrice = priceData.iloc[-2]
+
         currentFees = instrumentLookbackData.getFeatureDf(featureParams['fees']).iloc[-1]
-        changeInCapital = (currentPosition - previousPosition) * currentPrice + currentFees
+        if 'capitalReqPercent' in featureParams:
+            capitalReqPercent = featureParams['capitalReqPercent']
+        else:
+            capitalReqPercent = 1
+
+        changeInCapital = capitalReqPercent * (np.abs(currentPosition) * currentPrice - np.abs(previousPosition) * previousPrice) \
+            + currentFees
         return changeInCapital
 
     '''
