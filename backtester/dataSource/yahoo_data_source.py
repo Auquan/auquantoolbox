@@ -184,13 +184,14 @@ class YahooStockDataSource(DataSource):
             self.__bookDataByFeature[featureKey].fillna(method='pad', inplace=True)
 
     def getInstrumentUpdateFromRow(self, instrumentId, row):
-        bookData = row
-        for key in bookData:
-            if is_number(bookData[key]):
-                bookData[key] = float(bookData[key])
-        timeKey = 'Date'
-        timeOfUpdate = datetime.strptime(row[timeKey], '%Y-%m-%d')
-        bookData.pop(timeKey, None)
+        bookData =  {'open': float(row['Open']),
+                    'high': float(row['High']),
+                    'low': float(row['Low']),
+                    'close': float(row['Close']),
+                    'adjClose' : float(row['Adj Close']),
+                    'volume': float(row['Volume'])}
+
+        timeOfUpdate = datetime.strptime(row['Date'], '%Y-%m-%d')
         inst = StockInstrumentUpdate(stockInstrumentId=instrumentId,
                                      tradeSymbol=instrumentId,
                                      timeOfUpdate=timeOfUpdate,
@@ -214,16 +215,17 @@ class YahooStockDataSource(DataSource):
         return self.__allTimes[-1]
 
     def getBookDataFeatures(self):
+
         return self.__bookDataByFeature.keys()
 
     def adjustPriceForSplitAndDiv(self, instrumentId, fileName):
         multiplier = data_source_utils.getMultipliers(self,instrumentId,fileName,self.__downloadId)
-        temp['Close'] = temp['Close'] * multiplier[0] * multiplier[1]
-        temp['Open'] = temp['Open'] * multiplier[0] * multiplier[1]
-        temp['High'] = temp['High'] * multiplier[0] * multiplier[1]
-        temp['Low'] = temp['Low'] * multiplier[0] * multiplier[1]
+        temp['close'] = temp['close'] * multiplier[0] * multiplier[1]
+        temp['open'] = temp['open'] * multiplier[0] * multiplier[1]
+        temp['high'] = temp['high'] * multiplier[0] * multiplier[1]
+        temp['low'] = temp['low'] * multiplier[0] * multiplier[1]
 
-        del temp['Dividends']
+        del temp['dividends']
         temp.to_csv(fileName)
 
 

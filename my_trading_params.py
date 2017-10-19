@@ -39,17 +39,25 @@ class MyTradingParams(TradingSystemParameters):
                                     event='history')
 
     '''
-    Returns a timedetla object to indicate frequency of updates to features
-    Any updates within this frequncy to instruments do not trigger feature updates.
-    Consequently any trading decisions that need to take place happen with the same
-    frequency
+    Return starting capital - the initial amount of money you're putting into your trading system
     '''
+    def getStartingCapital(self):
+        return 1000000
 
-    def getFrequencyOfFeatureUpdates(self):
-        return timedelta(0, 30)  # minutes, seconds
-
-    def getBenchmark(self):
-        return 'SPY'
+    '''
+    Returns an instance of class TimeRule, which describes the times at which
+    we should update all the features and try to execute any trades based on
+    execution logic.
+    For eg, for intra day data, you might have a system, where you get data
+    from exchange at a very fast rate (ie multiple times every second). However,
+    you might want to run your logic of computing features or running your execution
+    system, only at some fixed intervals (like once every 5 seconds). This depends on your
+    strategy whether its a high, medium, low frequency trading strategy. Also, performance
+    is another concern. if your execution system and features computation are taking
+    a lot of time, you realistically wont be able to keep upto pace.
+    '''
+    def getTimeRuleForUpdates(self):
+        return NotImplementedError
 
     '''
     This is a way to use any custom features you might have made.
@@ -186,7 +194,9 @@ class MyTradingParams(TradingSystemParameters):
 
     '''
     Returns the type of execution system we want to use. Its an implementation of the class ExecutionSystem
-    It converts prediction to intended positions for different instruments.
+    It converts prediction to intended trades for different instruments. 
+    Instruments with probability predictions values above enter_threshold are bought and below (1-enter_threshold) are sold.
+    Instrument positions with probability predictions values betweem (1-exit_threshold) and exit_threshold are closed 
     '''
 
     def getExecutionSystem(self):

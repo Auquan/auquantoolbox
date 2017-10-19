@@ -22,7 +22,8 @@ class ProfitLossFeature(Feature):
         currentPrice = priceDict.iloc[-1]
         changeInPosition = currentPosition - previousPosition
         tradePrice = pd.Series([instrumentManager.getInstrument(x).getLastTradePrice() for x in priceDict.columns], index=priceDict.columns)
-        pnl = (previousPosition * (currentPrice - previousPrice)) + (changeInPosition * (currentPrice - tradePrice)) - fees
+        tradeLoss = pd.Series([instrumentManager.getInstrument(x).getLastTradeLoss() for x in priceDict.columns], index=priceDict.columns)
+        pnl = (previousPosition * (currentPrice - previousPrice)) + (changeInPosition * (currentPrice - tradePrice)) - fees - tradeLoss
         cumulativePnl += pnl
         return cumulativePnl
 

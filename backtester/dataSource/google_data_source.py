@@ -189,14 +189,28 @@ class GoogleStockDataSource(DataSource):
         for featureKey in self.__bookDataByFeature:
             self.__bookDataByFeature[featureKey].fillna(method='pad', inplace=True)
 
+    # def getInstrumentUpdateFromRow(self, instrumentId, row):
+    #     bookData = row
+    #     for key in bookData:
+    #         if is_number(bookData[key]):
+    #             bookData[key] = float(bookData[key])
+    #     timeKey = 'Date'
+    #     timeOfUpdate = datetime.strptime(row[timeKey], '%Y-%m-%d')
+    #     bookData.pop(timeKey, None)
+    #     inst = StockInstrumentUpdate(stockInstrumentId=instrumentId,
+    #                                  tradeSymbol=instrumentId,
+    #                                  timeOfUpdate=timeOfUpdate,
+    #                                  bookData=bookData)
+    #     return inst
+
     def getInstrumentUpdateFromRow(self, instrumentId, row):
-        bookData = row
-        for key in bookData:
-            if is_number(bookData[key]):
-                bookData[key] = float(bookData[key])
-        timeKey = 'Date'
-        timeOfUpdate = datetime.strptime(row[timeKey], '%Y-%m-%d')
-        bookData.pop(timeKey, None)
+        bookData =  {'open': float(row['Open']),
+                    'high': float(row['High']),
+                    'low': float(row['Low']),
+                    'close': float(row['Close']),
+                    'volume': float(row['Volume'])}
+
+        timeOfUpdate = datetime.strptime(row['Date'], '%Y-%m-%d')
         inst = StockInstrumentUpdate(stockInstrumentId=instrumentId,
                                      tradeSymbol=instrumentId,
                                      timeOfUpdate=timeOfUpdate,
@@ -221,7 +235,7 @@ class GoogleStockDataSource(DataSource):
 
     def getBookDataFeatures(self):
         return self.__bookDataByFeature.keys()
-         
+
     def adjustPriceForSplitAndDiv(self, instrumentId, fileName):
         multiplier = data_source_utils.getMultipliers(self,instrumentId,fileName,self.__downloadId)
         temp['Close'] = temp['Close'] * multiplier[0] * multiplier[1]

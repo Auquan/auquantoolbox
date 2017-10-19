@@ -29,9 +29,6 @@ class MyTradingParams(TradingSystemParameters):
                                      startDateStr=startDateStr,
                                      endDateStr=endDateStr)
 
-    def getFrequencyOfFeatureUpdates(self):
-        return timedelta(0, 30)  # minutes, seconds
-
     def getBenchmark(self):
         return 'BANKBEES'
 

@@ -26,7 +26,8 @@ class BacktestingOrderPlacer(BaseOrderPlacer):
             changeInPosition = instrumentExecution.getVolume() * factor
             placedOrder = PlacedOrder(instrumentId=instrumentId,
                                       changeInPosition=changeInPosition,
-                                      timeOfExecution=instrumentExecution.getTimeOfExecution())
+                                      timeOfExecution=instrumentExecution.getTimeOfExecution(),
+                                      tradeLoss=0.0)
             self.__orders.append(placedOrder)
 
     def emitPlacedOrders(self, time, instrumentsManager):

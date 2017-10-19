@@ -1,57 +1,49 @@
 from backtester.trading_system_parameters import TradingSystemParameters
 from backtester.features.feature import Feature
 from datetime import timedelta
+from backtester.dataSource.nse_data_source import NSEStockDataSource
 from backtester.dataSource.yahoo_data_source import YahooStockDataSource
+from backtester.dataSource.google_data_source import GoogleStockDataSource
 from backtester.executionSystem.simple_execution_system import SimpleExecutionSystem
 from backtester.orderPlacer.backtesting_order_placer import BacktestingOrderPlacer
 from backtester.trading_system import TradingSystem
 from backtester.version import updateCheck
 from backtester.constants import *
-import pandas as pd
+from my_custom_feature import MyCustomFeature
+from backtester.timeRule.us_time_rule import USTimeRule
 
-
+start = '2017/01/01'
+end = '2017/06/30'
+assets = ['AAPL', 'MSFT']  # ,'FEDERALBNK', 'ICICIBANK', 'CANBK', 'SBIN', 'YESBANK', 'KOTAKBANK',
+#'BANKBARODA', 'HDFCBANK', 'AXISBANK', 'INDUSINDBK', 'NIFTYBEES']
 
 
 class MyTradingParams(TradingSystemParameters):
-    '''
-    initialize class
-    place any global variables here
-    '''
-    def __init__(self):
-        super(MyTradingParams, self).__init__()
-        self.count = 0 
-        self.params = {}
-        self.start = '2017/01/01'
-        self.end = '2017/06/30'
-        self.instrumentIds = ['AAPL', 'GOOG']
+  '''
+  Returns an instance of class DataParser. Source of data for instruments
+  '''
 
-    '''
-    Returns an instance of class DataParser. Source of data for instruments
-    '''
+  def getDataParser(self):
+    instrumentIds = assets
+    startDateStr = start
+    endDateStr = end
+    return YahooStockDataSource(cachedFolderName='yahooData',
+                              dataSetId='',
+                              instrumentIds=instrumentIds,
+                              startDateStr=startDateStr,
+                              endDateStr=endDateStr)
 
-    def getDataParser(self):
-
-        return YahooStockDataSource(cachedFolderName='yahooData/',
-                                    dataSetId='AuquanTrainingTest',
-                                    instrumentIds=self.instrumentIds,
-                                    startDateStr=self.start,
-                                    endDateStr=self.end,
-                                    event='history')
-
-    '''
-    Returns a timedetla object to indicate frequency of updates to features
-    Any updates within this frequncy to instruments do not trigger feature updates.
-    Consequently any trading decisions that need to take place happen with the same
-    frequency
-    '''
-
-    def getFrequencyOfFeatureUpdates(self):
-        return timedelta(0, 30)  # minutes, seconds
 
     def getBenchmark(self):
         return 'SPY'
 
-    '''
+  def getTimeRuleForUpdates(self):
+      return USTimeRule(cachedFolderName='yahooData/',
+                        dataSetId='',
+                        startDate = '2017/01/01',
+                        endDate = '2017/06/30')
+
+  '''
     This is a way to use any custom features you might have made.
     Returns a dictionary where
     key: featureId to access this feature (Make sure this doesnt conflict with any of the pre defined feature Ids)
@@ -90,38 +82,37 @@ class MyTradingParams(TradingSystemParameters):
     For each stock instrument, you will have features keyed by position, mv_avg_30, mv_avg_90
     '''
 
-    def getInstrumentFeatureConfigDicts(self):
-        # ADD RELEVANT FEATURES HERE
+  def getInstrumentFeatureConfigDicts(self):
+    # ADD RELEVANT FEATURES HERE
+    ma1Dict = {'featureKey': 'ma_90',
+               'featureId': 'moving_average',
+               'params': {'period': 90,
+                          'featureName': 'close'}}
+    ma2Dict = {'featureKey': 'ma_5',
+               'featureId': 'moving_average',
+               'params': {'period': 5,
+                          'featureName': 'close'}}
+    sdevDict = {'featureKey': 'sdev_90',
+                'featureId': 'moving_sdev',
+                'params': {'period': 90,
+                           'featureName': 'close'}}
+    momDict = {'featureKey': 'mom_90',
+               'featureId': 'momentum',
+               'params': {'period': 30,
+                          'featureName': 'close'}}
+    maRibbonDict = {'featureKey': 'ma_ribbon',
+                    'featureId': 'ma_ribbon',
+                    'params': {'startPeriod': 5,
+                               'endPeriod': 100,
+                               'numRibbons': 20,
+                               'featureName': 'close'}}
+    rsiDict = {'featureKey': 'rsi_30',
+               'featureId': 'rsi',
+               'params': {'period': 30,
+                          'featureName': 'close'}}
+    return {INSTRUMENT_TYPE_STOCK: [ma1Dict, ma2Dict, sdevDict, momDict, rsiDict]}
 
-        predictionDict = {'featureKey': 'prediction',
-                                'featureId': 'prediction',
-                                'params': {}}
-
-        ### TODO: FILL THIS FUNCTION TO CREATE DESIRED FEATURES for each stock
-        ### USE TEMPLATE BELOW AS EXAMPLE 
-        ma1Dict = {'featureKey': 'ma_90',
-                   'featureId': 'moving_average',
-                   'params': {'period': 90,
-                              'featureName': 'Adj Close'}}
-        ma2Dict = {'featureKey': 'ma_5',
-                   'featureId': 'moving_average',
-                   'params': {'period': 5,
-                              'featureName': 'Adj Close'}}
-        sdevDict = {'featureKey': 'sdev_90',
-                    'featureId': 'moving_sdev',
-                    'params': {'period': 90,
-                               'featureName': 'Adj Close'}}
-        momDict = {'featureKey': 'mom_90',
-                   'featureId': 'momentum',
-                   'params': {'period': 30,
-                              'featureName': 'Adj Close'}}
-        rsiDict = {'featureKey': 'rsi_30',
-                   'featureId': 'rsi',
-                   'params': {'period': 30,
-                              'featureName': 'Adj Close'}}
-        return {INSTRUMENT_TYPE_STOCK: [predictionDict, ma1Dict, ma2Dict, sdevDict, momDict, rsiDict]}
-
-    '''
+  '''
     Returns an array of market feature config dictionaries
         market feature config Dictionary has the following keys:
         featureId: a string representing the type of feature you want to use

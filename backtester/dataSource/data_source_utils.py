@@ -13,9 +13,9 @@ from itertools import groupby
 def getCookieForYahoo(instrumentId):
     """Returns a tuple pair of cookie and crumb used in the request"""
     url = 'https://finance.yahoo.com/quote/%s/history' % (instrumentId)
-    r = requests.get(url)
-    txt = r.content
-    cookie = r.cookies['B']
+    req = requests.get(url)
+    txt = req.content
+    cookie = req.cookies['B']
     pattern = re.compile('.*"CrumbStore":\{"crumb":"(?P<crumb>[^"]+)"\}')
 
     for line in txt.splitlines():

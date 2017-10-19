@@ -8,8 +8,10 @@ from backtester.orderPlacer.backtesting_order_placer import BacktestingOrderPlac
 from backtester.trading_system import TradingSystem
 from backtester.constants import *
 from my_custom_feature import MyCustomFeature
+from backtester.timeRule.us_time_rule import USTimeRule
+from backtester.features.feature import Feature
 
-instrumentIds = ['FEDERALBNK', 'ICICIBANK','NIFTYBEES']
+instrumentIds = ['AAPL', 'MSFT'] # This needs to be in alphabetical order :(
 
 
 class MyTradingParams(TradingSystemParameters):
@@ -19,21 +21,12 @@ class MyTradingParams(TradingSystemParameters):
 
     def getDataParser(self):
         startDateStr = '2010/01/01'
-        endDateStr = '2017/06/30'
-        return NSEStockDataSource(cachedFolderName='nseData',
+        endDateStr = '2011/06/30'
+        return YahooStockDataSource(cachedFolderName='yahooData',
+                                     dataSetId='',
                                      instrumentIds=instrumentIds,
                                      startDateStr=startDateStr,
                                      endDateStr=endDateStr)
-
-    '''
-    Returns a timedetla object to indicate frequency of updates to features
-    Any updates within this frequncy to instruments do not trigger feature updates.
-    Consequently any trading decisions that need to take place happen with the same
-    frequency
-    '''
-
-    def getFrequencyOfFeatureUpdates(self):
-        return timedelta(0, 30)  # minutes, seconds
 
     '''
     This is a way to use any custom features you might have made.
@@ -48,7 +41,14 @@ class MyTradingParams(TradingSystemParameters):
         return 'NIFTYBEES'
 
     def getCustomFeatures(self):
-        return {'my_custom_feature': MyCustomFeature}
+        return {'my_custom_feature': MyCustomFeature,
+                'pairvalue_prediction': PairValuePredictionFeature}
+
+    def getTimeRuleForUpdates(self):
+        return USTimeRule(cachedFolderName='yahooData/',
+                          dataSetId='',
+                          startDate = '2010/01/01',
+                          endDate = '2017/06/30')
 
     '''
     Returns a dictionary with:
@@ -118,46 +118,13 @@ class MyTradingParams(TradingSystemParameters):
                                'instrumentId1': instrumentIds[0],
                                 'instrumentId2': instrumentIds[1],
                                 'featureName': 'close'}}
+        pairValuePrediction = {'featureKey': 'prediction',
+                               'featureId': 'pairvalue_prediction',
+                               'params': {}}
         # customFeatureDict = {'featureKey': 'custom_mrkt_feature',
         #                      'featureId': 'my_custom_mrkt_feature',
         #                      'params': {'param1': 'value1'}}
-        return [ratioDict, ma1Dict, ma2Dict, sdevDict, correlDict]
-
-    '''
-    A function that returns your predicted value based on your heuristics.
-    If you are just trading one asset like a stock, it could be the predicted value of the stock.
-    If you are doing pair trading, the prediction could be the difference in the prices of the stocks.
-    Arguments:
-    time - When this prediction is being calculated
-    currentMarketFeatures - Dictionary of market features which have been calculated at this update cycle.
-    instrumentManager - Holder for all instruments and everything else if you need.
-    '''
-
-    def getPrediction(self, time, currentMarketFeatures, instrumentManager):
-        lookbackMarketFeatures = instrumentManager.getDataDf()
-        # IMPLEMENT THIS
-        if currentMarketFeatures['sdev_90'] != 0:
-            z_score = (currentMarketFeatures['ma_10'] - currentMarketFeatures['ma_90']) / currentMarketFeatures['sdev_90']
-        else:
-            z_score = 0
-        instrument = instrumentManager.getInstrument(instrumentIds[0])
-        #z_score = z_score + instrument.getDataDf()['position']/20000
-        
-        if currentMarketFeatures['correl_90'] < 0.5:
-            z_score = 0
-
-        if z_score > 1:
-            return {instrumentIds[0]: .2,
-                    instrumentIds[1]: .8}
-        elif z_score < -1:
-            return {instrumentIds[0]: .8,
-                    instrumentIds[1]: 0.2}
-        elif (z_score > 0.5) or (z_score < -0.5) :
-            return {instrumentIds[0]: 0.6,
-                    instrumentIds[1]: 0.6}
-        else:
-            return {instrumentIds[0]: 0.5,
-                    instrumentIds[1]: 0.5}
+        return [ratioDict, ma1Dict, ma2Dict, sdevDict, correlDict, pairValuePrediction]
 
     '''
     Returns the type of execution system we want to use. Its an implementation of the class ExecutionSystem
@@ -167,16 +134,16 @@ class MyTradingParams(TradingSystemParameters):
     def getExecutionSystem(self):
         return PairExecutionSystem(pair=[instrumentIds[0], instrumentIds[1]],
                                    pairRatio=0.3,
-                                   pairEnter_threshold=0.7, 
+                                   pairEnter_threshold=0.7,
                                    pairExit_threshold=0.55,
                                    pairLongLimit=20000,
                                    pairShortLimit=20000,
                                    pairCapitalUsageLimit = 0.10*self.getStartingCapital(),
                                    pairLotSize=200)
-        # return SimpleExecutionSystem(enter_threshold=0.7, 
-        #                              exit_threshold=0.55, 
-        #                              longLimit={'ADANIPOWER.BO': 100,'RPOWER.BO': 100 * ratio}, 
-        #                              shortLimit={'ADANIPOWER.BO': -100,'RPOWER.BO': -100 * ratio}, 
+        # return SimpleExecutionSystem(enter_threshold=0.7,
+        #                              exit_threshold=0.55,
+        #                              longLimit={'ADANIPOWER.BO': 100,'RPOWER.BO': 100 * ratio},
+        #                              shortLimit={'ADANIPOWER.BO': -100,'RPOWER.BO': -100 * ratio},
         #                              lotSize={'ADANIPOWER.BO': 10,'RPOWER.BO': 10 * ratio})
 
     '''
@@ -196,6 +163,38 @@ class MyTradingParams(TradingSystemParameters):
 
     def getLookbackSize(self):
         return 90
+
+
+class PairValuePredictionFeature(Feature):
+
+    @classmethod
+    def computeForMarket(cls, updateNum, time, featureParams, featureKey, currentMarketFeatures, instrumentManager):
+        lookbackMarketFeatures = instrumentManager.getDataDf()
+        # IMPLEMENT THIS
+        if currentMarketFeatures['sdev_90'] != 0:
+            z_score = (currentMarketFeatures['ma_10'] - currentMarketFeatures['ma_90']) / currentMarketFeatures['sdev_90']
+        else:
+            z_score = 0
+        instrument = instrumentManager.getInstrument(instrumentIds[0])
+        #z_score = z_score + instrument.getDataDf()['position']/20000
+
+        if currentMarketFeatures['correl_90'] < 0.5:
+            z_score = 0
+
+        if z_score > 1:
+            return {instrumentIds[0]: .2,
+                    instrumentIds[1]: .8}
+        elif z_score < -1:
+            return {instrumentIds[0]: .8,
+                    instrumentIds[1]: 0.2}
+        elif (z_score > 0.5) or (z_score < -0.5) :
+            return {instrumentIds[0]: 0.6,
+                    instrumentIds[1]: 0.6}
+        else:
+            return {instrumentIds[0]: 0.5,
+                    instrumentIds[1]: 0.5}
+
+
 
 
 if __name__ == "__main__":
