@@ -23,13 +23,13 @@ TODO: 1) Support excluding columns for each files.
 '''
 
 def generateGraph(df, fileName, statsString, benchmark_pnl, startingCapital=0):
-    if os.path.isfile(fileName):
+    if isfile(fileName):
         logInfo('Generating %s' % fileName, True)
         df = pd.read_csv(fileName, engine='python',
                          index_col='time', parse_dates=True)
 
         layout = dict(
-            title=stats,
+            title=statsString,
             xaxis=dict(
                 rangeselector=dict(
                     buttons=list([
@@ -68,3 +68,6 @@ def generateGraph(df, fileName, statsString, benchmark_pnl, startingCapital=0):
             plot_data['data'] += [Scatter(x=df.index,
                                           y=100 * benchmark_pnl, name='Benchmark (%)')]
         plotly.offline.plot(plot_data, filename=fileName + ".html")
+
+if __name__ == "__main__":
+    generateGraph([],'C:/Users/Chandini/Auquan_Beta/auquantoolbox/runLogs/runLog_20171021_044320/marketFeatures.csv', '', None, 600000)
