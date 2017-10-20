@@ -37,7 +37,6 @@ class QuantQuestTimeRule(TimeRule):
             return False
 
     def emitTimeToTrade(self):
-        # TODO: Download if needed
         fileName = self.getFileName()
         if not os.path.exists(self.__cachedFolderName):
             os.mkdir(self.cachedFolderName, 0o755)
