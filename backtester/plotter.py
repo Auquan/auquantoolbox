@@ -22,12 +22,19 @@ TODO: 1) Support excluding columns for each files.
       3) Provide a selector GUI to chose the files.
 '''
 
-def generateGraph(df, fileName, statsString, benchmark_pnl, startingCapital=0):
+def generateGraph(instrumentList, path, fileName, statsString, benchmark_pnl, startingCapital=0):
     if isfile(fileName):
         logInfo('Generating %s' % fileName, True)
-        df = pd.read_csv(fileName, engine='python',
-                         index_col='time', parse_dates=True)
-
+        updatemenus = list([
+        dict(active=-1,
+            buttons=list([   
+                dict(label = 'Total Market',
+                    method = 'update',
+                    args = [{'title': statsString,
+                          'data': generateData(fileName, startingCapital, benchmark_pnl)}])
+                ]),
+            )
+        ])
         layout = dict(
             title=statsString,
             xaxis=dict(
@@ -54,20 +61,29 @@ def generateGraph(df, fileName, statsString, benchmark_pnl, startingCapital=0):
                 ),
                 rangeslider=dict(),
                 type='date'
-            )
+            ),
+            updatemenus=updatemenus
         )
+        
         plot_data = {
-            "data": [],
+            "data": generateData(fileName, startingCapital, benchmark_pnl),
             "layout": layout
         }
-        for col in df.columns[1:]:
-            plot_data['data'] += [Scatter(x=df.index, y=df[col], name=col)]
-        if 'pnl' in df.columns and startingCapital>0:
-            plot_data['data'] += [Scatter(x=df.index, y=100*df['pnl']/float(startingCapital), name='Returns(%)')]
-        if benchmark_pnl is not None:
-            plot_data['data'] += [Scatter(x=df.index,
-                                          y=100 * benchmark_pnl, name='Benchmark (%)')]
+
         plotly.offline.plot(plot_data, filename=fileName + ".html")
 
+def generateData(fileName, startingCapital, benchmark_pnl):
+    df = pd.read_csv(fileName, engine='python',
+                     index_col='time', parse_dates=True)
+    data = []
+    for col in df.columns[1:]:
+        data += [Scatter(x=df.index, y=df[col], name=col)]
+    if 'pnl' in df.columns and startingCapital>0:
+        data += [Scatter(x=df.index, y=100*df['pnl']/float(startingCapital), name='Returns(%)')]
+    if benchmark_pnl is not None:
+        data += [Scatter(x=df.index,y=100 * benchmark_pnl, name='Benchmark (%)')]
+    return data
+
 if __name__ == "__main__":
-    generateGraph([],'C:/Users/Chandini/Auquan_Beta/auquantoolbox/runLogs/runLog_20171021_044320/marketFeatures.csv', '', None, 600000)
+    generateGraph(['FFS','FKI'],'C:/Users/Chandini/Auquan_Beta/auquantoolbox/runLogs/runLog_20171021_044320',\
+        'C:/Users/Chandini/Auquan_Beta/auquantoolbox/runLogs/runLog_20171021_044320/marketFeatures.csv', 'Just a test plot', None, 600000)

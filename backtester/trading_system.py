@@ -128,7 +128,7 @@ class TradingSystem:
     def saveCurrentState(self, timeOfUpdate):
         self.stateWriter.writeCurrentState(timeOfUpdate, self.instrumentManager)
 
-    def getFinalMetrics(self, dateBounds, shouldPlotFeatures=True):
+    def getFinalMetrics(self, dateBounds, shouldPlotMarketFeatures=True):
         allInstruments = self.instrumentManager.getAllInstrumentsByInstrumentId()
         resultDict = {}
         resultDict['instrument_names'] = []
@@ -154,8 +154,9 @@ class TradingSystem:
         metricString = metrics.getMarketMetricsString()
         logInfo(metricString, True)
         resultDict.update(processResult(stats, self.stateWriter.getFolderName(), self.stateWriter.getMarketFeaturesFilename()))
-        if shouldPlotFeatures:
-            generateGraph(self.instrumentManager.getDataDf(), self.stateWriter.getMarketFeaturesFilename(), metricString, None, self.tsParams.getStartingCapital())
+        if shouldPlotMarketFeatures:
+            generateGraph(allInstruments, self.stateWriter.getFolderName(), self.stateWriter.getMarketFeaturesFilename(), \
+                metricString, None, self.tsParams.getStartingCapital())
         return resultDict
 
     def startTrading(self, onlyAnalyze=False, shouldPlot=True, makeInstrumentCsvs=True):
