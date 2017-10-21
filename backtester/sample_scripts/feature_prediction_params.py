@@ -6,7 +6,7 @@ from backtester.orderPlacer.backtesting_order_placer import BacktestingOrderPlac
 from backtester.trading_system import TradingSystem
 from backtester.constants import *
 from backtester.features.feature import Feature
-
+import numpy as np
 
 class FeaturePredictionTradingParams(TradingSystemParameters):
 
@@ -55,7 +55,9 @@ class FeaturePredictionTradingParams(TradingSystemParameters):
 
     def getCustomFeatures(self):
         return dict(self.__problem2Solver.getCustomFeatures(),
-                    **{'problem2_prediction': Problem2PredictionFeature})
+                    **{'problem2_prediction': Problem2PredictionFeature,
+                       'spread': SpreadCalculator,
+                       'total_fees': TotalFeesCalculator})
 
     '''
     Returns a dictionary with:
@@ -93,8 +95,26 @@ class FeaturePredictionTradingParams(TradingSystemParameters):
                      'featureId': 'score_ll',
                      'params': {'predictionKey': 'prediction',
                                 'target': 'Y'}}
-
-        return {INSTRUMENT_TYPE_STOCK: stockFeatureConfigs + [classifierPrediction, scoreDict]}
+        spreadConfigDict = {'featureKey': 'spread',
+                            'featureId': 'spread',
+                            'params': {}}
+        feesConfigDict = {'featureKey': 'fees',
+                          'featureId': 'total_fees',
+                          'params': {'price': self.getPriceFeatureKey(),
+                                     'feesDict': {1: 0.0001, -1: 0.0001, 0: 0},
+                                     'spread': 'spread'}}
+        profitlossConfigDict = {'featureKey': 'pnl',
+                                'featureId': 'pnl',
+                                'params': {'price': self.getPriceFeatureKey(),
+                                           'fees': 'fees'}}
+        capitalConfigDict = {'featureKey': 'capital',
+                             'featureId': 'capital',
+                             'params': {'price': self.getPriceFeatureKey(),
+                                        'fees': 'fees',
+                                        'capitalReqPercent': 0.15}}
+        return {INSTRUMENT_TYPE_STOCK: stockFeatureConfigs + [classifierPrediction, scoreDict,
+                 spreadConfigDict, feesConfigDict,
+                 profitlossConfigDict, capitalConfigDict]}
     '''
     Returns an array of market feature config dictionaries
         market feature config Dictionary has the following keys:
@@ -164,8 +184,43 @@ class Problem2PredictionFeature(Feature):
     def computeForInstrument(cls, updateNum, time, featureParams, featureKey, instrumentManager):
         return Problem2PredictionFeature.problem2Solver.getClassifierProbability(updateNum, time, instrumentManager)
 
+class SpreadCalculator(Feature):
 
-if __name__ == "__main__":
-    tsParams = MyTradingParams()
-    tradingSystem = TradingSystem(tsParams)
-    tradingSystem.startTrading(onlyAnalyze=True, shouldPlot=True)
+    @classmethod
+    def computeForInstrument(cls, updateNum, time, featureParams, featureKey, instrumentManager):
+        instrumentLookbackData = instrumentManager.getLookbackInstrumentFeatures()
+        try:
+            # TODO: Change the hard key references
+            currentStockBidPrice = instrumentLookbackData.getFeatureDf('stockTopBidPrice').iloc[-1]
+            currentStockAskPrice = instrumentLookbackData.getFeatureDf('stockTopAskPrice').iloc[-1]
+        except KeyError:
+            logError('Bid and Ask Price Feature Key does not exist')
+
+        currentSpread = currentStockAskPrice - currentStockBidPrice
+        return np.minimum(currentSpread / 2.0, 0.1)
+
+class TotalFeesCalculator(Feature):
+
+    @classmethod
+    def computeForInstrument(cls, updateNum, time, featureParams, featureKey, instrumentManager):
+        instrumentLookbackData = instrumentManager.getLookbackInstrumentFeatures()
+
+        positionData = instrumentLookbackData.getFeatureDf('position')
+        feesDict = featureParams['feesDict']
+        currentPosition = positionData.iloc[-1]
+        previousPosition = 0 if updateNum < 2 else positionData.iloc[-2]
+        changeInPosition = currentPosition - previousPosition
+        fees = np.abs(changeInPosition) * [feesDict[np.sign(x)] for x in changeInPosition]
+        if 'price' in featureParams:
+            try:
+                priceData = instrumentLookbackData.getFeatureDf(featureParams['price'])
+                currentPrice = priceData.iloc[-1]
+            except KeyError:
+                logError('Price Feature Key does not exist')
+
+            fees = fees * currentPrice
+
+        total = 2 * fees \
+                + (np.abs(changeInPosition) * instrumentLookbackData.getFeatureDf(featureParams['spread']).iloc[-1])
+        return total
+
