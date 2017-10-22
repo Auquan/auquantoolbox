@@ -22,42 +22,64 @@ TODO: 1) Support excluding columns for each files.
       3) Provide a selector GUI to chose the files.
 '''
 
-def generateGraph(df, fileName, stats, benchmark_pnl):
-    layout = dict(
-        title=stats,
-        xaxis=dict(
-            rangeselector=dict(
-                buttons=list([
-                    dict(count=6,
-                         label='6m',
-                         step='month',
-                         stepmode='backward'),
-                    dict(count=1,
-                         label='YTD',
-                         step='year',
-                         stepmode='todate'),
-                    dict(count=1,
-                         label='1y',
-                         step='year',
-                         stepmode='backward'),
-                    dict(count=5,
-                         label='5y',
-                         step='year',
-                         stepmode='backward'),
-                    dict(step='all')
-                ])
+def generateGraph(instrumentList, path, fileName, statsString, benchmark_pnl, startingCapital=0):
+    if isfile(fileName):
+        logInfo('Generating %s' % fileName, True)
+        updatemenus = list([
+        dict(active=-1,
+            buttons=list([   
+                dict(label = 'Total Market',
+                    method = 'update',
+                    args = [{'title': statsString,
+                          'data': generateData(fileName, startingCapital, benchmark_pnl)}])
+                ]),
+            )
+        ])
+        layout = dict(
+            title=statsString,
+            xaxis=dict(
+                rangeselector=dict(
+                    buttons=list([
+                        dict(count=6,
+                             label='6m',
+                             step='month',
+                             stepmode='backward'),
+                        dict(count=1,
+                             label='YTD',
+                             step='year',
+                             stepmode='todate'),
+                        dict(count=1,
+                             label='1y',
+                             step='year',
+                             stepmode='backward'),
+                        dict(count=5,
+                             label='5y',
+                             step='year',
+                             stepmode='backward'),
+                        dict(step='all')
+                    ])
+                ),
+                rangeslider=dict(),
+                type='date'
             ),
-            rangeslider=dict(),
-            type='date'
+            updatemenus=updatemenus
         )
-    )
-    plot_data = {
-        "data": [],
-        "layout": layout
-    }
+        
+        plot_data = {
+            "data": generateData(fileName, startingCapital, benchmark_pnl),
+            "layout": layout
+        }
+
+        plotly.offline.plot(plot_data, filename=fileName + ".html")
+
+def generateData(fileName, startingCapital, benchmark_pnl):
+    df = pd.read_csv(fileName, engine='python',
+                     index_col='time', parse_dates=True)
+    data = []
     for col in df.columns[1:]:
-        plot_data['data'] += [Scatter(x=df.index, y=df[col], name=col)]
+        data += [Scatter(x=df.index, y=df[col], name=col)]
+    if 'pnl' in df.columns and startingCapital>0:
+        data += [Scatter(x=df.index, y=100*df['pnl']/float(startingCapital), name='Returns(%)')]
     if benchmark_pnl is not None:
-        plot_data['data'] += [Scatter(x=df.index,
-                                      y=100 * benchmark_pnl, name='Benchmark (%)')]
-    plotly.offline.plot(plot_data, filename=fileName + ".html")
+        data += [Scatter(x=df.index,y=100 * benchmark_pnl, name='Benchmark (%)')]
+    return data

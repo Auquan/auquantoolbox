@@ -34,7 +34,8 @@ class Metrics():
         # Add back below once benchmark support
         # + ' Benchmark: %0.2f%% ' % (100 * self.__stats['Base Return(%)']) \
         str = \
-            ' Total Pnl: %0.2f%% ' % (100 * self.__stats['Total Pnl(%)']) \
+            ' Pnl: %0.2f ' % self.__stats['Pnl'] \
+            + ' Total Pnl: %0.2f%% ' % (100 * self.__stats['Total Pnl(%)']) \
             + ' Profit/Loss Ratio: %0.2f ' % self.__stats['Profit/Loss Ratio'] \
             + ' Accuracy: %0.2f ' % self.__stats['Accuracy']
         if 'Score' in self.__stats:
@@ -101,6 +102,7 @@ class Metrics():
         count_loss = instrumentLookbackData.getFeatureDf('count_loss').iloc[-1]
 
         totalReturn = pnl / float(startingCapital)
+        stats['Pnl'] = pnl.loc[instrumentId]
         stats['Total Pnl(%)'] = totalReturn.loc[instrumentId]
         stats['Profit/Loss Ratio'] = self.profit_factor(total_profit.loc[instrumentId], total_loss.loc[instrumentId])
         stats['Accuracy'] = self.accuracy(count_profit.loc[instrumentId], count_loss.loc[instrumentId])

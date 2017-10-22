@@ -128,7 +128,7 @@ class TradingSystem:
     def saveCurrentState(self, timeOfUpdate):
         self.stateWriter.writeCurrentState(timeOfUpdate, self.instrumentManager)
 
-    def getFinalMetrics(self, dateBounds, shouldPlotFeatures=True):
+    def getFinalMetrics(self, dateBounds, shouldPlotMarketFeatures=True):
         allInstruments = self.instrumentManager.getAllInstrumentsByInstrumentId()
         resultDict = {}
         resultDict['instrument_names'] = []
@@ -143,7 +143,9 @@ class TradingSystem:
             metricString = metrics.getInstrumentMetricsString()
             logInfo('%s: %s' % (instrumentId, metricString), True)
             resultDict['instrument_names'] += [instrumentId]
-            resultDict['instrument_stats'] += [{'total_pnl': stats['Total Pnl(%)'], 'score': stats['Score']}]
+            resultDict['instrument_stats'] += [{'total_pnl': stats['Total Pnl(%)']}]
+            if 'Score' in stats:
+                resultDict['instrument_stats'][-1]['score'] = stats['Score']
             if 'Normalized Score' in stats:
                 resultDict['instrument_stats'][-1]['normalized_score'] = stats['Normalized Score']
         metrics = Metrics(marketFeaturesDf=self.instrumentManager.getDataDf())
@@ -152,8 +154,9 @@ class TradingSystem:
         metricString = metrics.getMarketMetricsString()
         logInfo(metricString, True)
         resultDict.update(processResult(stats, self.stateWriter.getFolderName(), self.stateWriter.getMarketFeaturesFilename()))
-        if shouldPlotFeatures:
-            generateGraph(self.instrumentManager.getDataDf(), self.stateWriter.getMarketFeaturesFilename(), stats, None)
+        if shouldPlotMarketFeatures:
+            generateGraph(allInstruments, self.stateWriter.getFolderName(), self.stateWriter.getMarketFeaturesFilename(), \
+                metricString, None, self.tsParams.getStartingCapital())
         return resultDict
 
     def startTrading(self, onlyAnalyze=False, shouldPlot=True, makeInstrumentCsvs=True):
