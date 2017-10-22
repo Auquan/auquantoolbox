@@ -83,7 +83,3 @@ def generateData(fileName, startingCapital, benchmark_pnl):
     if benchmark_pnl is not None:
         data += [Scatter(x=df.index,y=100 * benchmark_pnl, name='Benchmark (%)')]
     return data
-
-if __name__ == "__main__":
-    generateGraph(['FFS','FKI'],'C:/Users/Chandini/Auquan_Beta/auquantoolbox/runLogs/runLog_20171021_044320',\
-        'C:/Users/Chandini/Auquan_Beta/auquantoolbox/runLogs/runLog_20171021_044320/marketFeatures.csv', 'Just a test plot', None, 600000)
