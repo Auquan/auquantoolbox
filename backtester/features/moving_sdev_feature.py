@@ -14,6 +14,7 @@ class MovingSDevFeature(Feature):
     def computeForMarket(cls, updateNum, time, featureParams, featureKey, currentMarketFeatures, instrumentManager):
         lookbackDataDf = instrumentManager.getDataDf()
         data = lookbackDataDf[featureParams['featureName']]
+        import pdb; pdb.set_trace()
         sdev = data[-featureParams['period']:].std().fillna(0)
         if len(data) < 1:
             return 0

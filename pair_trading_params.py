@@ -8,8 +8,9 @@ from backtester.orderPlacer.backtesting_order_placer import BacktestingOrderPlac
 from backtester.trading_system import TradingSystem
 from backtester.constants import *
 from my_custom_feature import MyCustomFeature
+from backtester.timeRule.us_time_rule import USTimeRule
 
-instrumentIds = ['FEDERALBNK', 'ICICIBANK','NIFTYBEES']
+instrumentIds = ['MSFT', 'AAPL']
 
 
 class MyTradingParams(TradingSystemParameters):
@@ -20,7 +21,8 @@ class MyTradingParams(TradingSystemParameters):
     def getDataParser(self):
         startDateStr = '2010/01/01'
         endDateStr = '2017/06/30'
-        return NSEStockDataSource(cachedFolderName='nseData',
+        return YahooStockDataSource(cachedFolderName='yahooData',
+                                     dataSetId='',
                                      instrumentIds=instrumentIds,
                                      startDateStr=startDateStr,
                                      endDateStr=endDateStr)
@@ -39,6 +41,12 @@ class MyTradingParams(TradingSystemParameters):
 
     def getCustomFeatures(self):
         return {'my_custom_feature': MyCustomFeature}
+
+    def getTimeRuleForUpdates(self):
+        return USTimeRule(cachedFolderName='yahooData/',
+                          dataSetId='',
+                          startDate = '2010/01/01',
+                          endDate = '2017/06/30')
 
     '''
     Returns a dictionary with:
@@ -132,7 +140,7 @@ class MyTradingParams(TradingSystemParameters):
             z_score = 0
         instrument = instrumentManager.getInstrument(instrumentIds[0])
         #z_score = z_score + instrument.getDataDf()['position']/20000
-        
+
         if currentMarketFeatures['correl_90'] < 0.5:
             z_score = 0
 
@@ -157,16 +165,16 @@ class MyTradingParams(TradingSystemParameters):
     def getExecutionSystem(self):
         return PairExecutionSystem(pair=[instrumentIds[0], instrumentIds[1]],
                                    pairRatio=0.3,
-                                   pairEnter_threshold=0.7, 
+                                   pairEnter_threshold=0.7,
                                    pairExit_threshold=0.55,
                                    pairLongLimit=20000,
                                    pairShortLimit=20000,
                                    pairCapitalUsageLimit = 0.10*self.getStartingCapital(),
                                    pairLotSize=200)
-        # return SimpleExecutionSystem(enter_threshold=0.7, 
-        #                              exit_threshold=0.55, 
-        #                              longLimit={'ADANIPOWER.BO': 100,'RPOWER.BO': 100 * ratio}, 
-        #                              shortLimit={'ADANIPOWER.BO': -100,'RPOWER.BO': -100 * ratio}, 
+        # return SimpleExecutionSystem(enter_threshold=0.7,
+        #                              exit_threshold=0.55,
+        #                              longLimit={'ADANIPOWER.BO': 100,'RPOWER.BO': 100 * ratio},
+        #                              shortLimit={'ADANIPOWER.BO': -100,'RPOWER.BO': -100 * ratio},
         #                              lotSize={'ADANIPOWER.BO': 10,'RPOWER.BO': 10 * ratio})
 
     '''

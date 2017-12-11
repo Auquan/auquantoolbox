@@ -168,4 +168,3 @@ class TradingSystem:
 
         self.stateWriter.closeStateWriter()
         return self.getFinalMetrics([self.startDate, timeOfUpdate], shouldPlot)
-
