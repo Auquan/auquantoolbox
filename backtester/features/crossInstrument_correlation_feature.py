@@ -13,8 +13,9 @@ class MovingInstrumentCorrelationFeature(Feature):
         if (instrument1 is None) or (instrument2 is None):
             return 0
         else:
-            x = instrument1.getDataDf()[feature]
-            y = instrument2.getDataDf()[feature]
+            lookbackInstrumentFeatures = instrumentManager.getLookbackInstrumentFeatures()
+            x = lookbackInstrumentFeatures.getFeatureDf(feature)[instrumentId1]
+            y = lookbackInstrumentFeatures.getFeatureDf(feature)[instrumentId2]
 
         if (len(x) < 1) or (len(y) < 1):
             return 0
