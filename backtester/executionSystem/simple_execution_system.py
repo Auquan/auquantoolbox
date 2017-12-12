@@ -20,7 +20,7 @@ class SimpleExecutionSystem(BaseExecutionSystem):
         if isinstance(self.longLimit, pd.DataFrame):
             return self.convertLimit(self.longLimit)
         if isinstance(self.longLimit, dict):
-            longLimitDf = pd.DataFrame(self.longLimit.values())
+            longLimitDf = pd.Series(self.longLimit)
             return self.convertLimit(longLimitDf)
         else:
             return self.convertLimit(pd.Series(self.longLimit, index=instrumentIds))
@@ -29,7 +29,7 @@ class SimpleExecutionSystem(BaseExecutionSystem):
         if isinstance(self.shortLimit, pd.DataFrame):
             return self.convertLimit(self.shortLimit)
         if isinstance(self.shortLimit, dict):
-            shortLimitDf = pd.DataFrame(self.shortLimit.values())
+            shortLimitDf = pd.Series(self.shortLimit)
             return self.convertLimit(shortLimitDf)
         else:
             return self.convertLimit(pd.Series(self.shortLimit, index=instrumentIds))
@@ -38,7 +38,7 @@ class SimpleExecutionSystem(BaseExecutionSystem):
         if isinstance(self.lotSize, pd.DataFrame):
             return self.convertLimit(self.lotSize)
         if isinstance(self.lotSize, dict):
-            lotSizeDf = pd.DataFrame(self.lotSize.values())
+            lotSizeDf = pd.Series(self.lotSize)
             return self.convertLimit(lotSizeDf)
         else:
             return self.convertLimit(pd.Series(self.lotSize, index=instrumentIds))
@@ -128,6 +128,7 @@ class SimpleExecutionSystem(BaseExecutionSystem):
             logWarn('Not Enough Capital')
             return pd.Series(True, index=positionData.columns)
         position = positionData.iloc[-1]
+        # TODO: Cant do this if position and getLongLimit indexes dont match
         return (position > self.getLongLimit(positionData.columns)) | (position < -self.getShortLimit(positionData.columns))
 
     def exitCondition(self, currentPredictions, instrumentsManager):

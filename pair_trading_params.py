@@ -9,8 +9,9 @@ from backtester.trading_system import TradingSystem
 from backtester.constants import *
 from my_custom_feature import MyCustomFeature
 from backtester.timeRule.us_time_rule import USTimeRule
+from backtester.features.feature import Feature
 
-instrumentIds = ['MSFT', 'AAPL']
+instrumentIds = ['AAPL', 'MSFT'] # This needs to be in alphabetical order :(
 
 
 class MyTradingParams(TradingSystemParameters):
@@ -20,7 +21,7 @@ class MyTradingParams(TradingSystemParameters):
 
     def getDataParser(self):
         startDateStr = '2010/01/01'
-        endDateStr = '2017/06/30'
+        endDateStr = '2011/06/30'
         return YahooStockDataSource(cachedFolderName='yahooData',
                                      dataSetId='',
                                      instrumentIds=instrumentIds,
@@ -40,7 +41,8 @@ class MyTradingParams(TradingSystemParameters):
         return 'NIFTYBEES'
 
     def getCustomFeatures(self):
-        return {'my_custom_feature': MyCustomFeature}
+        return {'my_custom_feature': MyCustomFeature,
+                'pairvalue_prediction': PairValuePredictionFeature}
 
     def getTimeRuleForUpdates(self):
         return USTimeRule(cachedFolderName='yahooData/',
@@ -116,46 +118,13 @@ class MyTradingParams(TradingSystemParameters):
                                'instrumentId1': instrumentIds[0],
                                 'instrumentId2': instrumentIds[1],
                                 'featureName': 'close'}}
+        pairValuePrediction = {'featureKey': 'prediction',
+                               'featureId': 'pairvalue_prediction',
+                               'params': {}}
         # customFeatureDict = {'featureKey': 'custom_mrkt_feature',
         #                      'featureId': 'my_custom_mrkt_feature',
         #                      'params': {'param1': 'value1'}}
-        return [ratioDict, ma1Dict, ma2Dict, sdevDict, correlDict]
-
-    '''
-    A function that returns your predicted value based on your heuristics.
-    If you are just trading one asset like a stock, it could be the predicted value of the stock.
-    If you are doing pair trading, the prediction could be the difference in the prices of the stocks.
-    Arguments:
-    time - When this prediction is being calculated
-    currentMarketFeatures - Dictionary of market features which have been calculated at this update cycle.
-    instrumentManager - Holder for all instruments and everything else if you need.
-    '''
-
-    def getPrediction(self, time, currentMarketFeatures, instrumentManager):
-        lookbackMarketFeatures = instrumentManager.getDataDf()
-        # IMPLEMENT THIS
-        if currentMarketFeatures['sdev_90'] != 0:
-            z_score = (currentMarketFeatures['ma_10'] - currentMarketFeatures['ma_90']) / currentMarketFeatures['sdev_90']
-        else:
-            z_score = 0
-        instrument = instrumentManager.getInstrument(instrumentIds[0])
-        #z_score = z_score + instrument.getDataDf()['position']/20000
-
-        if currentMarketFeatures['correl_90'] < 0.5:
-            z_score = 0
-
-        if z_score > 1:
-            return {instrumentIds[0]: .2,
-                    instrumentIds[1]: .8}
-        elif z_score < -1:
-            return {instrumentIds[0]: .8,
-                    instrumentIds[1]: 0.2}
-        elif (z_score > 0.5) or (z_score < -0.5) :
-            return {instrumentIds[0]: 0.6,
-                    instrumentIds[1]: 0.6}
-        else:
-            return {instrumentIds[0]: 0.5,
-                    instrumentIds[1]: 0.5}
+        return [ratioDict, ma1Dict, ma2Dict, sdevDict, correlDict, pairValuePrediction]
 
     '''
     Returns the type of execution system we want to use. Its an implementation of the class ExecutionSystem
@@ -194,6 +163,38 @@ class MyTradingParams(TradingSystemParameters):
 
     def getLookbackSize(self):
         return 90
+
+
+class PairValuePredictionFeature(Feature):
+
+    @classmethod
+    def computeForMarket(cls, updateNum, time, featureParams, featureKey, currentMarketFeatures, instrumentManager):
+        lookbackMarketFeatures = instrumentManager.getDataDf()
+        # IMPLEMENT THIS
+        if currentMarketFeatures['sdev_90'] != 0:
+            z_score = (currentMarketFeatures['ma_10'] - currentMarketFeatures['ma_90']) / currentMarketFeatures['sdev_90']
+        else:
+            z_score = 0
+        instrument = instrumentManager.getInstrument(instrumentIds[0])
+        #z_score = z_score + instrument.getDataDf()['position']/20000
+
+        if currentMarketFeatures['correl_90'] < 0.5:
+            z_score = 0
+
+        if z_score > 1:
+            return {instrumentIds[0]: .2,
+                    instrumentIds[1]: .8}
+        elif z_score < -1:
+            return {instrumentIds[0]: .8,
+                    instrumentIds[1]: 0.2}
+        elif (z_score > 0.5) or (z_score < -0.5) :
+            return {instrumentIds[0]: 0.6,
+                    instrumentIds[1]: 0.6}
+        else:
+            return {instrumentIds[0]: 0.5,
+                    instrumentIds[1]: 0.5}
+
+
 
 
 if __name__ == "__main__":
