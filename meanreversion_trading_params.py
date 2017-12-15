@@ -1,15 +1,18 @@
 from backtester.trading_system_parameters import TradingSystemParameters
 from datetime import timedelta
 from backtester.dataSource.nse_data_source import NSEStockDataSource
+from backtester.dataSource.yahoo_data_source import YahooStockDataSource
+from backtester.dataSource.google_data_source import GoogleStockDataSource
 from backtester.executionSystem.simple_execution_system import SimpleExecutionSystem
 from backtester.orderPlacer.backtesting_order_placer import BacktestingOrderPlacer
 from backtester.trading_system import TradingSystem
 from backtester.constants import *
 from my_custom_feature import MyCustomFeature
+from backtester.timeRule.us_time_rule import USTimeRule
 
-start = '2010/01/01'
+start = '2017/01/01'
 end = '2017/06/30'
-assets = ['PNB', 'BANKBEES']  # ,'FEDERALBNK', 'ICICIBANK', 'CANBK', 'SBIN', 'YESBANK', 'KOTAKBANK',
+assets = ['AAPL', 'MSFT']  # ,'FEDERALBNK', 'ICICIBANK', 'CANBK', 'SBIN', 'YESBANK', 'KOTAKBANK',
 #'BANKBARODA', 'HDFCBANK', 'AXISBANK', 'INDUSINDBK', 'NIFTYBEES']
 
 
@@ -22,7 +25,8 @@ class MyTradingParams(TradingSystemParameters):
     instrumentIds = assets
     startDateStr = start
     endDateStr = end
-    return NSEStockDataSource(cachedFolderName='nseData',
+    return YahooStockDataSource(cachedFolderName='yahooData',
+                              dataSetId='',
                               instrumentIds=instrumentIds,
                               startDateStr=startDateStr,
                               endDateStr=endDateStr)
@@ -30,6 +34,12 @@ class MyTradingParams(TradingSystemParameters):
 
   def getBenchmark(self):
     return 'BANKBEES'
+
+  def getTimeRuleForUpdates(self):
+      return USTimeRule(cachedFolderName='yahooData/',
+                        dataSetId='',
+                        startDate = '2017/01/01',
+                        endDate = '2017/06/30')
 
   '''
     This is a way to use any custom features you might have made.
@@ -97,7 +107,7 @@ class MyTradingParams(TradingSystemParameters):
                'featureId': 'rsi',
                'params': {'period': 30,
                           'featureName': 'close'}}
-    return {INSTRUMENT_TYPE_STOCK: [ma1Dict, ma2Dict, sdevDict, momDict, maRibbonDict, rsiDict]}
+    return {INSTRUMENT_TYPE_STOCK: [ma1Dict, ma2Dict, sdevDict, momDict, rsiDict]}
 
   '''
     Returns an array of market feature config dictionaries

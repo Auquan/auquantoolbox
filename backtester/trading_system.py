@@ -108,7 +108,7 @@ class TradingSystem:
     def saveCurrentState(self, timeOfUpdate):
         self.stateWriter.writeCurrentState(timeOfUpdate, self.instrumentManager)
 
-    def getFinalMetrics(self, dateBounds, shouldPlotFeatures=True):
+    def getFinalMetrics(self, dateBounds, shouldPlotFeatures=True, createResultDict=False):
         allInstruments = self.instrumentManager.getAllInstrumentsByInstrumentId()
         resultDict = {}
         resultDict['instrument_names'] = []
@@ -122,16 +122,18 @@ class TradingSystem:
             stats = metrics.getMetrics()
             metricString = metrics.getInstrumentMetricsString()
             logInfo('%s: %s' % (instrumentId, metricString), True)
-            resultDict['instrument_names'] += [instrumentId]
-            resultDict['instrument_stats'] += [{'total_pnl': stats['Total Pnl(%)'], 'score': stats['Score']}]
-            if 'Normalized Score' in stats:
-                resultDict['instrument_stats'][-1]['normalized_score'] = stats['Normalized Score']
+            if createResultDict:
+                resultDict['instrument_names'] += [instrumentId]
+                resultDict['instrument_stats'] += [{'total_pnl': stats['Total Pnl(%)'], 'score': stats['Score']}]
+                if 'Normalized Score' in stats:
+                    resultDict['instrument_stats'][-1]['normalized_score'] = stats['Normalized Score']
         metrics = Metrics(marketFeaturesDf=self.instrumentManager.getDataDf())
         metrics.calculateMarketMetrics(None, self.tsParams.getPriceFeatureKey(), self.tsParams.getStartingCapital(), dateBounds)
         stats = metrics.getMetrics()
         metricString = metrics.getMarketMetricsString()
         logInfo(metricString, True)
-        resultDict.update(processResult(stats, self.stateWriter.getFolderName(), self.stateWriter.getMarketFeaturesFilename()))
+        if createResultDict:
+            resultDict.update(processResult(stats, self.stateWriter.getFolderName(), self.stateWriter.getMarketFeaturesFilename()))
         if shouldPlotFeatures:
             generateGraph(self.instrumentManager.getDataDf(), self.stateWriter.getMarketFeaturesFilename(), stats, None)
         return resultDict
@@ -167,4 +169,4 @@ class TradingSystem:
                 break
 
         self.stateWriter.closeStateWriter()
-        return self.getFinalMetrics([self.startDate, timeOfUpdate], shouldPlot)
+        return self.getFinalMetrics([self.startDate, timeOfUpdate], shouldPlot, False)
