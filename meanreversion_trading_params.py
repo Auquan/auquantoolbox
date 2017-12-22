@@ -1,46 +1,57 @@
 from backtester.trading_system_parameters import TradingSystemParameters
+from backtester.features.feature import Feature
 from datetime import timedelta
-from backtester.dataSource.nse_data_source import NSEStockDataSource
+from backtester.dataSource.yahoo_data_source import YahooStockDataSource
 from backtester.executionSystem.simple_execution_system import SimpleExecutionSystem
 from backtester.orderPlacer.backtesting_order_placer import BacktestingOrderPlacer
 from backtester.trading_system import TradingSystem
+from backtester.version import updateCheck
 from backtester.constants import *
-from my_custom_feature import MyCustomFeature
+import pandas as pd
 
-start = '2010/01/01'
-end = '2017/06/30'
-assets = ['PNB', 'BANKBEES']  # ,'FEDERALBNK', 'ICICIBANK', 'CANBK', 'SBIN', 'YESBANK', 'KOTAKBANK',
-#'BANKBARODA', 'HDFCBANK', 'AXISBANK', 'INDUSINDBK', 'NIFTYBEES']
+
 
 
 class MyTradingParams(TradingSystemParameters):
-  '''
-  Returns an instance of class DataParser. Source of data for instruments
-  '''
+    '''
+    initialize class
+    place any global variables here
+    '''
+    def __init__(self):
+        super(MyTradingParams, self).__init__()
+        self.count = 0 
+        self.params = {}
+        self.start = '2017/01/01'
+        self.end = '2017/06/30'
+        self.instrumentIds = ['AAPL', 'GOOG']
 
-  def getDataParser(self):
-    instrumentIds = assets
-    startDateStr = start
-    endDateStr = end
-    return NSEStockDataSource(cachedFolderName='nseData',
-                              instrumentIds=instrumentIds,
-                              startDateStr=startDateStr,
-                              endDateStr=endDateStr)
+    '''
+    Returns an instance of class DataParser. Source of data for instruments
+    '''
 
-  '''
+    def getDataParser(self):
+
+        return YahooStockDataSource(cachedFolderName='yahooData/',
+                                    dataSetId='AuquanTrainingTest',
+                                    instrumentIds=self.instrumentIds,
+                                    startDateStr=self.start,
+                                    endDateStr=self.end,
+                                    event='history')
+
+    '''
     Returns a timedetla object to indicate frequency of updates to features
     Any updates within this frequncy to instruments do not trigger feature updates.
     Consequently any trading decisions that need to take place happen with the same
     frequency
     '''
 
-  def getFrequencyOfFeatureUpdates(self):
-    return timedelta(0, 30)  # minutes, seconds
+    def getFrequencyOfFeatureUpdates(self):
+        return timedelta(0, 30)  # minutes, seconds
 
-  def getBenchmark(self):
-    return 'BANKBEES'
+    def getBenchmark(self):
+        return 'SPY'
 
-  '''
+    '''
     This is a way to use any custom features you might have made.
     Returns a dictionary where
     key: featureId to access this feature (Make sure this doesnt conflict with any of the pre defined feature Ids)
@@ -49,10 +60,11 @@ class MyTradingParams(TradingSystemParameters):
     you will import that class, and return this function as {'my_custom_feature': MyCustomFeature}
     '''
 
-  def getCustomFeatures(self):
-    return {'my_custom_feature': MyCustomFeature}
+    def getCustomFeatures(self):
+        return {'my_custom_feature': MyCustomFeature, 
+                'prediction': TrainingPredictionFeature}
 
-  '''
+    '''
     Returns a dictionary with:
     key: string representing instrument type. Right now INSTRUMENT_TYPE_OPTION, INSTRUMENT_TYPE_STOCK, INSTRUMENT_TYPE_FUTURE
     value: Array of instrument feature config dictionaries
@@ -78,37 +90,38 @@ class MyTradingParams(TradingSystemParameters):
     For each stock instrument, you will have features keyed by position, mv_avg_30, mv_avg_90
     '''
 
-  def getInstrumentFeatureConfigDicts(self):
-    # ADD RELEVANT FEATURES HERE
-    ma1Dict = {'featureKey': 'ma_90',
-               'featureId': 'moving_average',
-               'params': {'period': 90,
-                          'featureName': 'close'}}
-    ma2Dict = {'featureKey': 'ma_5',
-               'featureId': 'moving_average',
-               'params': {'period': 5,
-                          'featureName': 'close'}}
-    sdevDict = {'featureKey': 'sdev_90',
-                'featureId': 'moving_sdev',
-                'params': {'period': 90,
-                           'featureName': 'close'}}
-    momDict = {'featureKey': 'mom_90',
-               'featureId': 'momentum',
-               'params': {'period': 30,
-                          'featureName': 'close'}}
-    maRibbonDict = {'featureKey': 'ma_ribbon',
-                    'featureId': 'ma_ribbon',
-                    'params': {'startPeriod': 5,
-                               'endPeriod': 100,
-                               'numRibbons': 20,
-                               'featureName': 'close'}}
-    rsiDict = {'featureKey': 'rsi_30',
-               'featureId': 'rsi',
-               'params': {'period': 30,
-                          'featureName': 'close'}}
-    return {INSTRUMENT_TYPE_STOCK: [ma1Dict, ma2Dict, sdevDict, momDict, maRibbonDict, rsiDict]}
+    def getInstrumentFeatureConfigDicts(self):
+        # ADD RELEVANT FEATURES HERE
 
-  '''
+        predictionDict = {'featureKey': 'prediction',
+                                'featureId': 'prediction',
+                                'params': {}}
+
+        ### TODO: FILL THIS FUNCTION TO CREATE DESIRED FEATURES for each stock
+        ### USE TEMPLATE BELOW AS EXAMPLE 
+        ma1Dict = {'featureKey': 'ma_90',
+                   'featureId': 'moving_average',
+                   'params': {'period': 90,
+                              'featureName': 'Adj Close'}}
+        ma2Dict = {'featureKey': 'ma_5',
+                   'featureId': 'moving_average',
+                   'params': {'period': 5,
+                              'featureName': 'Adj Close'}}
+        sdevDict = {'featureKey': 'sdev_90',
+                    'featureId': 'moving_sdev',
+                    'params': {'period': 90,
+                               'featureName': 'Adj Close'}}
+        momDict = {'featureKey': 'mom_90',
+                   'featureId': 'momentum',
+                   'params': {'period': 30,
+                              'featureName': 'Adj Close'}}
+        rsiDict = {'featureKey': 'rsi_30',
+                   'featureId': 'rsi',
+                   'params': {'period': 30,
+                              'featureName': 'Adj Close'}}
+        return {INSTRUMENT_TYPE_STOCK: [predictionDict, ma1Dict, ma2Dict, sdevDict, momDict, rsiDict]}
+
+    '''
     Returns an array of market feature config dictionaries
         market feature config Dictionary has the following keys:
         featureId: a string representing the type of feature you want to use
@@ -116,15 +129,16 @@ class MyTradingParams(TradingSystemParameters):
         params: A dictionary with which contains other optional params if needed by the feature
     '''
 
-  def getMarketFeatureConfigDicts(self):
+    def getMarketFeatureConfigDicts(self):
     # ADD RELEVANT FEATURES HERE
+        scoreDict = {'featureKey': 'score',
+                     'featureId': 'score_ll',
+                     'params': {'featureName': self.getPriceFeatureKey(),
+                                'instrument_score_feature': 'pnl'}}
+        return [scoreDict]
 
-    # customFeatureDict = {'featureKey': 'custom_mrkt_feature',
-    #                      'featureId': 'my_custom_mrkt_feature',
-    #                      'params': {'param1': 'value1'}}
-    return []
 
-  '''
+    '''
     A function that returns your predicted value based on your heuristics.
     If you are just trading one asset like a stock, it could be the predicted value of the stock.
     If you are doing pair trading, the prediction could be the difference in the prices of the stocks.
@@ -134,65 +148,136 @@ class MyTradingParams(TradingSystemParameters):
     instrumentManager - Holder for all instruments and everything else if you need.
     '''
 
-  def getPrediction(self, time, currentMarketFeatures, instrumentManager):
-    instrumentIds = instrumentManager.getAllInstrumentsByInstrumentId()
-    predictions = {}
-    for ids in instrumentIds:
-      instrument = instrumentManager.getInstrument(ids)
+    def getPrediction(self, time, updateNum, instrumentManager):
 
-      if instrument is None:
-        predictions[ids] = 0.5
+        predictions = pd.Series(index = self.instrumentIds)
 
-      lookbackInstrumentFeatures = instrument.getDataDf().iloc[-1]
-      # IMPLEMENT THIS
-      if lookbackInstrumentFeatures['sdev_90'] != 0:
-        z_score = (lookbackInstrumentFeatures['ma_5'] - lookbackInstrumentFeatures['ma_90']) / lookbackInstrumentFeatures['sdev_90']
-      else:
-        z_score = 0
-      if z_score > 1:
-        predictions[ids] = 0.2
-      elif z_score < -1:
-        predictions[ids] = 0.8
-      elif (z_score > 0.5) or (z_score < -0.5):
-        predictions[ids] = 0.6
-      else:
-        predictions[ids] = 0.5
+        # holder for all the instrument features
+        lookbackInstrumentFeatures = instrumentManager.getLookbackInstrumentFeatures()
 
-    return predictions
+        ### TODO : FILL THIS FUNCTION TO RETURN A BUY (1) or SELL (0) prediction for each stock
+        ### USE TEMPLATE BELOW AS EXAMPLE 
 
-  '''
+        # dataframe for a historical instrument feature (ma_5 in this case). The index is the timestamps
+        # of upto lookback data points. The columns of this dataframe are the stock symbols/instrumentIds.
+        ma5Data = lookbackInstrumentFeatures.getFeatureDf('ma_5')
+        ma90Data = lookbackInstrumentFeatures.getFeatureDf('ma_90')
+        sdevData = lookbackInstrumentFeatures.getFeatureDf('sdev_90')
+
+        # Get the last row of the dataframe, the most recent datapoint
+        if len(ma5Data.index) > 0:
+            ma5 = ma5Data.iloc[-1]
+            ma90 = ma90Data.iloc[-1]
+            sdev = sdevData.iloc[-1]
+
+            #create Zscore
+
+            z_score = (ma5 - ma90)/sdev
+            z_score[sdev==0] = 0
+
+
+            predictions[z_score>1] = 0  #Sell the stock
+            predictions[z_score<-1] = 1 #Buy the stock
+            predictions[(z_score<1) & (z_score>0.5)] = 0.25 # Don't sell but don't close existing positions either
+            predictions[(z_score>-1) & (z_score<-0.5)] = 0.75 # Don't buy but don't close existing positions either
+            predictions[(z_score>-.5) & (z_score<0.5)] = 0.5 # Close existing positions
+
+        return predictions
+
+    '''
     Returns the type of execution system we want to use. Its an implementation of the class ExecutionSystem
     It converts prediction to intended positions for different instruments.
     '''
 
-  def getExecutionSystem(self):
-    return SimpleExecutionSystem(enter_threshold=0.7,
+    def getExecutionSystem(self):
+        return SimpleExecutionSystem(enter_threshold=0.7,
                                  exit_threshold=0.55,
                                  longLimit=10000,
                                  shortLimit=10000,
                                  capitalUsageLimit=0.10 * self.getStartingCapital(),
-                                 lotSize=10)
+                                 lotSize=1)
 
-  '''
+    '''
     Returns the type of order placer we want to use. its an implementation of the class OrderPlacer.
     It helps place an order, and also read confirmations of orders being placed.
     For Backtesting, you can just use the BacktestingOrderPlacer, which places the order which you want, and automatically confirms it too.
     '''
 
-  def getOrderPlacer(self):
-    return BacktestingOrderPlacer()
+    def getOrderPlacer(self):
+        return BacktestingOrderPlacer()
 
-  '''
+    '''
     Returns the amount of lookback data you want for your calculations. The historical market features and instrument features are only
     stored upto this amount.
     This number is the number of times we have updated our features.
     '''
 
-  def getLookbackSize(self):
-    return 90
+    def getLookbackSize(self):
+        return 90
+
+
+    def getPriceFeatureKey(self):
+        return 'Adj Close'
+
+
+class TrainingPredictionFeature(Feature):
+
+    @classmethod
+    def computeForInstrument(cls, updateNum, time, featureParams, featureKey, instrumentManager):
+        t = MyTradingParams()
+        return t.getPrediction(time, updateNum, instrumentManager)
+
+
+
+class MyCustomFeature(Feature):
+    ''''
+    Custom Feature to implement for instrument. This function would return the value of the feature you want to implement.
+    This function would be called at every update cycle for every instrument. To use this feature you MUST do the following things:
+    1. Define it in getCustomFeatures, where you specify the identifier with which you want to access this feature.
+    2. To finally use it in a meaningful way, specify this feature in getFeatureConfigDicts with appropirate feature params.
+    Example for this is provided below.
+    Params:
+    updateNum: current iteration of update. For first iteration, it will be 1.
+    time: time in datetime format when this update for feature will be run
+    featureParams: A dictionary of parameter and parameter values your features computation might depend on.
+                   You define the structure for this. just have to make sure these parameters are provided when
+                   you wanted to actually use this feature in getFeatureConfigDicts
+    featureKey: Name of the key this will feature will be mapped against.
+    instrumentManager: A holder for all the instruments
+    Returns:
+    A Pandas series with stocks/instrumentIds as the index and the corresponding data the value of your custom feature
+    for that stock/instrumentId
+    '''
+    @classmethod
+    def computeForInstrument(cls, updateNum, time, featureParams, featureKey, instrumentManager):
+        # Custom parameter which can be used as input to computation of this feature
+        param1Value = featureParams['param1']
+
+        # A holder for the all the instrument features
+        lookbackInstrumentFeatures = instrumentManager.getLookbackInstrumentFeatures()
+
+        # dataframe for a historical instrument feature (basis in this case). The index is the timestamps
+        # atmost upto lookback data points. The columns of this dataframe are the stocks/instrumentIds.
+        lookbackInstrumentValue = lookbackInstrumentFeatures.getFeatureDf('Adj Close')
+
+        # The last row of the previous dataframe gives the last calculated value for that feature (basis in this case)
+        # This returns a series with stocks/instrumentIds as the index.
+        currentValue = lookbackInstrumentValue.iloc[-1]
+
+        if param1Value == 'value1':
+            return currentValue * 0.1
+        else:
+            return currentValue * 0.5
 
 
 if __name__ == "__main__":
-  tsParams = MyTradingParams()
-  tradingSystem = TradingSystem(tsParams)
-  tradingSystem.startTrading(onlyAnalyze=True, shouldPlot=False)
+    if updateCheck():
+        print('Your version of the auquan toolbox package is old. Please update by running the following command:')
+        print('pip install -U auquan_toolbox')
+    else:
+        tsParams = MyTradingParams()
+        tradingSystem = TradingSystem(tsParams)
+        # Set onlyAnalyze to True to quickly generate csv files with all the features
+        # Set onlyAnalyze to False to run a full backtest
+        # Set makeInstrumentCsvs to False to not make instrument specific csvs in runLogs. This improves the performance BY A LOT
+        tradingSystem.startTrading(onlyAnalyze=False, shouldPlot=True, makeInstrumentCsvs=True)
