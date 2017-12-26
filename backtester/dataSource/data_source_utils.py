@@ -33,7 +33,7 @@ def downloadFileFromYahoo(startDate, endDate, instrumentId, fileName, event='his
     end = int(mktime(endDate.timetuple()))
     url = 'https://query1.finance.yahoo.com/v7/finance/download/%s?period1=%s&period2=%s&interval=1d&events=%s&crumb=%s' % (instrumentId, start, end, event, crumb)
     data = requests.get(url, cookies={'B': cookie})
-    with open(fileName, 'w') as f:
+    with open(fileName, 'wb') as f:
         f.write(data.content)
         return True
     return False
