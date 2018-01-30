@@ -37,5 +37,11 @@ class BaseOrderPlacer():
     def placeOrders(self, time, instrumentExecutions, instrumentsManager):
         raise NotImplementedError
 
-    def emitPlacedOrders(self):
+    def emitPlacedOrders(self, time, instrumentsManager):
         raise NotImplementedError
+
+    '''
+    Called at end of trading to cleanup stuff
+    '''
+    def cleanup(self):
+        return
