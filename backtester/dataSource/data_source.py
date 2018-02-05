@@ -12,3 +12,9 @@ class DataSource(object):
     # returns a list of feature keys which are already present in the data.
     def getBookDataFeatures(self):
         raise NotImplementedError
+
+    '''
+    Called at end of trading to cleanup stuff
+    '''
+    def cleanup(self):
+        return
