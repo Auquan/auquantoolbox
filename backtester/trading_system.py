@@ -36,9 +36,8 @@ class TradingSystem:
         self.orderPlacer = self.tsParams.getOrderPlacer()
         self.portfolioValue = self.tsParams.getStartingCapital()
         self.capital = self.tsParams.getStartingCapital()
-        self.timeRule = self.tsParams.getTimeRuleForUpdates()
         self.instrumentManager = InstrumentManager(self.tsParams, self.dataParser.getBookDataFeatures(), self.dataParser.getInstrumentIds(),
-                                                   self.timeRule)
+                                                   self.tsParams.getTimeRuleForUpdates())
 
     def processInstrumentUpdates(self, timeOfUpdate, instrumentUpdates, onlyAnalyze=False, isClose=False):
         # Process instrument updates first
@@ -143,7 +142,7 @@ class TradingSystem:
         self.stateWriter = StateWriter('runLogs', datetime.strftime(datetime.now(), '%Y%m%d_%H%M%S'), not makeInstrumentCsvs)
         # TODO: Figure out a good way to handle order parsers with live data later on.
         groupedInstrumentUpdates = self.dataParser.emitInstrumentUpdates()
-        timeGetter = self.timeRule.emitTimeToTrade()
+        timeGetter = self.tsParams.getTimeRuleForUpdates().emitTimeToTrade()
         timeOfNextFeatureUpdate = timeGetter.next()
         self.startDate = timeOfNextFeatureUpdate
         timeOfUpdate, instrumentUpdates = groupedInstrumentUpdates.next()
