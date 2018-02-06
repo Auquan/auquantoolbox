@@ -115,8 +115,11 @@ class QuantQuestDataSource(DataSource):
             with open(self.getFileName(instrumentId)) as f:
                 records = csv.DictReader(f)
                 for row in records:
-                    inst = self.getInstrumentUpdateFromRow(instrumentId, row)
-                    allInstrumentUpdates.append(inst)
+                    try:
+                        inst = self.getInstrumentUpdateFromRow(instrumentId, row)
+                        allInstrumentUpdates.append(inst)
+                    except:
+                        continue
 
         groupedInstrumentUpdates = groupAndSortByTimeUpdates(allInstrumentUpdates)
         return groupedInstrumentUpdates
