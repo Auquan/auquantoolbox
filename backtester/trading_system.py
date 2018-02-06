@@ -207,4 +207,4 @@ class TradingSystem:
         self.orderPlacer.cleanup()
         self.dataParser.cleanup()
         self.stateWriter.closeStateWriter()
-        return self.getFinalMetrics([self.startDate, timeOfUpdate], shouldPlot, False)
+        return self.getFinalMetrics([self.startDate, timeOfNextFeatureUpdate], shouldPlot, False)
