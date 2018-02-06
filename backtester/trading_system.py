@@ -72,6 +72,9 @@ class TradingSystem:
 
     def updateFeaturesAndExecute(self, timeOfUpdate, isClose, onlyAnalyze=False):
         print(timeOfUpdate)
+        if (len(self.dataParser.getInstrumentIds()) != len(self.instrumentManager.getAllInstrumentsByInstrumentId().keys())):
+            logInfo('Not updating features at this time coz exists atleast 1 instrument which hasnt had an update yet')
+            return
         self.totalUpdates = self.totalUpdates + 1
         self.updateFeatures(timeOfUpdate)
         if not onlyAnalyze:
@@ -163,6 +166,38 @@ class TradingSystem:
                 except StopIteration:
                     isClose = True
                 self.updateFeaturesAndExecute(currentTimeUpdate, isClose, onlyAnalyze)
+            if not onlyAnalyze and self.portfolioValue < 0:
+                logError('Trading will STOP - OUT OF MONEY!!!!')
+                break
+            if isClose:
+                break
+
+        self.orderPlacer.cleanup()
+        self.dataParser.cleanup()
+        self.stateWriter.closeStateWriter()
+        return self.getFinalMetrics([self.startDate, timeOfUpdate], shouldPlot, False)
+
+    def startTradingLive(self, onlyAnalyze=False, shouldPlot=True, makeInstrumentCsvs=True):
+        self.stateWriter = StateWriter('runLogs', datetime.strftime(datetime.now(), '%Y%m%d_%H%M%S'), not makeInstrumentCsvs)
+        # TODO: Figure out a good way to handle order parsers with live data later on.
+        timeGetter = self.tsParams.getTimeRuleForUpdates().emitTimeToTrade()
+        timeOfNextFeatureUpdate = timeGetter.next()
+        self.startDate = timeOfNextFeatureUpdate
+        isClose = False
+        while True:
+            currentTime = datetime.now()
+            if (currentTime >= timeOfNextFeatureUpdate):
+                currentTimeUpdate = timeOfNextFeatureUpdate
+                try:
+                    timeOfNextFeatureUpdate = timeGetter.next()
+                except StopIteration:
+                    isClose = True
+                self.updateFeaturesAndExecute(currentTimeUpdate, isClose, onlyAnalyze)
+            else:
+                instrumentUpdates = self.dataParser.emitInstrumentUpdates()
+                for instrumentUpdate in instrumentUpdates:
+                    self.processInstrumentUpdates(currentTime, [instrumentUpdate], onlyAnalyze)
+            time.sleep(0.01)
             if not onlyAnalyze and self.portfolioValue < 0:
                 logError('Trading will STOP - OUT OF MONEY!!!!')
                 break
