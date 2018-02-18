@@ -67,7 +67,8 @@ class TradingSystem:
         changeInPosition = placedOrder.getChangeInPosition()
         placedInstrument = self.instrumentManager.getInstrument(instrumentId)
         tradePrice = placedOrder.getTradePrice()
-        placedInstrument.updatePositionAtPrice(changeInPosition, tradePrice)
+        tradeLoss = placedOrder.getTradeLoss()
+        placedInstrument.updatePositionAtPrice(changeInPosition, tradePrice, tradeLoss)
 
     def updateFeaturesAndExecute(self, timeOfUpdate, isClose, onlyAnalyze=False):
         print(timeOfUpdate)

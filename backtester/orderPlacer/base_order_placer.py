@@ -2,11 +2,12 @@ from backtester.logger import *
 
 
 class PlacedOrder():
-    def __init__(self, instrumentId, changeInPosition, timeOfExecution):
+    def __init__(self, instrumentId, changeInPosition, timeOfExecution, tradeLoss):
         self.__instrumentId = instrumentId
         self.__changeInPosition = changeInPosition
         self.__tradePrice = None
         self.__timeOfExecution = timeOfExecution
+        self.__tradeLoss = tradeLoss
 
     def getInstrumentId(self):
         return self.__instrumentId
@@ -25,6 +26,9 @@ class PlacedOrder():
 
     def getTimeOfExecution(self):
         return self.__timeOfExecution
+
+    def getTradeLoss(self):
+        return self.__tradeLoss
 
 
 # TODO: For live orders, we need a way to track what orders we have placed but havent gotten
