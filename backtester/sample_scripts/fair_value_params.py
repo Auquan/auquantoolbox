@@ -147,7 +147,7 @@ class FairValueTradingParams(TradingSystemParameters):
                      'featureId': 'prob1_score',
                      'params': {'price': 'FairValue',
                                 'instrument_score_feature': 'score',
-                                'benchmark_score_feature': 'benchmark_score'}}
+                                'benchmark_score_feature': 'sdev_5_for_exec'}}
         return [scoreDict]
 
     '''
@@ -222,7 +222,7 @@ class SpreadCalculator(Feature):
             logError('Bid and Ask Price Feature Key does not exist')
 
         currentSpread = currentStockAskPrice - currentStockBidPrice + currentFutureAskPrice - currentFutureBidPrice
-        return np.minimum(currentSpread / 8.0, 0.025)
+        return np.minimum(currentSpread / 4.0, 0.25)
 
 
 class TotalFeesCalculator(Feature):

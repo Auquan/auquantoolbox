@@ -4,7 +4,7 @@ import numpy as np
 
 
 class BasisExecutionSystem(SimpleExecutionSystemWithFairValue):
-    def __init__(self, basisEnter_threshold=0.1, basisExit_threshold=0.05,
+    def __init__(self, basisEnter_threshold=0.5, basisExit_threshold=0.1,
                  basisLongLimit=5000, basisShortLimit=5000,
                  basisCapitalUsageLimit=0.05, basisLotSize=100,
                  basisLimitType='L', basis_thresholdParam='sdev',
@@ -58,13 +58,34 @@ class BasisExecutionSystem(SimpleExecutionSystemWithFairValue):
     def enterCondition(self, currentPredictions, instrumentsManager):
         currentDeviationFromPrediction = self.getDeviationFromPrediction(currentPredictions, instrumentsManager)
         currentSpread = self.getSpread(instrumentsManager)
-        return np.abs(currentDeviationFromPrediction) - 4 * self.getFees(instrumentsManager) > (self.enter_threshold) *\
-            np.abs(instrumentsManager.getLookbackInstrumentFeatures().getFeatureDf(self.thresholdParam).iloc[-1])
+        # print(np.minimum(self.spreadLimit, currentSpread))
+        shouldTrade = np.abs(currentDeviationFromPrediction) > (self.enter_threshold) * np.abs(instrumentsManager.getLookbackInstrumentFeatures().getFeatureDf(self.thresholdParam).iloc[-1])
+        shouldTrade[np.abs(currentDeviationFromPrediction) - (self.feesRatio * 4 * self.getFees(instrumentsManager)) - 4 * np.minimum(self.spreadLimit, currentSpread)< 0 ]=False
+        shouldTrade[currentSpread > self.spreadLimit] = False
+        # print(instrumentLookbackData.getFeatureDf('basis').iloc[-1])
+        # print(instrumentLookbackData.getFeatureDf('stockVWAP').iloc[-1])
+        # print(instrumentLookbackData.getFeatureDf('futureVWAP').iloc[-1])
+        # print(currentDeviationFromPrediction)
+        # print('Check if we are outside error thresholdParam')
+        # print(np.abs(currentDeviationFromPrediction) > (self.enter_threshold) * np.abs(instrumentsManager.getLookbackInstrumentFeatures().getFeatureDf(self.thresholdParam).iloc[-1]))
+        # print(currentSpread)
+        # print(self.feesRatio * 4 * self.getFees(instrumentsManager))
+        # print('Check if fee critera met')
+        # print(np.abs(currentDeviationFromPrediction) - (self.feesRatio * 4 * self.getFees(instrumentsManager)) - 4 * np.minimum(self.spreadLimit, currentSpread))
+        # print('Check if spread limit met')
+        # print(currentSpread > self.spreadLimit)
+        # print(shouldTrade)
+        return shouldTrade
 
     def exitCondition(self, currentPredictions, instrumentsManager):
         currentDeviationFromPrediction = self.getDeviationFromPrediction(currentPredictions, instrumentsManager)
         instrumentLookbackData = instrumentsManager.getLookbackInstrumentFeatures()
         position = instrumentLookbackData.getFeatureDf('position').iloc[-1]
+        # print(currentDeviationFromPrediction)
+        print(position)
+        # print((self.exit_threshold) * np.abs(instrumentLookbackData.getFeatureDf(self.thresholdParam).iloc[-1]))
+        # print('Check if exit exitCondition met')
+        # print(-np.sign(position) * (currentDeviationFromPrediction) < (self.exit_threshold) * np.abs(instrumentLookbackData.getFeatureDf(self.thresholdParam).iloc[-1]))
         return -np.sign(position) * (currentDeviationFromPrediction) < (self.exit_threshold) * np.abs(instrumentLookbackData.getFeatureDf(self.thresholdParam).iloc[-1])
 
     # def getExecutions(self, time, instrumentsManager, capital):
