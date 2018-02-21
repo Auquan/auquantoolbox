@@ -55,6 +55,7 @@ def generateGraph(df, fileName, stats, benchmark_pnl):
         "data": [],
         "layout": layout
     }
+    df = pd.read_csv(fileName, index_col = 0, parse_dates=True)
     for col in df.columns[1:]:
         plot_data['data'] += [Scatter(x=df.index, y=df[col], name=col)]
     if benchmark_pnl is not None:
