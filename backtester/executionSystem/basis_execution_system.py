@@ -8,7 +8,7 @@ class BasisExecutionSystem(SimpleExecutionSystemWithFairValue):
                  basisLongLimit=5000, basisShortLimit=5000,
                  basisCapitalUsageLimit=0.05, basisLotSize=100,
                  basisLimitType='L', basis_thresholdParam='sdev',
-                 price='', feeDict=0.0001):
+                 price='', feeDict=0.0001, feesRatio=1.5, spreadLimit=0.25):
         super(BasisExecutionSystem, self).__init__(enter_threshold_deviation=basisEnter_threshold,
                                                    exit_threshold_deviation=basisExit_threshold,
                                                    longLimit=basisLongLimit, shortLimit=basisShortLimit,
@@ -16,6 +16,8 @@ class BasisExecutionSystem(SimpleExecutionSystemWithFairValue):
                                                    limitType=basisLimitType, price=price)
         self.fees = feeDict
         self.thresholdParam = basis_thresholdParam
+        self.feesRatio = feesRatio
+        self.spreadLimit = spreadLimit
 
     def getDeviationFromPrediction(self, currentPredictions, instrumentsManager):
         instrumentLookbackData = instrumentsManager.getLookbackInstrumentFeatures()
