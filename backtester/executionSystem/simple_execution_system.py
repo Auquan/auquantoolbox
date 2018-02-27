@@ -124,12 +124,12 @@ class SimpleExecutionSystem(BaseExecutionSystem):
         return (currentPredictions - 0.5).abs() > (self.enter_threshold - 0.5)
 
     def atPositionLimit(self, capital, positionData):
-        if capital < self.capitalUsageLimit:
+        if capital <= self.capitalUsageLimit:
             logWarn('Not Enough Capital')
             return pd.Series(True, index=positionData.columns)
         position = positionData.iloc[-1]
         # TODO: Cant do this if position and getLongLimit indexes dont match
-        return (position > self.getLongLimit(positionData.columns)) | (position < -self.getShortLimit(positionData.columns))
+        return (position >= self.getLongLimit(positionData.columns)) | (position <= -self.getShortLimit(positionData.columns))
 
     def exitCondition(self, currentPredictions, instrumentsManager):
         return (currentPredictions - 0.5).abs() < (self.exit_threshold - 0.5)

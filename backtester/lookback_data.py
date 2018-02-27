@@ -93,8 +93,11 @@ class LookbackData:
         # for this column to Nan, it raises an error if you try to update the cell which has value Nan
         # to dictionary.
         # only need to do it once for the first update
-        if len(self.__data) == 1 and (isinstance(featureVal, dict)):
-            self.__data[featureKey] = self.__data[featureKey].astype(object)
+        if len(self.__data) == 1 :
+            if (isinstance(featureVal, dict)):
+                self.__data[featureKey] = self.__data[featureKey].astype(object)
+            elif (isinstance(featureVal, str)):
+                self.__data[featureKey] = self.__data[featureKey].astype(str)
         self.__data.set_value(timeOfUpdate, featureKey, featureVal)
 
 

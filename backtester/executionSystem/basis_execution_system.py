@@ -1,6 +1,9 @@
 from backtester.executionSystem.simple_execution_system_fairvalue import SimpleExecutionSystemWithFairValue
 from backtester.logger import *
 import numpy as np
+import pandas as pd
+import time
+from datetime import datetime, time
 
 
 class BasisExecutionSystem(SimpleExecutionSystemWithFairValue):
@@ -8,7 +11,8 @@ class BasisExecutionSystem(SimpleExecutionSystemWithFairValue):
                  basisLongLimit=5000, basisShortLimit=5000,
                  basisCapitalUsageLimit=0.05, basisLotSize=100,
                  basisLimitType='L', basis_thresholdParam='sdev',
-                 price='', feeDict=0.0001, feesRatio=1.5, spreadLimit=0.25):
+                 price='', feeDict=0.0001, feesRatio=1.5, spreadLimit=0.25,
+                 hackTime = time(15,25,0)):
         super(BasisExecutionSystem, self).__init__(enter_threshold_deviation=basisEnter_threshold,
                                                    exit_threshold_deviation=basisExit_threshold,
                                                    longLimit=basisLongLimit, shortLimit=basisShortLimit,
@@ -18,6 +22,7 @@ class BasisExecutionSystem(SimpleExecutionSystemWithFairValue):
         self.thresholdParam = basis_thresholdParam
         self.feesRatio = feesRatio
         self.spreadLimit = spreadLimit
+        self.hackTime = hackTime
 
     def getDeviationFromPrediction(self, currentPredictions, instrumentsManager):
         instrumentLookbackData = instrumentsManager.getLookbackInstrumentFeatures()
@@ -61,9 +66,14 @@ class BasisExecutionSystem(SimpleExecutionSystemWithFairValue):
         currentDeviationFromPrediction = self.getDeviationFromPrediction(currentPredictions, instrumentsManager)
         currentSpread = self.getSpread(instrumentsManager)
         # print(np.minimum(self.spreadLimit, currentSpread))
-        shouldTrade = np.abs(currentDeviationFromPrediction) > (self.enter_threshold) * np.abs(instrumentsManager.getLookbackInstrumentFeatures().getFeatureDf(self.thresholdParam).iloc[-1])
-        shouldTrade[np.abs(currentDeviationFromPrediction) - (self.feesRatio * 4 * self.getFees(instrumentsManager)) - 4 * np.minimum(self.spreadLimit, currentSpread)< 0 ]=False
-        shouldTrade[currentSpread > self.spreadLimit] = False
+        instrumentLookbackData = instrumentsManager.getLookbackInstrumentFeatures()
+        if instrumentLookbackData.getFeatureDf('position').index[-1].time() < self.hackTime :
+            shouldTrade = np.abs(currentDeviationFromPrediction) > (self.enter_threshold) * np.abs(instrumentsManager.getLookbackInstrumentFeatures().getFeatureDf(self.thresholdParam).iloc[-1])
+            shouldTrade[np.abs(currentDeviationFromPrediction) - (self.feesRatio * 4 * self.getFees(instrumentsManager)) - 4 * np.minimum(self.spreadLimit, currentSpread)< 0 ]=False
+            shouldTrade[currentSpread > self.spreadLimit] = False
+        else:
+            shouldTrade = pd.Series(False, index=currentPredictions.index)
+
         # print(instrumentLookbackData.getFeatureDf('basis').iloc[-1])
         # print(instrumentLookbackData.getFeatureDf('stockVWAP').iloc[-1])
         # print(instrumentLookbackData.getFeatureDf('futureVWAP').iloc[-1])
@@ -84,11 +94,21 @@ class BasisExecutionSystem(SimpleExecutionSystemWithFairValue):
         instrumentLookbackData = instrumentsManager.getLookbackInstrumentFeatures()
         position = instrumentLookbackData.getFeatureDf('position').iloc[-1]
         # print(currentDeviationFromPrediction)
-        print(position)
         # print((self.exit_threshold) * np.abs(instrumentLookbackData.getFeatureDf(self.thresholdParam).iloc[-1]))
         # print('Check if exit exitCondition met')
         # print(-np.sign(position) * (currentDeviationFromPrediction) < (self.exit_threshold) * np.abs(instrumentLookbackData.getFeatureDf(self.thresholdParam).iloc[-1]))
         return -np.sign(position) * (currentDeviationFromPrediction) < (self.exit_threshold) * np.abs(instrumentLookbackData.getFeatureDf(self.thresholdParam).iloc[-1])
+
+    def hackCondition(self, currentPredictions, instrumentsManager):
+        instrumentLookbackData = instrumentsManager.getLookbackInstrumentFeatures()
+        position = instrumentLookbackData.getFeatureDf('position').iloc[-1]
+        hack = pd.Series(False, index=currentPredictions.index)
+        if instrumentLookbackData.getFeatureDf('position').index[-1].time() > self.hackTime :
+            hack[position!=0] = True
+            print('Hacking at Close......')
+            print(hack)
+        return hack
+
 
     # def getExecutions(self, time, instrumentsManager, capital):
     #   # TODO:

@@ -66,7 +66,8 @@ class FairValueTradingParams(TradingSystemParameters):
         return dict(self.__problem1Solver.getCustomFeatures(),
                     **{'problem1_prediction': Problem1PredictionFeature,
                        'spread': SpreadCalculator,
-                       'total_fees': TotalFeesCalculator})
+                       'total_fees': TotalFeesCalculator,
+                       'predictionString':predictionString})
 
     '''
     Returns a dictionary with:
@@ -99,13 +100,13 @@ class FairValueTradingParams(TradingSystemParameters):
         fairValuePrediction = {'featureKey': 'prediction',
                                'featureId': 'problem1_prediction',
                                'params': {}}
-        scoreDict = {'featureKey': 'score',
-                     'featureId': 'prob1_score',
-                     'params': {'predictionKey': 'prediction',
-                                'price': 'FairValue'}}
+        # scoreDict = {'featureKey': 'score',
+        #              'featureId': 'prob1_score',
+        #              'params': {'predictionKey': 'prediction',
+        #                         'price': 'FairValue'}}
         sdevDictForExec = {'featureKey': 'sdev_5_for_exec',
                            'featureId': 'moving_sdev',
-                           'params': {'period': 5,
+                           'params': {'period': 375,
                                       'featureName': 'basis'}}
         spreadConfigDict = {'featureKey': 'spread',
                             'featureId': 'spread',
@@ -125,7 +126,7 @@ class FairValueTradingParams(TradingSystemParameters):
                                         'fees': 'fees',
                                         'capitalReqPercent': 0.15}}
         return {INSTRUMENT_TYPE_STOCK: stockFeatureConfigs +
-                [fairValuePrediction, sdevDictForExec, scoreDict,
+                [fairValuePrediction, sdevDictForExec, #scoreDict,
                  spreadConfigDict, feesConfigDict,
                  profitlossConfigDict, capitalConfigDict]}
 
@@ -140,27 +141,34 @@ class FairValueTradingParams(TradingSystemParameters):
     def getMarketFeatureConfigDicts(self):
         # ADD RELEVANT FEATURES HERE
 
-        # customFeatureDict = {'featureKey': 'custom_mrkt_feature',
-        #                      'featureId': 'my_custom_mrkt_feature',
-        #                      'params': {'param1': 'value1'}}
-        scoreDict = {'featureKey': 'score',
-                     'featureId': 'prob1_score',
-                     'params': {'price': 'FairValue',
-                                'instrument_score_feature': 'score',
-                                'benchmark_score_feature': 'sdev_5_for_exec'}}
-        return [scoreDict]
+        prediction = {'featureKey': 'predictionString',
+                             'featureId': 'predictionString',
+                             'params': {'prediction': 'prediction'}}
 
+        pnl = {'featureKey': 'pnlString',
+                             'featureId': 'predictionString',
+                             'params': {'prediction': 'pnl'}}
+        position = {'featureKey': 'positionString',
+                             'featureId': 'predictionString',
+                             'params': {'prediction': 'position'}}
+        # scoreDict = {'featureKey': 'score',
+        #              'featureId': 'prob1_score',
+        #              'params': {'price': 'FairValue',
+        #                         'instrument_score_feature': 'score',
+        #                         'benchmark_score_feature': 'sdev_5_for_exec'}}
+        return [prediction, pnl, position]#[scoreDict]
     '''
     Returns the type of execution system we want to use. Its an implementation of the class ExecutionSystem
     It converts prediction to intended positions for different instruments.
     '''
 
     def getExecutionSystem(self):
-        return BasisExecutionSystem(basisEnter_threshold=0.25, basisExit_threshold=0.01,
-                                    basisLongLimit=5000, basisShortLimit=5000,
+        return BasisExecutionSystem(basisEnter_threshold=1, basisExit_threshold=0.25,
+                                    basisLongLimit=2500, basisShortLimit=2500,
                                     basisCapitalUsageLimit=0.05, basisLotSize=100,
                                     basisLimitType='L', basis_thresholdParam='sdev_5_for_exec',
-                                    price=self.getPriceFeatureKey())
+                                    price=self.getPriceFeatureKey(), feeDict=0.0001, feesRatio=1.5, 
+                                    spreadLimit=0.1)
 
     '''
     Returns the type of order placer we want to use. its an implementation of the class OrderPlacer.
@@ -222,7 +230,7 @@ class SpreadCalculator(Feature):
             logError('Bid and Ask Price Feature Key does not exist')
 
         currentSpread = currentStockAskPrice - currentStockBidPrice + currentFutureAskPrice - currentFutureBidPrice
-        return np.minimum(currentSpread / 4.0, 0.25)
+        return np.minimum(currentSpread / 4.0, 0.10)
 
 
 class TotalFeesCalculator(Feature):
@@ -254,3 +262,14 @@ class TotalFeesCalculator(Feature):
         total = 2 * fees \
                 + (np.abs(changeInPosition) * instrumentLookbackData.getFeatureDf(featureParams['spread']).iloc[-1])
         return total
+
+class predictionString(Feature):
+    @classmethod
+    def computeForMarket(cls, updateNum, time, featureParams, featureKey, currentMarketFeatures, instrumentManager):
+        instrumentLookbackData = instrumentManager.getLookbackInstrumentFeatures()
+        predictionDict = instrumentLookbackData.getFeatureDf(featureParams['prediction']).iloc[-1]
+        # import pdb;pdb.set_trace()
+        predictionStr = predictionDict.apply(lambda x: '%.3f'%x).values
+
+        return ', '.join(predictionDict.apply(lambda x: '%.3f'%x).values)
+
