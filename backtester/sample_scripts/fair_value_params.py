@@ -65,6 +65,8 @@ class FairValueTradingParams(TradingSystemParameters):
     def getCustomFeatures(self):
         return dict(self.__problem1Solver.getCustomFeatures(),
                     **{'problem1_prediction': Problem1PredictionFeature,
+                       'enter_price':EnterPrice,
+                       'enter_flag':EnterFlag,
                        'spread': SpreadCalculator,
                        'total_fees': TotalFeesCalculator,
                        'predictionString':predictionString})
@@ -100,10 +102,12 @@ class FairValueTradingParams(TradingSystemParameters):
         fairValuePrediction = {'featureKey': 'prediction',
                                'featureId': 'problem1_prediction',
                                'params': {}}
-        # scoreDict = {'featureKey': 'score',
-        #              'featureId': 'prob1_score',
-        #              'params': {'predictionKey': 'prediction',
-        #                         'price': 'FairValue'}}
+        enterPriceDict = {'featureKey': 'enter_price',
+                     'featureId': 'enter_price',
+                     'params': {'price': self.getPriceFeatureKey()}}
+        enterFlagDict = {'featureKey': 'enter_flag',
+                     'featureId': 'enter_flag',
+                     'params': {}}
         sdevDictForExec = {'featureKey': 'sdev_5_for_exec',
                            'featureId': 'moving_sdev',
                            'params': {'period': 375,
@@ -126,9 +130,9 @@ class FairValueTradingParams(TradingSystemParameters):
                                         'fees': 'fees',
                                         'capitalReqPercent': 0.15}}
         return {INSTRUMENT_TYPE_STOCK: stockFeatureConfigs +
-                [fairValuePrediction, sdevDictForExec, #scoreDict,
+                [fairValuePrediction, sdevDictForExec,
                  spreadConfigDict, feesConfigDict,
-                 profitlossConfigDict, capitalConfigDict]}
+                 profitlossConfigDict, capitalConfigDict, enterPriceDict, enterFlagDict]}
 
     '''
     Returns an array of market feature config dictionaries
@@ -163,12 +167,12 @@ class FairValueTradingParams(TradingSystemParameters):
     '''
 
     def getExecutionSystem(self):
-        return BasisExecutionSystem(basisEnter_threshold=1, basisExit_threshold=0.25,
+        return BasisExecutionSystem(basisEnter_threshold=.3, basisExit_threshold=0.1,
                                     basisLongLimit=2500, basisShortLimit=2500,
                                     basisCapitalUsageLimit=0.05, basisLotSize=100,
                                     basisLimitType='L', basis_thresholdParam='sdev_5_for_exec',
                                     price=self.getPriceFeatureKey(), feeDict=0.0001, feesRatio=1.5, 
-                                    spreadLimit=0.1)
+                                    spreadLimit=0.05)
 
     '''
     Returns the type of order placer we want to use. its an implementation of the class OrderPlacer.
@@ -210,6 +214,55 @@ class Problem1PredictionFeature(Feature):
         return Problem1PredictionFeature.problem1Solver.getFairValue(updateNum, time, instrumentManager)
 
 
+class EnterPrice(Feature):
+    problem1Solver = None
+
+    @classmethod
+    def setProblemSolver(cls, problem1Solver):
+        Problem1PredictionFeature.problem1Solver = problem1Solver
+
+    @classmethod
+    def computeForInstrument(cls, updateNum, time, featureParams, featureKey, instrumentManager):
+        instrumentLookbackData = instrumentManager.getLookbackInstrumentFeatures()
+        try:
+            priceData = instrumentLookbackData.getFeatureDf(featureParams['price'])
+            currentPrice = priceData.iloc[-1]
+        except KeyError:
+            logError('Price Feature Key does not exist')
+        # import pdb;pdb.set_trace()
+        positionData = instrumentLookbackData.getFeatureDf('position')
+        previousPosition = 0 if updateNum <= 2 else positionData.iloc[-2]
+        currentPosition = 0*currentPrice if updateNum <= 2 else positionData.iloc[-1]
+        changeInPosition = 0 if updateNum <= 2 else positionData.iloc[-1] - positionData.iloc[-2]
+        avgEnterPrice = 0*currentPrice if updateNum <= 2 else instrumentLookbackData.getFeatureDf(featureKey).iloc[-1]
+        avgEnterPrice[currentPosition!=0] = (previousPosition*avgEnterPrice + changeInPosition * currentPrice)/currentPosition
+        avgEnterPrice[currentPosition==0] = 0
+
+        return avgEnterPrice
+
+
+class EnterFlag(Feature):
+    problem1Solver = None
+
+    @classmethod
+    def setProblemSolver(cls, problem1Solver):
+        Problem1PredictionFeature.problem1Solver = problem1Solver
+
+    @classmethod
+    def computeForInstrument(cls, updateNum, time, featureParams, featureKey, instrumentManager):
+        instrumentLookbackData = instrumentManager.getLookbackInstrumentFeatures()
+        positionData = instrumentLookbackData.getFeatureDf('position')
+        previousPosition = 0 if updateNum <= 2 else positionData.iloc[-2]
+        currentPosition = 0*instrumentLookbackData.getFeatureDf('basis').iloc[-1] if updateNum <= 2 else positionData.iloc[-1]
+        changeInPosition = currentPosition - previousPosition
+        enterFlag = 0*currentPosition if updateNum <= 2 else instrumentLookbackData.getFeatureDf(featureKey).iloc[-1]
+        enterFlag[changeInPosition!=0] = True
+        enterFlag[changeInPosition==0] = False
+
+        return enterFlag
+
+
+
 class SpreadCalculator(Feature):
     problem1Solver = None
 
@@ -230,7 +283,7 @@ class SpreadCalculator(Feature):
             logError('Bid and Ask Price Feature Key does not exist')
 
         currentSpread = currentStockAskPrice - currentStockBidPrice + currentFutureAskPrice - currentFutureBidPrice
-        return np.minimum(currentSpread / 4.0, 0.10)
+        return np.minimum(currentSpread / 4.0, 0.20)
 
 
 class TotalFeesCalculator(Feature):

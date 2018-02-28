@@ -3,7 +3,7 @@ from backtester.logger import *
 import numpy as np
 import pandas as pd
 import time
-from datetime import datetime, time
+from datetime import datetime, time, timedelta
 
 
 class BasisExecutionSystem(SimpleExecutionSystemWithFairValue):
@@ -11,12 +11,13 @@ class BasisExecutionSystem(SimpleExecutionSystemWithFairValue):
                  basisLongLimit=5000, basisShortLimit=5000,
                  basisCapitalUsageLimit=0.05, basisLotSize=100,
                  basisLimitType='L', basis_thresholdParam='sdev',
-                 price='', feeDict=0.0001, feesRatio=1.5, spreadLimit=0.25,
+                 price='', feeDict=0.0001, feesRatio=1.5, spreadLimit=0.1,
                  hackTime = time(15,25,0)):
         super(BasisExecutionSystem, self).__init__(enter_threshold_deviation=basisEnter_threshold,
                                                    exit_threshold_deviation=basisExit_threshold,
                                                    longLimit=basisLongLimit, shortLimit=basisShortLimit,
-                                                   capitalUsageLimit=basisCapitalUsageLimit, lotSize=basisLotSize,
+                                                   capitalUsageLimit=basisCapitalUsageLimit, 
+                                                   enterlotSize=basisLotSize, exitlotSize = 5*basisLotSize,
                                                    limitType=basisLimitType, price=price)
         self.fees = feeDict
         self.thresholdParam = basis_thresholdParam
@@ -46,7 +47,7 @@ class BasisExecutionSystem(SimpleExecutionSystemWithFairValue):
             logError('Bid and Ask Price Feature Key does not exist')
 
         currentSpread = currentStockAskPrice - currentStockBidPrice + currentFutureAskPrice - currentFutureBidPrice
-        return currentSpread / 8.0
+        return currentSpread / 4.0
 
     def getFees(self, instrumentsManager):
         instrumentLookbackData = instrumentsManager.getLookbackInstrumentFeatures()
@@ -67,11 +68,16 @@ class BasisExecutionSystem(SimpleExecutionSystemWithFairValue):
         currentSpread = self.getSpread(instrumentsManager)
         # print(np.minimum(self.spreadLimit, currentSpread))
         instrumentLookbackData = instrumentsManager.getLookbackInstrumentFeatures()
-        if instrumentLookbackData.getFeatureDf('position').index[-1].time() < self.hackTime :
+        if instrumentLookbackData.getFeatureDf('position').index[-1].time() < time(15,25,0):#(self.hackTime - timedelta(minutes=10)) :
             shouldTrade = np.abs(currentDeviationFromPrediction) > (self.enter_threshold) * np.abs(instrumentsManager.getLookbackInstrumentFeatures().getFeatureDf(self.thresholdParam).iloc[-1])
             shouldTrade[np.abs(currentDeviationFromPrediction) - (self.feesRatio * 4 * self.getFees(instrumentsManager)) - 4 * np.minimum(self.spreadLimit, currentSpread)< 0 ]=False
-            shouldTrade[currentSpread > self.spreadLimit] = False
+            shouldTrade[instrumentLookbackData.getFeatureDf('enter_flag').iloc[-1]==True] = False
+            # shouldTrade[currentSpread > self.spreadLimit] = False
+            # shouldTrade[['HDFCBANK', 'YESBANK', 'IBREALEST']] = False
+            # print('enter_flag')
+            # print(instrumentLookbackData.getFeatureDf('enter_flag').iloc[-1])
         else:
+            print('Trading time over')
             shouldTrade = pd.Series(False, index=currentPredictions.index)
 
         # print(instrumentLookbackData.getFeatureDf('basis').iloc[-1])
@@ -90,14 +96,28 @@ class BasisExecutionSystem(SimpleExecutionSystemWithFairValue):
         return shouldTrade
 
     def exitCondition(self, currentPredictions, instrumentsManager):
-        currentDeviationFromPrediction = self.getDeviationFromPrediction(currentPredictions, instrumentsManager)
         instrumentLookbackData = instrumentsManager.getLookbackInstrumentFeatures()
+        currentDeviationFromPrediction = self.getDeviationFromPrediction(currentPredictions, instrumentsManager)
+        currentSpread = self.getSpread(instrumentsManager)
+        try:
+            currentMidPrice = instrumentLookbackData.getFeatureDf(self.priceFeature).iloc[-1]
+        except KeyError:
+            logError('You have specified FairValue Execution Type but Price Feature Key does not exist')
+        avgEnterPrice = instrumentLookbackData.getFeatureDf('enter_price').iloc[-1]
+        avgEnterDeviation = currentMidPrice.transpose() - avgEnterPrice
         position = instrumentLookbackData.getFeatureDf('position').iloc[-1]
+        avgEnterDeviation[position==0] = 0
         # print(currentDeviationFromPrediction)
         # print((self.exit_threshold) * np.abs(instrumentLookbackData.getFeatureDf(self.thresholdParam).iloc[-1]))
         # print('Check if exit exitCondition met')
         # print(-np.sign(position) * (currentDeviationFromPrediction) < (self.exit_threshold) * np.abs(instrumentLookbackData.getFeatureDf(self.thresholdParam).iloc[-1]))
-        return -np.sign(position) * (currentDeviationFromPrediction) < (self.exit_threshold) * np.abs(instrumentLookbackData.getFeatureDf(self.thresholdParam).iloc[-1])
+        
+        ## Exit if no longer attractive
+        shouldExit = -np.sign(position) * (currentDeviationFromPrediction) < (self.exit_threshold) * np.abs(instrumentLookbackData.getFeatureDf(self.thresholdParam).iloc[-1])
+        
+        ## Exit to collect profits
+        shouldExit[avgEnterDeviation*np.sign(position) - (self.feesRatio * 4 * self.getFees(instrumentsManager)) - 4 * np.minimum(self.spreadLimit, currentSpread) > 0 ]=True
+        return shouldExit
 
     def hackCondition(self, currentPredictions, instrumentsManager):
         instrumentLookbackData = instrumentsManager.getLookbackInstrumentFeatures()

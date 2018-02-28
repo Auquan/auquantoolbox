@@ -6,12 +6,12 @@ import pandas as pd
 
 class SimpleExecutionSystemWithFairValue(SimpleExecutionSystem):
     def __init__(self, enter_threshold_deviation=0.07, exit_threshold_deviation=0.05, longLimit=10,
-                 shortLimit=10, capitalUsageLimit=0, lotSize=1, limitType='L', price=''):
+                 shortLimit=10, capitalUsageLimit=0, enterlotSize=1, exitlotSize=1, limitType='L', price=''):
         super(SimpleExecutionSystemWithFairValue, self).__init__(enter_threshold=enter_threshold_deviation,
                                                                  exit_threshold=exit_threshold_deviation,
                                                                  longLimit=longLimit, shortLimit=shortLimit,
                                                                  capitalUsageLimit=capitalUsageLimit,
-                                                                 lotSize=lotSize, limitType=limitType, price=price)
+                                                                 enterlotSize=enterlotSize, exitlotSize=exitlotSize, limitType=limitType, price=price)
 
     def getDeviationFromPrediction(self, currentPredictions, instrumentsManager):
         instrumentLookbackData = instrumentsManager.getLookbackInstrumentFeatures()
