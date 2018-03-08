@@ -116,7 +116,7 @@ class BasisExecutionSystem(SimpleExecutionSystemWithFairValue):
         #shouldExit = -np.sign(position) * (currentDeviationFromPrediction) < (self.exit_threshold) * np.abs(instrumentLookbackData.getFeatureDf(self.thresholdParam).iloc[-1])
         
         ## Exit to collect profits
-        shouldExit[avgEnterDeviation*np.sign(position) - (self.feesRatio * 4 * self.getFees(instrumentsManager)) - 4 * np.minimum(self.spreadLimit, currentSpread) > 0 ]=True
+        shouldExit = (avgEnterDeviation*np.sign(position) - (self.feesRatio * 4 * self.getFees(instrumentsManager)) - 4 * np.minimum(self.spreadLimit, currentSpread)) > 0 
         return shouldExit
 
     def hackCondition(self, currentPredictions, instrumentsManager):
