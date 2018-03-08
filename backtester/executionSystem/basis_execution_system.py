@@ -70,7 +70,7 @@ class BasisExecutionSystem(SimpleExecutionSystemWithFairValue):
         instrumentLookbackData = instrumentsManager.getLookbackInstrumentFeatures()
         if instrumentLookbackData.getFeatureDf('position').index[-1].time() < time(15,25,0):#(self.hackTime - timedelta(minutes=10)) :
             shouldTrade = np.abs(currentDeviationFromPrediction) > (self.enter_threshold) * np.abs(instrumentsManager.getLookbackInstrumentFeatures().getFeatureDf(self.thresholdParam).iloc[-1])
-            shouldTrade[np.abs(currentDeviationFromPrediction) - (self.feesRatio * 4 * self.getFees(instrumentsManager)) - 4 * np.minimum(self.spreadLimit, currentSpread)< 0 ]=False
+            shouldTrade[np.abs(currentDeviationFromPrediction) - (self.feesRatio * 2 * self.getFees(instrumentsManager)) - 2 * np.minimum(self.spreadLimit, currentSpread)< 0 ]=False
             shouldTrade[instrumentLookbackData.getFeatureDf('enter_flag').iloc[-1]==True] = False
             # shouldTrade[currentSpread > self.spreadLimit] = False
             # shouldTrade[['HDFCBANK', 'YESBANK', 'IBREALEST']] = False
@@ -113,7 +113,7 @@ class BasisExecutionSystem(SimpleExecutionSystemWithFairValue):
         # print(-np.sign(position) * (currentDeviationFromPrediction) < (self.exit_threshold) * np.abs(instrumentLookbackData.getFeatureDf(self.thresholdParam).iloc[-1]))
         
         ## Exit if no longer attractive
-        shouldExit = -np.sign(position) * (currentDeviationFromPrediction) < (self.exit_threshold) * np.abs(instrumentLookbackData.getFeatureDf(self.thresholdParam).iloc[-1])
+        #shouldExit = -np.sign(position) * (currentDeviationFromPrediction) < (self.exit_threshold) * np.abs(instrumentLookbackData.getFeatureDf(self.thresholdParam).iloc[-1])
         
         ## Exit to collect profits
         shouldExit[avgEnterDeviation*np.sign(position) - (self.feesRatio * 4 * self.getFees(instrumentsManager)) - 4 * np.minimum(self.spreadLimit, currentSpread) > 0 ]=True
