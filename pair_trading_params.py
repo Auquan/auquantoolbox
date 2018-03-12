@@ -10,8 +10,14 @@ from backtester.constants import *
 from my_custom_feature import MyCustomFeature
 from backtester.timeRule.us_time_rule import USTimeRule
 from backtester.features.feature import Feature
+import pandas as pd
+import numpy as np
 
-instrumentIds = ['AAPL', 'MSFT'] # This needs to be in alphabetical order :(
+
+PAIRIDS = {1 : ['AAPL', 'GOOG'],
+           2 : ['ADBE', 'MSFT']}
+
+instrumentIds = ['AAPL', 'ADBE', 'GOOG', 'MSFT'] 
 
 
 class MyTradingParams(TradingSystemParameters):
@@ -20,10 +26,10 @@ class MyTradingParams(TradingSystemParameters):
     '''
 
     def getDataParser(self):
-        startDateStr = '2010/01/01'
-        endDateStr = '2011/06/30'
-        return YahooStockDataSource(cachedFolderName='yahooData',
-                                     dataSetId='',
+        startDateStr = '2007/12/31'
+        endDateStr = '2017/12/31'
+        return YahooStockDataSource(cachedFolderName='yahooData/',
+                                     dataSetId='testPairsTrading',
                                      instrumentIds=instrumentIds,
                                      startDateStr=startDateStr,
                                      endDateStr=endDateStr)
@@ -38,7 +44,7 @@ class MyTradingParams(TradingSystemParameters):
     '''
 
     def getBenchmark(self):
-        return 'NIFTYBEES'
+        return None
 
     def getCustomFeatures(self):
         return {'my_custom_feature': MyCustomFeature,
@@ -46,9 +52,9 @@ class MyTradingParams(TradingSystemParameters):
 
     def getTimeRuleForUpdates(self):
         return USTimeRule(cachedFolderName='yahooData/',
-                          dataSetId='',
-                          startDate = '2010/01/01',
-                          endDate = '2017/06/30')
+                          dataSetId='testPairsTrading',
+                          startDate = '2007/12/31',
+                          endDate = '2017/12/31')
 
     '''
     Returns a dictionary with:
@@ -81,8 +87,20 @@ class MyTradingParams(TradingSystemParameters):
         ma1Dict = {'featureKey': 'ma_90',
                    'featureId': 'moving_average',
                    'params': {'period': 90,
-                              'featureName': 'close'}}
-        return {INSTRUMENT_TYPE_STOCK: [ma1Dict]}
+                              'featureName': 'adjClose'}}
+        ma2Dict = {'featureKey': 'ma_15',
+                   'featureId': 'moving_average',
+                   'params': {'period': 15,
+                              'featureName': 'adjClose'}}
+        sdevDict = {'featureKey': 'ma_15',
+                    'featureId': 'moving_average',
+                    'params': {'period': 15,
+                              'featureName': 'adjClose'}}
+
+        pairValuePrediction = {'featureKey': 'prediction',
+                               'featureId': 'pairvalue_prediction',
+                               'params': {}}
+        return {INSTRUMENT_TYPE_STOCK: [pairValuePrediction]}
 
     '''
     Returns an array of market feature config dictionaries
@@ -95,36 +113,58 @@ class MyTradingParams(TradingSystemParameters):
     def getMarketFeatureConfigDicts(self):
         # ADD RELEVANT FEATURES HERE
 
-        ratioDict = {'featureKey': 'ratio',
+        ratio1Dict = {'featureKey': 'ratio1',
                      'featureId': 'ratio',
-                     'params': {'instrumentId1': instrumentIds[0],
-                                'instrumentId2': instrumentIds[1],
-                                'featureName': 'close'}}
-        ma1Dict = {'featureKey': 'ma_90',
+                     'params': {'instrumentId1': PAIRIDS[1][0],
+                                'instrumentId2': PAIRIDS[1][1],
+                                'featureName': 'adjClose'}}
+        ratio2Dict = {'featureKey': 'ratio2',
+                     'featureId': 'ratio',
+                     'params': {'instrumentId1': PAIRIDS[2][0],
+                                'instrumentId2': PAIRIDS[2][1],
+                                'featureName': 'adjClose'}}
+        ma11Dict = {'featureKey': 'ma_r1_90',
                    'featureId': 'moving_average',
                    'params': {'period': 90,
-                              'featureName': 'ratio'}}
-        ma2Dict = {'featureKey': 'ma_10',
+                              'featureName': 'ratio1'}}
+        ma21Dict = {'featureKey': 'ma_r1_10',
                    'featureId': 'moving_average',
                    'params': {'period': 10,
-                              'featureName': 'ratio'}}
-        sdevDict = {'featureKey': 'sdev_90',
+                              'featureName': 'ratio1'}}
+        sdev1Dict = {'featureKey': 'sdev_r1_90',
                     'featureId': 'moving_sdev',
                     'params': {'period': 90,
-                               'featureName': 'ratio'}}
-        correlDict = {'featureKey': 'correl_90',
+                               'featureName': 'ratio1'}}
+        ma12Dict = {'featureKey': 'ma_r2_90',
+                   'featureId': 'moving_average',
+                   'params': {'period': 90,
+                              'featureName': 'ratio2'}}
+        ma22Dict = {'featureKey': 'ma_r2_10',
+                   'featureId': 'moving_average',
+                   'params': {'period': 10,
+                              'featureName': 'ratio2'}}
+        sdev2Dict = {'featureKey': 'sdev_r2_90',
+                    'featureId': 'moving_sdev',
+                    'params': {'period': 90,
+                               'featureName': 'ratio2'}}
+        correl1Dict = {'featureKey': 'correl_r1_90',
                     'featureId': 'cross_instrument_correlation',
                     'params': {'period': 90,
-                               'instrumentId1': instrumentIds[0],
-                                'instrumentId2': instrumentIds[1],
-                                'featureName': 'close'}}
-        pairValuePrediction = {'featureKey': 'prediction',
-                               'featureId': 'pairvalue_prediction',
-                               'params': {}}
+                               'instrumentId1': PAIRIDS[1][0],
+                                'instrumentId2': PAIRIDS[1][1],
+                                'featureName': 'adjClose'}}
+        correl2Dict = {'featureKey': 'correl_r2_90',
+                    'featureId': 'cross_instrument_correlation',
+                    'params': {'period': 90,
+                               'instrumentId1': PAIRIDS[2][0],
+                                'instrumentId2': PAIRIDS[2][1],
+                                'featureName': 'adjClose'}}
+        
         # customFeatureDict = {'featureKey': 'custom_mrkt_feature',
         #                      'featureId': 'my_custom_mrkt_feature',
         #                      'params': {'param1': 'value1'}}
-        return [ratioDict, ma1Dict, ma2Dict, sdevDict, correlDict, pairValuePrediction]
+        return [ratio1Dict, ma11Dict, ma21Dict, sdev1Dict, correl1Dict, 
+                ratio2Dict, ma12Dict, ma22Dict, sdev2Dict, correl2Dict]
 
     '''
     Returns the type of execution system we want to use. Its an implementation of the class ExecutionSystem
@@ -132,19 +172,24 @@ class MyTradingParams(TradingSystemParameters):
     '''
 
     def getExecutionSystem(self):
-        return PairExecutionSystem(pair=[instrumentIds[0], instrumentIds[1]],
-                                   pairRatio=0.3,
-                                   pairEnter_threshold=0.7,
-                                   pairExit_threshold=0.55,
-                                   pairLongLimit=20000,
-                                   pairShortLimit=20000,
-                                   pairCapitalUsageLimit = 0.10*self.getStartingCapital(),
-                                   pairLotSize=200)
-        # return SimpleExecutionSystem(enter_threshold=0.7,
-        #                              exit_threshold=0.55,
-        #                              longLimit={'ADANIPOWER.BO': 100,'RPOWER.BO': 100 * ratio},
-        #                              shortLimit={'ADANIPOWER.BO': -100,'RPOWER.BO': -100 * ratio},
-        #                              lotSize={'ADANIPOWER.BO': 10,'RPOWER.BO': 10 * ratio})
+        # return PairExecutionSystem(pair=[instrumentIds[0], instrumentIds[1]],
+        #                            pairRatio=0.3,
+        #                            pairEnter_threshold=0.7,
+        #                            pairExit_threshold=0.55,
+        #                            pairLongLimit=20000,
+        #                            pairShortLimit=20000,
+        #                            pairCapitalUsageLimit = 0.10*self.getStartingCapital(),
+        #                            pairLotSize=200)
+        return SimpleExecutionSystem(enter_threshold=0.7, exit_threshold=0.55, 
+                                    longLimit=10000,shortLimit=10000, capitalUsageLimit=.85, 
+                                    enterlotSize=10000, exitlotSize = 10000, limitType='D', price='adjClose')
+
+
+            # enter_threshold=0.7,
+            #                          exit_threshold=0.55,
+            #                          longLimit={'ADANIPOWER.BO': 100,'RPOWER.BO': 100 * ratio},
+            #                          shortLimit={'ADANIPOWER.BO': -100,'RPOWER.BO': -100 * ratio},
+            #                          lotSize={'ADANIPOWER.BO': 10,'RPOWER.BO': 10 * ratio})
 
     '''
     Returns the type of order placer we want to use. its an implementation of the class OrderPlacer.
@@ -168,33 +213,45 @@ class MyTradingParams(TradingSystemParameters):
 class PairValuePredictionFeature(Feature):
 
     @classmethod
-    def computeForMarket(cls, updateNum, time, featureParams, featureKey, currentMarketFeatures, instrumentManager):
+    def computeForInstrument(cls, updateNum, time, featureParams, featureKey, instrumentManager):
+    # def computeForMarket(cls, updateNum, time, featureParams, featureKey, currentMarketFeatures, instrumentManager):
         lookbackMarketFeatures = instrumentManager.getDataDf()
-        # IMPLEMENT THIS
-        if currentMarketFeatures['sdev_90'] != 0:
-            z_score = (currentMarketFeatures['ma_10'] - currentMarketFeatures['ma_90']) / currentMarketFeatures['sdev_90']
-        else:
-            z_score = 0
-        instrument = instrumentManager.getInstrument(instrumentIds[0])
-        #z_score = z_score + instrument.getDataDf()['position']/20000
+        
+        prediction = pd.Series(0.5, index = instrumentManager.getAllInstrumentsByInstrumentId())
+        if len(lookbackMarketFeatures)>0:
+            currentMarketFeatures = lookbackMarketFeatures.iloc[-1]
+            # IMPLEMENT THIS
+            z_score = pd.Series(index = PAIRIDS.keys())
+            for i in PAIRIDS.keys():
+                if currentMarketFeatures['sdev_r%s_90'%i] != 0:
+                  z_score[i] = (currentMarketFeatures['ma_r%s_10'%i] - currentMarketFeatures['ma_r%s_90'%i]) / currentMarketFeatures['sdev_r%s_90'%i]
+                else:
+                  z_score[i] = 0
+                instrument = instrumentManager.getInstrument(instrumentIds[0])
+                #z_score = z_score + instrument.getDataDf()['position']/20000
 
-        if currentMarketFeatures['correl_90'] < 0.5:
-            z_score = 0
-
-        if z_score > 1:
-            return {instrumentIds[0]: .2,
-                    instrumentIds[1]: .8}
-        elif z_score < -1:
-            return {instrumentIds[0]: .8,
-                    instrumentIds[1]: 0.2}
-        elif (z_score > 0.5) or (z_score < -0.5) :
-            return {instrumentIds[0]: 0.6,
-                    instrumentIds[1]: 0.6}
-        else:
-            return {instrumentIds[0]: 0.5,
-                    instrumentIds[1]: 0.5}
+                if currentMarketFeatures['correl_r%s_90'%i] < 0.5:
+                  z_score[i] = 0
 
 
+                if z_score[i] > 1:
+                    print(i, z_score[i], ' is greater than 1')
+                    prediction[PAIRIDS[i][0]] = 0
+                    prediction[PAIRIDS[i][1]] = 1
+                elif z_score[i] < -1:
+                    print(i, z_score[i], ' is less than -1')
+                    prediction[PAIRIDS[i][0]] = 1
+                    prediction[PAIRIDS[i][1]] = 0
+                elif (z_score[i] > 0.5) or (z_score[i] < -0.5) :
+                    print(i, z_score[i], ' is less than -0.5 or greater than 0.5')
+                    prediction[PAIRIDS[i][0]] = 0.75
+                    prediction[PAIRIDS[i][1]] = 0.25
+                else:
+                    print(i, z_score[i], ' is between -0.5 and 0.5')
+                    prediction[PAIRIDS[i][0]] = 0.5
+                    prediction[PAIRIDS[i][1]] = 0.5
+
+        return prediction
 
 
 if __name__ == "__main__":
