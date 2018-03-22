@@ -47,7 +47,7 @@ class BasisExecutionSystem(SimpleExecutionSystemWithFairValue):
             logError('Bid and Ask Price Feature Key does not exist')
 
         currentSpread = currentStockAskPrice - currentStockBidPrice + currentFutureAskPrice - currentFutureBidPrice
-        return currentSpread / 4.0
+        return np.max(self.spreadLimit/2.0 ,currentSpread / 4.0)
 
     def getFees(self, instrumentsManager):
         instrumentLookbackData = instrumentsManager.getLookbackInstrumentFeatures()
