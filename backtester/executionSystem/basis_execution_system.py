@@ -137,14 +137,17 @@ class BasisExecutionSystem(SimpleExecutionSystemWithFairValue):
 
     def hackCondition(self, currentPredictions, instrumentsManager):
         instrumentLookbackData = instrumentsManager.getLookbackInstrumentFeatures()
-        position = instrumentLookbackData.getFeatureDf('position').iloc[-1]
+        position = pd.Series([instrumentsManager.getInstrument(x).getCurrentPosition() for x in instrumentsManager.getAllInstrumentsByInstrumentId()], index=instrumentsManager.getAllInstrumentsByInstrumentId())
+        avgEnterPrice = instrumentLookbackData.getFeatureDf('enter_price').iloc[-1]
         hack = pd.Series(False, index=currentPredictions.index)
+        
+        hack[np.sign(position)*(avgEnterPrice - currentPredictions)>0] = True
+
         if instrumentLookbackData.getFeatureDf('position').index[-1].time() > self.hackTime :
             hack[position!=0] = True
             print('Hacking at Close......')
-            print(hack)
+        print(hack)
         return hack
-
 
     # def getExecutions(self, time, instrumentsManager, capital):
     #   # TODO:
