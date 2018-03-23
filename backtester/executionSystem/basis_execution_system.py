@@ -17,7 +17,7 @@ class BasisExecutionSystem(SimpleExecutionSystemWithFairValue):
                                                    exit_threshold_deviation=basisExit_threshold,
                                                    longLimit=basisLongLimit, shortLimit=basisShortLimit,
                                                    capitalUsageLimit=basisCapitalUsageLimit,
-                                                   enterlotSize=basisLotSize, exitlotSize = 5*basisLotSize,
+                                                   enterlotSize=basisLotSize, exitlotSize = 2*basisLotSize,
                                                    limitType=basisLimitType, price=price)
         self.fees = feeDict
         self.thresholdParam = basis_thresholdParam
@@ -71,10 +71,8 @@ class BasisExecutionSystem(SimpleExecutionSystemWithFairValue):
         if instrumentLookbackData.getFeatureDf('position').index[-1].time() < time(15,25,0):#(self.hackTime - timedelta(minutes=10)) :
             shouldTrade = np.abs(currentDeviationFromPrediction) > (self.enter_threshold) * np.abs(instrumentsManager.getLookbackInstrumentFeatures().getFeatureDf(self.thresholdParam).iloc[-1])
             shouldTrade[np.abs(currentDeviationFromPrediction) - self.feesRatio * (2 * self.getFees(instrumentsManager) + 2 * np.minimum(self.spreadLimit, currentSpread))< 0 ]=False
-            shouldTrade[instrumentLookbackData.getFeatureDf('enter_flag').iloc[-1]==True] = False
+            # shouldTrade[instrumentLookbackData.getFeatureDf('enter_flag').iloc[-1]==True] = False
             # shouldTrade[currentSpread > self.spreadLimit] = False
-            # shouldTrade[['HDFCBANK', 'YESBANK', 'IBREALEST']] = False
-            # print('enter_flag')
             d = pd.DataFrame(index=instrumentsManager.getAllInstrumentsByInstrumentId(),
                               columns=['deviation','threshold','fees','flag','decision'])
             d['deviation'] = currentDeviationFromPrediction
@@ -126,13 +124,13 @@ class BasisExecutionSystem(SimpleExecutionSystemWithFairValue):
         #shouldExit = -np.sign(position) * (currentDeviationFromPrediction) < (self.exit_threshold) * np.abs(instrumentLookbackData.getFeatureDf(self.thresholdParam).iloc[-1])
 
         ## Exit to collect profits
-        shouldExit = (avgEnterDeviation*np.sign(position) - self.feesRatio * (4 * self.getFees(instrumentsManager) + 4 * np.minimum(self.spreadLimit, currentSpread))) > 0
+        shouldExit = (avgEnterDeviation*np.sign(position) - 2 * (1 + self.feesRatio) * (self.getFees(instrumentsManager) + np.minimum(self.spreadLimit, currentSpread))) > 0
 
         d = pd.DataFrame(index=instrumentsManager.getAllInstrumentsByInstrumentId(),
                                        columns=['enterPrice','deviation','fees','decision'])
         d['deviation'] = avgEnterDeviation
         d['enterPrice'] = avgEnterPrice
-        d['fees'] = self.feesRatio * (4 * self.getFees(instrumentsManager) + 4 * np.minimum(self.spreadLimit, currentSpread))
+        d['fees'] = 2 * (self.feesRatio) * (self.getFees(instrumentsManager) + np.minimum(self.spreadLimit, currentSpread))
         d['decision'] = shouldExit
         print(d)
         return shouldExit
