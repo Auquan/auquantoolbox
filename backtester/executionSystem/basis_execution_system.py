@@ -80,6 +80,8 @@ class BasisExecutionSystem(SimpleExecutionSystemWithFairValue):
             d['fees'] = self.feesRatio * (2 * self.getFees(instrumentsManager) + 2 * np.minimum(self.spreadLimit, currentSpread))
             d['flag'] = instrumentLookbackData.getFeatureDf('enter_flag').iloc[-1]
             d['decision'] = shouldTrade
+            d['tfees'] = self.getFees(instrumentsManager)
+            d['sp'] = np.minimum(self.spreadLimit, currentSpread)
             print(d)
             # print(instrumentLookbackData.getFeatureDf('enter_flag').iloc[-1])
         else:
@@ -140,7 +142,7 @@ class BasisExecutionSystem(SimpleExecutionSystemWithFairValue):
         position = pd.Series([instrumentsManager.getInstrument(x).getCurrentPosition() for x in instrumentsManager.getAllInstrumentsByInstrumentId()], index=instrumentsManager.getAllInstrumentsByInstrumentId())
         avgEnterPrice = instrumentLookbackData.getFeatureDf('enter_price').iloc[-1]
         hack = pd.Series(False, index=currentPredictions.index)
-        
+
         hack[np.sign(position)*(avgEnterPrice - currentPredictions)>0] = True
 
         if instrumentLookbackData.getFeatureDf('position').index[-1].time() > self.hackTime :
