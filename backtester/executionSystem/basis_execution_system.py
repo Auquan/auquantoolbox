@@ -73,15 +73,15 @@ class BasisExecutionSystem(SimpleExecutionSystemWithFairValue):
             shouldTrade[np.abs(currentDeviationFromPrediction) - self.feesRatio * (2 * self.getFees(instrumentsManager) + 2 * np.minimum(self.spreadLimit, currentSpread))< 0 ]=False
             # shouldTrade[instrumentLookbackData.getFeatureDf('enter_flag').iloc[-1]==True] = False
             # shouldTrade[currentSpread > self.spreadLimit] = False
-            d = pd.DataFrame(index=instrumentsManager.getAllInstrumentsByInstrumentId(),
-                              columns=['deviation','threshold','fees','flag','decision'])
-            d['deviation'] = currentDeviationFromPrediction
-            d['threshold'] = (self.enter_threshold) * np.abs(instrumentsManager.getLookbackInstrumentFeatures().getFeatureDf(self.thresholdParam).iloc[-1])
-            d['fees'] = self.feesRatio * (2 * self.getFees(instrumentsManager) + 2 * np.minimum(self.spreadLimit, currentSpread))
-            d['flag'] = instrumentLookbackData.getFeatureDf('enter_flag').iloc[-1]
-            d['decision'] = shouldTrade
-            d['tfees'] = self.getFees(instrumentsManager)
-            d['sp'] = np.minimum(self.spreadLimit, currentSpread)
+            #d = pd.DataFrame(index=instrumentsManager.getAllInstrumentsByInstrumentId(),
+            #                  columns=['deviation','threshold','fees','flag','decision'])
+            #d['deviation'] = currentDeviationFromPrediction
+            #d['threshold'] = (self.enter_threshold) * np.abs(instrumentsManager.getLookbackInstrumentFeatures().getFeatureDf(self.thresholdParam).iloc[-1])
+            #d['fees'] = self.feesRatio * (2 * self.getFees(instrumentsManager) + 2 * np.minimum(self.spreadLimit, currentSpread))
+            #d['flag'] = instrumentLookbackData.getFeatureDf('enter_flag').iloc[-1]
+            #d['decision'] = shouldTrade
+            #d['tfees'] = self.getFees(instrumentsManager)
+            #d['sp'] = np.minimum(self.spreadLimit, currentSpread)
             print(d)
             # print(instrumentLookbackData.getFeatureDf('enter_flag').iloc[-1])
         else:
