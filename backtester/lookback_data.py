@@ -71,21 +71,21 @@ class LookbackData:
         else:
             self.__data = initializer['market']
             self.__columns = self.__data.columns
-            self.__times.extendleft(reversed(self.__data.index.values))
-            self.__storedData.extendleft(reversed(self.__data.values))
-
+            self.__times.extendleft(reversed(self.__data.index))
+            # self.__storedData.extendleft(reversed(self.__data.values))
 
 
         # self.__data = pd.DataFrame(data=self.__storedData, columns=self.__columns, index=self.__times)
         # self.__storedData = pd.DataFrame(columns=columns)
 
     def addData(self, timeOfUpdate, data):
-        self.__storedData.append(data)
+        # self.__storedData.append(data)
         self.__times.append(timeOfUpdate)
         if len(self.__storedData) > self.__size:
-            self.__storedData.popleft()
+            # self.__storedData.popleft()
             self.__times.popleft()
-        self.__data = pd.DataFrame(data=list(self.__storedData), columns=self.__columns, index=list(self.__times))
+        self.__data = self.__data.reindex(pd.to_datetime(self.__times))
+        #pd.DataFrame(data=list(self.__storedData), columns=self.__columns, index=pd.to_datetime(self.__times))
         # self.__storedData.loc[timeOfUpdate] = data
 
     '''
@@ -107,7 +107,7 @@ class LookbackData:
                 self.__data[featureKey] = self.__data[featureKey].astype(object)
             elif (isinstance(featureVal, str)):
                 self.__data[featureKey] = self.__data[featureKey].astype(str)
-        self.__data.set_value(timeOfUpdate, featureKey, featureVal)
+        self.__data.at[timeOfUpdate, featureKey] = featureVal
 
 
 if __name__ == "__main__":
