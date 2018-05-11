@@ -61,12 +61,21 @@ class LookbackDataEfficient:
 
 
 class LookbackData:
-    def __init__(self, size, columns):
+    def __init__(self, size, columns, initializer=None):
         self.__size = size
-        self.__columns = columns
         self.__storedData = deque([])
         self.__times = deque([])
-        self.__data = pd.DataFrame(data=list(self.__storedData), columns=self.__columns, index=list(self.__times))
+        if initializer is None:
+            self.__columns = columns
+            self.__data = pd.DataFrame(data=list(self.__storedData), columns=self.__columns, index=list(self.__times))
+        else:
+            self.__data = initializer['market']
+            self.__columns = self.__data.columns
+            self.__times.extendleft(reversed(self.__data.index.values))
+            self.__storedData.extendleft(reversed(self.__data.values))
+
+
+
         # self.__data = pd.DataFrame(data=self.__storedData, columns=self.__columns, index=self.__times)
         # self.__storedData = pd.DataFrame(columns=columns)
 

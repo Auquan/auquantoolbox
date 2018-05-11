@@ -91,7 +91,7 @@ def getCompulsoryInstrumentFeatureConfigs(tsParams, instrumentType):
 
 
 class InstrumentManager:
-    def __init__(self, tsParams, bookDataFeatures, instrumentIds, frequencyGetter):
+    def __init__(self, tsParams, bookDataFeatures, instrumentIds, frequencyGetter, initializer=None):
         self.tsParams = tsParams
         self.__instrumentsDict = {}
         # TODO: create a different place to hold different types of instruments
@@ -100,7 +100,7 @@ class InstrumentManager:
         columns = map(lambda x: x.getFeatureKey(), featureConfigs)
         compulsoryColumns = map(lambda x: x.getFeatureKey(), self.__compulsoryFeatureConfigs)
         marketFeatureKeys = list(chain(columns, compulsoryColumns))
-        self.__lookbackMarketFeatures = LookbackData(tsParams.getLookbackSize(), marketFeatureKeys)
+        self.__lookbackMarketFeatures = LookbackData(tsParams.getLookbackSize(), marketFeatureKeys, initializer)
 
         self.__bookDataFeatures = bookDataFeatures
         self.__compulsoryInstrumentFeatureConfigs = getCompulsoryInstrumentFeatureConfigs(tsParams, INSTRUMENT_TYPE_STOCK)
@@ -111,7 +111,8 @@ class InstrumentManager:
         self.__lookbackInstrumentFeatures = InstrumentsLookbackData(size=tsParams.getLookbackSize(),
                                                                     features=featureKeys,
                                                                     instrumentIds=instrumentIds,
-                                                                    frequencyGetter=frequencyGetter)
+                                                                    frequencyGetter=frequencyGetter,
+                                                                    initializer=initializer)
 
         self.__totalIter = 0
         self.__perfDict = {}
