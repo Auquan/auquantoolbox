@@ -146,6 +146,8 @@ class TradingSystem:
             resultDict.update(processResult(stats, self.stateWriter.getFolderName(), self.stateWriter.getMarketFeaturesFilename()))
         if shouldPlotFeatures:
             generateGraph(self.instrumentManager.getDataDf(), self.stateWriter.getMarketFeaturesFilename(), stats, None)
+        print('Finished')
+        print(resultDict)
         return resultDict
 
     def startTrading(self, onlyAnalyze=False, shouldPlot=True, makeInstrumentCsvs=True):
@@ -186,7 +188,9 @@ class TradingSystem:
         dataToStore = {'market':marketFeaturesDf, 'instrument':instrumentLookbackData}
         with open('savedData%s'%datetime.strftime(datetime.now(), '%Y%m%d'), 'wb') as myFile:
             cPickle.dump(dataToStore, myFile)
-        return self.getFinalMetrics([self.startDate, timeOfUpdate], shouldPlot, False)
+        ret = self.getFinalMetrics([self.startDate, timeOfUpdate], shouldPlot, False)
+        print('Dunzo')
+        return ret
 
     def startTradingLive(self, onlyAnalyze=False, shouldPlot=True, makeInstrumentCsvs=True):
         self.stateWriter = StateWriter('runLogs', datetime.strftime(datetime.now(), '%Y%m%d_%H%M%S'), not makeInstrumentCsvs)

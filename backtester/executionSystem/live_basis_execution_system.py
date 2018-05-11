@@ -72,4 +72,9 @@ class LiveBasisExecutionSystem(SimpleExecutionSystemWithFairValue):
         hack = pd.Series(False, index=currentPredictions.index)
         return hack
 
+    def exitPosition(self, time, instrumentsManager, currentPredictions, closeAllPositions=False):
+        return pd.Series(0, index=currentPredictions.index)
 
+    def enterPosition(self, time, instrumentsManager, currentPredictions, capital):
+        executions = pd.Series(self.enterlotSize, index=currentPredictions.index)
+        return executions
