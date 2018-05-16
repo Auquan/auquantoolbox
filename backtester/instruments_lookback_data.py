@@ -7,11 +7,11 @@ class InstrumentsLookbackData:
         self.__features = features
         self.__instrumentIds = instrumentIds
         self.__data = {}
-        if initializer is None:
-            for feature in self.__features:
+        for feature in self.__features:
+            if initializer is None:
                 self.__data[feature] = LookbackDataEfficient(size, instrumentIds, frequencyGetter.emitTimeToTrade())
-        else:
-            self.__data = initializer['instrument']
+            else:
+                self.__data[feature] = LookbackDataEfficient(size, instrumentIds, frequencyGetter.emitTimeToTrade(), initializer['instrument'][feature])
 
 
     def addFeatureValueForAllInstruments(self, timeOfUpdate, featureKey, values):

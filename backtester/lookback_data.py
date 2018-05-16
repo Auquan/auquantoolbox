@@ -8,7 +8,8 @@ MAX_THRESHOLD = 2000
 
 # TODO: Use indexListGetter better
 class LookbackDataEfficient:
-    def __init__(self, lookbackSize, columns, indexListGetter):
+    def __init__(self, lookbackSize, columns, indexListGetter, initializer=None):
+        self.__isInitialized = False
         self.__lookbackSize = lookbackSize
         self.__columns = columns
         self.__indexList = []
@@ -18,10 +19,33 @@ class LookbackDataEfficient:
         self.__endLookbackData = 0
         self.__endIndexList = 0
         self.__maxSize = self.computeMaxSize(lookbackSize, len(self.__indexList))
+        
         newEndIndexList = self.__endIndexList + self.__maxSize if (len(self.__indexList) > self.__endIndexList + self.__maxSize) else len(self.__indexList)
-        self.__data = pd.DataFrame(columns=self.__columns, index=self.__indexList[self.__endIndexList:newEndIndexList])
-        self.__endIndexList = newEndIndexList
+        if initializer is not None:
+            self.__isInitialized = True
+            initializerLookbackSize = min(lookbackSize, len(initializer.getData()))
+            if lookbackSize < len(self.__indexList):
+                self.__data = pd.DataFrame(columns=self.__columns, index=initializer.getIndexList()[-initializerLookbackSize:]+self.__indexList[self.__endIndexList:newEndIndexList-initializerLookbackSize])
+                self.__endIndexList = newEndIndexList - initializerLookbackSize
+            else:
+                self.__data = pd.DataFrame(columns=self.__columns, index=initializer.getIndexList()[-initializerLookbackSize:]+self.__indexList[self.__endIndexList:newEndIndexList])
+                self.__endIndexList = newEndIndexList
+                self.__maxSize = initializerLookbackSize + newEndIndexList
+
+            self.__data.iloc[0:initializerLookbackSize] = initializer.getData().iloc[-initializerLookbackSize:]
+            self.__endLookbackData = initializerLookbackSize
+            
+        else:
+            self.__data = pd.DataFrame(columns=self.__columns, index=self.__indexList[self.__endIndexList:newEndIndexList])
+            self.__endIndexList = newEndIndexList
         self.__hasSetOnce = False
+
+
+    def getIndexList(self):
+        return self.__indexList
+
+    def getData(self):
+        return self.__data
 
     def computeMaxSize(self, lookbackSize, lenIndexList):
         maxSize = lookbackSize * SIZE_FACTOR
@@ -38,10 +62,14 @@ class LookbackDataEfficient:
     def addData(self, timeOfUpdate, data):
         if (self.__endLookbackData == self.__maxSize):
             # make a new dataframe and copy
+            print('making new df')
             newEndIndexList = self.__endIndexList - self.__lookbackSize + self.__maxSize
             if newEndIndexList > len(self.__indexList):
                 newEndIndexList = len(self.__indexList)
-            newData = pd.DataFrame(columns=self.__columns, index=self.__indexList[self.__endIndexList - self.__lookbackSize: newEndIndexList])
+            if self.__isInitialized:
+                newData = pd.DataFrame(columns=self.__columns, index=self.__indexList[self.__endIndexList - self.__lookbackSize: newEndIndexList]) 
+            else:
+                newData = pd.DataFrame(columns=self.__columns, index=self.__indexList[self.__endIndexList - self.__lookbackSize: newEndIndexList])
             self.__endIndexList = newEndIndexList
             newData.iloc[0:self.__lookbackSize] = self.__data.iloc[self.__startLookbackData:self.__endLookbackData]
             self.__startLookbackData = 0
