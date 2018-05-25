@@ -15,7 +15,6 @@ class Metrics():
         # + ' Benchmark: %0.2f%% ' % (100 * self.__stats['Base Return(%)']) \
         str = \
             ' Total Pnl: %0.2f%% ' % (100 * self.__stats['Total Pnl(%)']) \
-            + ' Score: %0.2f ' % self.__stats['Score'] \
             + ' Max Drawdown: %0.2f%% ' % (100 * self.__stats['Max Drawdown(%)']) \
             + ' RoC: %0.2f%% ' % (100 * self.__stats['RoC(%)']) \
             + ' P/L Ratio: %0.2f ' % self.__stats['Profit/Loss Ratio'] \

@@ -6,17 +6,19 @@ SIZE_FACTOR = 3
 MIN_THRESHOLD = 500
 MAX_THRESHOLD = 2000
 
-
+# TODO: Use indexListGetter better
 class LookbackDataEfficient:
-    def __init__(self, lookbackSize, columns, indexList):
+    def __init__(self, lookbackSize, columns, indexListGetter):
         self.__lookbackSize = lookbackSize
         self.__columns = columns
-        self.__indexList = indexList
+        self.__indexList = []
+        for t in indexListGetter:
+            self.__indexList.append(t)
         self.__startLookbackData = 0
         self.__endLookbackData = 0
         self.__endIndexList = 0
-        self.__maxSize = self.computeMaxSize(lookbackSize, len(indexList))
-        newEndIndexList = self.__endIndexList + self.__maxSize if (len(indexList) > self.__endIndexList + self.__maxSize) else len(self.__indexList)
+        self.__maxSize = self.computeMaxSize(lookbackSize, len(self.__indexList))
+        newEndIndexList = self.__endIndexList + self.__maxSize if (len(self.__indexList) > self.__endIndexList + self.__maxSize) else len(self.__indexList)
         self.__data = pd.DataFrame(columns=self.__columns, index=self.__indexList[self.__endIndexList:newEndIndexList])
         self.__endIndexList = newEndIndexList
         self.__hasSetOnce = False

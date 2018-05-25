@@ -6,7 +6,8 @@ from backtester.orderPlacer.backtesting_order_placer import BacktestingOrderPlac
 from backtester.trading_system import TradingSystem
 from backtester.constants import *
 from backtester.features.feature import Feature
-import numpy as np
+from backtester.timeRule.quant_quest_time_rule import QuantQuestTimeRule
+
 
 class FeaturePredictionTradingParams(TradingSystemParameters):
 
@@ -32,14 +33,20 @@ class FeaturePredictionTradingParams(TradingSystemParameters):
                                     instrumentIds=instrumentIds)
 
     '''
-    Returns a timedetla object to indicate frequency of updates to features
-    Any updates within this frequncy to instruments do not trigger feature updates.
-    Consequently any trading decisions that need to take place happen with the same
-    frequency
+    Returns an instance of class TimeRule, which describes the times at which
+    we should update all the features and try to execute any trades based on
+    execution logic.
+    For eg, for intra day data, you might have a system, where you get data
+    from exchange at a very fast rate (ie multiple times every second). However,
+    you might want to run your logic of computing features or running your execution
+    system, only at some fixed intervals (like once every 5 seconds). This depends on your
+    strategy whether its a high, medium, low frequency trading strategy. Also, performance
+    is another concern. if your execution system and features computation are taking
+    a lot of time, you realistically wont be able to keep upto pace.
     '''
-
-    def getFrequencyOfFeatureUpdates(self):
-        return timedelta(0, 30)  # minutes, seconds
+    def getTimeRuleForUpdates(self):
+        return QuantQuestTimeRule(cachedFolderName='historicalData/',
+                                  dataSetId=self.__dataSetId)
 
     def getBenchmark(self):
         return None

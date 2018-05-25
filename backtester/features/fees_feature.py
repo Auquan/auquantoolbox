@@ -19,7 +19,7 @@ class FeesFeature(Feature):
                 priceData = instrumentLookbackData.getFeatureDf(featureParams['price'])
                 currentPrice = priceData.iloc[-1]
             except KeyError:
-                logError('Price Feature Key does not exist')
+                currentPrice = 0
             fees = fees * currentPrice
         return fees
 

@@ -1,4 +1,5 @@
 from backtester.executionSystem.simple_execution_system import SimpleExecutionSystem
+import pandas as pd
 
 
 class PairExecutionSystem(SimpleExecutionSystem):
@@ -12,3 +13,12 @@ class PairExecutionSystem(SimpleExecutionSystem):
                                                   shortLimit=shortLimit,
                                                   capitalUsageLimit=pairCapitalUsageLimit,
                                                   lotSize=lotSize)
+
+    def getExecutions(self, time, instrumentsManager, capital):
+        marketFeatures = instrumentsManager.getLookbackMarketFeatures().getData()
+        currentPrediction = marketFeatures['prediction'].iloc[-1]
+        currentPredictions = pd.DataFrame(data=[currentPrediction], index=[time]).iloc[-1]
+        executions = self.exitPosition(time, instrumentsManager, currentPredictions)
+        executions += self.enterPosition(time, instrumentsManager, currentPredictions, capital)
+        # executions is a series with stocknames as index and positions to execute as column (-10 means sell 10)
+        return self.getInstrumentExecutionsFromExecutions(time, executions)

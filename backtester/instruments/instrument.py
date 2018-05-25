@@ -12,6 +12,7 @@ class Instrument(object):
         self.tsParams = tsParams
         self.__position = 0
         self.__lastTradePrice = 0
+        self.__lastTradeLoss = 0
 
     def getInstrumentType(self):
         raise NotImplementedError
@@ -33,15 +34,19 @@ class Instrument(object):
 
         self.__currentInstrumentUpdate = instrumentUpdate
 
-    def updatePositionAtPrice(self, changeInPosition, tradePrice):
+    def updatePositionAtPrice(self, changeInPosition, tradePrice, tradeLoss):
         self.__position = self.__position + changeInPosition
         self.__lastTradePrice = tradePrice
+        self.__lastTradeLoss = tradeLoss
 
     def getCurrentPosition(self):
         return self.__position
 
     def getLastTradePrice(self):
         return self.__lastTradePrice
+
+    def getLastTradeLoss(self):
+        return self.__lastTradeLoss
 
     def getCurrentBookData(self):
         return self.__currentInstrumentUpdate.getBookData()
