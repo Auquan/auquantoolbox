@@ -5,10 +5,6 @@ from pandas.tseries.offsets import CustomBusinessHour
 from pandas.tseries.offsets import CustomBusinessDay
 from pandas.tseries.holiday import USFederalHolidayCalendar
 import os
-try:
-    from urllib2 import urlopen
-except ImportError:
-    from urllib.request import urlopen
 
 
 class USTimeRule(TimeRule):
