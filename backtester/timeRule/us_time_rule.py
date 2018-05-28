@@ -28,16 +28,17 @@ class USTimeRule(TimeRule):
         return pd.date_range(start=self.__startDate, end=self.__endDate, freq= bday_us)
 
     def createBusinessHourSeries(self):
-        bhour_us = CustomBusinessHour(start='9:00', end='15:30', calendar=USFederalHolidayCalendar())
+        bhour_us = CustomBusinessHour(start='9:00', end='16:00', calendar=USFederalHolidayCalendar())
         return pd.date_range(start=self.__startDate, end=self.__endDate, freq= bhour_us)
 
     def createBusinessMinSeries(self):
         hour_series = createBusinessHourSeries()
+        return pd.date_range(hour_series.min(), hour_series.max(), freq='min')
 
 
     def createBusinessSecSeries(self):
-        bhour_us = CustomBusinessHour(start='9:00', end='15:30', calendar=USFederalHolidayCalendar())
-        return pd.date_range(start=self.__startDate, end=self.__endDate, freq= bhour_us)
+        hour_series = createBusinessHourSeries()
+        return pd.date_range(hour_series.min(), hour_series.max(), freq='s')
 
 
     def emitTimeToTrade(self):
