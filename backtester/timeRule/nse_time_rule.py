@@ -1,3 +1,4 @@
+from backtester.timeRule.custom_time_rule import CustomTimeRule
 from datetime import datetime, timedelta
 import os
 import os.path
@@ -35,35 +36,3 @@ class NSETimeRule(TimeRule):
         except urllib2.HTTPError as e:
             print(e.fp.read())
             return None
-
-    # def createBusinessDaySeries(self):
-    #     bday_in = CustomBusinessDay(holidays = getNSEHolidays(), weekmask = 'Mon Tue Wed Thu Fri')
-    #     return pd.date_range(start=self.__startDate, end=self.__endDate, freq= bday_in)
-    #
-    # def createBusinessHourSeries(self):
-    #     bhour_in = CustomBusinessHour(start='9:00', end='16:00', holidays = getNSEHolidays(), weekmask = 'Mon Tue Wed Thu Fri')
-    #     return pd.date_range(start=self.__startDate, end=self.__endDate, freq= bhour_in)
-    #
-    # def createBusinessMinSeries(self):
-    #     hour_series = createBusinessHourSeries()
-    #     return pd.date_range(hour_series.min(), hour_series.max(), freq='min')
-    #
-    #
-    # def createBusinessSecSeries(self):
-    #     hour_series = createBusinessHourSeries()
-    #     return pd.date_range(hour_series.min(), hour_series.max(), freq='s')
-    #
-    #
-    # def emitTimeToTrade(self):
-    #     time_range = None
-    #     if(self.__frequency == 'D'):
-    #         time_range = self.createBusinessDaySeries()
-    #     elif(self.__frequency == 'H'):
-    #         time_range = self.createBusinessHourSeries()
-    #     elif(self.__frequency == 'M'):
-    #         time_range = self.createBusinessMinSeries()
-    #     elif(self.__frequency == 'S'):
-    #         time_range = self.createBusinessSecSeries()
-    #
-    #     for timestamp in time_range:
-    #         yield timestamp
