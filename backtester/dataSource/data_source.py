@@ -13,6 +13,8 @@ class DataSource(object):
     def getBookDataFeatures(self):
         raise NotImplementedError
 
+    def emitAllIntrumentUpdates():
+        raise NotImplementedError
     '''
     Called at end of trading to cleanup stuff
     '''
