@@ -20,7 +20,7 @@ def is_number(s):
 
 
 class QuantQuestDataSource(DataSource):
-    def __init__(self, cachedFolderName, dataSetId, instrumentIds):
+    def __init__(self, cachedFolderName, dataSetId, instrumentIds, liveUpdates=True):
         self.__cachedFolderName = cachedFolderName
         self.__dataSetId = dataSetId
         self.ensureDirectoryExists(cachedFolderName, dataSetId)
@@ -31,6 +31,10 @@ class QuantQuestDataSource(DataSource):
             self.__instrumentIds = self.getAllInstrumentIds()
         self.__bookDataFeatureKeys = None
         self.__groupedInstrumentUpdates = self.getGroupedInstrumentUpdates()
+        if not liveUpdates:
+            self.processAllInstrumentUpdates()
+            del self.__groupedInstrumentUpdates
+            self.filterUpdatesByDates()
 
     def ensureDirectoryExists(self, cachedFolderName, dataSetId):
         if not os.path.exists(cachedFolderName):

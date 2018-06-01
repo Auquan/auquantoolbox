@@ -10,7 +10,7 @@ try:
     import urllib2 as ue
 except ImportError:
     from urllib.request import urlopen
-    import urllib.error as ue 
+    import urllib.error as ue
 import pandas as pd
 import time
 
@@ -29,14 +29,14 @@ def checkDate(lineItem):
         return False
 
 class QuandlDataSource(DataSource):
-    def __init__(self, cachedFolderName, dataSetId, instrumentIds, startDate, endDate):
+    def __init__(self, cachedFolderName, dataSetId, instrumentIds, startDate, endDate, liveUpdates=True):
         self.__cachedFolderName = cachedFolderName
         self.__dataSetId = dataSetId
         if(not checkDate(startDate)):
             self.__startDate = datetime.strptime(startDate, '%Y/%m/%d').strftime('%Y-%m-%d')
         if(not checkDate(endDate)):
             self.__endDate = datetime.strptime(endDate, '%Y/%m/%d').strftime('%Y-%m-%d')
-        self.dateAppend = "_%sto%s"%(datetime.strptime(startDate, '%Y/%m/%d').strftime('%Y-%m-%d'),datetime.strptime(startDate, '%Y/%m/%d').strftime('%Y-%m-%d'))    
+        self.dateAppend = "_%sto%s"%(datetime.strptime(startDate, '%Y/%m/%d').strftime('%Y-%m-%d'),datetime.strptime(startDate, '%Y/%m/%d').strftime('%Y-%m-%d'))
         self.ensureDirectoryExists(cachedFolderName, dataSetId)
         if instrumentIds is not None and len(instrumentIds) > 0:
             self.__instrumentIds = instrumentIds
@@ -45,8 +45,13 @@ class QuandlDataSource(DataSource):
         self.__bookDataByFeature = {}
         self.__groupedInstrumentUpdates = self.getGroupedInstrumentUpdates()
         self.__allTimes = None
-        print ('Processing instruments before beginning backtesting. This could take some time...')
-        self.processGroupedInstrumentUpdates()
+        if liveUpdates:
+            print ('Processing instruments before beginning backtesting. This could take some time...')
+            self.processGroupedInstrumentUpdates()
+        else:
+            self.processAllInstrumentUpdates()
+            del self.__groupedInstrumentUpdates
+            self.filterUpdatesByDates([(startDate, endDate)])
 
     def downloadFile(self, instrumentId, downloadLocation):
         url = 'https://www.quandl.com/api/v3/datasets/WIKI/%s.csv?start_date=%s&end_date=%s'%(instrumentId,self.__startDate,self.__endDate)

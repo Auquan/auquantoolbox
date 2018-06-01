@@ -105,7 +105,7 @@ class InstrumentsFromFile():
 
 
 class GoogleStockDataSource(DataSource):
-    def __init__(self, cachedFolderName, dataSetId, instrumentIds, startDateStr, endDateStr, adjustPrice=False, downloadId = ".NS"):
+    def __init__(self, cachedFolderName, dataSetId, instrumentIds, startDateStr, endDateStr, adjustPrice=False, downloadId = ".NS", liveUpdates=True):
         self.__downloadId = downloadId
         self.startDate = datetime.strptime(startDateStr, "%Y/%m/%d")
         self.endDate = datetime.strptime(endDateStr, "%Y/%m/%d")
@@ -121,7 +121,12 @@ class GoogleStockDataSource(DataSource):
             self.__instrumentIds = self.getAllInstrumentIds()
         self.__bookDataByFeature = {}
         self.__groupedInstrumentUpdates = self.getGroupedInstrumentUpdates()
-        self.processGroupedInstrumentUpdates()
+        if liveUpdates:
+            self.processGroupedInstrumentUpdates()
+        else:
+            self.processAllInstrumentUpdates()
+            del self.__groupedInstrumentUpdates
+            self.filterUpdatesByDates([(startDateStr, endDateStr)])
         self.lineLength = 6
 
     def downloadFile(self, instrumentId, fileName):

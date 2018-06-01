@@ -129,7 +129,7 @@ class InstrumentsFromFile():
 
 
 class NSEStockDataSource(DataSource):
-    def __init__(self, cachedFolderName, dataSetId, instrumentIds, startDateStr, endDateStr, adjustPrice=False, downloadId = ".NS"):
+    def __init__(self, cachedFolderName, dataSetId, instrumentIds, startDateStr, endDateStr, adjustPrice=False, downloadId = ".NS", liveUpdates=True):
         self.startDate = datetime.strptime(startDateStr, "%Y/%m/%d")
         self.endDate = datetime.strptime(endDateStr, "%Y/%m/%d")
         self.dateAppend = "_%sto%s"%(datetime.strptime(startDateStr, '%Y/%m/%d').strftime('%Y-%m-%d'),datetime.strptime(startDateStr, '%Y/%m/%d').strftime('%Y-%m-%d'))
@@ -145,7 +145,12 @@ class NSEStockDataSource(DataSource):
         self.__bookDataByFeature = {}
         self.adjustPrice = adjustPrice
         self.__groupedInstrumentUpdates = self.getGroupedInstrumentUpdates()
-        self.processGroupedInstrumentUpdates()
+        if liveUpdates:
+            self.processGroupedInstrumentUpdates()
+        else:
+            self.processAllInstrumentUpdates()
+            del self.__groupedInstrumentUpdates
+            self.filterUpdatesByDates([(startDateStr, endDateStr)])
         self.lineLength = 13
 
     def getResponseFromUrl(self, url, isxml):
