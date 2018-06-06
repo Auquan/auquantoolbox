@@ -9,6 +9,8 @@ class ModelLearningSystemParamters(Object):
         self.testDataSource = None
         self.validationSplit = None
         self.targetVariable = None
+        self.validationSplit = None
+        self.targetVariable = None
 
         FeatureConfig.setupCustomFeatures(self.getCustomFeatures())
         self.__instrumentFeatureConfigs = {}
