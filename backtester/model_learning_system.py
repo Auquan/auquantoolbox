@@ -3,16 +3,18 @@ import sys
 
 class ModelLearningSystem:
     """docstring for ModelLearningSystem."""
-    # def __init__(self, mlsParams):
-        # self.mlsParams = mlsParams
-
-    def __init__(self, symbols, targetVariable, dataSource, models=None, dateRange=None):
-        self.symbols = symbols
-        self.targetVariable = targetVariable
-        self.dataSource = dataSource
-
+    # def __init__(self, symbols, targetVariable, dataSource, models=None, dateRange=None):
+    def __init__(self,mlsParams):
+        self.mlsParams = mlsParams
+        self.__targetVariable = self.mlsParams.getTargetVariable()
+        self.__trainingDataSource = self.mlsParams.getTrainingDataSource()
+        self.__validationDataSource = self.mlsParams.getValidationDataSource()
+        self.__testDataSource = self.mlsParams.getTestDataSource()
 
     def getFeatureSet(self):
+        pass
+
+    def computeFeatures(self):
         pass
 
     def findBestModel(self):
