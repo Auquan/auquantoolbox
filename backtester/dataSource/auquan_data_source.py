@@ -136,7 +136,7 @@ class AuquanDataSource(DataSource):
                     fileHandler = InstrumentsFromFile(fileName=fileName, instrumentId=instrumentId, expiryTime=expiryTime)
                     instrumentUpdates = fileHandler.processLinesIntoInstruments()
                     allInstrumentUpdates = allInstrumentUpdates + instrumentUpdates
-            groupedInstrumentUpdates = groupAndSortByTimeUpdates(allInstrumentUpdates)
+            timeUpdates, groupedInstrumentUpdates = groupAndSortByTimeUpdates(allInstrumentUpdates)
             for timeOfUpdate, instrumentUpdates in groupedInstrumentUpdates:
                 yield([timeOfUpdate, instrumentUpdates])
             self.currentDate = self.currentDate + timedelta(days=1)

@@ -1,3 +1,8 @@
+import os, sys
+parentPath = os.path.abspath("../..")
+if parentPath not in sys.path:
+    sys.path.insert(0, parentPath)
+import timeit
 from datetime import datetime
 from backtester.instrumentUpdates import *
 from backtester.constants import *
@@ -7,7 +12,7 @@ import csv
 import pandas as pd
 import os
 import os.path
-from backtester.dataSource.data_source_utils import downloadFileFromYahoo, groupAndSortByTimeUpdates
+from backtester.dataSource.data_source_utils import downloadFileFromYahoo, groupAndSortByTimeUpdates, ensureDirectoryExists
 import backtester.dataSource.data_source_utils as data_source_utils
 
 TYPE_LINE_UNDEFINED = 0
@@ -112,7 +117,7 @@ class YahooStockDataSource(DataSource):
         self.dateAppend = "_%sto%s"%(datetime.strptime(startDateStr, '%Y/%m/%d').strftime('%Y-%m-%d'),datetime.strptime(startDateStr, '%Y/%m/%d').strftime('%Y-%m-%d'))
         self.__cachedFolderName = cachedFolderName
         self.__dataSetId = dataSetId
-        self.ensureDirectoryExists(self.__dataSetId)
+        ensureDirectoryExists(self.__cachedFolderName, self.__dataSetId)
         self.__downloadId = downloadId
         if instrumentIds is not None and len(instrumentIds) > 0:
             self.__instrumentIds = instrumentIds
@@ -122,11 +127,11 @@ class YahooStockDataSource(DataSource):
         self.currentDate = self.startDate
         self.event = event
         self.adjustPrice = adjustPrice
-        self.__groupedInstrumentUpdates = self.getGroupedInstrumentUpdates()
+        self.__allTimes, self.__groupedInstrumentUpdates = self.getGroupedInstrumentUpdates()
         if liveUpdates:
             self.processGroupedInstrumentUpdates()
         else:
-            # self.__instrumentDataDict = self.getAllInstrumentUpdates()
+            # self.__allTimes, self.__instrumentDataDict = self.getAllInstrumentUpdates()
             self.processAllInstrumentUpdates()
             del self.__groupedInstrumentUpdates
             self.filterUpdatesByDates([(startDateStr, endDateStr)])
@@ -134,39 +139,53 @@ class YahooStockDataSource(DataSource):
     def getFileName(self, dataSetId, instrumentId):
         return self.__cachedFolderName + dataSetId + '/' + instrumentId + '%s.csv'%self.dateAppend
 
-    def ensureDirectoryExists(self, dataSetId):
-        if not os.path.exists(self.__cachedFolderName):
-            os.mkdir(self.__cachedFolderName, 0o755)
-        if not os.path.exists(self.__cachedFolderName + '/' + dataSetId):
-            os.mkdir(self.__cachedFolderName + '/' + dataSetId)
+    def downloadAndAdjustData(self, instrumentId, fileName):
+        if not os.path.isfile(fileName):
+            if not downloadFileFromYahoo(self.startDate, self.endDate, instrumentId, fileName):
+                logError('Skipping %s:' % (instrumentId))
+                return False
+            if(self.adjustPrice):
+                self.adjustPriceForSplitAndDiv(instrumentId, fileName)
+        return True
 
     def getGroupedInstrumentUpdates(self):
         allInstrumentUpdates = []
         for instrumentId in self.__instrumentIds:
             print('Processing data for stock: %s' % (instrumentId))
             fileName = self.getFileName(self.__dataSetId, instrumentId)
-            if not os.path.exists(self.__cachedFolderName):
-                os.mkdir(self.__cachedFolderName, 0o755)
-            if not os.path.isfile(fileName):
-                if not downloadFileFromYahoo(self.startDate, self.endDate, instrumentId, fileName):
-                    logError('Skipping %s:' % (instrumentId))
-                    continue
-                if(self.adjustPrice):
-                    self.adjustPriceForSplitAndDiv(instrumentId,fileName)
-            with open(self.getFileName(self.__dataSetId, instrumentId)) as f:
+            if not self.downloadAndAdjustData(instrumentId, fileName):
+                continue
+            with open(fileName) as f:
                 records = csv.DictReader(f)
                 for row in records:
-                    inst = self.getInstrumentUpdateFromRow(instrumentId, row)
-                    allInstrumentUpdates.append(inst)
+                    try:
+                        inst = self.getInstrumentUpdateFromRow(instrumentId, row)
+                        allInstrumentUpdates.append(inst)
+                    except:
+                        continue
+        timeUpdates, groupedInstrumentUpdates = groupAndSortByTimeUpdates(allInstrumentUpdates)
+        return timeUpdates, groupedInstrumentUpdates
 
-        groupedInstrumentUpdates = groupAndSortByTimeUpdates(allInstrumentUpdates)
-        return groupedInstrumentUpdates
+    def getAllInstrumentUpdates(self, chunks=None):
+        allInstrumentUpdates = {instrumentId : None for instrumentId in self.__instrumentIds}
+        timeUpdates = []
+        for instrumentId in self.__instrumentIds:
+            print('Processing data for stock: %s' % (instrumentId))
+            fileName = self.getFileName(self.__dataSetId, instrumentId)
+            if not self.downloadAndAdjustData(instrumentId, fileName):
+                continue
+            allInstrumentUpdates[instrumentId] = pd.read_csv(fileName, index_col=0, parse_dates=True, dtype=float)
+            timeUpdates = allInstrumentUpdates[instrumentId].index.union(timeUpdates)
+            # NOTE: Assuming data is sorted by timeUpdates
+            # allInstrumentUpdates[instrumentId] = allInstrumentUpdates[instrumentId].loc[allInstrumentUpdates[instrumentId].index.sort_values()]
+        timeUpdates = timeUpdates if type(timeUpdates) is list else list(timeUpdates.values)
+        return timeUpdates, allInstrumentUpdates
 
     def processGroupedInstrumentUpdates(self):
-        timeUpdates = []
-        for timeOfUpdate, instrumentUpdates in self.__groupedInstrumentUpdates:
-            timeUpdates.append(timeOfUpdate)
-        self.__allTimes = timeUpdates
+        timeUpdates = self.__allTimes
+        # for timeOfUpdate, instrumentUpdates in self.__groupedInstrumentUpdates:
+        #     timeUpdates.append(timeOfUpdate)
+        # self.__allTimes = timeUpdates
 
         limits = [0.20, 0.40, 0.60, 0.80, 1.0]
         if (len(self.__instrumentIds) > 30):
@@ -204,25 +223,6 @@ class YahooStockDataSource(DataSource):
                                      bookData=bookData)
         return inst
 
-    def getAllInstrumentUpdates(self, chunks=None):
-        allInstrumentUpdates = {instrumentId : None for instrumentId in self.__instrumentIds}
-        for instrumentId in self.__instrumentIds:
-            print('Processing data for stock: %s' % (instrumentId))
-            fileName = self.getFileName(self.__dataSetId, instrumentId)
-            if not os.path.exists(self.__cachedFolderName):
-                os.mkdir(self.__cachedFolderName, 0o755)
-            if not os.path.isfile(fileName):
-                if not downloadFileFromYahoo(self.startDate, self.endDate, instrumentId, fileName):
-                    logError('Skipping %s:' % (instrumentId))
-                    continue
-                if(self.adjustPrice):
-                    self.adjustPriceForSplitAndDiv(instrumentId,fileName)
-            allInstrumentUpdates[instrumentId] = pd.read_csv(self.getFileName(self.__dataSetId, instrumentId),
-                                                                  index_col=0, parse_dates=True)
-            ## sort instrument updates by time of update
-            allInstrumentUpdates[instrumentId] = allInstrumentUpdates[instrumentId].loc[allInstrumentUpdates[instrumentId].index.sort_values()]
-        return allInstrumentUpdates
-
     def emitInstrumentUpdates(self):
         for timeOfUpdate, instrumentUpdates in self.__groupedInstrumentUpdates:
             yield([timeOfUpdate, instrumentUpdates])
@@ -255,12 +255,15 @@ class YahooStockDataSource(DataSource):
 
 
 if __name__ == "__main__":
-    instrumentIds = ['IBM', 'AAPL', 'MSFT']
+    instrumentIds = ['IBM', 'AAPL']#, 'MSFT']
     startDateStr = '2013/05/10'
+    # startDateStr = '2016/05/10'
     endDateStr = '2017/06/09'
-    YahooStockDataSource(cachedFolderName='yahooData/',
+    yds = YahooStockDataSource(cachedFolderName='yahooData/',
                                      dataSetId="testTrading",
                                      instrumentIds=instrumentIds,
                                      startDateStr=startDateStr,
                                      endDateStr=endDateStr,
-                                     event='history')
+                                     event='history',
+                                     liveUpdates=False)
+    print(yds.emitAllInstrumentUpdates())

@@ -2,7 +2,7 @@ from backtester.dataSource.data_source import DataSource
 from backtester.instrumentUpdates import *
 import os
 from datetime import datetime
-from backtester.dataSource.data_source_utils import groupAndSortByTimeUpdates
+from backtester.dataSource.data_source_utils import groupAndSortByTimeUpdates, ensureDirectoryExists
 import csv
 from backtester.logger import *
 try:
@@ -37,18 +37,18 @@ class QuandlDataSource(DataSource):
         if(not checkDate(endDate)):
             self.__endDate = datetime.strptime(endDate, '%Y/%m/%d').strftime('%Y-%m-%d')
         self.dateAppend = "_%sto%s"%(datetime.strptime(startDate, '%Y/%m/%d').strftime('%Y-%m-%d'),datetime.strptime(startDate, '%Y/%m/%d').strftime('%Y-%m-%d'))
-        self.ensureDirectoryExists(cachedFolderName, dataSetId)
+        ensureDirectoryExists(cachedFolderName, dataSetId)
         if instrumentIds is not None and len(instrumentIds) > 0:
             self.__instrumentIds = instrumentIds
         else:
             self.__instrumentIds = self.getAllInstrumentIds()
         self.__bookDataByFeature = {}
-        self.__groupedInstrumentUpdates = self.getGroupedInstrumentUpdates()
-        self.__allTimes = None
+        self.__allTimes, self.__groupedInstrumentUpdates = self.getGroupedInstrumentUpdates()
         if liveUpdates:
             print ('Processing instruments before beginning backtesting. This could take some time...')
             self.processGroupedInstrumentUpdates()
         else:
+            # self.__allTimes, self.__instrumentDataDict = self.getAllInstrumentUpdates()
             self.processAllInstrumentUpdates()
             del self.__groupedInstrumentUpdates
             self.filterUpdatesByDates([(startDate, endDate)])
@@ -70,34 +70,50 @@ class QuandlDataSource(DataSource):
             logError('File not found. Please check settings!')
             return False
 
-    def getFileName(self, dataSetId, instrumentId):
-        return self.__cachedFolderName + dataSetId + '/' + instrumentId + '%s.csv'%self.dateAppend
+    def downloadAndAdjustData(self, instrumentId, fileName):
+        if not os.path.isfile(fileName):
+            if not self.downloadFile(instrumentId, fileName):
+                logError('Skipping %s:' % (instrumentId))
+                return False
+            # if(self.adjustPrice):
+                # self.adjustPriceForSplitAndDiv(instrumentId, fileName)
+        return True
 
-    def ensureDirectoryExists(self, cachedFolderName, dataSetId):
-        if not os.path.exists(cachedFolderName):
-            os.mkdir(cachedFolderName, 0o755)
-        if not os.path.exists(cachedFolderName + '/' + dataSetId):
-            os.mkdir(cachedFolderName + '/' + dataSetId)
+    def getFileName(self, instrumentId):
+        return self.__cachedFolderName + self.__dataSetId + '/' + instrumentId + '%s.csv'%self.dateAppend
 
     def getGroupedInstrumentUpdates(self):
         allInstrumentUpdates = []
         for instrumentId in self.__instrumentIds:
             print('Processing data for stock: %s' % (instrumentId))
-            fileName = self.getFileName(self.__dataSetId, instrumentId)
-            if not os.path.exists(self.__cachedFolderName):
-                os.mkdir(self.__cachedFolderName, 0o755)
-            if not os.path.isfile(fileName):
-                if not self.downloadFile(instrumentId, fileName):
-                    logError('Skipping %s:' % (instrumentId))
-                    continue
-            with open(self.getFileName(self.__dataSetId, instrumentId)) as f:
+            fileName = self.getFileName(instrumentId)
+            if not self.downloadAndAdjustData(instrumentId, fileName):
+                continue
+            with open(fileName) as f:
                 records = csv.DictReader(f)
                 for row in records:
-                    inst = self.getInstrumentUpdateFromRow(instrumentId, row)
-                    allInstrumentUpdates.append(inst)
+                    try:
+                        inst = self.getInstrumentUpdateFromRow(instrumentId, row)
+                        allInstrumentUpdates.append(inst)
+                    except:
+                        continue
+        timeUpdates, groupedInstrumentUpdates = groupAndSortByTimeUpdates(allInstrumentUpdates)
+        return timeUpdates, groupedInstrumentUpdates
 
-        groupedInstrumentUpdates = groupAndSortByTimeUpdates(allInstrumentUpdates)
-        return groupedInstrumentUpdates
+    def getAllInstrumentUpdates(self, chunks=None):
+        allInstrumentUpdates = {instrumentId : None for instrumentId in self.__instrumentIds}
+        timeUpdates = []
+        for instrumentId in self.__instrumentIds:
+            print('Processing data for stock: %s' % (instrumentId))
+            fileName = self.getFileName(instrumentId)
+            if not self.downloadAndAdjustData(instrumentId, fileName):
+                continue
+            allInstrumentUpdates[instrumentId] = pd.read_csv(fileName, index_col=0, parse_dates=True)
+            timeUpdates = allInstrumentUpdates[instrumentId].index.union(timeUpdates)
+            # NOTE: Assuming data is sorted by timeUpdates
+            # allInstrumentUpdates[instrumentId] = allInstrumentUpdates[instrumentId].loc[allInstrumentUpdates[instrumentId].index.sort_values()]
+        timeUpdates = timeUpdates if type(timeUpdates) is list else list(timeUpdates.values)
+        return timeUpdates, allInstrumentUpdates
 
     def processGroupedInstrumentUpdates(self):
         timeUpdates = []

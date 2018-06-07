@@ -2,7 +2,7 @@ from backtester.dataSource.data_source import DataSource
 from backtester.instrumentUpdates import *
 import os
 from datetime import datetime
-from backtester.dataSource.data_source_utils import groupAndSortByTimeUpdates
+from backtester.dataSource.data_source_utils import groupAndSortByTimeUpdates, ensureDirectoryExists
 import csv
 from backtester.logger import *
 try:
@@ -23,24 +23,19 @@ class QuantQuestDataSource(DataSource):
     def __init__(self, cachedFolderName, dataSetId, instrumentIds, liveUpdates=True):
         self.__cachedFolderName = cachedFolderName
         self.__dataSetId = dataSetId
-        self.ensureDirectoryExists(cachedFolderName, dataSetId)
+        ensureDirectoryExists(cachedFolderName, dataSetId)
         self.ensureAllInstrumentsFile(dataSetId)
         if instrumentIds is not None and len(instrumentIds) > 0:
             self.__instrumentIds = instrumentIds
         else:
             self.__instrumentIds = self.getAllInstrumentIds()
         self.__bookDataFeatureKeys = None
-        self.__groupedInstrumentUpdates = self.getGroupedInstrumentUpdates()
+        self.__allTimes, self.__groupedInstrumentUpdates = self.getGroupedInstrumentUpdates()
         if not liveUpdates:
+            # self.__allTimes, self.__instrumentDataDict = self.getAllInstrumentUpdates()
             self.processAllInstrumentUpdates()
             del self.__groupedInstrumentUpdates
             self.filterUpdatesByDates()
-
-    def ensureDirectoryExists(self, cachedFolderName, dataSetId):
-        if not os.path.exists(cachedFolderName):
-            os.mkdir(cachedFolderName, 0o755)
-        if not os.path.exists(cachedFolderName + '/' + dataSetId):
-            os.mkdir(cachedFolderName + '/' + dataSetId)
 
     def getFileName(self, instrumentId):
         return self.__cachedFolderName + self.__dataSetId + '/' + instrumentId + '.csv'
@@ -75,9 +70,9 @@ class QuantQuestDataSource(DataSource):
         content = [x.strip() for x in content]
         return content
 
-    def downloadFile(self, dataSetId, instrumentId, downloadLocation):
+    def downloadFile(self, instrumentId, downloadLocation):
         url = 'https://raw.githubusercontent.com/Auquan/auquan-historical-data/master/qq2Data/%s/%s.csv' % (
-            dataSetId, instrumentId)
+            self.__dataSetId, instrumentId)
         response = urlopen(url)
         status = response.getcode()
         if status == 200:
@@ -88,6 +83,48 @@ class QuantQuestDataSource(DataSource):
         else:
             logError('File not found. Please check settings!')
             return False
+
+    def downloadAndAdjustData(self, instrumentId, fileName):
+        if not os.path.isfile(fileName):
+            if not self.downloadFile(instrumentId, fileName):
+                logError('Skipping %s:' % (instrumentId))
+                return False
+            # if(self.adjustPrice):
+                # self.adjustPriceForSplitAndDiv(instrumentId, fileName)
+        return True
+
+    def getGroupedInstrumentUpdates(self):
+        allInstrumentUpdates = []
+        for instrumentId in self.__instrumentIds:
+            print('Processing data for stock: %s' % (instrumentId))
+            fileName = self.getFileName(instrumentId)
+            if not self.downloadAndAdjustData(instrumentId, fileName):
+                continue
+            with open(fileName) as f:
+                records = csv.DictReader(f)
+                for row in records:
+                    try:
+                        inst = self.getInstrumentUpdateFromRow(instrumentId, row)
+                        allInstrumentUpdates.append(inst)
+                    except:
+                        continue
+        timeUpdates, groupedInstrumentUpdates = groupAndSortByTimeUpdates(allInstrumentUpdates)
+        return timeUpdates, groupedInstrumentUpdates
+
+    def getAllInstrumentUpdates(self, chunks=None):
+        allInstrumentUpdates = {instrumentId : None for instrumentId in self.__instrumentIds}
+        timeUpdates = []
+        for instrumentId in self.__instrumentIds:
+            print('Processing data for stock: %s' % (instrumentId))
+            fileName = self.getFileName(instrumentId)
+            if not self.downloadAndAdjustData(instrumentId, fileName):
+                continue
+            allInstrumentUpdates[instrumentId] = pd.read_csv(fileName, index_col=0, parse_dates=True)
+            timeUpdates = allInstrumentUpdates[instrumentId].index.union(timeUpdates)
+            # NOTE: Assuming data is sorted by timeUpdates
+            # allInstrumentUpdates[instrumentId] = allInstrumentUpdates[instrumentId].loc[allInstrumentUpdates[instrumentId].index.sort_values()]
+        timeUpdates = timeUpdates if type(timeUpdates) is list else list(timeUpdates.values)
+        return timeUpdates, allInstrumentUpdates
 
     def getInstrumentUpdateFromRow(self, instrumentId, row):
         bookData = row
@@ -105,29 +142,6 @@ class QuantQuestDataSource(DataSource):
             self.__bookDataFeatureKeys = bookData.keys()  # just setting to the first one we encounter
         return inst
 
-    def getGroupedInstrumentUpdates(self):
-        allInstrumentUpdates = []
-        for instrumentId in self.__instrumentIds:
-            print('Processing data for stock: %s' % (instrumentId))
-            fileName = self.getFileName(instrumentId)
-            if not os.path.exists(self.__cachedFolderName):
-                os.mkdir(self.cachedFolderName, 0o755)
-            if not os.path.isfile(fileName):
-                if not self.downloadFile(self.__dataSetId, instrumentId, fileName):
-                    logError('Skipping %s:' % (instrumentId))
-                    continue
-            with open(self.getFileName(instrumentId)) as f:
-                records = csv.DictReader(f)
-                for row in records:
-                    try:
-                        inst = self.getInstrumentUpdateFromRow(instrumentId, row)
-                        allInstrumentUpdates.append(inst)
-                    except:
-                        continue
-
-        groupedInstrumentUpdates = groupAndSortByTimeUpdates(allInstrumentUpdates)
-        return groupedInstrumentUpdates
-
     def emitInstrumentUpdates(self):
         for timeOfUpdate, instrumentUpdates in self.__groupedInstrumentUpdates:
             yield([timeOfUpdate, instrumentUpdates])
@@ -137,3 +151,6 @@ class QuantQuestDataSource(DataSource):
 
     def getBookDataFeatures(self):
         return self.__bookDataFeatureKeys
+
+    def getAllTimes(self):
+        return self.__allTimes

@@ -15,16 +15,48 @@ class DataSource(object):
     def getBookDataFeatures(self):
         raise NotImplementedError
 
-    # accretes all instrument updates using emitInstrumentUpdates method
-    def processAllInstrumentUpdates(self):
+    def processAllInstrumentUpdates_v1(self):
         frames = {instrumentId : [] for instrumentId in self.getInstrumentIds()}
         for timeOfUpdate, instrumentUpdates in self.emitInstrumentUpdates():
             for instrumentUpdate in instrumentUpdates:
-                df = pd.DataFrame([instrumentUpdate.getBookData()], index=[timeOfUpdate])
                 frames[instrumentUpdate.getInstrumentId()].append(pd.DataFrame([instrumentUpdate.getBookData()],
                                                                                 index=[timeOfUpdate]))
         # del self.__groupedInstrumentUpdates
         self.__instrumentDataDict = {inst : pd.concat(frames[inst]) if frames[inst] else None for inst in self.getInstrumentIds()}
+
+    def processAllInstrumentUpdates_v2(self):
+        instrumentUpdateFlag = {instrumentId : False for instrumentId in self.getInstrumentIds()}
+        self.__instrumentDataDict = {instrumentId : pd.DataFrame(index=self.getAllTimes()) for instrumentId in self.getInstrumentIds()}
+        lastTimeOfUpdate = None
+        for timeOfUpdate, instrumentUpdates in self.emitInstrumentUpdates():
+            for instrumentUpdate in instrumentUpdates:
+                instrumentId = instrumentUpdate.getInstrumentId()
+                instrumentUpdateFlag[instrumentId] = True
+                for col in instrumentUpdate.getBookData():
+                    self.__instrumentDataDict[instrumentId].at[timeOfUpdate, col] = instrumentUpdate.getBookData()[col]
+            for instrumentId in instrumentUpdateFlag:
+                if (not instrumentUpdateFlag[instrumentId]) and (lastTimeOfUpdate is not None):
+                    self.__instrumentDataDict[instrumentId].at[timeOfUpdate, :] = self.__instrumentDataDict[instrumentId].loc[lastTimeOfUpdate].values
+                instrumentUpdateFlag[instrumentId] = False
+            lastTimeOfUpdate = timeOfUpdate
+        for instrumentId in self.__instrumentDataDict:
+            self.__instrumentDataDict[instrumentId].fillna(0.0, inplace=True)
+
+    # accretes all instrument updates using emitInstrumentUpdates method
+    def processAllInstrumentUpdates(self, pad=True):
+        self.__instrumentDataDict = {instrumentId : pd.DataFrame(index=self.getAllTimes()) for instrumentId in self.getInstrumentIds()}
+        for timeOfUpdate, instrumentUpdates in self.emitInstrumentUpdates():
+            for instrumentUpdate in instrumentUpdates:
+                instrumentId = instrumentUpdate.getInstrumentId()
+                for col in instrumentUpdate.getBookData():
+                    self.__instrumentDataDict[instrumentId].at[timeOfUpdate, col] = instrumentUpdate.getBookData()[col]
+        for instrumentId in self.__instrumentDataDict:
+            if pad:
+                self.__instrumentDataDict[instrumentId].fillna(method='ffill', inplace=True)
+                self.__instrumentDataDict[instrumentId].fillna(0.0, inplace=True)
+            else:
+                self.__instrumentDataDict[instrumentId].dropna(inplace=True)
+
 
     # emits the dict of all instrument updates where
     # keys are instrumentId and values are pandas dataframe
