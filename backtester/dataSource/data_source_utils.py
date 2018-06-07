@@ -1,7 +1,6 @@
 from backtester.instrumentUpdates import *
 from backtester.constants import *
 from backtester.logger import *
-from backtester.dataSource.data_source import DataSource
 import os
 import os.path
 import requests
@@ -87,9 +86,3 @@ def getMultipliers(self,instrumentId, fileName, downloadId):
         multiplier = pd.concat([multiplier1, multiplier2], axis=1).fillna(method='bfill').fillna(1)
         multiplier[1] = multiplier[1].shift(-1).fillna(1)
         return multiplier
-
-def ensureDirectoryExists(cachedFolderName, dataSetId):
-    if not os.path.exists(cachedFolderName):
-        os.mkdir(cachedFolderName, 0o755)
-    if not os.path.exists(cachedFolderName + '/' + dataSetId):
-        os.mkdir(cachedFolderName + '/' + dataSetId)

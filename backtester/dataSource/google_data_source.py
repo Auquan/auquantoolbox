@@ -8,7 +8,6 @@ import os.path
 import csv
 import pandas as pd
 from pandas_datareader import data
-from backtester.dataSource.data_source_utils import downloadFileFromYahoo, groupAndSortByTimeUpdates, ensureDirectoryExists
 import backtester.dataSource.data_source_utils as data_source_utils
 
 TYPE_LINE_UNDEFINED = 0
@@ -105,34 +104,29 @@ class InstrumentsFromFile():
 
 
 class GoogleStockDataSource(DataSource):
-    def __init__(self, cachedFolderName, dataSetId, instrumentIds, startDateStr, endDateStr, adjustPrice=False, downloadId = ".NS", liveUpdates=True):
+    def __init__(self, cachedFolderName, dataSetId, instrumentIds, startDateStr, endDateStr, adjustPrice=False, downloadId = ".NS", liveUpdates=True, pad=True):
+        super(GoogleStockDataSource, self).__init__(cachedFolderName, dataSetId, instrumentIds, startDateStr, endDateStr)
         self.__downloadId = downloadId
-        self.startDate = datetime.strptime(startDateStr, "%Y/%m/%d")
-        self.endDate = datetime.strptime(endDateStr, "%Y/%m/%d")
-        self.dateAppend = "_%sto%s"%(datetime.strptime(startDateStr, '%Y/%m/%d').strftime('%Y-%m-%d'),datetime.strptime(startDateStr, '%Y/%m/%d').strftime('%Y-%m-%d'))
-        self.currentDate = self.startDate
-        self.__cachedFolderName = cachedFolderName
-        self.__dataSetId = dataSetId
-        self.adjustPrice = adjustPrice
-        ensureDirectoryExists(self.__cachedFolderName, self.__dataSetId)
-        if instrumentIds is not None and len(instrumentIds) > 0:
-            self.__instrumentIds = instrumentIds
-        else:
-            self.__instrumentIds = self.getAllInstrumentIds()
+        self.__dateAppend = "_%sto%s"%(datetime.strptime(startDateStr, '%Y/%m/%d').strftime('%Y-%m-%d'),datetime.strptime(startDateStr, '%Y/%m/%d').strftime('%Y-%m-%d'))
+        self.__adjustPrice = adjustPrice
         self.__bookDataByFeature = {}
-        self.__allTimes, self.__groupedInstrumentUpdates = self.getGroupedInstrumentUpdates()
+        self.currentDate = self._startDate
         if liveUpdates:
+            self._allTimes, self._groupedInstrumentUpdates = self.getGroupedInstrumentUpdates()
             self.processGroupedInstrumentUpdates()
         else:
-            # self.__allTimes, self.__instrumentDataDict = self.getAllInstrumentUpdates()
-            self.processAllInstrumentUpdates()
-            del self.__groupedInstrumentUpdates
+            self._allTimes, self._instrumentDataDict = self.getAllInstrumentUpdates()
+            if pad:
+                self.padInstrumentUpdates()
+            # self._allTimes, self._groupedInstrumentUpdates = self.getGroupedInstrumentUpdates()
+            # self.processAllInstrumentUpdates(pad=pad)
+            # del self._groupedInstrumentUpdates
             self.filterUpdatesByDates([(startDateStr, endDateStr)])
         self.lineLength = 6
 
     def downloadFile(self, instrumentId, fileName):
         logInfo('Downloading %s' % fileName)
-        pd = data.DataReader(instrumentId, 'google', self.startDate, self.endDate)
+        pd = data.DataReader(instrumentId, 'google', self._startDate, self._endDate)
         pd.to_csv(fileName)
         return True
 
@@ -141,58 +135,25 @@ class GoogleStockDataSource(DataSource):
             if not self.downloadFile(instrumentId, fileName):
                 logError('Skipping %s:' % (instrumentId))
                 return False
-            if(self.adjustPrice):
+            if(self.__adjustPrice):
                 self.adjustPriceForSplitAndDiv(instrumentId, fileName)
         return True
 
-    def getFileName(self, dataSetId, instrumentId):
-        return self.__cachedFolderName + dataSetId + '/' + instrumentId + '%s.csv'%self.dateAppend
-
-    def getGroupedInstrumentUpdates(self):
-        allInstrumentUpdates = []
-        for instrumentId in self.__instrumentIds:
-            print('Processing data for stock: %s' % (instrumentId))
-            fileName = self.getFileName(self.__dataSetId, instrumentId)
-            if not self.downloadAndAdjustData(instrumentId, fileName):
-                continue
-            with open(fileName) as f:
-                records = csv.DictReader(f)
-                for row in records:
-                    try:
-                        inst = self.getInstrumentUpdateFromRow(instrumentId, row)
-                        allInstrumentUpdates.append(inst)
-                    except:
-                        continue
-        timeUpdates, groupedInstrumentUpdates = groupAndSortByTimeUpdates(allInstrumentUpdates)
-        return timeUpdates, groupedInstrumentUpdates
-
-    def getAllInstrumentUpdates(self, chunks=None):
-        allInstrumentUpdates = {instrumentId : None for instrumentId in self.__instrumentIds}
-        timeUpdates = []
-        for instrumentId in self.__instrumentIds:
-            print('Processing data for stock: %s' % (instrumentId))
-            fileName = self.getFileName(self.__dataSetId, instrumentId)
-            if not self.downloadAndAdjustData(instrumentId, fileName):
-                continue
-            allInstrumentUpdates[instrumentId] = pd.read_csv(fileName, index_col=0, parse_dates=True)
-            timeUpdates = allInstrumentUpdates[instrumentId].index.union(timeUpdates)
-            # NOTE: Assuming data is sorted by timeUpdates
-            # allInstrumentUpdates[instrumentId] = allInstrumentUpdates[instrumentId].loc[allInstrumentUpdates[instrumentId].index.sort_values()]
-        timeUpdates = timeUpdates if type(timeUpdates) is list else list(timeUpdates.values)
-        return timeUpdates, allInstrumentUpdates
+    def getFileName(self, instrumentId):
+        return self._cachedFolderName + self._dataSetId + '/' + instrumentId + '%s.csv'%self.__dateAppend
 
     def processGroupedInstrumentUpdates(self):
-        timeUpdates = self.__allTimes
-        # for timeOfUpdate, instrumentUpdates in self.__groupedInstrumentUpdates:
+        timeUpdates = self._allTimes
+        # for timeOfUpdate, instrumentUpdates in self._groupedInstrumentUpdates:
         #     timeUpdates.append(timeOfUpdate)
-        # self.__allTimes = timeUpdates
+        # self._allTimes = timeUpdates
 
         limits = [0.20, 0.40, 0.60, 0.80, 1.0]
-        if (len(self.__instrumentIds) > 30):
+        if (len(self._instrumentIds) > 30):
             limits = [0.10, 0.20, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90, 1.0]
         currentLimitIdx = 0
         idx = 0.0
-        for timeOfUpdate, instrumentUpdates in self.__groupedInstrumentUpdates:
+        for timeOfUpdate, instrumentUpdates in self._groupedInstrumentUpdates:
             idx = idx + 1.0
             if (idx / len(timeUpdates)) > limits[currentLimitIdx]:
                 print ('%d%% done...' % (limits[currentLimitIdx] * 100))
@@ -202,7 +163,7 @@ class GoogleStockDataSource(DataSource):
                 for featureKey in bookData:
                     # TODO: Fix for python 3
                     if featureKey not in self.__bookDataByFeature:
-                        self.__bookDataByFeature[featureKey] = pd.DataFrame(columns=self.__instrumentIds,
+                        self.__bookDataByFeature[featureKey] = pd.DataFrame(columns=self._instrumentIds,
                                                                             index=timeUpdates)
                     self.__bookDataByFeature[featureKey].set_value(timeOfUpdate, instrumentUpdate.getInstrumentId(), bookData[featureKey])
         for featureKey in self.__bookDataByFeature:
@@ -236,21 +197,11 @@ class GoogleStockDataSource(DataSource):
                                      bookData=bookData)
         return inst
 
-    def emitInstrumentUpdates(self):
-        for timeOfUpdate, instrumentUpdates in self.__groupedInstrumentUpdates:
-            yield([timeOfUpdate, instrumentUpdates])
-
-    def getInstrumentIds(self):
-        return self.__instrumentIds
-
     def getBookDataByFeature(self):
         return self.__bookDataByFeature
 
-    def getAllTimes(self):
-        return self.__allTimes
-
     def getClosingTime(self):
-        return self.__allTimes[-1]
+        return self._allTimes[-1]
 
     def getBookDataFeatures(self):
         return self.__bookDataByFeature.keys()

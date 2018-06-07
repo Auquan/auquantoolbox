@@ -17,7 +17,6 @@ except ImportError:
     import urllib2
     from urllib2 import urlopen
     from urllib import quote
-from backtester.dataSource.data_source_utils import downloadFileFromYahoo, groupAndSortByTimeUpdates, ensureDirectoryExists
 import backtester.dataSource.data_source_utils as data_source_utils
 TYPE_LINE_UNDEFINED = 0
 TYPE_LINE_HEADER = 1
@@ -129,28 +128,23 @@ class InstrumentsFromFile():
 
 
 class NSEStockDataSource(DataSource):
-    def __init__(self, cachedFolderName, dataSetId, instrumentIds, startDateStr, endDateStr, adjustPrice=False, downloadId = ".NS", liveUpdates=True):
-        self.startDate = datetime.strptime(startDateStr, "%Y/%m/%d")
-        self.endDate = datetime.strptime(endDateStr, "%Y/%m/%d")
-        self.dateAppend = "_%sto%s"%(datetime.strptime(startDateStr, '%Y/%m/%d').strftime('%Y-%m-%d'),datetime.strptime(startDateStr, '%Y/%m/%d').strftime('%Y-%m-%d'))
+    def __init__(self, cachedFolderName, dataSetId, instrumentIds, startDateStr, endDateStr, adjustPrice=False, downloadId = ".NS", liveUpdates=True, pad=True):
+        super(NSEStockDataSource, self).__init__(cachedFolderName, dataSetId, instrumentIds, startDateStr, endDateStr)
+        self.__dateAppend = "_%sto%s"%(datetime.strptime(startDateStr, '%Y/%m/%d').strftime('%Y-%m-%d'),datetime.strptime(startDateStr, '%Y/%m/%d').strftime('%Y-%m-%d'))
         self.__downloadId = downloadId
-        self.currentDate = self.startDate
-        self.__cachedFolderName = cachedFolderName
-        self.__dataSetId = dataSetId
-        ensureDirectoryExists(self.__cachedFolderName,self.__dataSetId)
-        if instrumentIds is not None and len(instrumentIds) > 0:
-            self.__instrumentIds = instrumentIds
-        else:
-            self.__instrumentIds = self.getAllInstrumentIds()
         self.__bookDataByFeature = {}
-        self.adjustPrice = adjustPrice
-        self.__allTimes, self.__groupedInstrumentUpdates = self.getGroupedInstrumentUpdates()
+        self.__adjustPrice = adjustPrice
+        self.currentDate = self._startDate
         if liveUpdates:
+            self._allTimes, self._groupedInstrumentUpdates = self.getGroupedInstrumentUpdates()
             self.processGroupedInstrumentUpdates()
         else:
-            # self.__allTimes, self.__instrumentDataDict = self.getAllInstrumentUpdates()
-            self.processAllInstrumentUpdates()
-            del self.__groupedInstrumentUpdates
+            self._allTimes, self._instrumentDataDict = self.getAllInstrumentUpdates()
+            if pad:
+                self.padInstrumentUpdates()
+            # self._allTimes, self._groupedInstrumentUpdates = self.getGroupedInstrumentUpdates()
+            # self.processAllInstrumentUpdates(pad=pad)
+            # del self._groupedInstrumentUpdates
             self.filterUpdatesByDates([(startDateStr, endDateStr)])
         self.lineLength = 13
 
@@ -230,9 +224,9 @@ class NSEStockDataSource(DataSource):
 
     def downloadFile(self, instrumentId, fileName):
         logInfo('Downloading %s' % fileName)
-        tempStart = self.startDate
-        while tempStart < self.endDate:
-            tempEnd = min(tempStart + timedelta(days=364), self.endDate)
+        tempStart = self._startDate
+        while tempStart < self._endDate:
+            tempEnd = min(tempStart + timedelta(days=364), self._endDate)
             self.parseNSEUrl(instrumentId, datetime.strftime(tempStart, '%d-%m-%Y'), datetime.strftime(tempEnd, '%d-%m-%Y'), fileName)
             tempStart = tempEnd + timedelta(days=1)
         return True
@@ -242,58 +236,25 @@ class NSEStockDataSource(DataSource):
             if not self.downloadFile(instrumentId, fileName):
                 logError('Skipping %s:' % (instrumentId))
                 return False
-            if(self.adjustPrice):
+            if(self.__adjustPrice):
                 self.adjustPriceForSplitAndDiv(instrumentId, fileName)
         return True
 
-    def getFileName(self, dataSetId, instrumentId):
-        return self.__cachedFolderName + dataSetId + '/' + instrumentId + '%s.csv'%self.dateAppend
-
-    def getGroupedInstrumentUpdates(self):
-        allInstrumentUpdates = []
-        for instrumentId in self.__instrumentIds:
-            print('Processing data for stock: %s' % (instrumentId))
-            fileName = self.getFileName(self.__dataSetId, instrumentId)
-            if not self.downloadAndAdjustData(instrumentId, fileName):
-                continue
-            with open(fileName) as f:
-                records = csv.DictReader(f)
-                for row in records:
-                    try:
-                        inst = self.getInstrumentUpdateFromRow(instrumentId, row)
-                        allInstrumentUpdates.append(inst)
-                    except:
-                        continue
-        timeUpdates, groupedInstrumentUpdates = groupAndSortByTimeUpdates(allInstrumentUpdates)
-        return timeUpdates, groupedInstrumentUpdates
-
-    def getAllInstrumentUpdates(self, chunks=None):
-        allInstrumentUpdates = {instrumentId : None for instrumentId in self.__instrumentIds}
-        timeUpdates = []
-        for instrumentId in self.__instrumentIds:
-            print('Processing data for stock: %s' % (instrumentId))
-            fileName = self.getFileName(self.__dataSetId, instrumentId)
-            if not self.downloadAndAdjustData(instrumentId, fileName):
-                continue
-            allInstrumentUpdates[instrumentId] = pd.read_csv(fileName, index_col=0, parse_dates=True)
-            timeUpdates = allInstrumentUpdates[instrumentId].index.union(timeUpdates)
-            # NOTE: Assuming data is sorted by timeUpdates
-            # allInstrumentUpdates[instrumentId] = allInstrumentUpdates[instrumentId].loc[allInstrumentUpdates[instrumentId].index.sort_values()]
-        timeUpdates = timeUpdates if type(timeUpdates) is list else list(timeUpdates.values)
-        return timeUpdates, allInstrumentUpdates
+    def getFileName(self, instrumentId):
+        return self._cachedFolderName + self._dataSetId + '/' + instrumentId + '%s.csv'%self.__dateAppend
 
     def processGroupedInstrumentUpdates(self):
-        timeUpdates = self.__allTimes
-        # for timeOfUpdate, instrumentUpdates in self.__groupedInstrumentUpdates:
+        timeUpdates = self._allTimes
+        # for timeOfUpdate, instrumentUpdates in self._groupedInstrumentUpdates:
         #     timeUpdates.append(timeOfUpdate)
-        # self.__allTimes = timeUpdates
+        # self._allTimes = timeUpdates
 
         limits = [0.20, 0.40, 0.60, 0.80, 1.0]
-        if (len(self.__instrumentIds) > 30):
+        if (len(self._instrumentIds) > 30):
             limits = [0.10, 0.20, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90, 1.0]
         currentLimitIdx = 0
         idx = 0.0
-        for timeOfUpdate, instrumentUpdates in self.__groupedInstrumentUpdates:
+        for timeOfUpdate, instrumentUpdates in self._groupedInstrumentUpdates:
             idx = idx + 1.0
             if (idx / len(timeUpdates)) > limits[currentLimitIdx]:
                 print ('%d%% done...' % (limits[currentLimitIdx] * 100))
@@ -303,7 +264,7 @@ class NSEStockDataSource(DataSource):
                 for featureKey in bookData:
                     # TODO: Fix for python 3
                     if featureKey not in self.__bookDataByFeature:
-                        self.__bookDataByFeature[featureKey] = pd.DataFrame(columns=self.__instrumentIds,
+                        self.__bookDataByFeature[featureKey] = pd.DataFrame(columns=self._instrumentIds,
                                                                             index=timeUpdates)
                     self.__bookDataByFeature[featureKey].set_value(timeOfUpdate, instrumentUpdate.getInstrumentId(), bookData[featureKey])
         for featureKey in self.__bookDataByFeature:
@@ -323,21 +284,11 @@ class NSEStockDataSource(DataSource):
                                      bookData=bookData)
         return inst
 
-    def emitInstrumentUpdates(self):
-        for timeOfUpdate, instrumentUpdates in self.__groupedInstrumentUpdates:
-            yield([timeOfUpdate, instrumentUpdates])
-
-    def getInstrumentIds(self):
-        return self.__instrumentIds
-
     def getBookDataByFeature(self):
         return self.__bookDataByFeature
 
-    def getAllTimes(self):
-        return self.__allTimes
-
     def getClosingTime(self):
-        return self.__allTimes[-1]
+        return self._allTimes[-1]
 
     def getBookDataFeatures(self):
         return self.__bookDataByFeature.keys()
