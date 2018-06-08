@@ -40,13 +40,12 @@ class QuandlDataSource(DataSource):
             self._allTimes, self._groupedInstrumentUpdates = self.getGroupedInstrumentUpdates()
             print ('Processing instruments before beginning backtesting. This could take some time...')
             self.processGroupedInstrumentUpdates()
+            self._bookDataFeatureKeys = self.__bookDataByFeature.keys()
         else:
-            self._allTimes, self._instrumentDataDict = self.getAllInstrumentUpdates()
+            self._allTimes, self._bookDataByInstrument = self.getAllInstrumentUpdates()
+            self._bookDataFeatureKeys = list(self._bookDataByInstrument[self._instrumentIds[0]].columns)
             if pad:
                 self.padInstrumentUpdates()
-            # self._allTimes, self._groupedInstrumentUpdates = self.getGroupedInstrumentUpdates()
-            # self.processAllInstrumentUpdates(pad=pad)
-            # del self._groupedInstrumentUpdates
             self.filterUpdatesByDates([(startDate, endDate)])
 
     def downloadFile(self, instrumentId, downloadLocation):
@@ -77,11 +76,7 @@ class QuandlDataSource(DataSource):
         return self._cachedFolderName + self._dataSetId + '/' + instrumentId + '%s.csv'%self.__dateAppend
 
     def processGroupedInstrumentUpdates(self):
-        timeUpdates = []
-        for timeOfUpdate, instrumentUpdates in self._groupedInstrumentUpdates:
-            timeUpdates.append(timeOfUpdate)
-        self._allTimes = timeUpdates
-
+        timeUpdates = self._allTimes
         limits = [0.20, 0.40, 0.60, 0.80, 1.0]
         if (len(self._instrumentIds) > 30):
             limits = [0.10, 0.20, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90, 1.0]
@@ -122,6 +117,3 @@ class QuandlDataSource(DataSource):
 
     def getClosingTime(self):
         return self._allTimes[-1]
-
-    def getBookDataFeatures(self):
-        return self.__bookDataByFeature.keys()

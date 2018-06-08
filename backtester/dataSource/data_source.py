@@ -21,15 +21,8 @@ class DataSource(object):
         # Class variables: To be set by child class
         self._allTimes = None
         self._groupedInstrumentUpdates = None
-        self._instrumentDataDict = None
-
-
-    # def emitInstrumentUpdates(self):
-        # raise NotImplementedError
-
-    # returns a list of feature keys which are already present in the data.
-    def getBookDataFeatures(self):
-        raise NotImplementedError
+        self._bookDataByInstrument = None
+        self._bookDataFeatureKeys = None
 
     def getInstrumentUpdateFromRow(self, instrumentId, row):
         raise NotImplementedError
@@ -46,20 +39,23 @@ class DataSource(object):
     def getInstrumentIds(self):
         return self._instrumentIds
 
+    # returns a list of feature keys which are already present in the data.
+    def getBookDataFeatures(self):
+        return self._bookDataFeatureKeys
+
     # emits list of instrument updates at the same time.
     # The caller needs to ensure all these updates are happening at the same time
     # emits [t1, [i1, i2, i3]], where i1, i2, i3 are updates happening at time t1
     def emitInstrumentUpdates(self):
+        if self._groupedInstrumentUpdates is None:
+            logError("groupedInstrumentUpdates has not been computed")
         for timeOfUpdate, instrumentUpdates in self._groupedInstrumentUpdates:
             yield([timeOfUpdate, instrumentUpdates])
 
     # emits the dict of all instrument updates where
     # keys are instrumentId and values are pandas dataframe
     def emitAllInstrumentUpdates(self):
-        ## stock wise data
-        # for instrumentId in self.getInstrumentIds():
-            # yield self._instrumentDataDict[instrumentId]
-        return self._instrumentDataDict
+        return self._bookDataByInstrument
 
     def getGroupedInstrumentUpdates(self):
         allInstrumentUpdates = []
@@ -89,49 +85,49 @@ class DataSource(object):
                 continue
             allInstrumentUpdates[instrumentId] = pd.read_csv(fileName, index_col=0, parse_dates=True, dtype=float)
             timeUpdates = allInstrumentUpdates[instrumentId].index.union(timeUpdates)
-            # NOTE: Assuming data is sorted by timeUpdates
-            # allInstrumentUpdates[instrumentId] = allInstrumentUpdates[instrumentId].loc[allInstrumentUpdates[instrumentId].index.sort_values()]
-        timeUpdates = timeUpdates if type(timeUpdates) is list else list(timeUpdates.values)
+            allInstrumentUpdates[instrumentId].dropna(inplace=True)
+            # NOTE: Assuming data is sorted by timeUpdates and all instruments have same columns
+        timeUpdates = list(timeUpdates)
         return timeUpdates, allInstrumentUpdates
 
     # set same timestamps in all instrument data and then pad
     def padInstrumentUpdates(self):
         timeUpdates = pd.Series(self._allTimes)
         for instrumentId in self._instrumentIds:
-            if not timeUpdates.isin(self._instrumentDataDict[instrumentId].index).all():
-                df = pd.DataFrame(index=self._allTimes, columns=self._instrumentDataDict[instrumentId].columns)
-                df.at[self._instrumentDataDict[instrumentId].index] = self._instrumentDataDict[instrumentId].copy()
-                del self._instrumentDataDict[instrumentId]
-                self._instrumentDataDict[instrumentId] = df
-                self._instrumentDataDict[instrumentId].fillna(method='ffill', inplace=True)
-                self._instrumentDataDict[instrumentId].fillna(0.0, inplace=True)
+            if not timeUpdates.isin(self._bookDataByInstrument[instrumentId].index).all():
+                df = pd.DataFrame(index=self._allTimes, columns=self._bookDataByInstrument[instrumentId].columns)
+                df.at[self._bookDataByInstrument[instrumentId].index] = self._bookDataByInstrument[instrumentId].copy()
+                del self._bookDataByInstrument[instrumentId]
+                self._bookDataByInstrument[instrumentId] = df
+                self._bookDataByInstrument[instrumentId].fillna(method='ffill', inplace=True)
+                self._bookDataByInstrument[instrumentId].fillna(0.0, inplace=True)
 
     # accretes all instrument updates using emitInstrumentUpdates method
     def processAllInstrumentUpdates(self, pad=True):
-        self._instrumentDataDict = {instrumentId : pd.DataFrame(index=self._allTimes) for instrumentId in self._instrumentIds}
+        self._bookDataByInstrument = {instrumentId : pd.DataFrame(index=self._allTimes) for instrumentId in self._instrumentIds}
         for timeOfUpdate, instrumentUpdates in self.emitInstrumentUpdates():
             for instrumentUpdate in instrumentUpdates:
                 instrumentId = instrumentUpdate.getInstrumentId()
                 for col in instrumentUpdate.getBookData():
-                    self._instrumentDataDict[instrumentId].at[timeOfUpdate, col] = instrumentUpdate.getBookData()[col]
-        for instrumentId in self._instrumentDataDict:
+                    self._bookDataByInstrument[instrumentId].at[timeOfUpdate, col] = instrumentUpdate.getBookData()[col]
+        for instrumentId in self._bookDataByInstrument:
             if pad:
-                self._instrumentDataDict[instrumentId].fillna(method='ffill', inplace=True)
-                self._instrumentDataDict[instrumentId].fillna(0.0, inplace=True)
+                self._bookDataByInstrument[instrumentId].fillna(method='ffill', inplace=True)
+                self._bookDataByInstrument[instrumentId].fillna(0.0, inplace=True)
             else:
-                self._instrumentDataDict[instrumentId].dropna(inplace=True)
+                self._bookDataByInstrument[instrumentId].dropna(inplace=True)
 
     # selects only those instrument updates which lie within dateRange
     def filterUpdatesByDates(self, dateRange=None):
         dateRange = dateRange if dateRange else (self._startDate.strftime("%Y%m%d"), self._endDateStr.strftime("%Y%m%d"))
         for instrumentId in self._instrumentIds:
-            if type(dateRange) is list and self._instrumentDataDict[instrumentId] is not None:
+            if type(dateRange) is list and self._bookDataByInstrument[instrumentId] is not None:
                 frames = []
                 for dr in dateRange:
-                    frames.append(self._instrumentDataDict[instrumentId][dr[0]:dr[1]])
-                self._instrumentDataDict[instrumentId] = pd.concat(frames)
-            elif self._instrumentDataDict[instrumentId] is not None:
-                self._instrumentDataDict[instrumentId] = self._instrumentDataDict[instrumentId][dateRange[0]:dateRange[1]]
+                    frames.append(self._bookDataByInstrument[instrumentId][dr[0]:dr[1]])
+                self._bookDataByInstrument[instrumentId] = pd.concat(frames)
+            elif self._bookDataByInstrument[instrumentId] is not None:
+                self._bookDataByInstrument[instrumentId] = self._bookDataByInstrument[instrumentId][dateRange[0]:dateRange[1]]
 
     def setStartDate(self, startDateStr):
         self._startDate = datetime.strptime(startDateStr, "%Y/%m/%d")

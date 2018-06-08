@@ -2,8 +2,6 @@ import sys
 
 
 class ModelLearningSystem:
-    """docstring for ModelLearningSystem."""
-    # def __init__(self, symbols, targetVariable, dataSource, models=None, dateRange=None):
     def __init__(self,mlsParams):
         self.mlsParams = mlsParams
         self.__targetVariable = self.mlsParams.getTargetVariable()

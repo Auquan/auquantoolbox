@@ -3,9 +3,7 @@ import sys
 
 
 class ModelLearningSystemParamters(Object):
-    """docstring for ModelLearningSystemParamters."""
     def __init__(self, symbols, targetVariable, models=None):
-        # self.dataSources = {}
         self.trainingDataSource = None
         self.validationDataSource = None
         self.testDataSource = None

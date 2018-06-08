@@ -138,13 +138,12 @@ class NSEStockDataSource(DataSource):
         if liveUpdates:
             self._allTimes, self._groupedInstrumentUpdates = self.getGroupedInstrumentUpdates()
             self.processGroupedInstrumentUpdates()
+            self._bookDataFeatureKeys = self.__bookDataByFeature.keys()
         else:
-            self._allTimes, self._instrumentDataDict = self.getAllInstrumentUpdates()
+            self._allTimes, self._bookDataByInstrument = self.getAllInstrumentUpdates()
+            self._bookDataFeatureKeys = list(self._bookDataByInstrument[self._instrumentIds[0]].columns)
             if pad:
                 self.padInstrumentUpdates()
-            # self._allTimes, self._groupedInstrumentUpdates = self.getGroupedInstrumentUpdates()
-            # self.processAllInstrumentUpdates(pad=pad)
-            # del self._groupedInstrumentUpdates
             self.filterUpdatesByDates([(startDateStr, endDateStr)])
         self.lineLength = 13
 
@@ -245,10 +244,6 @@ class NSEStockDataSource(DataSource):
 
     def processGroupedInstrumentUpdates(self):
         timeUpdates = self._allTimes
-        # for timeOfUpdate, instrumentUpdates in self._groupedInstrumentUpdates:
-        #     timeUpdates.append(timeOfUpdate)
-        # self._allTimes = timeUpdates
-
         limits = [0.20, 0.40, 0.60, 0.80, 1.0]
         if (len(self._instrumentIds) > 30):
             limits = [0.10, 0.20, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90, 1.0]
@@ -289,9 +284,6 @@ class NSEStockDataSource(DataSource):
 
     def getClosingTime(self):
         return self._allTimes[-1]
-
-    def getBookDataFeatures(self):
-        return self.__bookDataByFeature.keys()
 
     def adjustPriceForSplitAndDiv(self, instrumentId, fileName):
         multiplier = data_source_utils.getMultipliers(self,instrumentId,fileName,self.__downloadId)

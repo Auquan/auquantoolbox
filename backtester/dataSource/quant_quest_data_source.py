@@ -22,17 +22,15 @@ class QuantQuestDataSource(DataSource):
     def __init__(self, cachedFolderName, dataSetId, instrumentIds, startDateStr=None, endDateStr=None, liveUpdates=True, pad=True):
         super(QuantQuestDataSource, self).__init__(cachedFolderName, dataSetId, instrumentIds, startDateStr, endDateStr)
         self.ensureAllInstrumentsFile(dataSetId)
-        self.__bookDataFeatureKeys = None
         if liveUpdates:
             self._allTimes, self._groupedInstrumentUpdates = self.getGroupedInstrumentUpdates()
         else:
-            self._allTimes, self._instrumentDataDict = self.getAllInstrumentUpdates()
+            self._allTimes, self._bookDataByInstrument = self.getAllInstrumentUpdates()
+            self._bookDataFeatureKeys = list(self._bookDataByInstrument[self._instrumentIds[0]].columns)
             if pad:
                 self.padInstrumentUpdates()
-            # self._allTimes, self._groupedInstrumentUpdates = self.getGroupedInstrumentUpdates()
-            # self.processAllInstrumentUpdates(pad=pad)
-            # del self._groupedInstrumentUpdates
-            # self.filterUpdatesByDates()
+            if (startDateStr is not None) and (endDateStr is not None):
+                self.filterUpdatesByDates([(startDateStr, endDateStr)])
 
     def getFileName(self, instrumentId):
         return self._cachedFolderName + self._dataSetId + '/' + instrumentId + '.csv'
@@ -100,9 +98,6 @@ class QuantQuestDataSource(DataSource):
                                      tradeSymbol=instrumentId,
                                      timeOfUpdate=timeOfUpdate,
                                      bookData=bookData)
-        if self.__bookDataFeatureKeys is None:
-            self.__bookDataFeatureKeys = bookData.keys()  # just setting to the first one we encounter
+        if self._bookDataFeatureKeys is None:
+            self._bookDataFeatureKeys = bookData.keys()  # just setting to the first one we encounter
         return inst
-
-    def getBookDataFeatures(self):
-        return self.__bookDataFeatureKeys
