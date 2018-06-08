@@ -1,7 +1,6 @@
 from backtester.instrumentUpdates import *
 from backtester.constants import *
 from backtester.logger import *
-from backtester.dataSource.data_source import DataSource
 import os
 import os.path
 import requests
@@ -48,13 +47,21 @@ ie [[t1, [i1,i2,i3]],
 def groupAndSortByTimeUpdates(instrumentUpdates):
     instrumentUpdates.sort(key=lambda x: x.getTimeOfUpdate())
     groupedInstruments = []
+    timeUpdates = []
     # groupby only works on already sorted elements, so we sorted first
     for timeOfUpdate, sameTimeInstruments in groupby(instrumentUpdates, lambda x: x.getTimeOfUpdate()):
         instruments = []
+        timeUpdates.append(timeOfUpdate)
         for sameTimeInstrument in sameTimeInstruments:
             instruments.append(sameTimeInstrument)
         groupedInstruments.append([timeOfUpdate, instruments])
-    return groupedInstruments
+    return timeUpdates, groupedInstruments
+
+def getAllTimeStamps(groupedInstrumentUpdates):
+    timeUpdates = []
+    for timeOfUpdate, instrumentUpdates in groupedInstrumentUpdates:
+        timeUpdates.append(timeOfUpdate)
+    return timeUpdates
 
 def getMultipliers(self,instrumentId, fileName, downloadId):
         divFile = self.getFileName('div', instrumentId)

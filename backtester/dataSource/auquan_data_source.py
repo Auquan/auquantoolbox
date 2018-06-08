@@ -109,12 +109,15 @@ class InstrumentsFromFile():
 
 
 class AuquanDataSource(DataSource):
-    def __init__(self, folderName, instrumentIdsByType, startDateStr, endDateStr):
+    def __init__(self, folderName, instrumentIdsByType, startDateStr, endDateStr, liveUpdates=True):
         self.startDate = datetime.strptime(startDateStr, "%Y/%m/%d")
         self.endDate = datetime.strptime(endDateStr, "%Y/%m/%d")
         self.folderName = folderName
         self.instrumentIdsByType = instrumentIdsByType
         self.currentDate = self.startDate
+        if not liveUpdates:
+            self.processAllInstrumentUpdates()
+            self.filterUpdatesByDates([(startDateStr, endDateStr)])
 
     def getFileName(self, instrumentType, instrumentId, date):
         dateStr = date.strftime("%Y%m%d")
@@ -133,7 +136,7 @@ class AuquanDataSource(DataSource):
                     fileHandler = InstrumentsFromFile(fileName=fileName, instrumentId=instrumentId, expiryTime=expiryTime)
                     instrumentUpdates = fileHandler.processLinesIntoInstruments()
                     allInstrumentUpdates = allInstrumentUpdates + instrumentUpdates
-            groupedInstrumentUpdates = groupAndSortByTimeUpdates(allInstrumentUpdates)
+            timeUpdates, groupedInstrumentUpdates = groupAndSortByTimeUpdates(allInstrumentUpdates)
             for timeOfUpdate, instrumentUpdates in groupedInstrumentUpdates:
                 yield([timeOfUpdate, instrumentUpdates])
             self.currentDate = self.currentDate + timedelta(days=1)

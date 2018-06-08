@@ -10,7 +10,7 @@ except ImportError:
     from urllib2 import Request, urlopen  # Python 2
 
 
-class NSETimeRule(TimeRule):
+class NSETimeRule(CustomTimeRule):
     def __init__(self, startDate, endDate, frequency='H', sample='1'):
         CustomTimeRule.__init__(startDate = startDate, endDate = endDate, holidays = getNSEHolidays(), frequency = frequency, sample = sample)
 
@@ -31,7 +31,7 @@ class NSETimeRule(TimeRule):
             holiday_dates = soup.find(id="tab20Content").find_all(style="text-align:right")
             holidays = []
             for date in holiday_dates:
-                holidays.append(datetime.strptime(var.get_text(), '%d-%b-%Y')
+                holidays.append(datetime.strptime(var.get_text(), '%d-%b-%Y'))
             return holidays
         except urllib2.HTTPError as e:
             print(e.fp.read())

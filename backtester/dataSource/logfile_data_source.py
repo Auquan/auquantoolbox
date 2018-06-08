@@ -3,11 +3,14 @@ from backtester.dataSource.data_source import DataSource
 
 
 class LogfileDataSource(DataSource):
-    def __init__(self, fileName):
+    def __init__(self, fileName, liveUpdates=True):
         self.fileName = fileName
         self.file = open(fileName, "r")
         self.file.seek(0, 2)
         self.unfinishedLine = ''
+        if not liveUpdates:
+            self.processAllInstrumentUpdates()
+            self.filterUpdatesByDates()
 
     '''
     Assume line in processLine is a complete line.

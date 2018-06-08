@@ -1,3 +1,4 @@
+import os, sys
 from datetime import datetime
 from backtester.instrumentUpdates import *
 from backtester.constants import *
@@ -7,7 +8,7 @@ import csv
 import pandas as pd
 import os
 import os.path
-from backtester.dataSource.data_source_utils import downloadFileFromYahoo, groupAndSortByTimeUpdates
+from backtester.dataSource.data_source_utils import downloadFileFromYahoo
 import backtester.dataSource.data_source_utils as data_source_utils
 
 TYPE_LINE_UNDEFINED = 0
@@ -106,68 +107,45 @@ class InstrumentsFromFile():
 
 
 class YahooStockDataSource(DataSource):
-    def __init__(self, cachedFolderName, dataSetId, instrumentIds, startDateStr, endDateStr,event='history',adjustPrice=False,downloadId=".NS"):
-        self.startDate = datetime.strptime(startDateStr, "%Y/%m/%d")
-        self.endDate = datetime.strptime(endDateStr, "%Y/%m/%d")
-        self.dateAppend = "_%sto%s"%(datetime.strptime(startDateStr, '%Y/%m/%d').strftime('%Y-%m-%d'),datetime.strptime(startDateStr, '%Y/%m/%d').strftime('%Y-%m-%d'))
-        self.__cachedFolderName = cachedFolderName
-        self.__dataSetId = dataSetId
-        self.ensureDirectoryExists(self.__dataSetId)
+    def __init__(self, cachedFolderName, dataSetId, instrumentIds, startDateStr, endDateStr, event='history', adjustPrice=False, downloadId=".NS", liveUpdates=True, pad=True):
+        super(YahooStockDataSource, self).__init__(cachedFolderName, dataSetId, instrumentIds, startDateStr, endDateStr)
+        self.__dateAppend = "_%sto%s"%(datetime.strptime(startDateStr, '%Y/%m/%d').strftime('%Y-%m-%d'),datetime.strptime(startDateStr, '%Y/%m/%d').strftime('%Y-%m-%d'))
         self.__downloadId = downloadId
-        if instrumentIds is not None and len(instrumentIds) > 0:
-            self.__instrumentIds = instrumentIds
-        else:
-            self.__instrumentIds = self.getAllInstrumentIds()
         self.__bookDataByFeature = {}
-        self.currentDate = self.startDate
+        self.__adjustPrice = adjustPrice
+        self.currentDate = self._startDate
         self.event = event
-        self.adjustPrice = adjustPrice
-        self.__groupedInstrumentUpdates = self.getGroupedInstrumentUpdates()
-        self.processGroupedInstrumentUpdates()
+        if liveUpdates:
+            self._allTimes, self._groupedInstrumentUpdates = self.getGroupedInstrumentUpdates()
+            self.processGroupedInstrumentUpdates()
+            self._bookDataFeatureKeys = self.__bookDataByFeature.keys()
+        else:
+            self._allTimes, self._bookDataByInstrument = self.getAllInstrumentUpdates()
+            self._bookDataFeatureKeys = list(self._bookDataByInstrument[self._instrumentIds[0]].columns)
+            if pad:
+                self.padInstrumentUpdates()
+            self.filterUpdatesByDates([(startDateStr, endDateStr)])
 
-    def getFileName(self, dataSetId, instrumentId):
-        return self.__cachedFolderName + dataSetId + '/' + instrumentId + '%s.csv'%self.dateAppend
+    def getFileName(self, instrumentId):
+        return self._cachedFolderName + self._dataSetId + '/' + instrumentId + '%s.csv'%self.__dateAppend
 
-    def ensureDirectoryExists(self, dataSetId):
-        if not os.path.exists(self.__cachedFolderName):
-            os.mkdir(self.__cachedFolderName, 0o755)
-        if not os.path.exists(self.__cachedFolderName + '/' + dataSetId):
-            os.mkdir(self.__cachedFolderName + '/' + dataSetId)
-
-    def getGroupedInstrumentUpdates(self):
-        allInstrumentUpdates = []
-        for instrumentId in self.__instrumentIds:
-            print('Processing data for stock: %s' % (instrumentId))
-            fileName = self.getFileName(self.__dataSetId, instrumentId)
-            if not os.path.exists(self.__cachedFolderName):
-                os.mkdir(self.__cachedFolderName, 0o755)
-            if not os.path.isfile(fileName):
-                if not downloadFileFromYahoo(self.startDate, self.endDate, instrumentId, fileName):
-                    logError('Skipping %s:' % (instrumentId))
-                    continue
-                if(self.adjustPrice):
-                    self.adjustPriceForSplitAndDiv(instrumentId,fileName)
-            with open(self.getFileName(self.__dataSetId, instrumentId)) as f:
-                records = csv.DictReader(f)
-                for row in records:
-                    inst = self.getInstrumentUpdateFromRow(instrumentId, row)
-                    allInstrumentUpdates.append(inst)
-
-        groupedInstrumentUpdates = groupAndSortByTimeUpdates(allInstrumentUpdates)
-        return groupedInstrumentUpdates
+    def downloadAndAdjustData(self, instrumentId, fileName):
+        if not os.path.isfile(fileName):
+            if not downloadFileFromYahoo(self._startDate, self._endDate, instrumentId, fileName):
+                logError('Skipping %s:' % (instrumentId))
+                return False
+            if(self.__adjustPrice):
+                self.adjustPriceForSplitAndDiv(instrumentId, fileName)
+        return True
 
     def processGroupedInstrumentUpdates(self):
-        timeUpdates = []
-        for timeOfUpdate, instrumentUpdates in self.__groupedInstrumentUpdates:
-            timeUpdates.append(timeOfUpdate)
-        self.__allTimes = timeUpdates
-
+        timeUpdates = self._allTimes
         limits = [0.20, 0.40, 0.60, 0.80, 1.0]
-        if (len(self.__instrumentIds) > 30):
+        if (len(self._instrumentIds) > 30):
             limits = [0.10, 0.20, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90, 1.0]
         currentLimitIdx = 0
         idx = 0.0
-        for timeOfUpdate, instrumentUpdates in self.__groupedInstrumentUpdates:
+        for timeOfUpdate, instrumentUpdates in self._groupedInstrumentUpdates:
             idx = idx + 1.0
             if (idx / len(timeUpdates)) > limits[currentLimitIdx]:
                 print ('%d%% done...' % (limits[currentLimitIdx] * 100))
@@ -177,7 +155,7 @@ class YahooStockDataSource(DataSource):
                 for featureKey in bookData:
                     # TODO: Fix for python 3
                     if featureKey not in self.__bookDataByFeature:
-                        self.__bookDataByFeature[featureKey] = pd.DataFrame(columns=self.__instrumentIds,
+                        self.__bookDataByFeature[featureKey] = pd.DataFrame(columns=self._instrumentIds,
                                                                             index=timeUpdates)
                     self.__bookDataByFeature[featureKey].set_value(timeOfUpdate, instrumentUpdate.getInstrumentId(), bookData[featureKey])
         for featureKey in self.__bookDataByFeature:
@@ -198,25 +176,11 @@ class YahooStockDataSource(DataSource):
                                      bookData=bookData)
         return inst
 
-    def emitInstrumentUpdates(self):
-        for timeOfUpdate, instrumentUpdates in self.__groupedInstrumentUpdates:
-            yield([timeOfUpdate, instrumentUpdates])
-
-    def getInstrumentIds(self):
-        return self.__instrumentIds
-
     def getBookDataByFeature(self):
         return self.__bookDataByFeature
 
-    def getAllTimes(self):
-        return self.__allTimes
-
     def getClosingTime(self):
-        return self.__allTimes[-1]
-
-    def getBookDataFeatures(self):
-
-        return self.__bookDataByFeature.keys()
+        return self._allTimes[-1]
 
     def adjustPriceForSplitAndDiv(self, instrumentId, fileName):
         multiplier = data_source_utils.getMultipliers(self,instrumentId,fileName,self.__downloadId)
@@ -230,12 +194,15 @@ class YahooStockDataSource(DataSource):
 
 
 if __name__ == "__main__":
-    instrumentIds = ['IBM', 'AAPL', 'MSFT']
+    instrumentIds = ['IBM', 'AAPL']
     startDateStr = '2013/05/10'
     endDateStr = '2017/06/09'
-    YahooStockDataSource(cachedFolderName='yahooData/',
+    yds = YahooStockDataSource(cachedFolderName='yahooData/',
                                      dataSetId="testTrading",
                                      instrumentIds=instrumentIds,
                                      startDateStr=startDateStr,
                                      endDateStr=endDateStr,
-                                     event='history')
+                                     event='history',
+                                     liveUpdates=True)
+    print(yds.emitInstrumentUpdates().next())
+    print(yds.getBookDataFeatures())

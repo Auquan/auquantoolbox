@@ -2,7 +2,6 @@ from backtester.dataSource.data_source import DataSource
 from backtester.instrumentUpdates import *
 import os
 from datetime import datetime
-from backtester.dataSource.data_source_utils import groupAndSortByTimeUpdates
 import csv
 from backtester.logger import *
 try:
@@ -20,29 +19,24 @@ def is_number(s):
 
 
 class QuantQuestDataSource(DataSource):
-    def __init__(self, cachedFolderName, dataSetId, instrumentIds):
-        self.__cachedFolderName = cachedFolderName
-        self.__dataSetId = dataSetId
-        self.ensureDirectoryExists(cachedFolderName, dataSetId)
+    def __init__(self, cachedFolderName, dataSetId, instrumentIds, startDateStr=None, endDateStr=None, liveUpdates=True, pad=True):
+        super(QuantQuestDataSource, self).__init__(cachedFolderName, dataSetId, instrumentIds, startDateStr, endDateStr)
         self.ensureAllInstrumentsFile(dataSetId)
-        if instrumentIds is not None and len(instrumentIds) > 0:
-            self.__instrumentIds = instrumentIds
+        if liveUpdates:
+            self._allTimes, self._groupedInstrumentUpdates = self.getGroupedInstrumentUpdates()
         else:
-            self.__instrumentIds = self.getAllInstrumentIds()
-        self.__bookDataFeatureKeys = None
-        self.__groupedInstrumentUpdates = self.getGroupedInstrumentUpdates()
-
-    def ensureDirectoryExists(self, cachedFolderName, dataSetId):
-        if not os.path.exists(cachedFolderName):
-            os.mkdir(cachedFolderName, 0o755)
-        if not os.path.exists(cachedFolderName + '/' + dataSetId):
-            os.mkdir(cachedFolderName + '/' + dataSetId)
+            self._allTimes, self._bookDataByInstrument = self.getAllInstrumentUpdates()
+            self._bookDataFeatureKeys = list(self._bookDataByInstrument[self._instrumentIds[0]].columns)
+            if pad:
+                self.padInstrumentUpdates()
+            if (startDateStr is not None) and (endDateStr is not None):
+                self.filterUpdatesByDates([(startDateStr, endDateStr)])
 
     def getFileName(self, instrumentId):
-        return self.__cachedFolderName + self.__dataSetId + '/' + instrumentId + '.csv'
+        return self._cachedFolderName + self._dataSetId + '/' + instrumentId + '.csv'
 
     def ensureAllInstrumentsFile(self, dataSetId):
-        stockListFileName = self.__cachedFolderName + self.__dataSetId + '/' + 'stock_list.txt'
+        stockListFileName = self._cachedFolderName + self._dataSetId + '/' + 'stock_list.txt'
         if os.path.isfile(stockListFileName):
             return True
         url = 'https://raw.githubusercontent.com/Auquan/auquan-historical-data/master/qq2Data/%s/stock_list.txt' % (
@@ -60,7 +54,7 @@ class QuantQuestDataSource(DataSource):
             return False
 
     def getAllInstrumentIds(self):
-        stockListFileName = self.__cachedFolderName + self.__dataSetId + '/' + 'stock_list.txt'
+        stockListFileName = self._cachedFolderName + self._dataSetId + '/' + 'stock_list.txt'
         if not os.path.isfile(stockListFileName):
             logError('Stock list file not present. Please try running again.')
             return []
@@ -71,9 +65,9 @@ class QuantQuestDataSource(DataSource):
         content = [x.strip() for x in content]
         return content
 
-    def downloadFile(self, dataSetId, instrumentId, downloadLocation):
+    def downloadFile(self, instrumentId, downloadLocation):
         url = 'https://raw.githubusercontent.com/Auquan/auquan-historical-data/master/qq2Data/%s/%s.csv' % (
-            dataSetId, instrumentId)
+            self._dataSetId, instrumentId)
         response = urlopen(url)
         status = response.getcode()
         if status == 200:
@@ -84,6 +78,13 @@ class QuantQuestDataSource(DataSource):
         else:
             logError('File not found. Please check settings!')
             return False
+
+    def downloadAndAdjustData(self, instrumentId, fileName):
+        if not os.path.isfile(fileName):
+            if not self.downloadFile(instrumentId, fileName):
+                logError('Skipping %s:' % (instrumentId))
+                return False
+        return True
 
     def getInstrumentUpdateFromRow(self, instrumentId, row):
         bookData = row
@@ -97,39 +98,6 @@ class QuantQuestDataSource(DataSource):
                                      tradeSymbol=instrumentId,
                                      timeOfUpdate=timeOfUpdate,
                                      bookData=bookData)
-        if self.__bookDataFeatureKeys is None:
-            self.__bookDataFeatureKeys = bookData.keys()  # just setting to the first one we encounter
+        if self._bookDataFeatureKeys is None:
+            self._bookDataFeatureKeys = bookData.keys()  # just setting to the first one we encounter
         return inst
-
-    def getGroupedInstrumentUpdates(self):
-        allInstrumentUpdates = []
-        for instrumentId in self.__instrumentIds:
-            print('Processing data for stock: %s' % (instrumentId))
-            fileName = self.getFileName(instrumentId)
-            if not os.path.exists(self.__cachedFolderName):
-                os.mkdir(self.cachedFolderName, 0o755)
-            if not os.path.isfile(fileName):
-                if not self.downloadFile(self.__dataSetId, instrumentId, fileName):
-                    logError('Skipping %s:' % (instrumentId))
-                    continue
-            with open(self.getFileName(instrumentId)) as f:
-                records = csv.DictReader(f)
-                for row in records:
-                    try:
-                        inst = self.getInstrumentUpdateFromRow(instrumentId, row)
-                        allInstrumentUpdates.append(inst)
-                    except:
-                        continue
-
-        groupedInstrumentUpdates = groupAndSortByTimeUpdates(allInstrumentUpdates)
-        return groupedInstrumentUpdates
-
-    def emitInstrumentUpdates(self):
-        for timeOfUpdate, instrumentUpdates in self.__groupedInstrumentUpdates:
-            yield([timeOfUpdate, instrumentUpdates])
-
-    def getInstrumentIds(self):
-        return self.__instrumentIds
-
-    def getBookDataFeatures(self):
-        return self.__bookDataFeatureKeys
