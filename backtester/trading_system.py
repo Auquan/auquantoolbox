@@ -144,22 +144,22 @@ class TradingSystem:
         # TODO: Figure out a good way to handle order parsers with live data later on.
         groupedInstrumentUpdates = self.dataParser.emitInstrumentUpdates()
         timeGetter = self.tsParams.getTimeRuleForUpdates().emitTimeToTrade()
-        timeOfNextFeatureUpdate = timeGetter.next()
+        timeOfNextFeatureUpdate = next(timeGetter)
         self.startDate = timeOfNextFeatureUpdate
-        timeOfUpdate, instrumentUpdates = groupedInstrumentUpdates.next()
+        timeOfUpdate, instrumentUpdates = next(groupedInstrumentUpdates)
         isClose = False
         while True:
             if (timeOfUpdate <= timeOfNextFeatureUpdate):
                 self.processInstrumentUpdates(timeOfUpdate, instrumentUpdates, onlyAnalyze)
                 try:
-                    timeOfUpdate, instrumentUpdates = groupedInstrumentUpdates.next()
+                    timeOfUpdate, instrumentUpdates = next(groupedInstrumentUpdates)
                 except StopIteration:
                     isClose = True
                     self.updateFeaturesAndExecute(timeOfNextFeatureUpdate, isClose, onlyAnalyze)
             else:
                 currentTimeUpdate = timeOfNextFeatureUpdate
                 try:
-                    timeOfNextFeatureUpdate = timeGetter.next()
+                    timeOfNextFeatureUpdate = next(timeGetter)
                 except StopIteration:
                     isClose = True
                 self.updateFeaturesAndExecute(currentTimeUpdate, isClose, onlyAnalyze)

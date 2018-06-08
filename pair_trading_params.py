@@ -45,9 +45,7 @@ class MyTradingParams(TradingSystemParameters):
                 'pairvalue_prediction': PairValuePredictionFeature}
 
     def getTimeRuleForUpdates(self):
-        return USTimeRule(cachedFolderName='yahooData/',
-                          dataSetId='',
-                          startDate = '2010/01/01',
+        return USTimeRule(startDate = '2010/01/01',
                           endDate = '2017/06/30')
 
     '''

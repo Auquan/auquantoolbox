@@ -9,4 +9,4 @@ import os
 
 class USTimeRule(CustomTimeRule):
     def __init__(self, startDate, endDate, frequency='H', sample='1'):
-        CustomTimeRule.__init__(startDate = startDate, endDate = endDate, calendar = USFederalHolidayCalendar(), frequency = frequency, sample = sample)
+        super().__init__(startDate = startDate, endDate = endDate, calendar = USFederalHolidayCalendar(), frequency = frequency, sample = sample)
