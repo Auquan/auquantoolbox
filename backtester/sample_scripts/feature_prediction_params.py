@@ -1,6 +1,6 @@
 from backtester.trading_system_parameters import TradingSystemParameters
 from datetime import timedelta
-from backtester.dataSource.quant_quest_data_source import QuantQuestDataSource
+from backtester.dataSource.quant_quest_data_source import CsvDataSource
 from backtester.executionSystem.simple_execution_system import SimpleExecutionSystem
 from backtester.orderPlacer.backtesting_order_placer import BacktestingOrderPlacer
 from backtester.trading_system import TradingSystem
@@ -28,9 +28,16 @@ class FeaturePredictionTradingParams(TradingSystemParameters):
 
     def getDataParser(self):
         instrumentIds = self.__problem2Solver.getSymbolsToTrade()
-        return QuantQuestDataSource(cachedFolderName='historicalData/',
-                                    dataSetId=self.__dataSetId,
-                                    instrumentIds=instrumentIds)
+        return CsvDataSource(cachedFolderName='historicalData/',
+                             dataSetId=self.__dataSetId,
+                             instrumentIds=instrumentIds,
+                             downloadUrl = 'https://raw.githubusercontent.com/Auquan/auquan-historical-data/master/qq2Data',
+                             timeKey = '',
+                             timeStringFormat = '%Y-%m-%d %H:%M:%S',
+                             startDateStr=None,
+                             endDateStr=None,
+                             liveUpdates=True,
+                             pad=True)
 
     '''
     Returns an instance of class TimeRule, which describes the times at which
@@ -230,4 +237,3 @@ class TotalFeesCalculator(Feature):
         total = 2 * fees \
                 + (np.abs(changeInPosition) * instrumentLookbackData.getFeatureDf(featureParams['spread']).iloc[-1])
         return total
-

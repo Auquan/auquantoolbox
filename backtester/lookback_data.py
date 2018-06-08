@@ -2,6 +2,11 @@ import pandas as pd
 from collections import deque
 import numpy as np
 
+# removing set_value deprecation warning, currently keepin set_value becase the overhead is least
+# refer https://stackoverflow.com/questions/28757389/loc-vs-iloc-vs-ix-vs-at-vs-iat/43968774#43968774
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
+
 SIZE_FACTOR = 3
 MIN_THRESHOLD = 500
 MAX_THRESHOLD = 2000

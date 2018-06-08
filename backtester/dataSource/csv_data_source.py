@@ -18,9 +18,12 @@ def is_number(s):
         return False
 
 
-class QuantQuestDataSource(DataSource):
-    def __init__(self, cachedFolderName, dataSetId, instrumentIds, startDateStr=None, endDateStr=None, liveUpdates=True, pad=True):
-        super(QuantQuestDataSource, self).__init__(cachedFolderName, dataSetId, instrumentIds, startDateStr, endDateStr)
+class CsvDataSource(DataSource):
+    def __init__(self, cachedFolderName, dataSetId, instrumentIds, downloadUrl = None, timeKey = None, timeStringFormat = None, startDateStr=None, endDateStr=None, liveUpdates=True, pad=True):
+        super(CsvDataSource, self).__init__(cachedFolderName, dataSetId, instrumentIds, startDateStr, endDateStr)
+        self._downloadUrl = downloadUrl
+        self._timeKey = timeKey
+        self._timeStringFormat = timeStringFormat
         self.ensureAllInstrumentsFile(dataSetId)
         if liveUpdates:
             self._allTimes, self._groupedInstrumentUpdates = self.getGroupedInstrumentUpdates()
@@ -39,8 +42,7 @@ class QuantQuestDataSource(DataSource):
         stockListFileName = self._cachedFolderName + self._dataSetId + '/' + 'stock_list.txt'
         if os.path.isfile(stockListFileName):
             return True
-        url = 'https://raw.githubusercontent.com/Auquan/auquan-historical-data/master/qq2Data/%s/stock_list.txt' % (
-            dataSetId)
+        url = '%s/%s/stock_list.txt' % (self._downloadUrl, dataSetId)
         print(url)
         response = urlopen(url)
         status = response.getcode()
@@ -66,8 +68,7 @@ class QuantQuestDataSource(DataSource):
         return content
 
     def downloadFile(self, instrumentId, downloadLocation):
-        url = 'https://raw.githubusercontent.com/Auquan/auquan-historical-data/master/qq2Data/%s/%s.csv' % (
-            self._dataSetId, instrumentId)
+        url = '%s/%s/%s.csv' % (self._downloadUrl, self._dataSetId, instrumentId)
         response = urlopen(url)
         status = response.getcode()
         if status == 200:
@@ -91,8 +92,8 @@ class QuantQuestDataSource(DataSource):
         for key in bookData:
             if is_number(bookData[key]):
                 bookData[key] = float(bookData[key])
-        timeKey = ''
-        timeOfUpdate = datetime.strptime(row[timeKey], '%Y-%m-%d %H:%M:%S')
+        timeKey = self._timeKey
+        timeOfUpdate = datetime.strptime(row[timeKey], self._timeStringFormat)
         bookData.pop(timeKey, None)
         inst = StockInstrumentUpdate(stockInstrumentId=instrumentId,
                                      tradeSymbol=instrumentId,
