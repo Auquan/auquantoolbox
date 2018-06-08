@@ -3,7 +3,6 @@ from backtester.features.feature import Feature
 from datetime import timedelta
 from backtester.dataSource.nse_data_source import NSEStockDataSource
 from backtester.dataSource.yahoo_data_source import YahooStockDataSource
-from backtester.dataSource.google_data_source import GoogleStockDataSource
 from backtester.executionSystem.simple_execution_system import SimpleExecutionSystem
 from backtester.orderPlacer.backtesting_order_placer import BacktestingOrderPlacer
 from backtester.trading_system import TradingSystem
@@ -53,7 +52,7 @@ class MyTradingParams(TradingSystemParameters):
     '''
 
     def getCustomFeatures(self):
-        return {'my_custom_feature': MyCustomFeature, 
+        return {'my_custom_feature': MyCustomFeature,
                 'prediction': TrainingPredictionFeature}
 
     '''
@@ -147,7 +146,7 @@ class MyTradingParams(TradingSystemParameters):
         lookbackInstrumentFeatures = instrumentManager.getLookbackInstrumentFeatures()
 
         ### TODO : FILL THIS FUNCTION TO RETURN A BUY (1) or SELL (0) prediction for each stock
-        ### USE TEMPLATE BELOW AS EXAMPLE 
+        ### USE TEMPLATE BELOW AS EXAMPLE
 
         # dataframe for a historical instrument feature (ma_5 in this case). The index is the timestamps
         # of upto lookback data points. The columns of this dataframe are the stock symbols/instrumentIds.
