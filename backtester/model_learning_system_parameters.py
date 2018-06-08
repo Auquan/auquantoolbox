@@ -4,6 +4,7 @@ import sys
 
 class ModelLearningSystemParamters(Object):
     def __init__(self, symbols, targetVariable, models=None):
+        self.instrumentIds = symbols
         self.trainingDataSource = None
         self.validationDataSource = None
         self.testDataSource = None

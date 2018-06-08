@@ -8,6 +8,8 @@ class ModelLearningSystem:
         self.__trainingDataSource = self.mlsParams.getTrainingDataSource()
         self.__validationDataSource = self.mlsParams.getValidationDataSource()
         self.__testDataSource = self.mlsParams.getTestDataSource()
+        self.__trainingFeatureManager = FeatureManager(self.mlsParams, self.__trainingDataSource)
+
 
     def getFeatureSet(self):
         pass

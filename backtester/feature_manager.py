@@ -2,12 +2,16 @@
 
 
 class FeatureManager(object):
-    """docstring FeatureManager ."""
-    def __init__(self, systemParams, instrumentIds):
+    """
+    """
+    def __init__(self, systemParams, dataParser, chunkSize):
         self.systemParams = systemParams
-        # self.__instrumentsDict = {}
-        # instrumentFeatureConfigs = systemParams.getFeatureConfigsForInstrumentType(INSTRUMENT_TYPE_STOCK)
-        # instrumentFeatureKeys = map(lambda x: x.getFeatureKey(), instrumentFeatureConfigs
+        self.__chunkSize = chunkSize
+        self.__bookDataFeatures = dataParser.getBookDataFeatures()
+        instrumentFeatureConfigs = systemParams.getFeatureConfigsForInstrumentType(INSTRUMENT_TYPE_STOCK)
+        instrumentFeatureKeys = map(lambda x: x.getFeatureKey(), instrumentFeatureConfigs)
+        featureKeys = list(chain(self.__bookDataFeatures, instrumentFeatureKeys))
+        self.__instrumentDataManger = InstrumentDataManager(dataParser, featureKeys, instrumentIds)
 
     def getSystemParamas(self):
         return self.systemParams
