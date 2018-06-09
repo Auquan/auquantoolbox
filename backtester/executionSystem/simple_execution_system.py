@@ -6,7 +6,7 @@ import pandas as pd
 
 class SimpleExecutionSystem(BaseExecutionSystem):
     def __init__(self, enter_threshold=0.7, exit_threshold=0.55, longLimit=10,
-                 shortLimit=10, capitalUsageLimit=0, lotSize=1, limitType='L', price=''):
+                 shortLimit=10, capitalUsageLimit=0, lotSize=1, limitType='L', price='close'):
         self.enter_threshold = enter_threshold
         self.exit_threshold = exit_threshold
         self.longLimit = longLimit
@@ -20,7 +20,7 @@ class SimpleExecutionSystem(BaseExecutionSystem):
         if isinstance(self.longLimit, pd.DataFrame):
             return self.convertLimit(self.longLimit, price)
         if isinstance(self.longLimit, dict):
-            longLimitDf = pd.DataFrame(self.longLimit.values())
+            longLimitDf = pd.DataFrame(list(self.longLimit.values()))
             return self.convertLimit(longLimitDf, price)
         else:
             return self.convertLimit(pd.Series(self.longLimit, index=instrumentIds), price)
@@ -29,16 +29,17 @@ class SimpleExecutionSystem(BaseExecutionSystem):
         if isinstance(self.shortLimit, pd.DataFrame):
             return self.convertLimit(self.shortLimit, price)
         if isinstance(self.shortLimit, dict):
-            shortLimitDf = pd.DataFrame(self.shortLimit.values())
+            shortLimitDf = pd.DataFrame(list(self.shortLimit.values()))
             return self.convertLimit(shortLimitDf, price)
         else:
             return self.convertLimit(pd.Series(self.shortLimit, index=instrumentIds), price)
 
     def getLotSize(self, instrumentIds, price):
+        import pdb; pdb.set_trace()
         if isinstance(self.lotSize, pd.DataFrame):
             return self.convertLimit(self.lotSize, price)
         if isinstance(self.lotSize, dict):
-            lotSizeDf = pd.DataFrame(self.lotSize.values())
+            lotSizeDf = pd.DataFrame(list(self.lotSize.values()))
             return self.convertLimit(lotSizeDf, price)
         else:
             return self.convertLimit(pd.Series(self.lotSize, index=instrumentIds), price)
@@ -107,8 +108,9 @@ class SimpleExecutionSystem(BaseExecutionSystem):
         position = positionData.iloc[-1]
         price = instrumentLookbackData.getFeatureDf(self.priceFeature).iloc[-1]
         executions = pd.Series([0] * len(positionData.columns), index=positionData.columns)
+        import pdb; pdb.set_trace()
         executions[self.enterCondition(currentPredictions, instrumentsManager)] = \
-            self.getLotSize(positionData.columns, price) * self.getBuySell(currentPredictions, instrumentsManager)
+            self.getLotSize(list(positionData.columns), price) * self.getBuySell(currentPredictions, instrumentsManager)
         # No executions if at position limit
         executions[self.atPositionLimit(capital, positionData, price)] = 0
 

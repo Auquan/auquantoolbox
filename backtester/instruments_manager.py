@@ -107,6 +107,7 @@ class InstrumentManager:
         instrumentFeatureConfigs = tsParams.getFeatureConfigsForInstrumentType(INSTRUMENT_TYPE_STOCK)
         compulsoryInstrumentFeatureKeys = map(lambda x: x.getFeatureKey(), self.__compulsoryInstrumentFeatureConfigs)
         instrumentFeatureKeys = map(lambda x: x.getFeatureKey(), instrumentFeatureConfigs)
+        import pdb; pdb.set_trace()
         featureKeys = list(chain(self.__bookDataFeatures, instrumentFeatureKeys, compulsoryInstrumentFeatureKeys))
         self.__lookbackInstrumentFeatures = InstrumentsLookbackData(size=tsParams.getLookbackSize(),
                                                                     features=featureKeys,

@@ -42,7 +42,11 @@ class CsvDataSource(DataSource):
         stockListFileName = self._cachedFolderName + self._dataSetId + '/' + 'stock_list.txt'
         if os.path.isfile(stockListFileName):
             return True
-        url = '%s/%s/stock_list.txt' % (self._downloadUrl, dataSetId)
+        url = ''
+        if self._dataSetId != '':
+            url = '%s/%s/stock_list.txt' % (self._downloadUrl, self._dataSetId)
+        else:
+            url = '%s/stock_list.txt' % (self._downloadUrl)
         print(url)
         response = urlopen(url)
         status = response.getcode()
@@ -68,7 +72,12 @@ class CsvDataSource(DataSource):
         return content
 
     def downloadFile(self, instrumentId, downloadLocation):
-        url = '%s/%s/%s.csv' % (self._downloadUrl, self._dataSetId, instrumentId)
+        url = ''
+        if self._dataSetId != '':
+            url = '%s/%s/%s.csv' % (self._downloadUrl, self._dataSetId, instrumentId)
+        else:
+            url = '%s/%s.csv' % (self._downloadUrl, instrumentId)
+
         response = urlopen(url)
         status = response.getcode()
         if status == 200:
@@ -88,6 +97,7 @@ class CsvDataSource(DataSource):
         return True
 
     def getInstrumentUpdateFromRow(self, instrumentId, row):
+        import pdb; pdb.set_trace()
         bookData = row
         for key in bookData:
             if is_number(bookData[key]):

@@ -204,5 +204,5 @@ if __name__ == "__main__":
                                      endDateStr=endDateStr,
                                      event='history',
                                      liveUpdates=True)
-    print(yds.emitInstrumentUpdates().next())
+    print(next(yds.emitInstrumentUpdates()))
     print(yds.getBookDataFeatures())
