@@ -97,7 +97,6 @@ class CsvDataSource(DataSource):
         return True
 
     def getInstrumentUpdateFromRow(self, instrumentId, row):
-        import pdb; pdb.set_trace()
         bookData = row
         for key in bookData:
             if is_number(bookData[key]):
