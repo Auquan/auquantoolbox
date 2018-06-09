@@ -1,4 +1,7 @@
 import os, sys
+parentPath = os.path.abspath("../..")
+if parentPath not in sys.path:
+    sys.path.insert(0, parentPath)
 from datetime import datetime
 from backtester.instrumentUpdates import *
 from backtester.constants import *
@@ -121,7 +124,6 @@ class YahooStockDataSource(DataSource):
             self._bookDataFeatureKeys = self.__bookDataByFeature.keys()
         else:
             self._allTimes, self._bookDataByInstrument = self.getAllInstrumentUpdates()
-            self._bookDataFeatureKeys = list(self._bookDataByInstrument[self._instrumentIds[0]].columns)
             if pad:
                 self.padInstrumentUpdates()
             self.filterUpdatesByDates([(startDateStr, endDateStr)])
@@ -203,6 +205,6 @@ if __name__ == "__main__":
                                      startDateStr=startDateStr,
                                      endDateStr=endDateStr,
                                      event='history',
-                                     liveUpdates=True)
-    print(next(yds.emitInstrumentUpdates()))
+                                     liveUpdates=False)
+    print(next(yds.emitAllInstrumentUpdates()['IBM'].getBookDataChunk(100)))
     print(yds.getBookDataFeatures())
