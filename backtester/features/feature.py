@@ -21,6 +21,6 @@ class Feature(object):
     Computing for Instrument Data.
     '''
     @classmethod
-    def computeForInstrumentData(cls, time, featureParams, featureKey, instrumentDataManager):
+    def computeForInstrumentData(cls, updateNum, featureParams, featureKey, featureManager):
         raise NotImplementedError
         return None

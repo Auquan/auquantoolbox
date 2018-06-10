@@ -21,3 +21,15 @@ class MovingAverageFeature(Feature):
         if len(data) < 1:
             return 0
         return avg
+
+    @classmethod
+    def computeForInstrumentData(cls, updateNum, featureParams, featureKey, featureManager):
+        chunkNumber, data = featureManager.getFeatureDf(featureParams['featureName'])
+        if data is None:
+            logWarn("instrument data for \"%s\" is not available, can't calculate \"%s\"" % (featureParams['featureName'], featureKey))
+            return None
+        if chunkNumber != updateNum:
+            logWarn("Desynchronized chunks! check again")
+            return None
+        avg = data.rolling.(window=featureParams['period'], min_periods=1).mean()
+        return avg

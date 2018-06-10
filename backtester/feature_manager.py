@@ -1,4 +1,6 @@
 from itertools import chain
+import time
+from backtester.features.feature_config import FeatureConfig
 from backtester.instrument_data_manager import InstrumentDataManager
 
 
@@ -23,27 +25,43 @@ class FeatureManager(object):
     def getSystemParamas(self):
         return self.systemParams
 
-    def getDataDf(self):
-        pass
+    def getInstrumentDf(self, instrumentId):
+        return self.__instrumentDataManger.getInstrumentDataByInstrument(instrumentId)
 
-    def computeInstrumentFeatures(self):
+    def getFeatureDf(self, featureKey):
+        return self.__instrumentDataManger.getInstrumentDataChunkByFeature(featureKey)
+
+    def computeInstrumentFeatures(self, writeFeatures=True):
         instrumentBookData = self.__dataParser.emitAllInstrumentUpdates()
+        instrumentIds = self.__dataParser.getInstrumentIds()
         for bookDataFeature in self.__bookDataFeatures:
-            featureDf = pd.concat([instrumentBookData[instrumentId].getBookDataByFeature(bookDataFeature) for instrumentId in instrumentBookData])
-            self.__instrumentDataManger.addBookDataFeatureValueForAllInstruments(bookDataFeature, featureDf)
+            featureDf = pd.concat([instrumentBookData[instrumentId].getBookDataByFeature(bookDataFeature) for instrumentId in instrumentIds], axis=1)
+            featureDf.columns = instrumentIds
+            self.__instrumentDataManger.addFeatureValueForAllInstruments(bookDataFeature, featureDf)
 
-        # TODO: delete instrumentBookData to free memory
+        # NOTE: copy in pd.concat is set to True. Check what happens when it is False
 
         featureConfigs = self.systemParams.getFeatureConfigsForInstrumentType(INSTRUMENT_TYPE_STOCK)
         # featureConfigKeys = [featureConfig.getFeatureKey() for featureConfig in featureConfigs]
-        for instrumentDataChunk in instrumentDataGenerator:
-
-        for featureConfig in featureConfigs:
-            featureKey = featureConfig.getFeatureKey()
-            featureParams = featureConfig.getFeatureParams()
-            featureId = featureConfig.getFeatureId()
-            featureCls = FeatureConfig.getClassForFeatureId(featureId)
-            featureDf = featureCls.computeForInstrumentData(featureParams=featureParams,
-                                                             featureKey=featureKey,
-                                                             instrumentDataManager=self.__instrumentDataManger)
-            self.__instrumentDataManger.addFeatureValueForAllInstruments(featureKey, featureDf)
+        featureGenerator = self.__instrumentDataManger.getSimulator(self.__chunkSize)
+        for chunkNumber, timeUpdates in featureGenerator:
+            self.__totalIter = self.__totalIter + 1
+            for featureConfig in featureConfigs:
+                start = time.time()
+                featureKey = featureConfig.getFeatureKey()
+                featureParams = featureConfig.getFeatureParams()
+                featureId = featureConfig.getFeatureId()
+                featureCls = FeatureConfig.getClassForFeatureId(featureId)
+                featureDf = featureCls.computeForInstrumentData(updateNum=chunkNumber,
+                                                                featureParams=featureParams,
+                                                                featureKey=featureKey,
+                                                                featureManager=self)
+                self.__instrumentDataManger.addFeatureValueForAllInstruments(featureKey, featureDf)
+                end = time.time()
+                diffms = (end - start) * 1000
+                self.__perfDict[featureKey] = self.__perfDict[featureKey] + diffms
+                logPerf('Avg time for feature: %s : %.2f' % (featureKey, self.__perfDict[featureKey] / self.__totalIter))
+            self.__instrumentDataManger.transformInstrumentData()
+            if writeFeatures:
+                self.__instrumentDataManger.writeInstrumentData()
+            self.__instrumentDataManger.dumpInstrumentDataChunk()

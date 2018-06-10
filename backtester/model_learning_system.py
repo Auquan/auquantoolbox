@@ -2,13 +2,13 @@ import sys
 
 
 class ModelLearningSystem:
-    def __init__(self,mlsParams):
+    def __init__(self,mlsParams, chunkSize=0):
         self.mlsParams = mlsParams
         self.__targetVariable = self.mlsParams.getTargetVariable()
         self.__trainingDataSource = self.mlsParams.getTrainingDataSource()
         self.__validationDataSource = self.mlsParams.getValidationDataSource()
         self.__testDataSource = self.mlsParams.getTestDataSource()
-        self.__trainingFeatureManager = FeatureManager(self.mlsParams, self.__trainingDataSource)
+        self.__trainingFeatureManager = FeatureManager(self.mlsParams, self.__trainingDataSource, chunkSize)
 
 
     def getFeatureSet(self):
