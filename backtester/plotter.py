@@ -22,12 +22,12 @@ TODO: 1) Support excluding columns for each files.
       3) Provide a selector GUI to chose the files.
 '''
 
-def generateGraph(instrumentList, path, fileName, statsString, benchmark_pnl, startingCapital=0):
+def generateGraph(instrumentList, fileName, statsString, benchmark_pnl, startingCapital=0):
     if isfile(fileName):
         logInfo('Generating %s' % fileName, True)
         updatemenus = list([
         dict(active=-1,
-            buttons=list([   
+            buttons=list([
                 dict(label = 'Total Market',
                     method = 'update',
                     args = [{'title': statsString,
@@ -64,7 +64,7 @@ def generateGraph(instrumentList, path, fileName, statsString, benchmark_pnl, st
             ),
             updatemenus=updatemenus
         )
-        
+
         plot_data = {
             "data": generateData(fileName, startingCapital, benchmark_pnl),
             "layout": layout

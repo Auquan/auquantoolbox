@@ -6,7 +6,7 @@ import pandas as pd
 
 class SimpleExecutionSystem(BaseExecutionSystem):
     def __init__(self, enter_threshold=0.7, exit_threshold=0.55, longLimit=10,
-                 shortLimit=10, capitalUsageLimit=0, lotSize=1, limitType='L', price='close'):
+                 shortLimit=10, capitalUsageLimit=0, lotSize=1, limitType='L', price=None):
         self.enter_threshold = enter_threshold
         self.exit_threshold = exit_threshold
         self.longLimit = longLimit
@@ -20,7 +20,7 @@ class SimpleExecutionSystem(BaseExecutionSystem):
         if isinstance(self.longLimit, pd.DataFrame):
             return self.convertLimit(self.longLimit, price)
         if isinstance(self.longLimit, dict):
-            longLimitDf = pd.DataFrame(list(self.longLimit.values()))
+            longLimitDf = pd.Series(self.longLimit)
             return self.convertLimit(longLimitDf, price)
         else:
             return self.convertLimit(pd.Series(self.longLimit, index=instrumentIds), price)
@@ -29,7 +29,7 @@ class SimpleExecutionSystem(BaseExecutionSystem):
         if isinstance(self.shortLimit, pd.DataFrame):
             return self.convertLimit(self.shortLimit, price)
         if isinstance(self.shortLimit, dict):
-            shortLimitDf = pd.DataFrame(list(self.shortLimit.values()))
+            shortLimitDf = pd.Series(self.shortLimit)
             return self.convertLimit(shortLimitDf, price)
         else:
             return self.convertLimit(pd.Series(self.shortLimit, index=instrumentIds), price)
@@ -38,7 +38,7 @@ class SimpleExecutionSystem(BaseExecutionSystem):
         if isinstance(self.lotSize, pd.DataFrame):
             return self.convertLimit(self.lotSize, price)
         if isinstance(self.lotSize, dict):
-            lotSizeDf = pd.DataFrame(list(self.lotSize.values()))
+            lotSizeDf = pd.Series(self.lotSize)
             return self.convertLimit(lotSizeDf, price)
         else:
             return self.convertLimit(pd.Series(self.lotSize, index=instrumentIds), price)
@@ -118,7 +118,6 @@ class SimpleExecutionSystem(BaseExecutionSystem):
         return np.sign(currentPredictions - 0.5)
 
     def enterCondition(self, currentPredictions, instrumentsManager):
-
         return (currentPredictions - 0.5).abs() > (self.enter_threshold - 0.5)
 
     def atPositionLimit(self, capital, positionData, price):

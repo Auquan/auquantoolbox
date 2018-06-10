@@ -137,7 +137,8 @@ class MyTradingParams(TradingSystemParameters):
                                    pairLongLimit=20000,
                                    pairShortLimit=20000,
                                    pairCapitalUsageLimit = 0.10*self.getStartingCapital(),
-                                   pairLotSize=200)
+                                   pairLotSize=200,
+                                   price='close')
         # return SimpleExecutionSystem(enter_threshold=0.7,
         #                              exit_threshold=0.55,
         #                              longLimit={'ADANIPOWER.BO': 100,'RPOWER.BO': 100 * ratio},
