@@ -2,6 +2,7 @@ import time
 import json
 import os
 import os.path
+import _pickle as cPickle
 from backtester.logger import *
 from backtester.instruments_manager import InstrumentManager
 from datetime import datetime
@@ -36,8 +37,13 @@ class TradingSystem:
         self.orderPlacer = self.tsParams.getOrderPlacer()
         self.portfolioValue = self.tsParams.getStartingCapital()
         self.capital = self.tsParams.getStartingCapital()
+        self.initializer = None
+        initializerFile = self.tsParams.getInitializer()
+        if initializerFile is not None:
+            with open(initializerFile, 'rb') as oldFile:
+                self.initializer = cPickle.load(oldFile)
         self.instrumentManager = InstrumentManager(self.tsParams, self.dataParser.getBookDataFeatures(), self.dataParser.getInstrumentIds(),
-                                                   self.tsParams.getTimeRuleForUpdates())
+                                                   self.tsParams.getTimeRuleForUpdates(), self.initializer)
 
     def processInstrumentUpdates(self, timeOfUpdate, instrumentUpdates, onlyAnalyze=False, isClose=False):
         # Process instrument updates first
@@ -172,4 +178,9 @@ class TradingSystem:
         self.orderPlacer.cleanup()
         self.dataParser.cleanup()
         self.stateWriter.closeStateWriter()
+        marketFeaturesDf = self.instrumentManager.getDataDf()
+        instrumentLookbackData = self.instrumentManager.getLookbackInstrumentFeatures().getData()
+        dataToStore = {'market':marketFeaturesDf, 'instrument':instrumentLookbackData}
+        with open('savedData%s'%datetime.strftime(datetime.now(), '%Y%m%d'), 'wb') as myFile:
+            cPickle.dump(dataToStore, myFile)
         return self.getFinalMetrics([self.startDate, timeOfUpdate], shouldPlot, False)

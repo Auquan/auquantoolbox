@@ -157,3 +157,6 @@ class TradingSystemParameters(object):
 
     def getMarketFeatureConfigs(self):
         return self.__marketFeatureConfigs
+
+    def getInitializer(self):
+        return None

@@ -16,8 +16,8 @@ class BasisExecutionSystem(SimpleExecutionSystemWithFairValue):
         super(BasisExecutionSystem, self).__init__(enter_threshold_deviation=basisEnter_threshold,
                                                    exit_threshold_deviation=basisExit_threshold,
                                                    longLimit=basisLongLimit, shortLimit=basisShortLimit,
-                                                   capitalUsageLimit=basisCapitalUsageLimit, 
-                                                   enterlotSize=basisLotSize, exitlotSize = 5*basisLotSize,
+                                                   capitalUsageLimit=basisCapitalUsageLimit,
+                                                   enterlotSize=basisLotSize, exitlotSize = 2*basisLotSize,
                                                    limitType=basisLimitType, price=price)
         self.fees = feeDict
         self.thresholdParam = basis_thresholdParam
@@ -47,7 +47,7 @@ class BasisExecutionSystem(SimpleExecutionSystemWithFairValue):
             logError('Bid and Ask Price Feature Key does not exist')
 
         currentSpread = currentStockAskPrice - currentStockBidPrice + currentFutureAskPrice - currentFutureBidPrice
-        return currentSpread / 4.0
+        return np.maximum(self.spreadLimit/2.0 ,currentSpread / 4.0)
 
     def getFees(self, instrumentsManager):
         instrumentLookbackData = instrumentsManager.getLookbackInstrumentFeatures()
@@ -66,33 +66,13 @@ class BasisExecutionSystem(SimpleExecutionSystemWithFairValue):
     def enterCondition(self, currentPredictions, instrumentsManager):
         currentDeviationFromPrediction = self.getDeviationFromPrediction(currentPredictions, instrumentsManager)
         currentSpread = self.getSpread(instrumentsManager)
-        # print(np.minimum(self.spreadLimit, currentSpread))
         instrumentLookbackData = instrumentsManager.getLookbackInstrumentFeatures()
         if instrumentLookbackData.getFeatureDf('position').index[-1].time() < time(15,25,0):#(self.hackTime - timedelta(minutes=10)) :
             shouldTrade = np.abs(currentDeviationFromPrediction) > (self.enter_threshold) * np.abs(instrumentsManager.getLookbackInstrumentFeatures().getFeatureDf(self.thresholdParam).iloc[-1])
-            shouldTrade[np.abs(currentDeviationFromPrediction) - (self.feesRatio * 2 * self.getFees(instrumentsManager)) - 2 * np.minimum(self.spreadLimit, currentSpread)< 0 ]=False
-            shouldTrade[instrumentLookbackData.getFeatureDf('enter_flag').iloc[-1]==True] = False
-            # shouldTrade[currentSpread > self.spreadLimit] = False
-            # shouldTrade[['HDFCBANK', 'YESBANK', 'IBREALEST']] = False
-            # print('enter_flag')
-            # print(instrumentLookbackData.getFeatureDf('enter_flag').iloc[-1])
+            shouldTrade[np.abs(currentDeviationFromPrediction) - self.feesRatio * (2 * self.getFees(instrumentsManager) + 2 * np.minimum(self.spreadLimit, currentSpread))< 0 ]=False
         else:
             print('Trading time over')
             shouldTrade = pd.Series(False, index=currentPredictions.index)
-
-        # print(instrumentLookbackData.getFeatureDf('basis').iloc[-1])
-        # print(instrumentLookbackData.getFeatureDf('stockVWAP').iloc[-1])
-        # print(instrumentLookbackData.getFeatureDf('futureVWAP').iloc[-1])
-        # print(currentDeviationFromPrediction)
-        # print('Check if we are outside error thresholdParam')
-        # print(np.abs(currentDeviationFromPrediction) > (self.enter_threshold) * np.abs(instrumentsManager.getLookbackInstrumentFeatures().getFeatureDf(self.thresholdParam).iloc[-1]))
-        # print(currentSpread)
-        # print(self.feesRatio * 4 * self.getFees(instrumentsManager))
-        # print('Check if fee critera met')
-        # print(np.abs(currentDeviationFromPrediction) - (self.feesRatio * 4 * self.getFees(instrumentsManager)) - 4 * np.minimum(self.spreadLimit, currentSpread))
-        # print('Check if spread limit met')
-        # print(currentSpread > self.spreadLimit)
-        # print(shouldTrade)
         return shouldTrade
 
     def exitCondition(self, currentPredictions, instrumentsManager):
@@ -103,54 +83,28 @@ class BasisExecutionSystem(SimpleExecutionSystemWithFairValue):
             currentMidPrice = instrumentLookbackData.getFeatureDf(self.priceFeature).iloc[-1]
         except KeyError:
             logError('You have specified FairValue Execution Type but Price Feature Key does not exist')
+        position = pd.Series([instrumentsManager.getInstrument(x).getCurrentPosition() for x in instrumentsManager.getAllInstrumentsByInstrumentId()], index=instrumentsManager.getAllInstrumentsByInstrumentId())
         avgEnterPrice = instrumentLookbackData.getFeatureDf('enter_price').iloc[-1]
         avgEnterDeviation = currentMidPrice.transpose() - avgEnterPrice
-        position = instrumentLookbackData.getFeatureDf('position').iloc[-1]
+        # position = instrumentLookbackData.getFeatureDf('position').iloc[-1]
         avgEnterDeviation[position==0] = 0
-        # print(currentDeviationFromPrediction)
-        # print((self.exit_threshold) * np.abs(instrumentLookbackData.getFeatureDf(self.thresholdParam).iloc[-1]))
-        # print('Check if exit exitCondition met')
-        # print(-np.sign(position) * (currentDeviationFromPrediction) < (self.exit_threshold) * np.abs(instrumentLookbackData.getFeatureDf(self.thresholdParam).iloc[-1]))
-        
+
         ## Exit if no longer attractive
         #shouldExit = -np.sign(position) * (currentDeviationFromPrediction) < (self.exit_threshold) * np.abs(instrumentLookbackData.getFeatureDf(self.thresholdParam).iloc[-1])
-        
+
         ## Exit to collect profits
-        shouldExit = (avgEnterDeviation*np.sign(position) - (self.feesRatio * 4 * self.getFees(instrumentsManager)) - 4 * np.minimum(self.spreadLimit, currentSpread)) > 0 
+        shouldExit = (avgEnterDeviation*np.sign(position) - 2 * (1 + self.feesRatio) * (self.getFees(instrumentsManager) + np.minimum(self.spreadLimit, currentSpread))) > 0
         return shouldExit
 
     def hackCondition(self, currentPredictions, instrumentsManager):
         instrumentLookbackData = instrumentsManager.getLookbackInstrumentFeatures()
-        position = instrumentLookbackData.getFeatureDf('position').iloc[-1]
+        position = pd.Series([instrumentsManager.getInstrument(x).getCurrentPosition() for x in instrumentsManager.getAllInstrumentsByInstrumentId()], index=instrumentsManager.getAllInstrumentsByInstrumentId())
+        avgEnterPrice = instrumentLookbackData.getFeatureDf('enter_price').iloc[-1]
         hack = pd.Series(False, index=currentPredictions.index)
+
+        hack[np.sign(position)*(avgEnterPrice - currentPredictions)>0] = True
+
         if instrumentLookbackData.getFeatureDf('position').index[-1].time() > self.hackTime :
             hack[position!=0] = True
             print('Hacking at Close......')
-            print(hack)
         return hack
-
-
-    # def getExecutions(self, time, instrumentsManager, capital):
-    #   # TODO:
-    #   marketFeaturesDf = instrumentsManager.getDataDf()
-    #   currentMarketFeatures = marketFeaturesDf.iloc[-1]
-    #   currentPredictions = marketFeaturesDf['prediction'].iloc[-1]
-    #   logInfo(str(currentPredictions))
-    #   currentDeviationFromPredictions = {}
-    #   currentProbabilityPredictions = {}
-    #   for instrumentId in currentPredictions.keys():
-    #       instrument = instrumentsManager.getInstrument(instrumentId)
-    #       if instrument is None:
-    #           continue
-    #       try:
-    #           currentPrice = instrument.getDataDf()[self.priceFeature].iloc[-1]
-    #       except KeyError:
-    #           logError('You have specified FairValue Execution Type but Price Feature Key does not exist')
-
-    #       currentDeviationFromPrediction = currentPredictions[instrumentId]/currentPrice
-    #       currentProbabilityPredictions[instrumentId] = currentDeviationFromPrediction/2
-
-    #   executions = []
-    #   executions += self.exitPosition(instrumentsManager, currentProbabilityPredictions)
-    #   executions += self.enterPosition(instrumentsManager, currentProbabilityPredictions, capital)
-    #   return executions
