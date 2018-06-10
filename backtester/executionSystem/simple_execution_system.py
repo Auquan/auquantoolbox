@@ -6,15 +6,26 @@ import pandas as pd
 
 class SimpleExecutionSystem(BaseExecutionSystem):
     def __init__(self, enter_threshold=0.7, exit_threshold=0.55, longLimit=10,
-                 shortLimit=10, capitalUsageLimit=0, lotSize=1, limitType='L', price=None):
+                 shortLimit=10, capitalUsageLimit=0, enterlotSize=1, exitlotSize = 1, limitType='L', price='close'):
         self.enter_threshold = enter_threshold
         self.exit_threshold = exit_threshold
         self.longLimit = longLimit
         self.shortLimit = shortLimit
         self.capitalUsageLimit = capitalUsageLimit
-        self.lotSize = lotSize
+        self.enterlotSize = enterlotSize
+        self.exitlotSize = exitlotSize
         self.limitType = limitType
         self.priceFeature = price
+
+    def getPriceSeries(self, instrumentsManager):
+        instrumentLookbackData = instrumentsManager.getLookbackInstrumentFeatures()
+        try:
+            price = instrumentLookbackData.getFeatureDf(self.priceFeature).iloc[-1]
+            return price
+        except KeyError:
+                logError('You have specified Dollar Limit but Price Feature Key %s does not exist'%self.priceFeature)
+
+
 
     def getLongLimit(self, instrumentIds, price):
         if isinstance(self.longLimit, pd.DataFrame):
@@ -34,14 +45,23 @@ class SimpleExecutionSystem(BaseExecutionSystem):
         else:
             return self.convertLimit(pd.Series(self.shortLimit, index=instrumentIds), price)
 
-    def getLotSize(self, instrumentIds, price):
-        if isinstance(self.lotSize, pd.DataFrame):
+    def getEnterLotSize(self, instrumentIds, price):
+        if isinstance(self.enterlotSize, pd.DataFrame):
             return self.convertLimit(self.lotSize, price)
-        if isinstance(self.lotSize, dict):
-            lotSizeDf = pd.Series(self.lotSize)
+        if isinstance(self.enterlotSize, dict):
+            lotSizeDf = pd.Series(self.enterlotSize)
             return self.convertLimit(lotSizeDf, price)
         else:
-            return self.convertLimit(pd.Series(self.lotSize, index=instrumentIds), price)
+            return self.convertLimit(pd.Series(self.enterlotSize, index=instrumentIds), price)
+
+    def getExitLotSize(self, instrumentIds, price):
+        if isinstance(self.exitlotSize, pd.DataFrame):
+            return self.convertLimit(self.lotSize, price)
+        if isinstance(self.exitlotSize, dict):
+            lotSizeDf = pd.Series(self.exitlotSize)
+            return self.convertLimit(lotSizeDf, price)
+        else:
+            return self.convertLimit(pd.Series(self.exitlotSize, index=instrumentIds), price)
 
     def convertLimit(self, df, price):
         if self.limitType == 'L':
@@ -91,13 +111,16 @@ class SimpleExecutionSystem(BaseExecutionSystem):
         instrumentLookbackData = instrumentsManager.getLookbackInstrumentFeatures()
         positionData = instrumentLookbackData.getFeatureDf('position')
         position = positionData.iloc[-1]
+        price = self.getPriceSeries(instrumentsManager)
         executions = pd.Series([0] * len(positionData.columns), index=positionData.columns)
 
         if closeAllPositions:
             executions = -position
             return executions
-        executions[self.exitCondition(currentPredictions, instrumentsManager)] = -position
-        executions[self.hackCondition(currentPredictions, instrumentsManager)] = -position
+        executions[self.exitCondition(currentPredictions, instrumentsManager)] = -np.sign(position)*\
+                                np.minimum(self.getExitLotSize(positionData.columns, price) , np.abs(position))
+        executions[self.hackCondition(currentPredictions, instrumentsManager)] = -np.sign(position)*\
+                                np.minimum(self.getExitLotSize(positionData.columns, price) , np.abs(position))
 
         return executions
 
@@ -105,10 +128,10 @@ class SimpleExecutionSystem(BaseExecutionSystem):
         instrumentLookbackData = instrumentsManager.getLookbackInstrumentFeatures()
         positionData = instrumentLookbackData.getFeatureDf('position')
         position = positionData.iloc[-1]
-        price = instrumentLookbackData.getFeatureDf(self.priceFeature).iloc[-1]
+        price = self.getPriceSeries(instrumentsManager)
         executions = pd.Series([0] * len(positionData.columns), index=positionData.columns)
         executions[self.enterCondition(currentPredictions, instrumentsManager)] = \
-            self.getLotSize(positionData.columns, price) * self.getBuySell(currentPredictions, instrumentsManager)
+            self.getEnterLotSize(positionData.columns, price) * self.getBuySell(currentPredictions, instrumentsManager)
         # No executions if at position limit
         executions[self.atPositionLimit(capital, positionData, price)] = 0
 
@@ -121,11 +144,13 @@ class SimpleExecutionSystem(BaseExecutionSystem):
         return (currentPredictions - 0.5).abs() > (self.enter_threshold - 0.5)
 
     def atPositionLimit(self, capital, positionData, price):
-        if capital < self.capitalUsageLimit:
+
+        if capital <= self.capitalUsageLimit:
             logWarn('Not Enough Capital')
             return pd.Series(True, index=positionData.columns)
         position = positionData.iloc[-1]
-        return (position > self.getLongLimit(positionData.columns, price)) | (position < -self.getShortLimit(positionData.columns, price))
+        # TODO: Cant do this if position and getLongLimit indexes dont match
+        return (position >= self.getLongLimit(positionData.columns, price)) | (position <= -self.getShortLimit(positionData.columns, price))
 
     def exitCondition(self, currentPredictions, instrumentsManager):
         return (currentPredictions - 0.5).abs() < (self.exit_threshold - 0.5)
