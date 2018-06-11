@@ -1,7 +1,10 @@
 from itertools import chain
+import pandas as pd
 import time
 from backtester.features.feature_config import FeatureConfig
 from backtester.instrument_data_manager import InstrumentDataManager
+from backtester.constants import *
+from backtester.logger import *
 
 
 class FeatureManager(object):
@@ -15,7 +18,8 @@ class FeatureManager(object):
         instrumentFeatureConfigs = systemParams.getFeatureConfigsForInstrumentType(INSTRUMENT_TYPE_STOCK)
         instrumentFeatureKeys = map(lambda x: x.getFeatureKey(), instrumentFeatureConfigs)
         featureKeys = list(chain(self.__bookDataFeatures, instrumentFeatureKeys))
-        self.__instrumentDataManger = InstrumentDataManager(dataParser, featureKeys, instrumentIds)
+        maxPeriod = self.parseFeatureConfigs(instrumentFeatureConfigs)
+        self.__instrumentDataManger = InstrumentDataManager(dataParser, featureKeys, systemParams.instrumentIds, lookbackSize=maxPeriod)
 
         self.__totalIter = 0
         self.__perfDict = {}
@@ -25,11 +29,20 @@ class FeatureManager(object):
     def getSystemParamas(self):
         return self.systemParams
 
-    def getInstrumentDf(self, instrumentId):
-        return self.__instrumentDataManger.getInstrumentDataByInstrument(instrumentId)
+    def getInstrumentDf(self, instrumentId, useFile=True, chunkSize=None):
+        return self.__instrumentDataManger.getInstrumentDataByInstrument(instrumentId, useFile, chunkSize)
 
     def getFeatureDf(self, featureKey):
         return self.__instrumentDataManger.getInstrumentDataChunkByFeature(featureKey)
+
+    def parseFeatureConfigs(self, featureConfigList):
+        maxPeriod = 0
+        for featureConfig in featureConfigList:
+            featureParams = featureConfig.getFeatureParams()
+            maxPeriod = max(maxPeriod, featureParams.get('period', 0))
+        if maxPeriod == 0:
+            return None
+        return maxPeriod
 
     def computeInstrumentFeatures(self, writeFeatures=True):
         instrumentBookData = self.__dataParser.emitAllInstrumentUpdates()
@@ -42,10 +55,11 @@ class FeatureManager(object):
         # NOTE: copy in pd.concat is set to True. Check what happens when it is False
 
         featureConfigs = self.systemParams.getFeatureConfigsForInstrumentType(INSTRUMENT_TYPE_STOCK)
-        # featureConfigKeys = [featureConfig.getFeatureKey() for featureConfig in featureConfigs]
         featureGenerator = self.__instrumentDataManger.getSimulator(self.__chunkSize)
         for chunkNumber, timeUpdates in featureGenerator:
             self.__totalIter = self.__totalIter + 1
+            for bookDataFeature in self.__bookDataFeatures:
+                self.__instrumentDataManger.updateInstrumentDataChunk(bookDataFeature)
             for featureConfig in featureConfigs:
                 start = time.time()
                 featureKey = featureConfig.getFeatureKey()
@@ -56,7 +70,7 @@ class FeatureManager(object):
                                                                 featureParams=featureParams,
                                                                 featureKey=featureKey,
                                                                 featureManager=self)
-                self.__instrumentDataManger.addFeatureValueForAllInstruments(featureKey, featureDf)
+                self.__instrumentDataManger.addFeatureValueChunkForAllInstruments(featureKey, featureDf)
                 end = time.time()
                 diffms = (end - start) * 1000
                 self.__perfDict[featureKey] = self.__perfDict[featureKey] + diffms
@@ -65,3 +79,9 @@ class FeatureManager(object):
             if writeFeatures:
                 self.__instrumentDataManger.writeInstrumentData()
             self.__instrumentDataManger.dumpInstrumentDataChunk()
+        if not self.__instrumentDataManger.checkDataIntegrity(chunkNumber):
+            logWarn("Some data is missing! Check logs")
+        if self.__chunkSize is None:
+            self.__instrumentDataManger.cleanup()
+        else:
+            self.__instrumentDataManger.cleanup(delInstrumentData=True)

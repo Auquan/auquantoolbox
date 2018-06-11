@@ -14,8 +14,8 @@ class InstrumentData(object):
         if chunkSize is None:
             if fileName:
                 self.__bookData = pd.read_csv(fileName, index_col=0, parse_dates=True, dtype=float)
-                self.__bookDataSize = len(self.__bookData)
                 self.__bookData.dropna(inplace=True)
+                self.__bookDataSize = len(self.__bookData)
             self.getBookDataChunk = self.__getBookDataInChunksFromDataFrame
         else:
             self.__bookData = pd.read_csv(fileName, index_col=0, parse_dates=True, dtype=float, chunksize=chunkSize)

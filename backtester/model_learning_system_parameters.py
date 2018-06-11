@@ -1,8 +1,9 @@
-from backtester.features.feature_config import FeatureConfig
 import sys
+from backtester.features.feature_config import FeatureConfig
+from backtester.constants import *
 
 
-class ModelLearningSystemParamters(Object):
+class ModelLearningSystemParamters(object):
     def __init__(self, symbols, targetVariable, models=None):
         self.instrumentIds = symbols
         self.trainingDataSource = None
@@ -24,8 +25,6 @@ class ModelLearningSystemParamters(Object):
             else:
                 logError("Unknown type of instruments' feature config dicts")
 
-
-
     def setTargetVariable(self):
         pass
 
@@ -42,6 +41,14 @@ class ModelLearningSystemParamters(Object):
         return
 
     def getInstrumentFeatureConfigDicts(self):
+        ma2Dict = {'featureKey': 'ma_5',
+                   'featureId': 'moving_average',
+                   'params': {'period': 5,
+                              'featureName': 'Open'}}
+
+        return {INSTRUMENT_TYPE_STOCK: [ma2Dict]}
+
+    def getCustomFeatures(self):
         return {}
 
     def getTargetVariable(self):
