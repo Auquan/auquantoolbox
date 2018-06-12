@@ -1,3 +1,4 @@
+import sys, os
 from backtester.features.feature_config import FeatureConfig
 from backtester.featureSelection.feature_selection_config import FeatureSelectionConfig
 from backtester.transformers.transformer_config import FeatureTransformationConfig
