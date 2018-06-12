@@ -1,6 +1,7 @@
 from itertools import chain
 import pandas as pd
-import time
+import time, json
+from datetime import timedelta
 from backtester.features.feature_config import FeatureConfig
 from backtester.instrument_data_manager import InstrumentDataManager
 from backtester.constants import *
@@ -10,17 +11,18 @@ from backtester.logger import *
 class FeatureManager(object):
     """
     """
-    def __init__(self, systemParams, dataParser, chunkSize):
+    def __init__(self, systemParams, dataParser, chunkSize, fingerprintFile='stock_data'):
         self.systemParams = systemParams
         self.__dataParser = dataParser
         self.__chunkSize = chunkSize
+        self.__fingerprintFile = fingerprintFile
         self.__bookDataFeatures = dataParser.getBookDataFeatures()
         instrumentFeatureConfigs = systemParams.getFeatureConfigsForInstrumentType(INSTRUMENT_TYPE_STOCK)
         instrumentFeatureKeys = map(lambda x: x.getFeatureKey(), instrumentFeatureConfigs)
         featureKeys = list(chain(self.__bookDataFeatures, instrumentFeatureKeys))
         maxPeriod = self.parseFeatureConfigs(instrumentFeatureConfigs)
-        self.__instrumentDataManger = InstrumentDataManager(dataParser, featureKeys, systemParams.instrumentIds, lookbackSize=maxPeriod)
-
+        self.__instrumentDataManger = InstrumentDataManager(dataParser, featureKeys, systemParams.instrumentIds,
+                                                            featureFolderName='features', lookbackSize=maxPeriod)
         self.__totalIter = 0
         self.__perfDict = {}
         for featureKey in featureKeys:
@@ -44,9 +46,8 @@ class FeatureManager(object):
             return None
         return maxPeriod
 
-    def computeInstrumentFeatures(self, writeFeatures=True):
+    def computeInstrumentFeatures(self, instrumentIds, writeFeatures=True):
         instrumentBookData = self.__dataParser.emitAllInstrumentUpdates()
-        instrumentIds = self.__dataParser.getInstrumentIds()
         for bookDataFeature in self.__bookDataFeatures:
             featureDf = pd.concat([instrumentBookData[instrumentId].getBookDataByFeature(bookDataFeature) for instrumentId in instrumentIds], axis=1)
             featureDf.columns = instrumentIds
@@ -85,3 +86,4 @@ class FeatureManager(object):
             self.__instrumentDataManger.cleanup()
         else:
             self.__instrumentDataManger.cleanup(delInstrumentData=True)
+        self.__instrumentDataManger.saveInstrumentDataFingerprint(self.__fingerprintFile)

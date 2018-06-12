@@ -2,10 +2,13 @@ import time
 import json
 import os
 import os.path
-import _pickle as cPickle
+from datetime import datetime
+try:
+    import _pickle as cPickle
+except ImportError: # Python 2.x
+    import cPickle
 from backtester.logger import *
 from backtester.instruments_manager import InstrumentManager
-from datetime import datetime
 from backtester.state_writer import StateWriter
 from backtester.process_result import processResult
 from backtester.metrics.metrics import Metrics

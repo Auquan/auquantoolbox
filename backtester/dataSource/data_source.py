@@ -1,6 +1,7 @@
 import pandas as pd
 import os, csv
 from datetime import datetime
+from dateutil import parser
 from backtester.dataSource.data_source_utils import groupAndSortByTimeUpdates
 from backtester.instrumentUpdates.instrument_data import InstrumentData
 
@@ -15,12 +16,12 @@ class DataSource(object):
             self._instrumentIds = self.getAllInstrumentIds()
 
         if startDateStr and endDateStr:
-            # # TODO: write method to also parse date string in different formats
-            self._startDate = datetime.strptime(startDateStr, "%Y/%m/%d")
-            self._endDate = datetime.strptime(endDateStr, "%Y/%m/%d")
+            self._startDate = parser.parse(startDateStr)
+            self._endDate = parser.parse(endDateStr)
 
         # Class variables: To be set by child class
         self._allTimes = None
+        self._usecols = None
         self._groupedInstrumentUpdates = None
         self._bookDataByInstrument = None
         self._bookDataFeatureKeys = None
@@ -84,7 +85,8 @@ class DataSource(object):
             fileName = self.getFileName(instrumentId)
             if not self.downloadAndAdjustData(instrumentId, fileName):
                 continue
-            allInstrumentUpdates[instrumentId] = InstrumentData(instrumentId, instrumentId, fileName, chunkSize=None)
+            allInstrumentUpdates[instrumentId] = InstrumentData(instrumentId, instrumentId, fileName,
+                                                                chunkSize=None, usecols=self._usecols)
             timeUpdates = allInstrumentUpdates[instrumentId].getAllTimestamps().union(timeUpdates)
             # NOTE: Assuming data is sorted by timeUpdates and all instruments have same columns
             if self._bookDataFeatureKeys is None:
@@ -99,7 +101,7 @@ class DataSource(object):
 
     # selects only those instrument updates which lie within dateRange
     def filterUpdatesByDates(self, dateRange=None):
-        dateRange = dateRange if dateRange else (self._startDate.strftime("%Y%m%d"), self._endDateStr.strftime("%Y%m%d"))
+        dateRange = dateRange if dateRange else (self._startDate.strftime("%Y%m%d"), self._endDate.strftime("%Y%m%d"))
         for instrumentId in self._instrumentIds:
             self._bookDataByInstrument[instrumentId].filterDataByDates(dateRange)
 
@@ -127,6 +129,12 @@ class DataSource(object):
     def setEndDate(self, endDateStr):
         self._endDate = datetime.strptime(endDateStr, "%Y/%m/%d")
 
+    def getStartDate(self, startDateStr):
+        return self._startDate.strftime("%Y/%m/%d")
+
+    def getEndDate(self, endDateStr):
+        return self._endDate.strftime("%Y/%m/%d")
+
     def setDateRange(self, dateRange):
         self._dateRange = dateRange
 
@@ -134,11 +142,14 @@ class DataSource(object):
     Helper Functions
     '''
 
-    def ensureDirectoryExists(self, cachedFolderName, dataSetId):
+    def ensureDirectoryExists(self, cachedFolderName, *folderNames):
         if not os.path.exists(cachedFolderName):
             os.mkdir(cachedFolderName, 0o755)
-        if not os.path.exists(cachedFolderName + '/' + dataSetId):
-            os.mkdir(cachedFolderName + '/' + dataSetId)
+        folderPath = cachedFolderName
+        for folderName in folderNames:
+            folderPath = os.path.join(folderPath, folderName)
+            if not os.path.exists(folderPath):
+                os.mkdir(folderPath)
 
     '''
     Called at end of trading to cleanup stuff

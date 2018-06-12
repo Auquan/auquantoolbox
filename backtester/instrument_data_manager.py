@@ -1,9 +1,9 @@
 import os, gc
 import pandas as pd
 import numpy as np
+import json
 from backtester.logger import *
 from backtester.instrumentUpdates.instrument_data import InstrumentData
-
 
 class InstrumentDataManager(object):
     '''
@@ -11,7 +11,9 @@ class InstrumentDataManager(object):
     def __init__(self, dataParser, features, instrumentIds, featureFolderName='features', lookbackSize=None):
         self.__cachedFolderName = dataParser._cachedFolderName
         self.__dataSetId = dataParser._dataSetId
-        self.__timeStamps = dataParser._allTimes
+        self.__timestamps = dataParser._allTimes
+        self.__startDateStr = dataParser.getStartDate()
+        self.__endDateStr = dataParser.getEndDate()
         self.__features = features
         self.__instrumentIds = instrumentIds
         self.__featureFolderName = featureFolderName
@@ -31,7 +33,7 @@ class InstrumentDataManager(object):
     def getSimulator(self, chunkSize):
         for feature in self.__features:
             self.__instrumentDataGenerator[feature] = self.getInstrumentDataGenerator(feature, chunkSize)
-        return self.getInstrumentDataInChunks(pd.Series(self.__timeStamps), chunkSize)
+        return self.getInstrumentDataInChunks(pd.Series(self.__timestamps), chunkSize)
 
     # returns a chunk of all instruments data with feature as featureKey
     def getInstrumentDataChunkByFeature(self, featureKey):
@@ -127,12 +129,12 @@ class InstrumentDataManager(object):
             else:
                 self.__instrumentDataByInstrument[instrumentId].to_csv(fileName, mode='w')
 
-    def readInstrumentData(self, instrumentId, useFile=True, chunkSize=None):
+    def readInstrumentData(self, instrumentId, useFile=True, chunkSize=None, usecols=None):
         if useFile:
             fileName = self.getFilePath(instrumentId)
             if os.path.isfile(fileName):
                 self.__instrumentDataByInstrument[instrumentId] = InstrumentData(instrumentId, instrumentId,
-                                                                                     fileName, chunkSize)
+                                                                                 fileName, chunkSize, usecols)
         else:
             instrumentData = InstrumentData(instrumentId, instrumentId)
             instrumentData.setBookData(self.__instrumentDataByInstrument[instrumentId])
@@ -150,6 +152,17 @@ class InstrumentDataManager(object):
                     (missingFeature, self.__instrumentDataChunkCounter[missingFeature], chunkNumber))
         return False
 
+    def saveInstrumentDataFingerprint(self, fileName):
+        fileName = self.getFilePath(fileName, ext='.json')
+        fingerprint = {}
+        fingerprint['stocks'] = self.__instrumentIds
+        fingerprint['features'] = self.__features
+        fingerprint['startDate'] = self.__startDateStr
+        fingerprint['endDate'] = self.__endDateStr
+        fingerprint['dataSize'] = len(self.__timestamps)
+        with open(fileName, 'w') as fp:
+            json.dump(fingerprint, fp, sort_keys=True, indent=4)
+
     def addFeatureValueForAllInstruments(self, featureKey, data):
         self.__instrumentDataByFeature[featureKey] = data
 
@@ -164,8 +177,8 @@ class InstrumentDataManager(object):
     def getInstrumentDataByFeature(self, featureKey):
         return self.__instrumentDataByFeature[featureKey]
 
-    def getFilePath(self, fileName, newDir=''):
-        return os.path.join(self.__cachedFolderName, self.__dataSetId, self.__featureFolderName, newDir, fileName + '.csv')
+    def getFilePath(self, fileName, newDir='', ext='.csv'):
+        return os.path.join(self.__cachedFolderName, self.__dataSetId, self.__featureFolderName, newDir, fileName + ext)
 
     def getTemporaryFileName(self, fname, *fnames):
         tempFileName = str(fname)

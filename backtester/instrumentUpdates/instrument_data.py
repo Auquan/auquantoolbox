@@ -5,20 +5,24 @@ from backtester.constants import *
 
 class InstrumentData(object):
     '''
+    InstrumentData class stores insturment book data
+    - Pads and filter instrument book data by dates
+    - Can read data in chunks or simulate chunking of data
     '''
-    def __init__(self, instrumentId, tradeSymbol, fileName=None, chunkSize=None):
+    def __init__(self, instrumentId, tradeSymbol, fileName=None, chunkSize=None, usecols=None):
         self.__instrumentId = instrumentId
         self.__tradeSymbol = tradeSymbol
         self.__fileName = fileName
         self.__bookDataSize = None
+        self.__bookData = None
         if chunkSize is None:
             if fileName:
-                self.__bookData = pd.read_csv(fileName, index_col=0, parse_dates=True, dtype=float)
+                self.__bookData = pd.read_csv(fileName, index_col=0, usecols=usecols, parse_dates=True, dtype=float)
                 self.__bookData.dropna(inplace=True)
                 self.__bookDataSize = len(self.__bookData)
             self.getBookDataChunk = self.__getBookDataInChunksFromDataFrame
         else:
-            self.__bookData = pd.read_csv(fileName, index_col=0, parse_dates=True, dtype=float, chunksize=chunkSize)
+            self.__bookData = pd.read_csv(fileName, index_col=0, usecols=usecols, parse_dates=True, dtype=float, chunksize=chunkSize)
             self.getBookDataChunk = self.__getBookDataInChunksFromFile
 
     def getInstrumentId(self):
@@ -33,7 +37,7 @@ class InstrumentData(object):
         return self.__bookDataSize
 
     def setBookData(self, data):
-        # del self.__bookData
+        del self.__bookData
         self.__bookData = data
         self.__bookDataSize = len(self.__bookData)
 
@@ -47,6 +51,7 @@ class InstrumentData(object):
     def __getBookDataInChunksFromDataFrame(self, chunkSize):
         if chunkSize <=0 :
             logError("chunkSize must be a positive integer")
+            raise ValueError
         for chunkNumber, bookDataChunk in self.__bookData.groupby(np.arange(self.__bookDataSize) // chunkSize):
             yield (chunkNumber, bookDataChunk)
 
