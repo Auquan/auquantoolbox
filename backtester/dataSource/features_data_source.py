@@ -44,17 +44,21 @@ class FeaturesDataSource(DataSource):
                 self.filterUpdatesByDates([(self._startDateStr, self._endDateStr)])
 
     def getInstrumentUpdates(self, instrumentId, chunkSize=None):
+        print(self._usecols)
         fileName = self.getFileName(instrumentId)
         if not self.downloadAndAdjustData(instrumentId, fileName):
             return None
-        return InstrumentData(instrumentId, instrumentId, fileName, chunkSize=chunkSize, usecols=self._usecols)
+        instrumentData = InstrumentData(instrumentId, instrumentId, fileName, chunkSize=chunkSize, usecols=self._usecols)
+        # instrumentData.padInstrumentData(self._allTimes)
+        self._allTimes = instrumentData.filterDataByDates([(self._startDateStr, self._endDateStr)])
+        return instrumentData
 
     def getFileName(self, instrumentId):
         return os.path.join(self._cachedFolderName, self._dataSetId, self._featureFolderName, instrumentId + '.csv')
 
     def ensureAllInstrumentsFile(self):
         stockDataFileName = os.path.join(self._cachedFolderName, self._dataSetId, self._featureFolderName, 'stock_data.json')
-        if os.path.isfile(stockListFileName):
+        if os.path.isfile(stockDataFileName):
             return True
         # TODO: Download from server
         raise NotImplementedError

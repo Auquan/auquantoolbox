@@ -103,7 +103,7 @@ class DataSource(object):
     def filterUpdatesByDates(self, dateRange=None):
         dateRange = dateRange if dateRange else (self._startDate.strftime("%Y%m%d"), self._endDate.strftime("%Y%m%d"))
         for instrumentId in self._instrumentIds:
-            self._bookDataByInstrument[instrumentId].filterDataByDates(dateRange)
+            self._allTimes = self._bookDataByInstrument[instrumentId].filterDataByDates(dateRange)
 
     # accretes all instrument updates using emitInstrumentUpdates method
     def processAllInstrumentUpdates(self, pad=True):
@@ -129,10 +129,10 @@ class DataSource(object):
     def setEndDate(self, endDateStr):
         self._endDate = datetime.strptime(endDateStr, "%Y/%m/%d")
 
-    def getStartDate(self, startDateStr):
+    def getStartDate(self):
         return self._startDate.strftime("%Y/%m/%d")
 
-    def getEndDate(self, endDateStr):
+    def getEndDate(self):
         return self._endDate.strftime("%Y/%m/%d")
 
     def setDateRange(self, dateRange):

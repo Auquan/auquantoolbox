@@ -1,7 +1,6 @@
 from itertools import chain
 import pandas as pd
 import time, json
-from datetime import timedelta
 from backtester.features.feature_config import FeatureConfig
 from backtester.instrument_data_manager import InstrumentDataManager
 from backtester.constants import *
@@ -11,7 +10,7 @@ from backtester.logger import *
 class FeatureManager(object):
     """
     """
-    def __init__(self, systemParams, dataParser, chunkSize, fingerprintFile='stock_data'):
+    def __init__(self, systemParams, dataParser, instrumentIds, chunkSize, fingerprintFile='stock_data'):
         self.systemParams = systemParams
         self.__dataParser = dataParser
         self.__chunkSize = chunkSize
@@ -21,7 +20,7 @@ class FeatureManager(object):
         instrumentFeatureKeys = map(lambda x: x.getFeatureKey(), instrumentFeatureConfigs)
         featureKeys = list(chain(self.__bookDataFeatures, instrumentFeatureKeys))
         maxPeriod = self.parseFeatureConfigs(instrumentFeatureConfigs)
-        self.__instrumentDataManger = InstrumentDataManager(dataParser, featureKeys, systemParams.instrumentIds,
+        self.__instrumentDataManger = InstrumentDataManager(dataParser, featureKeys, instrumentIds,
                                                             featureFolderName='features', lookbackSize=maxPeriod)
         self.__totalIter = 0
         self.__perfDict = {}
@@ -46,7 +45,7 @@ class FeatureManager(object):
             return None
         return maxPeriod
 
-    def computeInstrumentFeatures(self, instrumentIds, writeFeatures=True):
+    def computeInstrumentFeatures(self, instrumentIds, writeFeatures=True, prepend=None, updateFingerprint=False):
         instrumentBookData = self.__dataParser.emitAllInstrumentUpdates()
         for bookDataFeature in self.__bookDataFeatures:
             featureDf = pd.concat([instrumentBookData[instrumentId].getBookDataByFeature(bookDataFeature) for instrumentId in instrumentIds], axis=1)
@@ -78,7 +77,7 @@ class FeatureManager(object):
                 logPerf('Avg time for feature: %s : %.2f' % (featureKey, self.__perfDict[featureKey] / self.__totalIter))
             self.__instrumentDataManger.transformInstrumentData()
             if writeFeatures:
-                self.__instrumentDataManger.writeInstrumentData()
+                self.__instrumentDataManger.writeInstrumentData(prepend=prepend, chunkSize=self.__chunkSize)
             self.__instrumentDataManger.dumpInstrumentDataChunk()
         if not self.__instrumentDataManger.checkDataIntegrity(chunkNumber):
             logWarn("Some data is missing! Check logs")
@@ -86,4 +85,4 @@ class FeatureManager(object):
             self.__instrumentDataManger.cleanup()
         else:
             self.__instrumentDataManger.cleanup(delInstrumentData=True)
-        self.__instrumentDataManger.saveInstrumentDataFingerprint(self.__fingerprintFile)
+        self.__instrumentDataManger.saveInstrumentDataFingerprint(self.__fingerprintFile, update=updateFingerprint)

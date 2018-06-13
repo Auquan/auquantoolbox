@@ -2,6 +2,7 @@ import os, gc
 import pandas as pd
 import numpy as np
 import json
+from dateutil import parser
 from backtester.logger import *
 from backtester.instrumentUpdates.instrument_data import InstrumentData
 
@@ -18,6 +19,7 @@ class InstrumentDataManager(object):
         self.__instrumentIds = instrumentIds
         self.__featureFolderName = featureFolderName
         self.__lookbackSize = lookbackSize if lookbackSize is None else lookbackSize -1     # Max Period
+        self.__firstChunk = True
         self.__instrumentDataByFeature = {feature : None for feature in features}
         self.__instrumentLookbackDataByFeature = {feature : None for feature in features}
         self.__instrumentDataChunkByFeature = {feature : None for feature in features}
@@ -81,7 +83,7 @@ class InstrumentDataManager(object):
         if self.__lookbackSize is not None:
             chunkSize = chunkSize if chunkSize is None else (chunkSize - self.__lookbackSize)
         if chunkSize is None:
-            yield (chunkSize, instrumentData)
+            yield (0, instrumentData)
         else:
             if chunkSize <= 0:
                 logError("[InstrumentDataManager] chunkSize must be a positive integer and greater than lookbackSize")
@@ -119,15 +121,35 @@ class InstrumentDataManager(object):
                 # for instrumentId in self.__instrumentDataChunkByFeature[feature].columns:
                     # self.__instrumentDataByInstrument[instrumentId][feature] = self.__instrumentDataChunkByFeature[feature][instrumentId]
 
-    def writeInstrumentData(self):
+    def writeInstrumentData(self, prepend=None, chunkSize=None):
         for instrumentId in self.__instrumentIds:
             if self.__instrumentDataByInstrument[instrumentId] is None:
                 continue
             fileName = self.getFilePath(instrumentId)
-            if os.path.isfile(fileName):
+            if prepend is True:     # prepend into the existing file
+                self.prependInstrumentData(instrumentId, fileName, self.__instrumentDataByInstrument[instrumentId], chunkSize)
+            elif prepend is False:  # append into the existing file
+                self.appendInstrumentData(instrumentId, fileName, self.__instrumentDataByInstrument[instrumentId])
+            elif os.path.isfile(fileName) and (not self.__firstChunk):  # append into the new file
                 self.__instrumentDataByInstrument[instrumentId].to_csv(fileName, mode='a', header=False)
-            else:
+            else:                   # write into the new file
                 self.__instrumentDataByInstrument[instrumentId].to_csv(fileName, mode='w')
+        self.__firstChunk = False
+
+    def appendInstrumentData(self, instrumentId, fileName, data):
+        existingColumns = pd.read_csv(fileName, index_col=0, nrows=1).columns.tolist()
+        data.reindex(columns=existingColumns).to_csv(fileName, mode='a', header=False)
+
+    def prependInstrumentData(self, instrumentId, fileName, data, chunkSize=None):
+        name, ext = os.path.splitext(fileName)
+        tempFileName =  name + '_temp' + ext
+        existingColumns = pd.read_csv(fileName, index_col=0, nrows=1).columns.tolist()
+        data.reindex(columns=existingColumns).to_csv(tempFileName, mode='w')
+        existingData = InstrumentData(instrumentId, instrumentId, fileName, chunkSize)
+        for i, df in existingData.getBookDataChunk():
+            df.reindex(columns=existingColumns).to_csv(tempFileName, mode='a', header=False)
+        os.remove(fileName)
+        os.rename(tempFileName, fileName)
 
     def readInstrumentData(self, instrumentId, useFile=True, chunkSize=None, usecols=None):
         if useFile:
@@ -152,14 +174,33 @@ class InstrumentDataManager(object):
                     (missingFeature, self.__instrumentDataChunkCounter[missingFeature], chunkNumber))
         return False
 
-    def saveInstrumentDataFingerprint(self, fileName):
+    def saveInstrumentDataFingerprint(self, fileName, update=False):
         fileName = self.getFilePath(fileName, ext='.json')
+        if update:
+            self.updateInstrumentDataFingerprint(fileName)
+            return
         fingerprint = {}
         fingerprint['stocks'] = self.__instrumentIds
         fingerprint['features'] = self.__features
         fingerprint['startDate'] = self.__startDateStr
         fingerprint['endDate'] = self.__endDateStr
         fingerprint['dataSize'] = len(self.__timestamps)
+        with open(fileName, 'w') as fp:
+            json.dump(fingerprint, fp, sort_keys=True, indent=4)
+
+    def updateInstrumentDataFingerprint(self, fileName):
+        with open(fileName, 'r') as fp:
+            fingerprint = json.load(fp)
+        fingerprint['stocks'] = list(set(fingerprint['stocks']).union(self.__instrumentIds))
+        # Feature set will not be updated
+        startDate = parser.parse(self.__startDateStr)
+        endDate = parser.parse(self.__endDateStr)
+        existingStartDate = parser.parse(fingerprint['startDate'])
+        existingEndDate = parser.parse(fingerprint['endDate'])
+        fingerprint['startDate'] = self.__startDateStr if startDate < existingStartDate else fingerprint['startDate']
+        fingerprint['endDate'] = self.__endDateStr if endDate > existingEndDate else fingerprint['endDate']
+        if startDate != existingStartDate or endDate != existingEndDate:
+            fingerprint['dataSize'] += len(self.__timestamps)
         with open(fileName, 'w') as fp:
             json.dump(fingerprint, fp, sort_keys=True, indent=4)
 

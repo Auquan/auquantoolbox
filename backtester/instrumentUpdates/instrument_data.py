@@ -15,10 +15,13 @@ class InstrumentData(object):
         self.__fileName = fileName
         self.__bookDataSize = None
         self.__bookData = None
+        if fileName:
+            indexColumn = self.getIndexColumn(fileName)
+            usecols = usecols if usecols is None else [indexColumn] + usecols
         if chunkSize is None:
             if fileName:
                 self.__bookData = pd.read_csv(fileName, index_col=0, usecols=usecols, parse_dates=True, dtype=float)
-                self.__bookData.dropna(inplace=True)
+                # self.__bookData.dropna(axis=1, how='all', inplace=True)
                 self.__bookDataSize = len(self.__bookData)
             self.getBookDataChunk = self.__getBookDataInChunksFromDataFrame
         else:
@@ -47,21 +50,28 @@ class InstrumentData(object):
     def getBookDataByFeature(self, feature):
         return self.__bookData[feature]
 
+    def getIndexColumn(self, fileName):
+        return pd.read_csv(fileName, nrows=1).columns.tolist()[0]
+
     # returns a chunk from already completely loaded data
-    def __getBookDataInChunksFromDataFrame(self, chunkSize):
-        if chunkSize <=0 :
-            logError("chunkSize must be a positive integer")
-            raise ValueError
-        for chunkNumber, bookDataChunk in self.__bookData.groupby(np.arange(self.__bookDataSize) // chunkSize):
-            yield (chunkNumber, bookDataChunk)
+    def __getBookDataInChunksFromDataFrame(self, chunkSize=None):
+        if chunkSize is None:
+            yield (0, self.__bookData)
+        else:
+            if chunkSize <=0 :
+                logError("chunkSize must be a positive integer")
+                raise ValueError
+            for chunkNumber, bookDataChunk in self.__bookData.groupby(np.arange(self.__bookDataSize) // chunkSize):
+                yield (chunkNumber, bookDataChunk)
 
     # returns a chunk from __bookData generator after processing data
     # TODO: implement proper padding such that all instruments have same index set (timeUpdates)
-    def __getBookDataInChunksFromFile(self, dateRange):
+    def __getBookDataInChunksFromFile(self, dateRange=None):
         chunkNumber = -1
         for bookDataChunk in self.__bookData:
             chunkNumber += 1
-            bookDataChunk = self.filterDataByDates(bookDataChunk, dateRange)
+            if dateRange is not None:
+                bookDataChunk = self.__filterDataByDates(bookDataChunk, dateRange)
             yield (chunkNumber, bookDataChunk)
 
     # returns all timestamps in pandas series format
@@ -92,6 +102,7 @@ class InstrumentData(object):
         else:
             self.__bookData = self.__bookData[dateRange[0]:dateRange[1]]
         self.__bookDataSize = len(self.__bookData)
+        return self.__bookData.index.tolist()
 
     def padInstrumentData(self, timeUpdates, method='ffill'):
         timeUpdateSeries = pd.Series(timeUpdates)
