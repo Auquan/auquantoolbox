@@ -110,7 +110,7 @@ class InstrumentsFromFile():
 class YahooStockDataSource(DataSource):
     def __init__(self, cachedFolderName, dataSetId, instrumentIds, startDateStr, endDateStr, event='history', adjustPrice=False, downloadId=".NS", liveUpdates=True, pad=True):
         super(YahooStockDataSource, self).__init__(cachedFolderName, dataSetId, instrumentIds, startDateStr, endDateStr)
-        self.__dateAppend = "_%sto%s"%(parser.parse(startDateStr).strftime('%Y-%m-%d'),parser.parse(startDateStr).strftime('%Y-%m-%d'))
+        self.__dateAppend = "_%sto%s"%(parser.parse(startDateStr).strftime('%Y-%m-%d'),parser.parse(endDateStr).strftime('%Y-%m-%d'))
         self.__downloadId = downloadId
         self.__bookDataByFeature = {}
         self.__adjustPrice = adjustPrice

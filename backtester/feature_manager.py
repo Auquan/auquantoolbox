@@ -10,7 +10,7 @@ from backtester.logger import *
 class FeatureManager(object):
     """
     """
-    def __init__(self, systemParams, dataParser, instrumentIds, chunkSize, fingerprintFile='stock_data'):
+    def __init__(self, systemParams, dataParser, instrumentIds, chunkSize, fingerprintFile='stock_data.json'):
         self.systemParams = systemParams
         self.__dataParser = dataParser
         self.__chunkSize = chunkSize
@@ -19,9 +19,10 @@ class FeatureManager(object):
         instrumentFeatureConfigs = systemParams.getFeatureConfigsForInstrumentType(INSTRUMENT_TYPE_STOCK)
         instrumentFeatureKeys = map(lambda x: x.getFeatureKey(), instrumentFeatureConfigs)
         featureKeys = list(chain(self.__bookDataFeatures, instrumentFeatureKeys))
-        maxPeriod = self.parseFeatureConfigs(instrumentFeatureConfigs)
+        maxPeriod = FeatureManager.parseFeatureConfigs(instrumentFeatureConfigs)
+        # NOTE: Lookback size is (maxPeriod - 1)
         self.__instrumentDataManger = InstrumentDataManager(dataParser, featureKeys, instrumentIds,
-                                                            featureFolderName='features', lookbackSize=maxPeriod)
+                                                            featureFolderName='features', lookbackSize=(maxPeriod-1))
         self.__totalIter = 0
         self.__perfDict = {}
         for featureKey in featureKeys:
@@ -35,15 +36,6 @@ class FeatureManager(object):
 
     def getFeatureDf(self, featureKey):
         return self.__instrumentDataManger.getInstrumentDataChunkByFeature(featureKey)
-
-    def parseFeatureConfigs(self, featureConfigList):
-        maxPeriod = 0
-        for featureConfig in featureConfigList:
-            featureParams = featureConfig.getFeatureParams()
-            maxPeriod = max(maxPeriod, featureParams.get('period', 0))
-        if maxPeriod == 0:
-            return None
-        return maxPeriod
 
     def computeInstrumentFeatures(self, instrumentIds, writeFeatures=True, prepend=None, updateFingerprint=False):
         instrumentBookData = self.__dataParser.emitAllInstrumentUpdates()
@@ -77,7 +69,7 @@ class FeatureManager(object):
                 logPerf('Avg time for feature: %s : %.2f' % (featureKey, self.__perfDict[featureKey] / self.__totalIter))
             self.__instrumentDataManger.transformInstrumentData()
             if writeFeatures:
-                self.__instrumentDataManger.writeInstrumentData(prepend=prepend, chunkSize=self.__chunkSize)
+                self.__instrumentDataManger.writeInstrumentData(prepend=prepend)
             self.__instrumentDataManger.dumpInstrumentDataChunk()
         if not self.__instrumentDataManger.checkDataIntegrity(chunkNumber):
             logWarn("Some data is missing! Check logs")
@@ -85,4 +77,16 @@ class FeatureManager(object):
             self.__instrumentDataManger.cleanup()
         else:
             self.__instrumentDataManger.cleanup(delInstrumentData=True)
-        self.__instrumentDataManger.saveInstrumentDataFingerprint(self.__fingerprintFile, update=updateFingerprint)
+        if prepend is True:
+            self.__instrumentDataManger.appendExistingInstrumentData(chunkSize=self.__chunkSize)
+        self.__instrumentDataManger.saveInstrumentDataFingerprint(self.__fingerprintFile, update=updateFingerprint, prepend=prepend)
+
+    @staticmethod
+    def parseFeatureConfigs(featureConfigList):
+        maxPeriod = 0
+        for featureConfig in featureConfigList:
+            featureParams = featureConfig.getFeatureParams()
+            maxPeriod = max(maxPeriod, featureParams.get('period', 0))
+        if maxPeriod == 0:
+            return None
+        return maxPeriod

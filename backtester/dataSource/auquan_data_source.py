@@ -1,9 +1,10 @@
 from datetime import datetime, timedelta
 import calendar
+import os.path
+from dateutil import parser
 from backtester.instrumentUpdates import *
 from backtester.constants import *
 from backtester.dataSource.data_source import DataSource
-import os.path
 from backtester.dataSource.data_source_utils import groupAndSortByTimeUpdates
 
 TYPE_LINE_UNDEFINED = 0
@@ -110,8 +111,8 @@ class InstrumentsFromFile():
 
 class AuquanDataSource(DataSource):
     def __init__(self, folderName, instrumentIdsByType, startDateStr, endDateStr, liveUpdates=True):
-        self.startDate = datetime.strptime(startDateStr, "%Y/%m/%d")
-        self.endDate = datetime.strptime(endDateStr, "%Y/%m/%d")
+        self.startDate = parser.parse(startDateStr)
+        self.endDate = parser.parse(endDateStr)
         self.folderName = folderName
         self.instrumentIdsByType = instrumentIdsByType
         self.currentDate = self.startDate

@@ -16,7 +16,7 @@ class InstrumentData(object):
         self.__bookDataSize = None
         self.__bookData = None
         if fileName:
-            indexColumn = self.getIndexColumn(fileName)
+            indexColumn = self.getIndexColumnName(fileName)
             usecols = usecols if usecols is None else [indexColumn] + usecols
         if chunkSize is None:
             if fileName:
@@ -50,7 +50,7 @@ class InstrumentData(object):
     def getBookDataByFeature(self, feature):
         return self.__bookData[feature]
 
-    def getIndexColumn(self, fileName):
+    def getIndexColumnName(self, fileName):
         return pd.read_csv(fileName, nrows=1).columns.tolist()[0]
 
     # returns a chunk from already completely loaded data
@@ -84,16 +84,18 @@ class InstrumentData(object):
     # returns list of bookDataFeatures (columns)
     def getBookDataFeatures(self):
         if isinstance(self.__bookData, pd.DataFrame):
-            return list(self.__bookData.columns)
+            return self.__bookData.columns.tolist()
         else:
-            return list(pd.read_csv(self.__fileName, index_col=0, nrows=1).columns)
+            return pd.read_csv(self.__fileName, index_col=0, nrows=1).columns.tolist()
 
     def getTypeOfInstrument(self):
         return INSTRUMENT_TYPE_STOCK
 
     def filterDataByDates(self, dateRange):
+        if not isinstance(self.__bookData, pd.DataFrame):
+            return []
         if (dateRange is []) or (dateRange is ()):
-            return
+            return self.__bookData.index.tolist()
         elif type(dateRange) is list:
             frames = []
             for dr in dateRange:
@@ -105,8 +107,11 @@ class InstrumentData(object):
         return self.__bookData.index.tolist()
 
     def padInstrumentData(self, timeUpdates, method='ffill'):
+        if not isinstance(self.__bookData, pd.DataFrame):
+            return
         timeUpdateSeries = pd.Series(timeUpdates)
         if not timeUpdateSeries.isin(self.__bookData.index).all():
+            print("INSIDE")
             df = pd.DataFrame(index=timeUpdates, columns=self.__bookData.columns)
             df.at[self.__bookData.index] = self.__bookData.copy()
             df.fillna(method=method, inplace=True)

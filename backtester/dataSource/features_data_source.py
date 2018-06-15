@@ -2,7 +2,7 @@ from backtester.dataSource.data_source import DataSource
 from backtester.instrumentUpdates import *
 import os
 from datetime import datetime
-import csv
+from dateutil import parser
 from backtester.logger import *
 from backtester.instrumentUpdates.instrument_data import InstrumentData
 try:
@@ -44,13 +44,12 @@ class FeaturesDataSource(DataSource):
                 self.filterUpdatesByDates([(self._startDateStr, self._endDateStr)])
 
     def getInstrumentUpdates(self, instrumentId, chunkSize=None):
-        print(self._usecols)
         fileName = self.getFileName(instrumentId)
         if not self.downloadAndAdjustData(instrumentId, fileName):
             return None
         instrumentData = InstrumentData(instrumentId, instrumentId, fileName, chunkSize=chunkSize, usecols=self._usecols)
-        # instrumentData.padInstrumentData(self._allTimes)
-        self._allTimes = instrumentData.filterDataByDates([(self._startDateStr, self._endDateStr)])
+        if self._startDateStr is not None and self._endDateStr is not None:
+            self._allTimes = instrumentData.filterDataByDates([(self._startDateStr, self._endDateStr)])
         return instrumentData
 
     def getFileName(self, instrumentId):
@@ -79,7 +78,10 @@ class FeaturesDataSource(DataSource):
             if is_number(bookData[key]):
                 bookData[key] = float(bookData[key])
         timeKey = self._timeKey
-        timeOfUpdate = datetime.strptime(row[timeKey], self._timeStringFormat)
+        if self._timeStringFormat is None:
+            timeOfUpdate = parser.parse(row[timeKey])
+        else:
+            timeOfUpdate = datetime.strptime(row[timeKey], self._timeStringFormat)
         bookData.pop(timeKey, None)
         inst = StockInstrumentUpdate(stockInstrumentId=instrumentId,
                                      tradeSymbol=instrumentId,
