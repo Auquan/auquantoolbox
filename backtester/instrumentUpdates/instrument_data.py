@@ -81,6 +81,15 @@ class InstrumentData(object):
         else:
             return pd.read_csv(self.__fileName, index_col=0, usecols=[0]).index
 
+    # returns the fixed time frequency of data based on first 3 data points
+    def getTimeFrequency(self):
+        timeIndexStr = pd.infer_freq(self.getAllTimestamps()[:3])
+        if timeIndexStr == 'B': # Business days (non-fixed frequency)
+            timeIndexStr = 'D'
+        elif timeIndexStr == 'BH': # Business hours (non-fixed frequency)
+            timeIndexStr = 'H'
+        return timeIndexStr
+
     # returns list of bookDataFeatures (columns)
     def getBookDataFeatures(self):
         if isinstance(self.__bookData, pd.DataFrame):

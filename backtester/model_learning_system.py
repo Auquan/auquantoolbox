@@ -9,7 +9,7 @@ from backtester.constants import *
 class ModelLearningSystem:
     def __init__(self, mlsParams):
         self.mlsParams = mlsParams
-        self.__targetVariable = mlsParams.getTargetVariable()
+        # self.__targetVariable = mlsParams.getTargetVariable()
         self.__trainingDataSource = mlsParams.getTrainingDataSource()
         self.__chunkSize = mlsParams.chunkSize
 

@@ -31,6 +31,7 @@ class FeaturesDataSource(DataSource):
         self._pad = pad
         self._startDateStr = startDateStr
         self._endDateStr = endDateStr
+        self._timeFrequency = None
         self.ensureAllInstrumentsFile()
 
     def loadAllInstrumentUpdates(self):
@@ -42,6 +43,7 @@ class FeaturesDataSource(DataSource):
                 self.padInstrumentUpdates()
             if (self._startDateStr is not None) and (self._endDateStr is not None):
                 self.filterUpdatesByDates([(self._startDateStr, self._endDateStr)])
+            self._timeFrequency = self._bookDataByInstrument[self._instrumentIds[0]].getTimeFrequency()
 
     def getInstrumentUpdates(self, instrumentId, chunkSize=None):
         fileName = self.getFileName(instrumentId)
@@ -50,6 +52,7 @@ class FeaturesDataSource(DataSource):
         instrumentData = InstrumentData(instrumentId, instrumentId, fileName, chunkSize=chunkSize, usecols=self._usecols)
         if self._startDateStr is not None and self._endDateStr is not None:
             self._allTimes = instrumentData.filterDataByDates([(self._startDateStr, self._endDateStr)])
+        self._timeFrequency = instrumentData.getTimeFrequency()
         return instrumentData
 
     def getFileName(self, instrumentId):

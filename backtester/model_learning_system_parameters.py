@@ -23,6 +23,7 @@ class ModelLearningSystemParamters(object):
 
         FeatureConfig.setupCustomFeatures(self.getCustomFeatures())
         self.__instrumentFeatureConfigs = {}
+
         instrumentFeatureConfigDicts = self.getInstrumentFeatureConfigDicts()
         for instrumentType in instrumentFeatureConfigDicts:
             if type(instrumentFeatureConfigDicts[instrumentType]) is list:
@@ -31,6 +32,11 @@ class ModelLearningSystemParamters(object):
                 self.__instrumentFeatureConfigs[instrumentType] = {k : FeatureConfig(v) for k, v in instrumentFeatureConfigDicts[instrumentType]}
             else:
                 logError("Unknown type of instruments' feature config dicts")
+
+        self.__targetVariableConfigs = {}
+        targetVariableConfigDicts = self.getTargetVariableConfigDicts()
+        for instrumentType in targetVariableConfigDicts:
+            self.__targetVariableConfigs[instrumentType] = list(map(lambda x: FeatureConfig(x), targetVariableConfigDicts[instrumentType]))
 
     def initializeDataSource(self, dataSourceName, **params):
         dataSourceClass = getattr(data_source_classes, dataSourceName)
@@ -169,8 +175,13 @@ class ModelLearningSystemParamters(object):
     def getCustomFeatures(self):
         return {}
 
-    def getTargetVariable(self):
-        pass
+    def getTargetVariableConfigDicts(self):
+        tv_ma5 = {'featureKey' : 'tv_ma5',
+                   'featureId' : 'moving_average',
+                   'params' : {'period' : 5,
+                               'featureName' : 'ma_5',
+                               'shift' : 10}}
+        return {INSTRUMENT_TYPE_STOCK: [tv_ma5]}
 
     #####################################################################
     ###      END OF OVERRIDING METHODS
@@ -179,6 +190,12 @@ class ModelLearningSystemParamters(object):
     def getFeatureConfigsForInstrumentType(self, instrumentType):
         if instrumentType in self.__instrumentFeatureConfigs:
             return self.__instrumentFeatureConfigs[instrumentType]
+        else:
+            return []
+
+    def getTargetVariableConfigsForInstrumentType(self, instrumentType):
+        if instrumentType in self.__targetVariableConfigs:
+            return self.__targetVariableConfigs[instrumentType]
         else:
             return []
 
