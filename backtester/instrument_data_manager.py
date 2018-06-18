@@ -48,6 +48,7 @@ class InstrumentDataManager(object):
         if self.__instrumentLookbackDataByFeature[featureKey] is None:
             return self.__instrumentDataChunkByFeature[featureKey]
         else:
+            # OPTIMIZE: Concat it only once. Put it in updateInstrumentDataChunk
             return pd.concat([self.__instrumentLookbackDataByFeature[featureKey],
                               self.__instrumentDataChunkByFeature[featureKey]])
 
@@ -236,7 +237,6 @@ class InstrumentDataManager(object):
         with open(fileName, 'r') as fp:
             fingerprint = json.load(fp)
         fingerprint['stocks'] = list(set(fingerprint['stocks']).union(self.__instrumentIds))
-        # lookbackSize will not be updated
         startDate = parser.parse(self.__startDateStr)
         endDate = parser.parse(self.__endDateStr)
         periodStartDate = parser.parse(self.__periodStartDateStr)

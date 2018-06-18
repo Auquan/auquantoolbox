@@ -45,14 +45,18 @@ class FeaturesDataSource(DataSource):
                 self.filterUpdatesByDates([(self._startDateStr, self._endDateStr)])
             self._timeFrequency = self._bookDataByInstrument[self._instrumentIds[0]].getTimeFrequency()
 
-    def getInstrumentUpdates(self, instrumentId, chunkSize=None):
-        fileName = self.getFileName(instrumentId)
-        if not self.downloadAndAdjustData(instrumentId, fileName):
-            return None
-        instrumentData = InstrumentData(instrumentId, instrumentId, fileName, chunkSize=chunkSize, usecols=self._usecols)
-        if self._startDateStr is not None and self._endDateStr is not None:
-            self._allTimes = instrumentData.filterDataByDates([(self._startDateStr, self._endDateStr)])
-        self._timeFrequency = instrumentData.getTimeFrequency()
+    def getInstrumentUpdates(self, instrumentIds, chunkSize=None):
+        instrumentIds = instrumentIds if isinstance(instrumentIds, list) else [instrumentIds]
+        instrumentData = {}
+        for instrumentId in instrumentIds:
+            fileName = self.getFileName(instrumentId)
+            if not self.downloadAndAdjustData(instrumentId, fileName):
+                return None
+            instrumentData[instrumentId] = InstrumentData(instrumentId, instrumentId, fileName,
+                                                          chunkSize=chunkSize, usecols=self._usecols)
+            if self._startDateStr is not None and self._endDateStr is not None:
+                self._allTimes = instrumentData[instrumentId].filterDataByDates([(self._startDateStr, self._endDateStr)])
+            self._timeFrequency = instrumentData[instrumentId].getTimeFrequency()
         return instrumentData
 
     def getFileName(self, instrumentId):
