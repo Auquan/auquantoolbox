@@ -3,19 +3,18 @@ parentPath = os.path.abspath("..")
 if parentPath not in sys.path:
     sys.path.insert(0, parentPath)
 from backtester.model_learning_system_parameters import ModelLearningSystemParamters
-from backtester.feature_manager import FeatureManager
+from backtester.target_variable_manager import TargetVariableManager
 from backtester.constants import *
 
 class ModelLearningSystem:
-    def __init__(self, mlsParams):
+    def __init__(self, mlsParams, chunkSize=None):
         self.mlsParams = mlsParams
-        # self.__targetVariable = mlsParams.getTargetVariable()
         self.__trainingDataSource = mlsParams.getTrainingDataSource()
-        self.__chunkSize = mlsParams.chunkSize
-        self.__targetVariableManager = TargetVariableManager(mlsParams, instrumentIds=mlsParams.instrumentIds)
+        self.__chunkSize = chunkSize
+        self.__targetVariableManager = TargetVariableManager(mlsParams, instrumentIds=mlsParams.instrumentIds, chunkSize=self.__chunkSize)
 
-    def getTrainingInstrurmentData(self, instrumentId, chunkSize=None):
-        return self.__trainingDataSource.getInstrumentUpdates(instrumentId, chunkSize)
+    def getTrainingInstrurmentData(self, instrumentId):
+        return self.__trainingDataSource.getInstrumentUpdates(instrumentId, self.__chunkSize)
 
     def getTargetVariables(self, targetVariableConfigs):
         targetVariableConfigs = targetVariableConfigs if isinstance(targetVariableConfigs, list) else [targetVariableConfigs]
@@ -25,26 +24,39 @@ class ModelLearningSystem:
             targetVariable[key] = self.__targetVariableManager.getTargetVariableByKey(key)
         return targetVariable
 
-    def computeTargetVariables(self, instrumentData, instrumentId, targetVariableConfigs, chunkSize=None):
-        if chunkSize is None:
-            self.__targetVariableManager.computeTargetVariables(0, instrumentData, instrumentId, targetVariableConfigs)
+    def computeTargetVariables(self, instrumentData, instrumentId, targetVariableConfigs, useTimeFrequency=True):
+        timeFrequency = instrumentData.getTimeFrequency() if useTimeFrequency else None
+        print(timeFrequency)
+        if self.__chunkSize is None:
+            self.__targetVariableManager.computeTargetVariables(0, instrumentData.getBookData(), instrumentId,
+                                                                targetVariableConfigs, timeFrequency)
             targetVariable = self.getTargetVariables(targetVariableConfigs)
             print(targetVariable)
+            return
+        for chunkNumber, instrumentDataChunk in instrumentData.getBookDataChunk():
+            self.__targetVariableManager.computeTargetVariables(chunkNumber, instrumentDataChunk, instrumentId,
+                                                                targetVariableConfigs, timeFrequency)
+            targetVariable = self.getTargetVariables(targetVariableConfigs)
+            print(chunkNumber, targetVariable)
+        targetVariable = self.__targetVariableManager.getLeftoverTargetVariableChunk()
+        print(chunkNumber+1, targetVariable)
 
     def getFeatureSet(self):
         return self.mlsParams.features
 
-    def findBestModel(self):
-        pass
+    def findBestModel(self, instrumentId, useTimeFrequency=True):
+        instrumentData = self.getTrainingInstrurmentData(instrumentId)[instrumentId]
+        targetVariableConfigs = self.mlsParams.getTargetVariableConfigsForInstrumentType(INSTRUMENT_TYPE_STOCK)
+        self.computeTargetVariables(instrumentData, instrumentId, targetVariableConfigs, useTimeFrequency)
 
     def getFinalMetrics(self):
         pass
 
 if __name__ == '__main__':
     instrumentIds = ['IBM', 'AAPL']
-    startDateStr = '2015/07/10'
-    endDateStr = '2017/09/07'
-    chunkSize = 1000
+    startDateStr = '2014/07/10'
+    endDateStr = '2017/10/07'
+    chunkSize = 100
     mlsParams = ModelLearningSystemParamters(instrumentIds, 'XYZ', chunkSize=chunkSize)
     params = dict(cachedFolderName='yahooData/',
                  dataSetId='testTrading',
@@ -54,8 +66,6 @@ if __name__ == '__main__':
                  liveUpdates=False)
     mlsParams.initializeDataSource('YahooStockDataSource', **params)
 
-    # mlsParams.trainingDataSource = YahooStockDataSource()
-    # print(mlsParams.trainingDataSource.emitAllInstrumentUpdates()['IBM'].getBookData())
-
-    system1 = ModelLearningSystem(mlsParams)
-    print(system1.getTrainingInstrurmentData('IBM').getBookData())
+    system1 = ModelLearningSystem(mlsParams, chunkSize=100)
+    print(system1.getTrainingInstrurmentData('IBM')['IBM'].getBookData())
+    system1.findBestModel('IBM')

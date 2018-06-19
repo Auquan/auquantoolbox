@@ -68,7 +68,6 @@ class ModelLearningSystemParamters(object):
         endDateStr = params.get('endDateStr', None)
         for dates in actionDict['dateRange']:
             instrumentIds = [inst for inst in self.instrumentIds if inst not in actionDict['instrumentIds']]
-            print(instrumentIds)
             params['instrumentIds'] = instrumentIds
             params['startDateStr'] = dates['startDate']
             params['endDateStr'] = dates['endDate']
@@ -176,12 +175,18 @@ class ModelLearningSystemParamters(object):
         return {}
 
     def getTargetVariableConfigDicts(self):
+        tv_ma25 = {'featureKey' : 'tv_ma25',
+                   'featureId' : 'moving_average',
+                   'params' : {'period' : 25,
+                               'featureName' : 'ma_5',
+                               'shift' : 10}}
         tv_ma5 = {'featureKey' : 'tv_ma5',
                    'featureId' : 'moving_average',
                    'params' : {'period' : 5,
                                'featureName' : 'ma_5',
-                               'shift' : 10}}
-        return {INSTRUMENT_TYPE_STOCK: [tv_ma5]}
+                               'shift' : 5}}
+
+        return {INSTRUMENT_TYPE_STOCK: [tv_ma5, tv_ma25]}
 
     #####################################################################
     ###      END OF OVERRIDING METHODS

@@ -1,4 +1,5 @@
 from backtester.features.feature import Feature
+from backtester.logger import *
 
 # Average of feature name over some number of previous data points including current.
 # number of data points specified by user

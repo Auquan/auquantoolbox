@@ -6,6 +6,12 @@ from backtester.logger import *
 
 class TargetVariableManager(object):
     """
+    Calculates or reads target variables
+    * Data (instrumentData) can be fed to computeTargetVariables in two formats:
+        1. For a instrument, a dataframe of shape: timeStamps x features
+        2. A dictionary with keys as features and values as dataframe of shape: timeStamps x instrumentIds
+        ** 2nd format is useful for calculating target variables efficiently when several models are being trained simulataneoulsy
+    * Size of calculated target variables can be less than or equal to the size of instrumentData
     """
     def __init__(self, systemParams, instrumentIds=None, targetVariableFileName=None, targetVariablePath=None, chunkSize=None):
         self.systemParams = systemParams
@@ -17,6 +23,7 @@ class TargetVariableManager(object):
         targetVariableConfigs = systemParams.getTargetVariableConfigsForInstrumentType(INSTRUMENT_TYPE_STOCK)
         targetVariableKeys = map(lambda x: x.getFeatureKey(), targetVariableConfigs)
         self.readTargetVariables(targetVariableFileName, targetVariableKeys, instrumentIds)
+        self.__leftoverChunk = {key : None for key in targetVariableKeys}
 
     def getFeatureDf(self, featureKey):
         if self.__instrumentData is None:
@@ -29,14 +36,21 @@ class TargetVariableManager(object):
     def getAllTargetVariables(self):
         return self.__targetVariables
 
-    def getMaxShiftFromConfigList(configList):
+    def getLeftoverTargetVariableChunk(self):
+        return self.__leftoverChunk
+
+    def getMaxPeriodAndShiftFromConfigList(self, configList):
         maxShift = 0
+        maxPeriod = 0
         for config in configList:
             featureParams = config.getFeatureParams()
             maxShift = max(maxShift, featureParams.get('shift', 0))
-        if maxShift == 0:
-            return None
-        return maxShift
+            maxPeriod = max(maxPeriod, featureParams.get('period', 0))
+        if maxShift == 0 and maxPeriod == 0:
+            return None, None
+        maxPeriod = max(2*maxShift, maxPeriod)
+        maxShift = None if maxShift == 0 else maxShift
+        return maxShift, maxPeriod
 
     def readTargetVariables(self, fileNames, targetVariableKeys=None, instrumentIds=None):
         if isinstance(fileNames, list):
@@ -72,43 +86,51 @@ class TargetVariableManager(object):
             else:
                 self.__targetVariables.to_csv(fileName, mode='a', header=False)
 
-    def updateInstrumentData(self, instrumentData):
+    def updateInstrumentData(self, instrumentData, targetVariableConfigs):
         if self.__chunkSize is None:
             self.__instrumentData = instrumentData
-            return None
+            return None, None
         else:
-            maxShift = self.getMaxShiftFromConfigList(targetVariableConfigs)
-            if self.__lookBackInstrumentData is not None:
+            maxShift, maxPeriod = self.getMaxPeriodAndShiftFromConfigList(targetVariableConfigs)
+            if self.__lookBackInstrumentData is None:
+                self.__instrumentData = instrumentData
+            else:
                 self.__instrumentData = pd.concat([self.__lookBackInstrumentData, instrumentData])
-            return maxShift
+            return maxShift, maxPeriod
 
-    def computeTargetVariables(self, updateNum, instrumentData, instrumentId=None, targetVariableConfigs=None, writeVariables=False):
+    def computeTargetVariables(self, updateNum, instrumentData, instrumentId=None, targetVariableConfigs=None, timeFrequency=None, writeVariables=False):
         if targetVariableConfigs is None:
             targetVariableConfigs = self.systemParams.getTargetVariableConfigsForInstrumentType(INSTRUMENT_TYPE_STOCK)
 
-        maxShift = self.updateInstrumentData(instrumentData)
-        timeFrequency = instrumentData.getTimeFrequency()
+        maxShift, maxPeriod = self.updateInstrumentData(instrumentData, targetVariableConfigs)
         for targetVariableConfig in targetVariableConfigs:
             targetVariableKey = targetVariableConfig.getFeatureKey()
             targetVariableParams = targetVariableConfig.getFeatureParams()
             period = targetVariableParams.get('period', None)
-            if period is not None and timeFrequency is not None:
-                targetVariableParams['period'] = '%d%s' % (int(period), timeFrequency)
+            # TODO: Use the below code to calculate features using time frequency also
+            # if period is not None and timeFrequency is not None:
+                # try:
+                    # targetVariableParams['period'] = '%d%s' % (int(period), timeFrequency)
+                # except:
+                    # pass
             featureId = targetVariableConfig.getFeatureId()
             featureCls = targetVariableConfig.getClassForFeatureId(featureId)
             self.__targetVariables[targetVariableKey]  = featureCls.computeForInstrumentData(updateNum=updateNum,
                                                                                         featureParams=targetVariableParams,
                                                                                         featureKey=targetVariableKey,
                                                                                         featureManager=self)
-            shift = targetVariableParams.get('shift', None)
-            if shift is not None and shift > 0:
+            shift = targetVariableParams.get('shift', 0)
+            if shift > 0:
                 self.shiftTargetVariable(targetVariableKey, shift, timeFrequency)
-            if maxShift is not None:
-                self.__lookBackInstrumentData = instrumentData[-2*maxShift:]
-                if self.__firstChunk:
-                    self.__targetVariables[targetVariableKey] = self.__targetVariables[targetVariableKey][:(-maxShift)]
-                else:
-                    self.__targetVariables[targetVariableKey] = self.__targetVariables[targetVariableKey][maxShift:(-maxShift)]
+            if maxPeriod is not None or maxShift is not None:
+                self.__lookBackInstrumentData = instrumentData[-maxPeriod:]
+                if maxShift is not None:
+                    self.__leftoverChunk[targetVariableKey] = self.__targetVariables[targetVariableKey][(-maxShift):]
+                    if self.__firstChunk:
+                        self.__targetVariables[targetVariableKey] = self.__targetVariables[targetVariableKey][:(-maxShift)]
+                    else:
+                        self.__targetVariables[targetVariableKey] = self.__targetVariables[targetVariableKey][(maxPeriod-maxShift):(-maxShift)]
+            self.__targetVariables[targetVariableKey].dropna(inplace=True)
         if writeVariables:
             self.writeTargetVariables(instrumentId)
         if self.__firstChunk:
@@ -116,19 +138,12 @@ class TargetVariableManager(object):
 
     def shiftTargetVariable(self, key, shift, timeFrequency):
         tempDf = self.__targetVariables[key].shift(-shift, freq=timeFrequency)
-        if isinstance(tempdf, pd.Series):
+        if isinstance(tempDf, pd.Series):
             self.__targetVariables[key] = pd.Series(index=self.__targetVariables[key].index)
         elif isinstance(tempDf, pd.DataFrame):
             self.__targetVariables[key] = pd.DataFrame(index=self.__targetVariables[key].index,
-                                                              columns=self.__targetVariables[key].columns)
+                                                       columns=self.__targetVariables[key].columns)
         else:
             raise ValueError
         self.__targetVariables[key].update(tempDf)
         self.__targetVariables[key].fillna(method='ffill', inplace=True)
-
-    def shiftTargetVariableV2(self, key, shift, timeFrequency):
-        self.__targetVariables[key].update(self.__targetVariables[key].shift(-shift, freq=timeFrequency))
-        if isinstance(self.__targetVariables[key], pd.Series):
-            self.__targetVariables[key][-shift:] = self.__targetVariables[key][-(shift+1)]
-        elif isinstance(self.__targetVariables[key], pd.DataFrame):
-            self.__targetVariables[key].iloc[-shift:] = self.__targetVariables[key].iloc[-(shift+1)].values
