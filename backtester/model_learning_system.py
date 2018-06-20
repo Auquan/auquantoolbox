@@ -4,6 +4,7 @@ if parentPath not in sys.path:
     sys.path.insert(0, parentPath)
 from backtester.model_learning_system_parameters import ModelLearningSystemParamters
 from backtester.target_variable_manager import TargetVariableManager
+from backtester.feature_selection_manager import FeatureSelectionManager
 from backtester.constants import *
 
 class ModelLearningSystem:
@@ -12,6 +13,7 @@ class ModelLearningSystem:
         self.__trainingDataSource = mlsParams.getTrainingDataSource()
         self.__chunkSize = chunkSize
         self.__targetVariableManager = TargetVariableManager(mlsParams, instrumentIds=mlsParams.instrumentIds, chunkSize=self.__chunkSize)
+        self.__featureSelectionManager = FeatureSelectionManager(mlsParams)
 
     def getTrainingInstrurmentData(self, instrumentId):
         return self.__trainingDataSource.getInstrumentUpdates(instrumentId, self.__chunkSize)
@@ -48,6 +50,9 @@ class ModelLearningSystem:
         instrumentData = self.getTrainingInstrurmentData(instrumentId)[instrumentId]
         targetVariableConfigs = self.mlsParams.getTargetVariableConfigsForInstrumentType(INSTRUMENT_TYPE_STOCK)
         self.computeTargetVariables(instrumentData, instrumentId, targetVariableConfigs, useTimeFrequency)
+        self.__featureSelectionManager.pruneFeatures(instrumentData.getBookData(), self.getTargetVariables(targetVariableConfigs))
+        selectedFeatures = self.__featureSelectionManager.getAllSelectedFeatures()
+        print(selectedFeatures)
 
     def getFinalMetrics(self):
         pass

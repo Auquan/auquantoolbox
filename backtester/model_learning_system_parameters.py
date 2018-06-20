@@ -38,6 +38,12 @@ class ModelLearningSystemParamters(object):
         for instrumentType in targetVariableConfigDicts:
             self.__targetVariableConfigs[instrumentType] = list(map(lambda x: FeatureConfig(x), targetVariableConfigDicts[instrumentType]))
 
+        self.__featureSelectionConfigs = {}
+        featureSelectionConfigDicts = self.getFeatureSelectionConfigDicts()
+        for instrumentType in featureSelectionConfigDicts:
+            self.__featureSelectionConfigs[instrumentType] = list(map(lambda x: FeatureConfig(x), featureSelectionConfigDicts[instrumentType]))
+
+
     def initializeDataSource(self, dataSourceName, **params):
         dataSourceClass = getattr(data_source_classes, dataSourceName)
         cachedFolderName = params.get('cachedFolderName', '')
@@ -169,7 +175,7 @@ class ModelLearningSystemParamters(object):
                    'params': {'period': 5,
                               'featureName': 'Open'}}
 
-        return {INSTRUMENT_TYPE_STOCK: [ma2Dict]}
+        return {INSTRUMENT_TYPE_STOCK : [ma2Dict]}
 
     def getCustomFeatures(self):
         return {}
@@ -186,7 +192,17 @@ class ModelLearningSystemParamters(object):
                                'featureName' : 'ma_5',
                                'shift' : 5}}
 
-        return {INSTRUMENT_TYPE_STOCK: [tv_ma5, tv_ma25]}
+        return {INSTRUMENT_TYPE_STOCK : [tv_ma5, tv_ma25]}
+
+    def getFeatureSelectionConfigDicts(self):
+        corr = {'featureKey': corr,
+                'featureId' : 'pearson_correlation',
+                'params' : {'startPeriod' : 0,
+                            'endPeriod' : 60,
+                            'steps' : 10,
+                            'threshold' : 0.1,
+                            'topK' : 10}}
+        return {INSTRUMENT_TYPE_STOCK : [corr]}
 
     #####################################################################
     ###      END OF OVERRIDING METHODS
@@ -201,6 +217,12 @@ class ModelLearningSystemParamters(object):
     def getTargetVariableConfigsForInstrumentType(self, instrumentType):
         if instrumentType in self.__targetVariableConfigs:
             return self.__targetVariableConfigs[instrumentType]
+        else:
+            return []
+
+    def getFeatureSelectionConfigsForInstrumentType(self, instrumentType):
+        if instrumentType in self.__featureSelectionConfigs:
+            return self.__featureSelectionConfigs[instrumentType]
         else:
             return []
 
