@@ -1,5 +1,5 @@
 import pandas as pd
-from backtester.featureEngineering.feature_interaction import FeatureInteraction
+from backtester.featureSelectionMethods.feature_interaction import FeatureInteraction
 from backtester.logger import *
 
 
@@ -16,22 +16,22 @@ class PearsonCorrelation(FeatureInteraction):
 
     @classmethod
     def extractImportantFeatures(cls, targetVariableKey, featureKeys, params, dataManager):
-        startPeriod = params.get('startPeriod', START_PERIOD)
-        endPeriod = params.get('endPeriod', END_PERIOD)
-        steps = params.get('steps', STEPS)
-        threshold = params.get('threshold', THRESHOLD)
+        startPeriod = params.get('startPeriod', PearsonCorrelation.START_PERIOD)
+        endPeriod = params.get('endPeriod', PearsonCorrelation.END_PERIOD)
+        steps = params.get('steps', PearsonCorrelation.STEPS)
+        threshold = params.get('threshold', PearsonCorrelation.THRESHOLD)
         topK = params.get('top', None)
 
-        variableDf1 = dataManager.getVariableDf(targetVariableKey)
-        variableDf2 = dataManager.getVariableDf(featureKeys)
-        score = cls.computeInteractionScore(variableDf1, variableDf2).abs()
+        targetVariableDf = dataManager.getTargetVariableDf(targetVariableKey)
+        featureDf = dataManager.getFeatureDf(featureKeys)
+        score = cls.computeInteractionScore(targetVariableDf, featureDf).abs()
         for period in range(startPeriod, endPeriod, steps):
             if period == 0:
                 continue
-            df1 = variableDf1.diff(periods=period)
-            df2 = variableDf2.diff(periods=period)
+            df1 = targetVariableDf.diff(periods=period)
+            df2 = featureDf.diff(periods=period)
             score = pd.concat([score, cls.computeInteractionScore(df1, df2).abs()], axis=1).min(axis=1)
         if topK is None:
             return score[score >= threshold].index.tolist()
-        if else:
+        else:
             return score.nlargest(topK).index.tolist()

@@ -39,7 +39,7 @@ class FeatureSelectionManager(object):
         targetVariableKeys = self.getKeysFromData(targetVariables)
         self.__instrumentData = instrumentData
         self.__targetVariables = targetVariables
-        self.__selectedFeatures[targetVariableKey] = {key : [] for key in targetVariableKeys}
+        self.__selectedFeatures = {key : [] for key in targetVariableKeys}
 
         for targetVariableKey in targetVariableKeys:
             for featureSelectionConfig in featureSelectionConfigs:
@@ -49,9 +49,11 @@ class FeatureSelectionManager(object):
                 featureSelectionCls = featureSelectionConfig.getClassForFeatureId(featureSelectionId)
                 selectedFeatures = featureSelectionCls.extractImportantFeatures(targetVariableKey, featureKeys,
                                                                                   featureSelectionParams, self)
-                if aggregationMethod == 'union':
-                    self.__selectedFeatures[targetVariableKey] = list(set().union(selectedFeatures, self.__selectedFeatures[targetVariableKey]))
+                if self.__selectedFeatures[targetVariableKey] == []:
+                    self.__selectedFeatures[targetVariableKey] = selectedFeatures
+                elif aggregationMethod == 'union':
+                    self.__selectedFeatures[targetVariableKey] = list(set(selectedFeatures).union(self.__selectedFeatures[targetVariableKey]))
                 elif aggregationMethod == 'intersect':
-                    self.__selectedFeatures[targetVariableKey] = list(set().intersection(selectedFeatures, self.__selectedFeatures[targetVariableKey]))
+                        self.__selectedFeatures[targetVariableKey] = list(set(selectedFeatures).intersection(self.__selectedFeatures[targetVariableKey]))
                 else:
                     raise ValueError

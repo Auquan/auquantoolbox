@@ -28,7 +28,6 @@ class ModelLearningSystem:
 
     def computeTargetVariables(self, instrumentData, instrumentId, targetVariableConfigs, useTimeFrequency=True):
         timeFrequency = instrumentData.getTimeFrequency() if useTimeFrequency else None
-        print(timeFrequency)
         if self.__chunkSize is None:
             self.__targetVariableManager.computeTargetVariables(0, instrumentData.getBookData(), instrumentId,
                                                                 targetVariableConfigs, timeFrequency)
@@ -71,6 +70,6 @@ if __name__ == '__main__':
                  liveUpdates=False)
     mlsParams.initializeDataSource('YahooStockDataSource', **params)
 
-    system1 = ModelLearningSystem(mlsParams, chunkSize=100)
+    system1 = ModelLearningSystem(mlsParams, chunkSize=None)
     print(system1.getTrainingInstrurmentData('IBM')['IBM'].getBookData())
     system1.findBestModel('IBM')

@@ -64,7 +64,7 @@ class ModelLearningSystemParamters(object):
         else:
             self.fixFeaturesData(dataSourceClass, actionDict, params.copy())
 
-        params['features'] = self.features
+        params['features'] = None
         self.trainingDataSource = FeaturesDataSource(**params)
         # self.validationDataSource = None
         # self.testDataSource = None
@@ -195,12 +195,12 @@ class ModelLearningSystemParamters(object):
         return {INSTRUMENT_TYPE_STOCK : [tv_ma5, tv_ma25]}
 
     def getFeatureSelectionConfigDicts(self):
-        corr = {'featureKey': corr,
+        corr = {'featureKey': 'corr',
                 'featureId' : 'pearson_correlation',
                 'params' : {'startPeriod' : 0,
                             'endPeriod' : 60,
                             'steps' : 10,
-                            'threshold' : 0.1,
+                            'threshold' : 0.1,}}
                             'topK' : 10}}
         return {INSTRUMENT_TYPE_STOCK : [corr]}
 
