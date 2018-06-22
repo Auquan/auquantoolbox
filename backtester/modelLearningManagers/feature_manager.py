@@ -2,7 +2,7 @@ from itertools import chain
 import pandas as pd
 import time, json
 from backtester.features.feature_config import FeatureConfig
-from backtester.instrument_data_manager import InstrumentDataManager
+from backtester.modelLearningManagers.instrument_data_manager import InstrumentDataManager
 from backtester.constants import *
 from backtester.logger import *
 

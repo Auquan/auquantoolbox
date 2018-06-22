@@ -9,10 +9,11 @@ class FeatureSelectionManager(object):
         self.systemParams = systemParams
         self.__instrumentData = None
         self.__targetVariables = None
+        self.__currentTimestamps = None
         self.__selectedFeatures = {}
 
     def getFeatureDf(self, featureKey):
-        return self.__instrumentData[featureKey]
+        return self.__instrumentData[featureKey].loc[self.__currentTimestamps]
 
     def getTargetVariableDf(self, targetVariableKey):
         return self.__targetVariables[targetVariableKey]
@@ -42,6 +43,7 @@ class FeatureSelectionManager(object):
         self.__selectedFeatures = {key : [] for key in targetVariableKeys}
 
         for targetVariableKey in targetVariableKeys:
+            self.__currentTimestamps = self.__targetVariables[targetVariableKey].index
             for featureSelectionConfig in featureSelectionConfigs:
                 featureSelectionKey = featureSelectionConfig.getFeatureKey()
                 featureSelectionParams = featureSelectionConfig.getFeatureParams()

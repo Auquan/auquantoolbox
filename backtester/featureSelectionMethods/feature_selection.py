@@ -1,4 +1,4 @@
-class FeatureInteraction(object):
+class FeatureSelection(object):
     """Methods to compute interaction score between variable1 and variable2   """
 
     """

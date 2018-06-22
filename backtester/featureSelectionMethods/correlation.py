@@ -1,9 +1,9 @@
 import pandas as pd
-from backtester.featureSelectionMethods.feature_interaction import FeatureInteraction
+from backtester.featureSelectionMethods.feature_selection import FeatureSelection
 from backtester.logger import *
 
 
-class PearsonCorrelation(FeatureInteraction):
+class PearsonCorrelation(FeatureSelection):
     # Defaults
     THRESHOLD = 0.1
     END_PERIOD = 1
@@ -12,25 +12,26 @@ class PearsonCorrelation(FeatureInteraction):
 
     @classmethod
     def computeInteractionScore(cls, variableDf1, variableDf2):
-        return variableDf2.corrwith(variableDf1)
+        return variableDf1.corrwith(variableDf2)
 
     @classmethod
     def extractImportantFeatures(cls, targetVariableKey, featureKeys, params, dataManager):
-        startPeriod = params.get('startPeriod', PearsonCorrelation.START_PERIOD)
-        endPeriod = params.get('endPeriod', PearsonCorrelation.END_PERIOD)
-        steps = params.get('steps', PearsonCorrelation.STEPS)
-        threshold = params.get('threshold', PearsonCorrelation.THRESHOLD)
-        topK = params.get('top', None)
+        startPeriod = params.get('startPeriod', cls.START_PERIOD)
+        endPeriod = params.get('endPeriod', cls.END_PERIOD)
+        steps = params.get('steps', cls.STEPS)
+        threshold = params.get('threshold', cls.THRESHOLD)
+        topK = params.get('topK', None)
 
         targetVariableDf = dataManager.getTargetVariableDf(targetVariableKey)
         featureDf = dataManager.getFeatureDf(featureKeys)
-        score = cls.computeInteractionScore(targetVariableDf, featureDf).abs()
+        score = cls.computeInteractionScore(featureDf, targetVariableDf).abs()
         for period in range(startPeriod, endPeriod, steps):
             if period == 0:
                 continue
-            df1 = targetVariableDf.diff(periods=period)
-            df2 = featureDf.diff(periods=period)
+            df1 = featureDf.diff(periods=period)
+            df2 = targetVariableDf.diff(periods=period)
             score = pd.concat([score, cls.computeInteractionScore(df1, df2).abs()], axis=1).min(axis=1)
+        # print(score)
         if topK is None:
             return score[score >= threshold].index.tolist()
         else:

@@ -3,8 +3,8 @@ parentPath = os.path.abspath("..")
 if parentPath not in sys.path:
     sys.path.insert(0, parentPath)
 from backtester.model_learning_system_parameters import ModelLearningSystemParamters
-from backtester.target_variable_manager import TargetVariableManager
-from backtester.feature_selection_manager import FeatureSelectionManager
+from backtester.modelLearningManagers.target_variable_manager import TargetVariableManager
+from backtester.modelLearningManagers.feature_selection_manager import FeatureSelectionManager
 from backtester.constants import *
 
 class ModelLearningSystem:
@@ -49,7 +49,8 @@ class ModelLearningSystem:
         instrumentData = self.getTrainingInstrurmentData(instrumentId)[instrumentId]
         targetVariableConfigs = self.mlsParams.getTargetVariableConfigsForInstrumentType(INSTRUMENT_TYPE_STOCK)
         self.computeTargetVariables(instrumentData, instrumentId, targetVariableConfigs, useTimeFrequency)
-        self.__featureSelectionManager.pruneFeatures(instrumentData.getBookData(), self.getTargetVariables(targetVariableConfigs))
+        self.__featureSelectionManager.pruneFeatures(instrumentData.getBookData(), self.getTargetVariables(targetVariableConfigs),
+                                                     aggregationMethod='intersect')
         selectedFeatures = self.__featureSelectionManager.getAllSelectedFeatures()
         print(selectedFeatures)
 
@@ -71,5 +72,5 @@ if __name__ == '__main__':
     mlsParams.initializeDataSource('YahooStockDataSource', **params)
 
     system1 = ModelLearningSystem(mlsParams, chunkSize=None)
-    print(system1.getTrainingInstrurmentData('IBM')['IBM'].getBookData())
-    system1.findBestModel('IBM')
+    # print(system1.getTrainingInstrurmentData('IBM')['IBM'].getBookData())
+    system1.findBestModel('AAPL')

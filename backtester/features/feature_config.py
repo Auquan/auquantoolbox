@@ -43,6 +43,7 @@ from backtester.features.count_loss_feature import CountLossFeature
 
 # Feature Engineering techniques imports
 from backtester.featureSelectionMethods.correlation import PearsonCorrelation
+from backtester.featureSelectionMethods.generic_univariate_select import GenericUnivariateSelect
 
 featureIdToFeatureCls = {'argmax': ArgMaxFeature,
                          'argmin': ArgMinFeature,
@@ -87,7 +88,8 @@ featureIdToFeatureCls = {'argmax': ArgMaxFeature,
 
                          # TODO: Make config of feature Engineering techniques a separate entity
                          # Feature Engineering techniques
-                         'pearson_correlation' : PearsonCorrelation
+                         'pearson_correlation' : PearsonCorrelation,
+                         'generic_univariate_select' : GenericUnivariateSelect
                          }
 
 

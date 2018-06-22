@@ -6,7 +6,7 @@ from datetime import timedelta
 from backtester.features.feature_config import FeatureConfig
 from backtester.dataSource import data_source_classes
 from backtester.dataSource.features_data_source import FeaturesDataSource
-from backtester.feature_manager import FeatureManager
+from backtester.modelLearningManagers.feature_manager import FeatureManager
 from backtester.constants import *
 from backtester.logger import *
 
@@ -200,9 +200,15 @@ class ModelLearningSystemParamters(object):
                 'params' : {'startPeriod' : 0,
                             'endPeriod' : 60,
                             'steps' : 10,
-                            'threshold' : 0.1,}}
-                            'topK' : 10}}
-        return {INSTRUMENT_TYPE_STOCK : [corr]}
+                            'threshold' : 0.1,
+                            'topK' : 2}}
+
+        genericSelect = {'featureKey' : 'gus',
+                         'featureId' : 'generic_univariate_select',
+                         'params' : {'scoreFunction' : 'f_regression',
+                                     'mode' : 'k_best',
+                                     'modeParam' : 3}}
+        return {INSTRUMENT_TYPE_STOCK : [corr, genericSelect]}
 
     #####################################################################
     ###      END OF OVERRIDING METHODS
