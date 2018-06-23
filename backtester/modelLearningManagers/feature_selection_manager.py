@@ -4,7 +4,11 @@ from backtester.logger import *
 
 class FeatureSelectionManager(object):
     """
+    Selects features which are important for a target variable from the pool of feature set
     """
+
+    # TODO:  Implement the support for selecting features when instrument data is in chunks
+
     def __init__(self, systemParams):
         self.systemParams = systemParams
         self.__instrumentData = None
@@ -45,10 +49,10 @@ class FeatureSelectionManager(object):
         for targetVariableKey in targetVariableKeys:
             self.__currentTimestamps = self.__targetVariables[targetVariableKey].index
             for featureSelectionConfig in featureSelectionConfigs:
-                featureSelectionKey = featureSelectionConfig.getFeatureKey()
-                featureSelectionParams = featureSelectionConfig.getFeatureParams()
-                featureSelectionId = featureSelectionConfig.getFeatureId()
-                featureSelectionCls = featureSelectionConfig.getClassForFeatureId(featureSelectionId)
+                featureSelectionKey = featureSelectionConfig.getKey()
+                featureSelectionParams = featureSelectionConfig.getParams()
+                featureSelectionId = featureSelectionConfig.getId()
+                featureSelectionCls = featureSelectionConfig.getClassForFeatureSelectonId(featureSelectionId)
                 selectedFeatures = featureSelectionCls.extractImportantFeatures(targetVariableKey, featureKeys,
                                                                                   featureSelectionParams, self)
                 if self.__selectedFeatures[targetVariableKey] == []:

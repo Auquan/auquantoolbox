@@ -41,10 +41,6 @@ from backtester.features.total_loss_feature import TotalLossFeature
 from backtester.features.count_profit_feature import CountProfitFeature
 from backtester.features.count_loss_feature import CountLossFeature
 
-# Feature Engineering techniques imports
-from backtester.featureSelectionMethods.correlation import PearsonCorrelation
-from backtester.featureSelectionMethods.generic_univariate_select import GenericUnivariateSelect
-
 featureIdToFeatureCls = {'argmax': ArgMaxFeature,
                          'argmin': ArgMinFeature,
                          'bollinger_bands': BollingerBandsFeature,
@@ -84,12 +80,7 @@ featureIdToFeatureCls = {'argmax': ArgMaxFeature,
                          'count_profit': CountProfitFeature,
                          'maxDrawdown': MaxDrawdownFeature,
                          'variance': VarianceFeature,
-                         'maxCapitalUsage': MaxCapitalUsageFeature,
-
-                         # TODO: Make config of feature Engineering techniques a separate entity
-                         # Feature Engineering techniques
-                         'pearson_correlation' : PearsonCorrelation,
-                         'generic_univariate_select' : GenericUnivariateSelect
+                         'maxCapitalUsage': MaxCapitalUsageFeature
                          }
 
 

@@ -1,5 +1,5 @@
 import pandas as pd
-from backtester.featureSelectionMethods.feature_selection import FeatureSelection
+from backtester.featureSelection.feature_selection import FeatureSelection
 from backtester.logger import *
 
 

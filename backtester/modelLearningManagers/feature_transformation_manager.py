@@ -11,13 +11,19 @@ from backtester.logger import *
 
 class FeatureTransformationManager(object):
     """
+    performs series of transformation on the instrument data
     """
+
+    # TODO: Implement the support for transforming features in chunks
+
     def __init__(self, systemParams, transformerFileName=''):
         self.systemParams = systemParams
-        self.__fileName = transformerFileName
         self.__instrumentData = None
-        self.__transformedData = None
         self.__transformers = {}
+        if transformerFileName == '':
+            self.transformFeatures = self._transformFeaturesUsingConfigs
+        else:
+            self.readTransformers(transformerFileName)
 
     def getInstrumentData(self):
         return self.__instrumentData
@@ -25,31 +31,37 @@ class FeatureTransformationManager(object):
     def getTransformedData(self):
         return self.__instrumentData
 
-    def readTransformers(self):
-        with open(self.__fileName, 'rb') as f:
+    def readTransformers(self, fileName):
+        with open(fileName, 'rb') as f:
             self.__transformers = pickle.load(f)
+        self.transformFeatures = self._transformFeaturesUsingFile
 
     def writeTransformers(self, fileName):
         with open(fileName, 'wb') as f:
             pickle.dump(self.__transformers, f)
 
-    def transformFeaturesUsingFile(self, instrumentData, transformationConfigs=None):
+    def setTransformers(self, transformers):
+        self.__transformers = transformers
+        self.transformFeatures = self._transformFeaturesUsingFile
+
+    def _transformFeaturesUsingFile(self, instrumentData, transformationConfigs=None):
         self.__instrumentData = instrumentData
         if transformationConfigs is None:
             transformerKeys = self.__transformers.keys()
         else:
-            transformerKeys = [config.getFeatureKey() for config in transformationConfigs]
+            transformerKeys = [config.getKey() for config in transformationConfigs]
         for key in transformerKeys:
             self.__instrumentData = self.__transformers[key].transform(self)
 
-    def transformFeatures(self, instrumentData, transformationConfigs=None):
+    def _transformFeaturesUsingConfigs(self, instrumentData, transformationConfigs=None):
         if transformationConfigs is None:
             transformationConfigs = self.systemParams.getFeatureTransformationConfigsForInstrumentType(INSTRUMENT_TYPE_STOCK)
+
         self.__instrumentData = instrumentData
         for transformationConfig in transformationConfigs:
-            transformationKey = transformationConfig.getFeatureKey()
-            transformationId = transformationConfig.getFeatureId()
-            transformationParams = transformationConfig.getFeatureParams()
-            transformationCls = transformationConfig.getClassForFeatureId(transformationId)
+            transformationKey = transformationConfig.getKey()
+            transformationId = transformationConfig.getId()
+            transformationParams = transformationConfig.getParams()
+            transformationCls = transformationConfig.getClassForFeatureTransformationId(transformationId)
             self.__transformers[transformationKey] = transformationCls(transformationParams)
             self.__instrumentData = self.__transformers[transformationKey].transform(self)

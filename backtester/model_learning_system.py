@@ -5,15 +5,20 @@ if parentPath not in sys.path:
 from backtester.model_learning_system_parameters import ModelLearningSystemParamters
 from backtester.modelLearningManagers.target_variable_manager import TargetVariableManager
 from backtester.modelLearningManagers.feature_selection_manager import FeatureSelectionManager
+from backtester.modelLearningManagers.feature_transformation_manager import FeatureTransformationManager
 from backtester.constants import *
 
 class ModelLearningSystem:
+
+    # This chunksize is different from chunkSize defined in mlsParams
+    # This is useful to do training in chunks
     def __init__(self, mlsParams, chunkSize=None):
         self.mlsParams = mlsParams
         self.__trainingDataSource = mlsParams.getTrainingDataSource()
         self.__chunkSize = chunkSize
         self.__targetVariableManager = TargetVariableManager(mlsParams, instrumentIds=mlsParams.instrumentIds, chunkSize=self.__chunkSize)
         self.__featureSelectionManager = FeatureSelectionManager(mlsParams)
+        self.__featureTransformationManager = FeatureTransformationManager(mlsParams)
 
     def getTrainingInstrurmentData(self, instrumentId):
         return self.__trainingDataSource.getInstrumentUpdates(instrumentId, self.__chunkSize)
@@ -53,6 +58,15 @@ class ModelLearningSystem:
                                                      aggregationMethod='intersect')
         selectedFeatures = self.__featureSelectionManager.getAllSelectedFeatures()
         print(selectedFeatures)
+        selectedInstrumentData = {}
+        transformedInstrumentData = {}
+        for targetVariableConfig in targetVariableConfigs:
+            key = targetVariableConfig.getFeatureKey()
+            selectedInstrumentData[key] = instrumentData.getBookData()[selectedFeatures[key]]
+            self.__featureTransformationManager.transformFeatures(selectedInstrumentData[key])
+            transformedInstrumentData[key] = self.__featureTransformationManager.getTransformedData()
+            print(transformedInstrumentData[key])
+            self.__featureTransformationManager.writeTransformers('transformersss.pkl')
 
     def getFinalMetrics(self):
         pass

@@ -4,6 +4,8 @@ import numpy as np
 from dateutil import parser
 from datetime import timedelta
 from backtester.features.feature_config import FeatureConfig
+from backtester.featureSelection.feature_selection_config import FeatureSelectionConfig
+from backtester.transformers.transformer_config import FeatureTransformationConfig
 from backtester.dataSource import data_source_classes
 from backtester.dataSource.features_data_source import FeaturesDataSource
 from backtester.modelLearningManagers.feature_manager import FeatureManager
@@ -22,8 +24,10 @@ class ModelLearningSystemParamters(object):
         self.targetVariable = None
 
         FeatureConfig.setupCustomFeatures(self.getCustomFeatures())
-        self.__instrumentFeatureConfigs = {}
+        FeatureSelectionConfig.setupCustomFeatureSelectionMethods(self.getCustomFeatureSelectionMethods())
+        FeatureTransformationConfig.setupCustomFeatureTransformationMethods(self.getCustomFeatureTransformationMethods())
 
+        self.__instrumentFeatureConfigs = {}
         instrumentFeatureConfigDicts = self.getInstrumentFeatureConfigDicts()
         for instrumentType in instrumentFeatureConfigDicts:
             if type(instrumentFeatureConfigDicts[instrumentType]) is list:
@@ -41,7 +45,12 @@ class ModelLearningSystemParamters(object):
         self.__featureSelectionConfigs = {}
         featureSelectionConfigDicts = self.getFeatureSelectionConfigDicts()
         for instrumentType in featureSelectionConfigDicts:
-            self.__featureSelectionConfigs[instrumentType] = list(map(lambda x: FeatureConfig(x), featureSelectionConfigDicts[instrumentType]))
+            self.__featureSelectionConfigs[instrumentType] = list(map(lambda x: FeatureSelectionConfig(x), featureSelectionConfigDicts[instrumentType]))
+
+        self.__featureTransformationConfigs = {}
+        featureTransformationConfigDicts = self.getFeatureTransformationConfigDicts()
+        for instrumentType in featureTransformationConfigDicts:
+            self.__featureTransformationConfigs[instrumentType] = list(map(lambda x: FeatureTransformationConfig(x), featureTransformationConfigDicts[instrumentType]))
 
 
     def initializeDataSource(self, dataSourceName, **params):
@@ -177,9 +186,6 @@ class ModelLearningSystemParamters(object):
 
         return {INSTRUMENT_TYPE_STOCK : [ma2Dict]}
 
-    def getCustomFeatures(self):
-        return {}
-
     def getTargetVariableConfigDicts(self):
         tv_ma25 = {'featureKey' : 'tv_ma25',
                    'featureId' : 'moving_average',
@@ -195,20 +201,40 @@ class ModelLearningSystemParamters(object):
         return {INSTRUMENT_TYPE_STOCK : [tv_ma5, tv_ma25]}
 
     def getFeatureSelectionConfigDicts(self):
-        corr = {'featureKey': 'corr',
-                'featureId' : 'pearson_correlation',
+        corr = {'featureSelectionKey': 'corr',
+                'featureSelectionId' : 'pearson_correlation',
                 'params' : {'startPeriod' : 0,
                             'endPeriod' : 60,
                             'steps' : 10,
                             'threshold' : 0.1,
                             'topK' : 2}}
 
-        genericSelect = {'featureKey' : 'gus',
-                         'featureId' : 'generic_univariate_select',
+        genericSelect = {'featureSelectionKey' : 'gus',
+                         'featureSelectionId' : 'generic_univariate_select',
                          'params' : {'scoreFunction' : 'f_regression',
                                      'mode' : 'k_best',
                                      'modeParam' : 3}}
         return {INSTRUMENT_TYPE_STOCK : [corr, genericSelect]}
+
+    def getFeatureTransformationConfigDicts(self):
+        stdScaler = {'featureTransformKey': 'stdScaler',
+                     'featureTransformId' : 'standard_transform',
+                     'params' : {}}
+
+        minmaxScaler = {'featureTransformKey' : 'minmaxScaler',
+                        'featureTransformId' : 'minmax_transform',
+                        'params' : {'low' : -1,
+                                    'high' : 1}}
+        return {INSTRUMENT_TYPE_STOCK : [stdScaler, minmaxScaler]}
+
+    def getCustomFeatures(self):
+        return {}
+
+    def getCustomFeatureSelectionMethods(self):
+        return {}
+
+    def getCustomFeatureTransformationMethods(self):
+        return {}
 
     #####################################################################
     ###      END OF OVERRIDING METHODS
@@ -229,6 +255,12 @@ class ModelLearningSystemParamters(object):
     def getFeatureSelectionConfigsForInstrumentType(self, instrumentType):
         if instrumentType in self.__featureSelectionConfigs:
             return self.__featureSelectionConfigs[instrumentType]
+        else:
+            return []
+
+    def getFeatureTransformationConfigsForInstrumentType(self, instrumentType):
+        if instrumentType in self.__featureTransformationConfigs:
+            return self.__featureTransformationConfigs[instrumentType]
         else:
             return []
 

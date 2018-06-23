@@ -1,5 +1,5 @@
 from sklearn import feature_selection
-from backtester.featureSelectionMethods.feature_selection import FeatureSelection
+from backtester.featureSelection.feature_selection import FeatureSelection
 from backtester.logger import *
 
 class GenericUnivariateSelect(FeatureSelection):
