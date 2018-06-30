@@ -19,6 +19,7 @@ class LookbackDataEfficient:
         self.__columns = columns
         self.__indexList = []
         for t in indexListGetter:
+            print(t)
             self.__indexList.append(t)
         self.__startLookbackData = 0
         self.__endLookbackData = 0
