@@ -178,7 +178,7 @@ class FairValueTradingParams(TradingSystemParameters):
                                     basisLongLimit=2500, basisShortLimit=2500,
                                     basisCapitalUsageLimit=0.05, basisLotSize=100,
                                     basisLimitType='L', basis_thresholdParam='sdev_5_for_exec',
-                                    price=self.getPriceFeatureKey(), feeDict=0.0001, feesRatio=1.5, 
+                                    price=self.getPriceFeatureKey(), feeDict=0.0001, feesRatio=1.5,
                                     spreadLimit=0.05)
 
     '''
@@ -236,7 +236,6 @@ class EnterPrice(Feature):
             currentPrice = priceData.iloc[-1]
         except KeyError:
             logError('Price Feature Key does not exist')
-        # import pdb;pdb.set_trace()
         positionData = instrumentLookbackData.getFeatureDf('position')
         previousPosition = 0 if updateNum <= 2 else positionData.iloc[-2]
         currentPosition = 0*currentPrice if updateNum <= 2 else positionData.iloc[-1]
@@ -328,8 +327,6 @@ class predictionString(Feature):
     def computeForMarket(cls, updateNum, time, featureParams, featureKey, currentMarketFeatures, instrumentManager):
         instrumentLookbackData = instrumentManager.getLookbackInstrumentFeatures()
         predictionDict = instrumentLookbackData.getFeatureDf(featureParams['prediction']).iloc[-1]
-        # import pdb;pdb.set_trace()
         predictionStr = predictionDict.apply(lambda x: '%.3f'%x).values
 
         return ', '.join(predictionDict.apply(lambda x: '%.3f'%x).values)
-
