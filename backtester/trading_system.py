@@ -2,7 +2,10 @@ import time
 import json
 import os
 import os.path
-import _pickle as cPickle
+try:
+    import _pickle as cPickle
+except:
+    import cPickle
 from backtester.logger import *
 from backtester.instruments_manager import InstrumentManager
 from datetime import datetime

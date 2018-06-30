@@ -29,11 +29,11 @@ class CustomTimeRule(TimeRule):
         return pd.date_range(start=self.__startDate, end=self.__endDate, freq= self.__bhour)
 
     def createBusinessMinSeries(self):
-        hour_series = createBusinessHourSeries()
+        hour_series = self.createBusinessHourSeries()
         return pd.date_range(hour_series.min(), hour_series.max(), freq= self.__sample + ' min')
 
     def createBusinessSecSeries(self):
-        hour_series = createBusinessHourSeries()
+        hour_series = self.createBusinessHourSeries()
         return pd.date_range(hour_series.min(), hour_series.max(), freq= self.__sample + ' s')
 
     def emitTimeToTrade(self):
