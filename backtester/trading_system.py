@@ -145,7 +145,7 @@ class TradingSystem:
         if createResultDict:
             resultDict.update(processResult(stats, self.stateWriter.getFolderName(), self.stateWriter.getMarketFeaturesFilename()))
         if shouldPlotFeatures:
-            generateGraph(self.instrumentManager.getDataDf(), self.stateWriter.getMarketFeaturesFilename(), stats, None)
+            generateGraph(self.instrumentManager.getDataDf(), self.stateWriter.getMarketFeaturesFilename(), metricString, None)
         return resultDict
 
     def startTrading(self, onlyAnalyze=False, shouldPlot=True, makeInstrumentCsvs=True):

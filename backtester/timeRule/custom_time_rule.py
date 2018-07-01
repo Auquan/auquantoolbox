@@ -33,9 +33,9 @@ class CustomTimeRule(TimeRule):
         datetime_index = None
         for day in day_series:
             if(datetime_index is None):
-                datetime_index = pd.date_range(start=day+timedelta(minutes=555), end=day+timedelta(minutes=930), freq= self.__sample + ' min')
+                datetime_index = pd.date_range(start=day+timedelta(minutes=560), end=day+timedelta(minutes=930), freq= self.__sample + ' min')
             else:
-                datetime_index = datetime_index.append(pd.date_range(start=day+timedelta(minutes=555), end=day+timedelta(minutes=930), freq= self.__sample + ' min'))
+                datetime_index = datetime_index.append(pd.date_range(start=day+timedelta(minutes=560), end=day+timedelta(minutes=930), freq= self.__sample + ' min'))
         return datetime_index
 
     def createBusinessSecSeries(self):
@@ -43,9 +43,9 @@ class CustomTimeRule(TimeRule):
         datetime_index = None
         for day in day_series:
             if(datetime_index is None):
-                datetime_index = pd.date_range(start=day+timedelta(minutes=555), end=day+timedelta(minutes=930), freq= self.__sample + ' s')
+                datetime_index = pd.date_range(start=day+timedelta(minutes=560), end=day+timedelta(minutes=930), freq= self.__sample + ' s')
             else:
-                datetime_index = datetime_index.append(pd.date_range(start=day+timedelta(minutes=555), end=day+timedelta(minutes=930), freq= self.__sample + ' s'))
+                datetime_index = datetime_index.append(pd.date_range(start=day+timedelta(minutes=560), end=day+timedelta(minutes=930), freq= self.__sample + ' s'))
         return datetime_index
 
     def emitTimeToTrade(self):
