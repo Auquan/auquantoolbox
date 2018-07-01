@@ -18,7 +18,7 @@ class Metrics():
             + ' Max Drawdown: %0.2f%% ' % (100 * self.__stats['Max Drawdown(%)']) \
             + ' RoC: %0.2f%% ' % (100 * self.__stats['RoC(%)']) \
             + ' P/L Ratio: %0.2f ' % self.__stats['Profit/Loss Ratio'] \
-            + ' Accuracy: %0.2f ' % self.__stats['Accuracy']
+            + ' Trade Accuracy: %0.2f ' % self.__stats['Accuracy']
         if 'Score' in self.__stats:
             str = str + ' Score: %0.2f ' % self.__stats['Score']
         if self.__stats['Trading Days'] > 252:
@@ -36,7 +36,7 @@ class Metrics():
             ' Pnl: %0.2f ' % self.__stats['Pnl'] \
             + ' Total Pnl: %0.2f%% ' % (100 * self.__stats['Total Pnl(%)']) \
             + ' Profit/Loss Ratio: %0.2f ' % self.__stats['Profit/Loss Ratio'] \
-            + ' Accuracy: %0.2f ' % self.__stats['Accuracy']
+            + ' Trade Accuracy: %0.2f ' % self.__stats['Accuracy']
         if 'Score' in self.__stats:
             str = str + ' Score: %0.2f ' % self.__stats['Score']
         if 'Normalized Score' in self.__stats:
