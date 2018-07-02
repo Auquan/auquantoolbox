@@ -6,6 +6,7 @@ from datetime import timedelta
 from backtester.features.feature_config import FeatureConfig
 from backtester.featureSelection.feature_selection_config import FeatureSelectionConfig
 from backtester.transformers.transformer_config import FeatureTransformationConfig
+from backtester.predefinedModels.model_config import ModelConfig
 from backtester.dataSource import data_source_classes
 from backtester.dataSource.features_data_source import FeaturesDataSource
 from backtester.modelLearningManagers.feature_manager import FeatureManager
@@ -26,6 +27,7 @@ class ModelLearningSystemParamters(object):
         FeatureConfig.setupCustomFeatures(self.getCustomFeatures())
         FeatureSelectionConfig.setupCustomFeatureSelectionMethods(self.getCustomFeatureSelectionMethods())
         FeatureTransformationConfig.setupCustomFeatureTransformationMethods(self.getCustomFeatureTransformationMethods())
+        ModelConfig.setupCustomModelMethods(self.getCustomModelMethods())
 
         self.__instrumentFeatureConfigs = {}
         instrumentFeatureConfigDicts = self.getInstrumentFeatureConfigDicts()
@@ -51,6 +53,11 @@ class ModelLearningSystemParamters(object):
         featureTransformationConfigDicts = self.getFeatureTransformationConfigDicts()
         for instrumentType in featureTransformationConfigDicts:
             self.__featureTransformationConfigs[instrumentType] = list(map(lambda x: FeatureTransformationConfig(x), featureTransformationConfigDicts[instrumentType]))
+
+        self.__modelConfigs = {}
+        ModelConfigDicts = self.getModelConfigDicts()
+        for instrumentType in ModelConfigDicts:
+            self.__modelConfigs[instrumentType] = list(map(lambda x: ModelConfig(x), ModelConfigDicts[instrumentType]))
 
 
     def initializeDataSource(self, dataSourceName, **params):
@@ -227,6 +234,16 @@ class ModelLearningSystemParamters(object):
                                     'high' : 1}}
         return {INSTRUMENT_TYPE_STOCK : [stdScaler, minmaxScaler]}
 
+    def getModelConfigDicts(self):
+        model1 = {'modelKey': 'model1',
+                     'modelId' : 'linear_regression',
+                     'params' : {}}
+
+        model2 = {'modelKey': 'model2',
+                     'modelId' : 'logistic_regression',
+                     'params' : {}}
+        return {INSTRUMENT_TYPE_STOCK : [model1]}
+
     def getCustomFeatures(self):
         return {}
 
@@ -234,6 +251,9 @@ class ModelLearningSystemParamters(object):
         return {}
 
     def getCustomFeatureTransformationMethods(self):
+        return {}
+
+    def getCustomModelMethods(self):
         return {}
 
     #####################################################################
@@ -261,6 +281,12 @@ class ModelLearningSystemParamters(object):
     def getFeatureTransformationConfigsForInstrumentType(self, instrumentType):
         if instrumentType in self.__featureTransformationConfigs:
             return self.__featureTransformationConfigs[instrumentType]
+        else:
+            return []
+
+    def getModelConfigsForInstrumentType(self, instrumentType):
+        if instrumentType in self.__modelConfigs:
+            return self.__modelConfigs[instrumentType]
         else:
             return []
 

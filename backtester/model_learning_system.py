@@ -2,10 +2,12 @@ import sys, os
 parentPath = os.path.abspath("..")
 if parentPath not in sys.path:
     sys.path.insert(0, parentPath)
+import pandas as pd
 from backtester.model_learning_system_parameters import ModelLearningSystemParamters
 from backtester.modelLearningManagers.target_variable_manager import TargetVariableManager
 from backtester.modelLearningManagers.feature_selection_manager import FeatureSelectionManager
 from backtester.modelLearningManagers.feature_transformation_manager import FeatureTransformationManager
+from backtester.modelLearningManagers.regression_model import RegressionModel
 from backtester.constants import *
 
 class ModelLearningSystem:
@@ -19,6 +21,7 @@ class ModelLearningSystem:
         self.__targetVariableManager = TargetVariableManager(mlsParams, instrumentIds=mlsParams.instrumentIds, chunkSize=self.__chunkSize)
         self.__featureSelectionManager = FeatureSelectionManager(mlsParams)
         self.__featureTransformationManager = FeatureTransformationManager(mlsParams)
+        self.__trainingModelManager = RegressionModel(mlsParams)
 
     def getTrainingInstrurmentData(self, instrumentId):
         return self.__trainingDataSource.getInstrumentUpdates(instrumentId, self.__chunkSize)
@@ -53,8 +56,10 @@ class ModelLearningSystem:
     def findBestModel(self, instrumentId, useTimeFrequency=True):
         instrumentData = self.getTrainingInstrurmentData(instrumentId)[instrumentId]
         targetVariableConfigs = self.mlsParams.getTargetVariableConfigsForInstrumentType(INSTRUMENT_TYPE_STOCK)
+        modelConfigs = self.mlsParams.getModelConfigsForInstrumentType(INSTRUMENT_TYPE_STOCK)
         self.computeTargetVariables(instrumentData, instrumentId, targetVariableConfigs, useTimeFrequency)
-        self.__featureSelectionManager.pruneFeatures(instrumentData.getBookData(), self.getTargetVariables(targetVariableConfigs),
+        targetVariablesData = self.getTargetVariables(targetVariableConfigs)
+        self.__featureSelectionManager.pruneFeatures(instrumentData.getBookData(), targetVariablesData,
                                                      aggregationMethod='intersect')
         selectedFeatures = self.__featureSelectionManager.getAllSelectedFeatures()
         print(selectedFeatures)
@@ -64,9 +69,18 @@ class ModelLearningSystem:
             key = targetVariableConfig.getFeatureKey()
             selectedInstrumentData[key] = instrumentData.getBookData()[selectedFeatures[key]]
             self.__featureTransformationManager.transformFeatures(selectedInstrumentData[key])
-            transformedInstrumentData[key] = self.__featureTransformationManager.getTransformedData()
+            columns = selectedInstrumentData[key].columns
+            transformedInstrumentData[key] = pd.DataFrame(index=selectedInstrumentData[key].index, columns=columns)
+            transformedInstrumentData[key][columns] = self.__featureTransformationManager.getTransformedData()
             print(transformedInstrumentData[key])
-            self.__featureTransformationManager.writeTransformers('transformersss.pkl')
+            # self.__featureTransformationManager.writeTransformers('transformersss.pkl')
+            # for modelConfig in modelConfigs:
+            self.__trainingModelManager.fitModel(transformedInstrumentData[key], targetVariablesData[key])
+            print(self.__trainingModelManager.predict(transformedInstrumentData[key]))
+            print(self.__trainingModelManager.evaluateModel(transformedInstrumentData[key], targetVariablesData[key]))
+
+
+        print(self.__trainingModelManager.getModel())
 
     def getFinalMetrics(self):
         pass
