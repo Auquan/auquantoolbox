@@ -20,11 +20,12 @@ def is_number(s):
 
 
 class CsvDataSource(DataSource):
-    def __init__(self, cachedFolderName, dataSetId, instrumentIds, downloadUrl=None, timeKey=None, timeStringFormat=None, startDateStr=None, endDateStr=None, liveUpdates=True, pad=True):
+    def __init__(self, cachedFolderName, dataSetId, instrumentIds, downloadUrl=None, timeKey=None, timeStringFormat=None, startDateStr=None, endDateStr=None, usecols=None, liveUpdates=True, pad=True):
         super(CsvDataSource, self).__init__(cachedFolderName, dataSetId, instrumentIds, startDateStr, endDateStr)
         self._downloadUrl = downloadUrl
         self._timeKey = timeKey
         self._timeStringFormat = timeStringFormat
+        self._usecols = usecols
         self.ensureAllInstrumentsFile(dataSetId)
         if liveUpdates:
             self._allTimes, self._groupedInstrumentUpdates = self.getGroupedInstrumentUpdates()

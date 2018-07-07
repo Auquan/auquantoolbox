@@ -1,28 +1,16 @@
-import sys, os
-import glob, json
-import numpy as np
-from dateutil import parser
-from datetime import timedelta
 from backtester.features.feature_config import FeatureConfig
 from backtester.featureSelection.feature_selection_config import FeatureSelectionConfig
 from backtester.transformers.transformer_config import FeatureTransformationConfig
 from backtester.predefinedModels.model_config import ModelConfig
-from backtester.dataSource import data_source_classes
-from backtester.dataSource.features_data_source import FeaturesDataSource
-from backtester.modelLearningManagers.feature_manager import FeatureManager
 from backtester.constants import *
 from backtester.logger import *
 
 
 class ModelLearningSystemParamters(object):
-    def __init__(self, symbols, targetVariable, chunkSize=None, models=None):
+    def __init__(self, symbols, chunkSize=None, validationSplit=0.1):
         self.instrumentIds = symbols
         self.chunkSize = chunkSize
-        self.trainingDataSource = None
-        self.validationDataSource = None
-        self.testDataSource = None
-        self.validationSplit = None
-        self.targetVariable = None
+        self.validationSplit = validationSplit
 
         FeatureConfig.setupCustomFeatures(self.getCustomFeatures())
         FeatureSelectionConfig.setupCustomFeatureSelectionMethods(self.getCustomFeatureSelectionMethods())
@@ -59,153 +47,70 @@ class ModelLearningSystemParamters(object):
         for instrumentType in ModelConfigDicts:
             self.__modelConfigs[instrumentType] = list(map(lambda x: ModelConfig(x), ModelConfigDicts[instrumentType]))
 
+    def getTrainingDataSourceParams(self):
+        startDateStr = '2010/06/02'
+        endDateStr = '2012/02/07'
+        return dict( dataSourceName='CsvDataSource',
+                     featureFolderName='trainingFeatures',
+                     dropFeatures=['Y'],
+                     ## Now Datasource parameters ##
+                     cachedFolderName='historicalData/',
+                     dataSetId='QQ3Data',
+                     instrumentIds=self.instrumentIds,
+                     downloadUrl='https://raw.githubusercontent.com/Auquan/qq3Data/master',
+                     timeKey='datetime',
+                     timeStringFormat='%Y-%m-%d %H:%M:%S',
+                     startDateStr=startDateStr,
+                     endDateStr=endDateStr,
+                     liveUpdates=False)
 
-    def initializeDataSource(self, dataSourceName, **params):
-        dataSourceClass = getattr(data_source_classes, dataSourceName)
-        cachedFolderName = params.get('cachedFolderName', '')
-        dataSetId = params.get('dataSetId', '')
-        startDateStr = params.get('startDateStr', None)
-        endDateStr = params.get('endDateStr', None)
-        featureFolderName = params.get('featureFolderName', 'features')
-        # NOTE: Hardcoded name of json file
-        stockDataFile = os.path.join(cachedFolderName, dataSetId, featureFolderName, 'stock_data.json')
-        actionDict = self.checkFeaturesExistence(stockDataFile, startDateStr, endDateStr)
-        # TODO: Also compute and check the hash of instrument feature files with the hash stored in json file
-        if actionDict['exist']:
-            logInfo("Features found!")
-        elif actionDict['recalculate']:
-            dataSource = dataSourceClass(**params)
-            featureManager = FeatureManager(self, dataSource, self.instrumentIds, self.chunkSize)
-            featureManager.computeInstrumentFeatures(self.instrumentIds, writeFeatures=True)
-        else:
-            self.fixFeaturesData(dataSourceClass, actionDict, params.copy())
-
-        params['features'] = None
-        self.trainingDataSource = FeaturesDataSource(**params)
-        # self.validationDataSource = None
-        # self.testDataSource = None
-
-    def fixFeaturesData(self, dataSourceClass, actionDict, params):
-        startDateStr = params.get('startDateStr', None)
-        endDateStr = params.get('endDateStr', None)
-        for dates in actionDict['dateRange']:
-            instrumentIds = [inst for inst in self.instrumentIds if inst not in actionDict['instrumentIds']]
-            params['instrumentIds'] = instrumentIds
-            params['startDateStr'] = dates['startDate']
-            params['endDateStr'] = dates['endDate']
-            dataSource = dataSourceClass(**params)
-            featureManager = FeatureManager(self, dataSource, instrumentIds, self.chunkSize)
-            featureManager.computeInstrumentFeatures(instrumentIds, writeFeatures=True, prepend=dates['prepend'], updateFingerprint=True)
-
-        if len(actionDict['instrumentIds']) > 0:
-            params['instrumentIds'] = actionDict['instrumentIds']
-            params['startDateStr'] = startDateStr
-            params['endDateStr'] = endDateStr
-            dataSource = dataSourceClass(**params)
-            featureManager = FeatureManager(self, dataSource, actionDict['instrumentIds'], self.chunkSize)
-            featureManager.computeInstrumentFeatures(actionDict['instrumentIds'], writeFeatures=True, updateFingerprint=True)
-
-    def checkFeaturesExistence(self, stockDataFile, startDateStr, endDateStr):
-        instrumentFeatureConfigs = self.getFeatureConfigsForInstrumentType(INSTRUMENT_TYPE_STOCK)
-        self.features = list(map(lambda x: x.getFeatureKey(), instrumentFeatureConfigs))
-        lookbackSize = FeatureManager.parseFeatureConfigs(instrumentFeatureConfigs) - 1
-        actionDict = {'exist' : False, 'recalculate' : True, 'instrumentIds' : [], 'dateRange' : []}
-        try:
-            with open(stockDataFile, 'r') as fp:
-                fingerprint = json.load(fp)
-        except FileNotFoundError:
-            logWarn('stock_data.json file not found')
-            return actionDict
-        if lookbackSize != fingerprint['lookbackSize']:
-            return actionDict
-        if not set(self.features).issubset(set(fingerprint['features'])):
-            return actionDict
-        existingInstrumentFiles = glob.glob(os.path.join(os.path.dirname(stockDataFile), '*.csv'))
-        existingInstruments = [os.path.splitext(os.path.basename(instrumentFile))[0] for instrumentFile in existingInstrumentFiles]
-        actionDict['instrumentIds'] = list(np.setdiff1d(self.instrumentIds,
-                                           list(set(existingInstruments) & set(fingerprint['stocks']))))
-        actionDict['recalculate'], actionDict['dateRange'] = self.checkFeaturesDates(fingerprint,
-                                                                                     startDateStr, endDateStr)
-        if len(actionDict['instrumentIds']) > 0 or len(actionDict['dateRange']) > 0 :
-            return actionDict
-        actionDict['exist'] = True
-        actionDict['recalculate'] = False
-        return actionDict
-
-    def checkFeaturesDates(self, fingerprint, expStartDateStr, expEndDateStr):
-        if expStartDateStr is None or expEndDateStr is None:
-            raise ValueError
-        expStartDate = parser.parse(expStartDateStr)
-        expEndDate = parser.parse(expEndDateStr)
-        orgStartDate = parser.parse(fingerprint['startDate'])
-        orgEndDate = parser.parse(fingerprint['endDate'])
-        periodStartDate = parser.parse(fingerprint['periodStartDate'])
-        periodEndDate = parser.parse(fingerprint['periodEndDate'])
-        cond1 = orgStartDate > expStartDate and orgEndDate < expEndDate
-        cond2 = orgStartDate > expStartDate and orgEndDate >= expEndDate
-        cond3 = orgStartDate <= expStartDate and orgEndDate < expEndDate
-        cond4 = expStartDate > orgEndDate
-        cond5 = expEndDate < orgStartDate
-        topDateStr = (orgStartDate - timedelta(days=1)).strftime('%Y%m%d') if periodStartDate is None else fingerprint['periodStartDate']
-        botDateStr = (orgEndDate + timedelta(days=1)).strftime('%Y%m%d') if periodEndDate is None else fingerprint['periodEndDate']
-        if cond1:
-            return False, [dict(startDate=expStartDateStr,
-                                endDate=topDateStr,
-                                prepend=True),
-                           dict(startDate=botDateStr,
-                                endDate=expEndDateStr,
-                                prepend=False)]
-        if (cond2 and cond5) or (cond3 and cond4):
-            return True, [dict(startDate=expStartDateStr,
-                               endDate=expEndDateStr,
-                               prepend=False)]
-        elif cond2:
-            return False, [dict(startDate=expStartDateStr,
-                                endDate=topDateStr,
-                                prepend=True)]
-        elif cond3:
-            return False, [dict(startDate=botDateStr,
-                                endDate=expEndDate.strftime('%Y%m%d'),
-                                prepend=False)]
-        else:
-            return False, []
-
-    def setTargetVariable(self):
-        pass
-
-    def setTrainingDataSource(self, dataSetId, dateRange):
+    def getValidationDataSourceParams(self):
         raise NotImplementedError
-        return
 
-    def setValidationDataSource(self, dataSetId, dateRange):
-        raise NotImplementedError
-        return
+    def getTestDataSourceParams(self):
+        startDateStr = '2012/02/08'
+        endDateStr = '2013/02/07'
+        return dict( dataSourceName='CsvDataSource',
+                     featureFolderName='testFeatures',
+                     dropFeatures=['Y'],
+                     ## Now Datasource parameters ##
+                     cachedFolderName='historicalData/',
+                     dataSetId='QQ3Data',
+                     instrumentIds=self.instrumentIds,
+                     downloadUrl='https://raw.githubusercontent.com/Auquan/qq3Data/master',
+                     timeKey='datetime',
+                     timeStringFormat='%Y-%m-%d %H:%M:%S',
+                     startDateStr=startDateStr,
+                     endDateStr=endDateStr,
+                     liveUpdates=False)
 
-    def setTrainingDataSource(self, dataSetId, dateRange):
-        raise NotImplementedError
-        return
+    def getInstrumentIds(self):
+        return self.instrumentIds
 
     def getInstrumentFeatureConfigDicts(self):
-        ma2Dict = {'featureKey': 'ma_5',
-                   'featureId': 'moving_average',
-                   'params': {'period': 5,
-                              'featureName': 'Open'}}
+        # ma2Dict = {'featureKey': 'ma_5',
+        #            'featureId': 'moving_average',
+        #            'params': {'period': 5,
+        #                       'featureName': 'Open'}}
 
-        return {INSTRUMENT_TYPE_STOCK : [ma2Dict]}
+        return {INSTRUMENT_TYPE_STOCK : []}
 
     def getTargetVariableConfigDicts(self):
-        tv_ma25 = {'featureKey' : 'tv_ma25',
-                   'featureId' : 'moving_average',
-                   'params' : {'period' : 25,
-                               'featureName' : 'ma_5',
-                               'shift' : 10}}
-        tv_ma5 = {'featureKey' : 'tv_ma5',
-                   'featureId' : 'moving_average',
-                   'params' : {'period' : 5,
-                               'featureName' : 'ma_5',
-                               'shift' : 5}}
+        # tv_ma25 = {'featureKey' : 'tv_ma25',
+        #            'featureId' : 'moving_average',
+        #            'params' : {'period' : 25,
+        #                        'featureName' : 'ma_5',
+        #                        'shift' : 10}}
+        # tv_ma5 = {'featureKey' : 'tv_ma5',
+        #            'featureId' : 'moving_average',
+        #            'params' : {'period' : 5,
+        #                        'featureName' : 'ma_5',
+        #                        'shift' : 5}}
+        Y = {'featureKey' : 'Y',
+             'featureId' : '',
+             'params' : {}}
 
-        return {INSTRUMENT_TYPE_STOCK : [tv_ma5, tv_ma25]}
+        return {INSTRUMENT_TYPE_STOCK : [Y]}
 
     def getFeatureSelectionConfigDicts(self):
         corr = {'featureSelectionKey': 'corr',
@@ -218,10 +123,10 @@ class ModelLearningSystemParamters(object):
 
         genericSelect = {'featureSelectionKey' : 'gus',
                          'featureSelectionId' : 'generic_univariate_select',
-                         'params' : {'scoreFunction' : 'f_regression',
+                         'params' : {'scoreFunction' : 'f_classif',
                                      'mode' : 'k_best',
-                                     'modeParam' : 3}}
-        return {INSTRUMENT_TYPE_STOCK : [corr, genericSelect]}
+                                     'modeParam' : 30}}
+        return {INSTRUMENT_TYPE_STOCK : [genericSelect]}
 
     def getFeatureTransformationConfigDicts(self):
         stdScaler = {'featureTransformKey': 'stdScaler',
@@ -232,17 +137,17 @@ class ModelLearningSystemParamters(object):
                         'featureTransformId' : 'minmax_transform',
                         'params' : {'low' : -1,
                                     'high' : 1}}
-        return {INSTRUMENT_TYPE_STOCK : [stdScaler, minmaxScaler]}
+        return {INSTRUMENT_TYPE_STOCK : [stdScaler]}
 
     def getModelConfigDicts(self):
-        model1 = {'modelKey': 'model1',
+        regression_model = {'modelKey': 'linear_regression',
                      'modelId' : 'linear_regression',
                      'params' : {}}
 
-        model2 = {'modelKey': 'model2',
+        classification_model = {'modelKey': 'logistic_regression',
                      'modelId' : 'logistic_regression',
                      'params' : {}}
-        return {INSTRUMENT_TYPE_STOCK : [model1]}
+        return {INSTRUMENT_TYPE_STOCK : [classification_model]}
 
     def getCustomFeatures(self):
         return {}

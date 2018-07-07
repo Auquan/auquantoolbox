@@ -13,7 +13,7 @@ class TargetVariableManager(object):
         ** 2nd format is useful for calculating target variables efficiently when several models are being trained simulataneoulsy
     * Size of calculated target variables can be less than or equal to the size of instrumentData
     """
-    def __init__(self, systemParams, instrumentIds=None, targetVariableFileName=None, targetVariablePath=None, chunkSize=None):
+    def __init__(self, systemParams, instrumentIds=None, targetVariableFileName=None, targetVariablePath=None, chunkSize=None, dateRange=None):
         self.systemParams = systemParams
         self.__targetVariablePath = targetVariablePath
         self.__chunkSize = chunkSize
@@ -22,7 +22,7 @@ class TargetVariableManager(object):
         self.__lookBackInstrumentData = None
         targetVariableConfigs = systemParams.getTargetVariableConfigsForInstrumentType(INSTRUMENT_TYPE_STOCK)
         targetVariableKeys = map(lambda x: x.getFeatureKey(), targetVariableConfigs)
-        self.readTargetVariables(targetVariableFileName, targetVariableKeys, instrumentIds)
+        self.readTargetVariables(targetVariableFileName, targetVariableKeys, instrumentIds, dateRange)
         self.__leftoverChunk = {key : None for key in targetVariableKeys}
 
     def getFeatureDf(self, featureKey):
@@ -52,39 +52,72 @@ class TargetVariableManager(object):
         maxShift = None if maxShift == 0 else maxShift
         return maxShift, maxPeriod
 
-    def readTargetVariables(self, fileNames, targetVariableKeys=None, instrumentIds=None):
+    def getIndexColumnName(self, fileName):
+        return pd.read_csv(fileName, nrows=1).columns.tolist()[0]
+
+    def readTargetVariables(self, fileNames, targetVariableKeys=None, instrumentIds=None, dateRange=None):
         if isinstance(fileNames, list):
             for fileName in fileNames:
                 key = os.path.basename(os.splitext(fileName))
                 if key not in targetVariableKeys:
                     continue
-                # NOTE: This kind of Target Variable must be: (timestamps x instrumentIds) for a targetVariableKey
+                indexColumn = self.getIndexColumnName(fileName)
+                usecols = instrumentIds if instrumentIds is None else [indexColumn] + instrumentIds
+                # NOTE: This kind of Target Variable must be: [timestamps x instrumentIds] for a targetVariableKey
                 self.__targetVariables[key] = pd.read_csv(fileName, index_col=0, parse_dates=True, dtype=float,
-                                                          usecols=instrumentIds, chunksize=self.__chunkSize)
+                                                          usecols=usecols, chunksize=self.__chunkSize)
+                self.__targetVariables[key] = self.filterTargetVariablesByDates(self.__targetVariables[key], dateRange)
         elif isinstance(fileNames, str):
-            # NOTE: This kind of Target Variable must be: (timestamps x targetVariableKey) for a instrument
+            indexColumn = self.getIndexColumnName(fileNames)
+            usecols = targetVariableKeys if targetVariableKeys is None else [indexColumn] + targetVariableKeys
+            # NOTE: This kind of Target Variable must be: [timestamps x targetVariableKey(s)] for a instrument
             self.__targetVariables = pd.read_csv(fileNames, index_col=0, parse_dates=True, dtype=float,
-                                                 usecols=targetVariableKeys, chunksize=self.__chunkSize)
+                                                 usecols=usecols, chunksize=self.__chunkSize)
+            self.__targetVariables = self.filterTargetVariablesByDates(self.__targetVariables, dateRange)
         else:
             self.__targetVariables = {key : None for key in targetVariableKeys}
+
+    def filterTargetVariablesByDates(self, data, dateRange):
+        if dateRange is None:
+            return data
+        elif type(dateRange) is list and type(dateRange[0]) is tuple:
+            frames = []
+            for dr in dateRange:
+                frames.append(data[dr[0]:dr[1]])
+            return pd.concat(frames)
+        else:
+            return data[dateRange[0]:dateRange[1]]
 
     def writeTargetVariables(self, instrumentId=None):
         self.__targetVariablePath = '.' if self.__targetVariablePath is None else self.__targetVariablePath
         if isinstance(self.__targetVariables, dict):
-            for key in self.__targetVariables:
-                fileName = os.path.join(self.__targetVariablePath, key + '.csv')
-                if self.__targetVariables[key] is None:
-                    continue
+            if instrumentId is None:
+                # save targetVariables with filename as targetVariableKey and data in format (timeStamps x instrumentIds)
+                for key in self.__targetVariables:
+                    fileName = os.path.join(self.__targetVariablePath, key + '.csv')
+                    if self.__targetVariables[key] is None:
+                        continue
+                    if self.__firstChunk:
+                        self.__targetVariables[key].to_csv(fileName, mode='w', float_format=FLOAT_FORMAT)
+                    else:
+                        self.__targetVariables[key].to_csv(fileName, mode='a', header=False, float_format=FLOAT_FORMAT)
+            else:
+                # save targetVariables with filename as instrumentId and data in format (timeStamps x targetVariableKeys)
+                # BUG: This part of code may not work when there is only one instrumentId in self.__targetVariables dataframes
+                # TODO: Check and fix it
+                targetVariableDf = pd.concat([self.__targetVariables[key][instrumentId] for key in self.__targetVariables], axis=1)
+                targetVariableDf.columns = self.__targetVariables.keys()
+                fileName = os.path.join(self.__targetVariablePath, instrumentId + '.csv')
                 if self.__firstChunk:
-                    self.__targetVariables[key].to_csv(fileName, mode='w')
+                    self.__targetVariables.to_csv(fileName, mode='w', float_format=FLOAT_FORMAT)
                 else:
-                    self.__targetVariables[key].to_csv(fileName, mode='a', header=False)
+                    self.__targetVariables.to_csv(fileName, mode='a', header=False, float_format=FLOAT_FORMAT)
         else:
             fileName = os.path.join(self.__targetVariablePath, instrumentId + '.csv')
             if self.__firstChunk:
-                self.__targetVariables.to_csv(fileName, mode='w')
+                self.__targetVariables.to_csv(fileName, mode='w', float_format=FLOAT_FORMAT)
             else:
-                self.__targetVariables.to_csv(fileName, mode='a', header=False)
+                self.__targetVariables.to_csv(fileName, mode='a', header=False, float_format=FLOAT_FORMAT)
 
     def updateInstrumentData(self, instrumentData, targetVariableConfigs):
         if self.__chunkSize is None:
@@ -119,6 +152,7 @@ class TargetVariableManager(object):
                                                                                         featureParams=targetVariableParams,
                                                                                         featureKey=targetVariableKey,
                                                                                         featureManager=self)
+            print(self.__targetVariables)
             shift = targetVariableParams.get('shift', 0)
             if shift > 0:
                 self.shiftTargetVariable(targetVariableKey, shift, timeFrequency)

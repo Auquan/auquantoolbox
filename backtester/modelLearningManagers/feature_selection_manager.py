@@ -39,9 +39,13 @@ class FeatureSelectionManager(object):
     def pruneFeatures(self, instrumentData, targetVariables, featureSelectionConfigs=None, aggregationMethod='intersect'):
         if featureSelectionConfigs is None:
             featureSelectionConfigs = self.systemParams.getFeatureSelectionConfigsForInstrumentType(INSTRUMENT_TYPE_STOCK)
-
         featureKeys = self.getKeysFromData(instrumentData)
         targetVariableKeys = self.getKeysFromData(targetVariables)
+
+        if len(featureSelectionConfigs) == 0:
+            self.__selectedFeatures = {key : instrumentData.columns.tolist() for key in targetVariableKeys}
+            return
+
         self.__instrumentData = instrumentData
         self.__targetVariables = targetVariables
         self.__selectedFeatures = {key : [] for key in targetVariableKeys}
@@ -60,6 +64,6 @@ class FeatureSelectionManager(object):
                 elif aggregationMethod == 'union':
                     self.__selectedFeatures[targetVariableKey] = list(set(selectedFeatures).union(self.__selectedFeatures[targetVariableKey]))
                 elif aggregationMethod == 'intersect':
-                        self.__selectedFeatures[targetVariableKey] = list(set(selectedFeatures).intersection(self.__selectedFeatures[targetVariableKey]))
+                    self.__selectedFeatures[targetVariableKey] = list(set(selectedFeatures).intersection(self.__selectedFeatures[targetVariableKey]))
                 else:
                     raise ValueError

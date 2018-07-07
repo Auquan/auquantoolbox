@@ -1,4 +1,5 @@
 import pandas as pd
+from collections import OrderedDict
 try:        # Python 3.x
     import _pickle as pickle
 except ImportError:
@@ -19,7 +20,7 @@ class FeatureTransformationManager(object):
     def __init__(self, systemParams, transformerFileName=''):
         self.systemParams = systemParams
         self.__instrumentData = None
-        self.__transformers = {}
+        self.__transformers = OrderedDict()
         if transformerFileName == '':
             self.transformFeatures = self._transformFeaturesUsingConfigs
         else:
@@ -44,6 +45,9 @@ class FeatureTransformationManager(object):
         self.__transformers = transformers
         self.transformFeatures = self._transformFeaturesUsingFile
 
+    def getTransformers(self):
+        return self.__transformers
+
     def _transformFeaturesUsingFile(self, instrumentData, transformationConfigs=None):
         self.__instrumentData = instrumentData
         if transformationConfigs is None:
@@ -65,3 +69,10 @@ class FeatureTransformationManager(object):
             transformationCls = transformationConfig.getClassForFeatureTransformationId(transformationId)
             self.__transformers[transformationKey] = transformationCls(transformationParams)
             self.__instrumentData = self.__transformers[transformationKey].transform(self)
+
+    def transformFeaturesUsingTransformers(self, instrumentData, transformers):
+        self.__instrumentData = instrumentData
+        # NOTE: Transformation order is same as of the order of keys in this dict
+        # NOTE: Use OrderedDict (for Python2) to preserve order
+        for transformerKey in transformers:
+            self.__instrumentData = transformers[transformerKey].transform(self)

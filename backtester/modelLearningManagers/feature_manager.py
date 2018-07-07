@@ -10,19 +10,21 @@ from backtester.logger import *
 class FeatureManager(object):
     """
     """
-    def __init__(self, systemParams, dataParser, instrumentIds, chunkSize, fingerprintFile='stock_data.json'):
+    def __init__(self, systemParams, dataParser, instrumentIds, chunkSize, dropFeatures=None, featureFolderName='features', fingerprintFile='stock_data.json'):
         self.systemParams = systemParams
         self.__dataParser = dataParser
         self.__chunkSize = chunkSize
         self.__fingerprintFile = fingerprintFile
-        self.__bookDataFeatures = dataParser.getBookDataFeatures()
+        if dropFeatures is not None:
+            self.__bookDataFeatures = [f for f in dataParser.getBookDataFeatures() if f not in dropFeatures]
         instrumentFeatureConfigs = systemParams.getFeatureConfigsForInstrumentType(INSTRUMENT_TYPE_STOCK)
         instrumentFeatureKeys = map(lambda x: x.getFeatureKey(), instrumentFeatureConfigs)
         featureKeys = list(chain(self.__bookDataFeatures, instrumentFeatureKeys))
         maxPeriod = FeatureManager.parseFeatureConfigs(instrumentFeatureConfigs)
         # NOTE: Lookback size is (maxPeriod - 1)
+        lookbackSize = None if maxPeriod is None else maxPeriod - 1
         self.__instrumentDataManger = InstrumentDataManager(dataParser, featureKeys, instrumentIds,
-                                                            featureFolderName='features', lookbackSize=(maxPeriod-1))
+                                                            featureFolderName=featureFolderName, lookbackSize=lookbackSize)
         self.__totalIter = 0
         self.__perfDict = {}
         for featureKey in featureKeys:
@@ -45,6 +47,8 @@ class FeatureManager(object):
             self.__instrumentDataManger.addFeatureValueForAllInstruments(bookDataFeature, featureDf)
 
         # NOTE: copy in pd.concat is set to True. Check what happens when it is False
+
+        # TODO: efficiently copy bookData features to 'features' folder when featureConfigs is an empty list
 
         featureConfigs = self.systemParams.getFeatureConfigsForInstrumentType(INSTRUMENT_TYPE_STOCK)
         featureGenerator = self.__instrumentDataManger.getSimulator(self.__chunkSize)

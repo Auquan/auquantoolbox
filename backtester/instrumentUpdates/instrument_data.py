@@ -105,7 +105,7 @@ class InstrumentData(object):
             return []
         if (dateRange is []) or (dateRange is ()):
             return self.__bookData.index.tolist()
-        elif type(dateRange) is list:
+        elif type(dateRange) is list and type(dateRange[0]) is tuple:
             frames = []
             for dr in dateRange:
                 frames.append(self.__bookData[dr[0]:dr[1]])
@@ -120,7 +120,6 @@ class InstrumentData(object):
             return
         timeUpdateSeries = pd.Series(timeUpdates)
         if not timeUpdateSeries.isin(self.__bookData.index).all():
-            print("INSIDE")
             df = pd.DataFrame(index=timeUpdates, columns=self.__bookData.columns)
             df.at[self.__bookData.index] = self.__bookData.copy()
             df.fillna(method=method, inplace=True)

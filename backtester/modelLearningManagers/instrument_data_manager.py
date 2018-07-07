@@ -5,6 +5,7 @@ import json
 from dateutil import parser
 from datetime import timedelta
 from backtester.logger import *
+from backtester.constants import FLOAT_FORMAT
 from backtester.instrumentUpdates.instrument_data import InstrumentData
 
 class InstrumentDataManager(object):
@@ -157,25 +158,25 @@ class InstrumentDataManager(object):
             elif prepend is False:  # append into the existing file
                 self.appendInstrumentData(instrumentId, fileName, self.__instrumentDataByInstrument[instrumentId])
             elif os.path.isfile(fileName) and (not self.__firstChunk):  # append into the new file
-                self.__instrumentDataByInstrument[instrumentId].to_csv(fileName, mode='a', header=False)
+                self.__instrumentDataByInstrument[instrumentId].to_csv(fileName, mode='a', header=False, float_format=FLOAT_FORMAT)
             else:                   # write into the new file
-                self.__instrumentDataByInstrument[instrumentId].to_csv(fileName, mode='w')
+                self.__instrumentDataByInstrument[instrumentId].to_csv(fileName, mode='w', float_format=FLOAT_FORMAT)
         self.__firstChunk = False
 
     def appendInstrumentData(self, instrumentId, fileName, data):
         existingColumns = pd.read_csv(fileName, index_col=0, nrows=1).columns.tolist()
         if self.__lookbackSize is None:
-            data.reindex(columns=existingColumns).to_csv(fileName, mode='a', header=False)
+            data.reindex(columns=existingColumns).to_csv(fileName, mode='a', header=False, float_format=FLOAT_FORMAT)
         else:
-            data.iloc[self.__lookbackSize:].reindex(columns=existingColumns).to_csv(fileName, mode='a', header=False)
+            data.iloc[self.__lookbackSize:].reindex(columns=existingColumns).to_csv(fileName, mode='a', header=False, float_format=FLOAT_FORMAT)
 
     def prependInstrumentData(self, instrumentId, fileName, data):
         name, ext = os.path.splitext(fileName)
         tempFileName =  name + '.temp'
         if self.__firstChunk:
-            data.to_csv(tempFileName, mode='w')
+            data.to_csv(tempFileName, mode='w', float_format=FLOAT_FORMAT)
         else:
-            data.to_csv(tempFileName, mode='a', header=False)
+            data.to_csv(tempFileName, mode='a', header=False, float_format=FLOAT_FORMAT)
 
     def appendExistingInstrumentData(self, chunkSize=None):
         NextOfEndDateStr = (parser.parse(self.__endDateStr) + timedelta(days=1)).strftime('%Y%m%d')
@@ -189,7 +190,7 @@ class InstrumentDataManager(object):
                 newColumns = pd.read_csv(fileName, index_col=0, nrows=1).columns.tolist()
             existingData = InstrumentData(instrumentId, instrumentId, fileName, chunkSize)
             for i, chunk in existingData.getBookDataChunk():
-                chunk[NextOfEndDateStr:].reindex(columns=newColumns).to_csv(tempFileName, mode='a', header=False)
+                chunk[NextOfEndDateStr:].reindex(columns=newColumns).to_csv(tempFileName, mode='a', header=False, float_format=FLOAT_FORMAT)
             os.remove(fileName)
             os.rename(tempFileName, fileName)
 

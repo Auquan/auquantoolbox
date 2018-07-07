@@ -20,6 +20,7 @@ class TrainingModelManager(object):
         self._features = None
         self._targetVariable = None
         self._trainingModel = {}
+        self._modelKeyPool = 1      # NOTE: Vulnerable to overflow :P
 
     def getFeaures(self):
         return self._features
@@ -35,6 +36,19 @@ class TrainingModelManager(object):
 
     def getModel(self):
         return self._trainingModel
+
+    # add or update the model in the _trainingModel dict
+    def addModel(self, model, modelKey=None):
+        if modelKey is None:
+            modelKey = str(self._modelKeyPool)
+            self._modelKeyPool += 1
+        self._trainingModel.update({modelKey : model})
+        return modelKey
+
+    # add or update the models in the _trainingModel dict
+    def addModels(self, models, modelKey=None):
+        for modelKey in models:
+            self.addModel(models[modelKey], modelKey)
 
     def getModelByConfig(self, modelConfig):
         return self._trainingModel[modelConfig.getKey()]
@@ -62,7 +76,9 @@ class TrainingModelManager(object):
         return timestamps
 
     def modelConfigWrapper(func):
-        def wrapper(self, *args, modelConfigs=None):
+        def wrapper(self, *args, **kwargs):
+            modelConfigs = kwargs.get('modelConfigs', None)
+            modelConfigs = kwargs.get('modelConfig', None) if modelConfigs is None else modelConfigs
             outputDict = {}
             if modelConfigs is None:
                 modelConfigs = self.systemParams.getModelConfigsForInstrumentType(INSTRUMENT_TYPE_STOCK)
