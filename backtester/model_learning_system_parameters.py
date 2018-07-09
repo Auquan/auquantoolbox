@@ -47,19 +47,19 @@ class ModelLearningSystemParamters(object):
         for instrumentType in ModelConfigDicts:
             self.__modelConfigs[instrumentType] = list(map(lambda x: ModelConfig(x), ModelConfigDicts[instrumentType]))
 
+    def getInstrumentIds(self):
+        return self.instrumentIds
+
     def getTrainingDataSourceParams(self):
-        startDateStr = '2010/06/02'
-        endDateStr = '2012/02/07'
-        return dict( dataSourceName='CsvDataSource',
+        # raise NotImplementedError
+        startDateStr = '2013/02/02'
+        endDateStr = '2015/02/02'
+        return dict( dataSourceName='YahooStockDataSource',
                      featureFolderName='trainingFeatures',
-                     dropFeatures=['Y'],
-                     ## Now Datasource parameters ##
-                     cachedFolderName='historicalData/',
-                     dataSetId='QQ3Data',
+                     dropFeatures=None,
+                     cachedFolderName='yahooData/',
+                     dataSetId='testTrading',
                      instrumentIds=self.instrumentIds,
-                     downloadUrl='https://raw.githubusercontent.com/Auquan/qq3Data/master',
-                     timeKey='datetime',
-                     timeStringFormat='%Y-%m-%d %H:%M:%S',
                      startDateStr=startDateStr,
                      endDateStr=endDateStr,
                      liveUpdates=False)
@@ -68,49 +68,43 @@ class ModelLearningSystemParamters(object):
         raise NotImplementedError
 
     def getTestDataSourceParams(self):
-        startDateStr = '2012/02/08'
-        endDateStr = '2013/02/07'
-        return dict( dataSourceName='CsvDataSource',
+        # raise NotImplementedError
+        startDateStr = '2015/02/03'
+        endDateStr = '2017/02/02'
+        return dict( dataSourceName='YahooStockDataSource',
                      featureFolderName='testFeatures',
-                     dropFeatures=['Y'],
-                     ## Now Datasource parameters ##
-                     cachedFolderName='historicalData/',
-                     dataSetId='QQ3Data',
+                     dropFeatures=None,
+                     cachedFolderName='yahooData/',
+                     dataSetId='testTrading',
                      instrumentIds=self.instrumentIds,
-                     downloadUrl='https://raw.githubusercontent.com/Auquan/qq3Data/master',
-                     timeKey='datetime',
-                     timeStringFormat='%Y-%m-%d %H:%M:%S',
                      startDateStr=startDateStr,
                      endDateStr=endDateStr,
                      liveUpdates=False)
 
-    def getInstrumentIds(self):
-        return self.instrumentIds
-
     def getInstrumentFeatureConfigDicts(self):
-        # ma2Dict = {'featureKey': 'ma_5',
-        #            'featureId': 'moving_average',
-        #            'params': {'period': 5,
-        #                       'featureName': 'Open'}}
+        ma2Dict = {'featureKey': 'ma_5',
+                   'featureId': 'moving_average',
+                   'params': {'period': 5,
+                              'featureName': 'Open'}}
 
-        return {INSTRUMENT_TYPE_STOCK : []}
+        return {INSTRUMENT_TYPE_STOCK : [ma2Dict]}
 
     def getTargetVariableConfigDicts(self):
-        # tv_ma25 = {'featureKey' : 'tv_ma25',
-        #            'featureId' : 'moving_average',
-        #            'params' : {'period' : 25,
-        #                        'featureName' : 'ma_5',
-        #                        'shift' : 10}}
-        # tv_ma5 = {'featureKey' : 'tv_ma5',
-        #            'featureId' : 'moving_average',
-        #            'params' : {'period' : 5,
-        #                        'featureName' : 'ma_5',
-        #                        'shift' : 5}}
+        tv_ma25 = {'featureKey' : 'tv_ma25',
+                   'featureId' : 'moving_average',
+                   'params' : {'period' : 25,
+                               'featureName' : 'ma_5',
+                               'shift' : 10}}
+        tv_ma5 = {'featureKey' : 'tv_ma5',
+                   'featureId' : 'moving_average',
+                   'params' : {'period' : 5,
+                               'featureName' : 'ma_5',
+                               'shift' : 5}}
         Y = {'featureKey' : 'Y',
              'featureId' : '',
              'params' : {}}
 
-        return {INSTRUMENT_TYPE_STOCK : [Y]}
+        return {INSTRUMENT_TYPE_STOCK : [tv_ma25, tv_ma5]}
 
     def getFeatureSelectionConfigDicts(self):
         corr = {'featureSelectionKey': 'corr',
@@ -126,7 +120,7 @@ class ModelLearningSystemParamters(object):
                          'params' : {'scoreFunction' : 'f_classif',
                                      'mode' : 'k_best',
                                      'modeParam' : 30}}
-        return {INSTRUMENT_TYPE_STOCK : [genericSelect]}
+        return {INSTRUMENT_TYPE_STOCK : [corr]}
 
     def getFeatureTransformationConfigDicts(self):
         stdScaler = {'featureTransformKey': 'stdScaler',
@@ -147,7 +141,7 @@ class ModelLearningSystemParamters(object):
         classification_model = {'modelKey': 'logistic_regression',
                      'modelId' : 'logistic_regression',
                      'params' : {}}
-        return {INSTRUMENT_TYPE_STOCK : [classification_model]}
+        return {INSTRUMENT_TYPE_STOCK : [regression_model]}
 
     def getCustomFeatures(self):
         return {}
