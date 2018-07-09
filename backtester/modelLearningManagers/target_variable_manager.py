@@ -152,7 +152,6 @@ class TargetVariableManager(object):
                                                                                         featureParams=targetVariableParams,
                                                                                         featureKey=targetVariableKey,
                                                                                         featureManager=self)
-            print(self.__targetVariables)
             shift = targetVariableParams.get('shift', 0)
             if shift > 0:
                 self.shiftTargetVariable(targetVariableKey, shift, timeFrequency)

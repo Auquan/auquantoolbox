@@ -202,13 +202,13 @@ class ModelLearningSystem:
     def getFeatureSet(self):
         return self.mlsParams.features
 
-    def findBestModel(self, instrumentId, useTimeFrequency=True):
+    def findBestModel(self, instrumentId, useTargetVaribleFromFile=False, useTimeFrequency=True):
         # TODO: Some function arguments are hardcoded. Make it changeable
         instrumentData = self.getTrainingInstrurmentData(instrumentId)
         targetVariableConfigs = self.mlsParams.getTargetVariableConfigsForInstrumentType(INSTRUMENT_TYPE_STOCK)
         modelConfigs = self.mlsParams.getModelConfigsForInstrumentType(INSTRUMENT_TYPE_STOCK)
         self.computeTargetVariables(instrumentData, instrumentId, targetVariableConfigs,
-                                    useFile=True, dataParams=self.mlsParams.getTrainingDataSourceParams(),
+                                    useFile=useTargetVaribleFromFile, dataParams=self.mlsParams.getTrainingDataSourceParams(),
                                     useTimeFrequency=useTimeFrequency)
         targetVariablesData = self.getTargetVariables(targetVariableConfigs)
         # print(targetVariablesData)
@@ -232,10 +232,10 @@ class ModelLearningSystem:
 
             # print(self.__trainingModelManager.predict(transformedInstrumentData))
 
-    def getFinalMetrics(self, instrumentId, dataHandler, dataParamsHandler, targetVariableConfigs, modelConfigDict, useTimeFrequency=True):
+    def getFinalMetrics(self, instrumentId, dataHandler, dataParamsHandler, targetVariableConfigs, modelConfigDict, useTargetVaribleFromFile=False, useTimeFrequency=True):
         instrumentData = dataHandler(instrumentId)
         self.computeTargetVariables(instrumentData, instrumentId, targetVariableConfigs,
-                                    useFile=True, dataParams=dataParamsHandler(),
+                                    useFile=useTargetVaribleFromFile, dataParams=dataParamsHandler(),
                                     useTimeFrequency=useTimeFrequency)
         targetVariablesData = self.getTargetVariables(targetVariableConfigs)
         # print(targetVariablesData)
@@ -259,24 +259,26 @@ class ModelLearningSystem:
                 print("=================================================================")
 
     def runModels(self):
+        # TODO: Find a better way to infer whether to use target variable from file or not
+        useTargetVaribleFromFile = True
         useTimeFrequency = True
         targetVariableConfigs = self.mlsParams.getTargetVariableConfigsForInstrumentType(INSTRUMENT_TYPE_STOCK)
         modelConfigs = self.mlsParams.getModelConfigsForInstrumentType(INSTRUMENT_TYPE_STOCK)
         modelConfigDict = {config.getKey() : config for config in modelConfigs}
         for instrumentId in self.__instrumentIds:
             print("STOCK:", instrumentId)
-            self.findBestModel(instrumentId, useTimeFrequency=useTimeFrequency)
+            self.findBestModel(instrumentId, useTargetVaribleFromFile=useTargetVaribleFromFile, useTimeFrequency=useTimeFrequency)
             # print(self.__modelDict)
             print("Metrics on Training Data:")
             self.getFinalMetrics(instrumentId, self.getTrainingInstrurmentData, self.mlsParams.getTrainingDataSourceParams,
-                                targetVariableConfigs, modelConfigDict, useTimeFrequency=useTimeFrequency)
+                                targetVariableConfigs, modelConfigDict, useTargetVaribleFromFile=useTargetVaribleFromFile, useTimeFrequency=useTimeFrequency)
             print("Metrics on Test Data:")
             self.getFinalMetrics(instrumentId, self.getTestInstrurmentData, self.mlsParams.getTestDataSourceParams,
-                                targetVariableConfigs, modelConfigDict, useTimeFrequency=useTimeFrequency)
+                                targetVariableConfigs, modelConfigDict, useTargetVaribleFromFile=useTargetVaribleFromFile, useTimeFrequency=useTimeFrequency)
 
 if __name__ == '__main__':
     instrumentIds = ['SIZ', 'MLQ']
-    chunkSize = 100
+    chunkSize = 1000
     mlsParams = ModelLearningSystemParamters(instrumentIds, chunkSize=chunkSize)
     # YahooStockDataSource
     # startDateStr = '2010/06/02'
