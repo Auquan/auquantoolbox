@@ -51,7 +51,7 @@ class ModelLearningSystemParamters(object):
         endDateStr = '2015/02/02'
         return dict( dataSourceName='YahooStockDataSource',
                      featureFolderName='trainingFeatures',
-                     dropFeatures=['Volume'],
+                     dropFeatures=None,
                      cachedFolderName='yahooData/',
                      dataSetId='testTrading',
                      instrumentIds=self.instrumentIds,
@@ -68,7 +68,7 @@ class ModelLearningSystemParamters(object):
         endDateStr = '2017/02/02'
         return dict( dataSourceName='YahooStockDataSource',
                      featureFolderName='testFeatures',
-                     dropFeatures=['Volume'],
+                     dropFeatures=None,
                      cachedFolderName='yahooData/',
                      dataSetId='testTrading',
                      instrumentIds=self.instrumentIds,
