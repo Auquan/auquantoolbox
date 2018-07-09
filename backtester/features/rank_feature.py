@@ -1,4 +1,5 @@
 from backtester.features.feature import Feature
+import pandas as pd
 
 
 class RankFeature(Feature):

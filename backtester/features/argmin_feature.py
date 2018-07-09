@@ -1,5 +1,6 @@
 from backtester.features.feature import Feature
 import pandas as pd
+import numpy as np
 
 
 class ArgMinFeature(Feature):
