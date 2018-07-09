@@ -260,7 +260,7 @@ class ModelLearningSystem:
 
     def runModels(self):
         # TODO: Find a better way to infer whether to use target variable from file or not
-        useTargetVaribleFromFile = True
+        useTargetVaribleFromFile = False
         useTimeFrequency = True
         targetVariableConfigs = self.mlsParams.getTargetVariableConfigsForInstrumentType(INSTRUMENT_TYPE_STOCK)
         modelConfigs = self.mlsParams.getModelConfigsForInstrumentType(INSTRUMENT_TYPE_STOCK)
@@ -277,7 +277,7 @@ class ModelLearningSystem:
                                 targetVariableConfigs, modelConfigDict, useTargetVaribleFromFile=useTargetVaribleFromFile, useTimeFrequency=useTimeFrequency)
 
 if __name__ == '__main__':
-    instrumentIds = ['SIZ', 'MLQ']
+    instrumentIds = ['AAPL', 'IBM']
     chunkSize = 1000
     mlsParams = ModelLearningSystemParamters(instrumentIds, chunkSize=chunkSize)
     # YahooStockDataSource

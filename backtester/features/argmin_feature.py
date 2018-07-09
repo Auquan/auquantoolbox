@@ -27,3 +27,12 @@ class ArgMinFeature(Feature):
         if len(data) < 1:
             return 0
         return data[-featureParams['period']:].idxmin()
+
+    @classmethod
+    def computeForInstrumentData(cls, updateNum, featureParams, featureKey, featureManager):
+        data = featureManager.getFeatureDf(featureParams['featureName'])
+        if data is None:
+            logWarn("[%d] instrument data for \"%s\" is not available, can't calculate \"%s\"" % (updateNum, featureParams['featureName'], featureKey))
+            return None
+        argMin = data.rolling(window=featureParams['period'], min_periods=1).apply(np.argmin)
+        return argMin

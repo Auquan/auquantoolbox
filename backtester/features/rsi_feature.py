@@ -38,3 +38,20 @@ class RSIFeature(Feature):
         rsi = 0 if ((avg_downside == 0) & (avg_upside == 0)) else rsi
 
         return rsi
+
+    @classmethod
+    def computeForInstrumentData(cls, updateNum, featureParams, featureKey, featureManager):
+        data = featureManager.getFeatureDf(featureParams['featureName'])
+        if data is None:
+            logWarn("[%d] instrument data for \"%s\" is not available, can't calculate \"%s\"" % (updateNum, featureParams['featureName'], featureKey))
+            return None
+        data_upside = data.sub(data.shift(1), fill_value=0)
+        data_downside = data_upside.copy()
+        data_downside[data_upside > 0] = 0
+        data_upside[data_upside < 0] = 0
+        avg_upside=data_upside.rolling(window=featureParams['period'], min_periods=1).mean()
+        avg_downside=-data_downside.rolling(window=featureParams['period'], min_periods=1).mean()
+        rsi = 100 - (100 * avg_downside / (avg_downside + avg_upside))
+        rsi[(avg_downside == 0)] = 100
+        rsi[(avg_downside == 0) & (avg_upside == 0)] = 0
+        return rsi

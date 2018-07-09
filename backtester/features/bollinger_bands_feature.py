@@ -14,3 +14,8 @@ class BollingerBandsFeature(Feature):
     def computeForMarket(cls, updateNum, time, featureParams, featureKey, currentMarketFeatures, instrumentManager):
         raise NotImplementedError
         return 'Please use bollinger_bands_lower and bollinger_bands_upper'
+
+    @classmethod
+    def computeForInstrumentData(cls, updateNum, featureParams, featureKey, featureManager):
+        raise NotImplementedError
+        return 'Please use bollinger_bands_lower and bollinger_bands_upper'

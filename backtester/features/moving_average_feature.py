@@ -29,5 +29,5 @@ class MovingAverageFeature(Feature):
         if data is None:
             logWarn("[%d] instrument data for \"%s\" is not available, can't calculate \"%s\"" % (updateNum, featureParams['featureName'], featureKey))
             return None
-        avg = data.rolling(window=featureParams['period'], min_periods=1).mean()
-        return avg
+        movingAvg = data.rolling(window=featureParams['period'], min_periods=1).mean()
+        return movingAvg
