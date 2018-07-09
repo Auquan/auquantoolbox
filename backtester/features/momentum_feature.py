@@ -28,3 +28,16 @@ class MomentumFeature(Feature):
         else:
             m = 0
         return m
+
+    @classmethod
+    def computeForInstrumentData(cls, updateNum, featureParams, featureKey, featureManager):
+        data = featureManager.getFeatureDf(featureParams['featureName'])
+        if data is None:
+            logWarn("[%d] instrument data for \"%s\" is not available, can't calculate \"%s\"" % (updateNum, featureParams['featureName'], featureKey))
+            return None
+        mid = data.shift(featureParams['period']).fillna(0.00)
+        if len(data.index) > featureParams['period']:
+            momentum=((data/mid)-1)*100
+        else:
+            momentum=0
+        return momentum
