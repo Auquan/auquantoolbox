@@ -33,5 +33,5 @@ class DirectionFeature(Feature):
             logWarn("[%d] instrument data for \"%s\" is not available, can't calculate \"%s\"" % (updateNum, featureParams['featureName'], featureKey))
             return None
         data1 = data.shift(featureParams['period']).fillna(0.00)
-        direction = data1-data
+        direction = np.sign(data1-data)
         return direction

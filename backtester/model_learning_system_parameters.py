@@ -87,7 +87,119 @@ class ModelLearningSystemParamters(object):
                    'params': {'period': 5,
                               'featureName': 'Open'}}
 
-        return {INSTRUMENT_TYPE_STOCK : [ma2Dict]}
+        argMax = {'featureKey': 'argmax',
+                   'featureId': 'argmax',
+                   'params': {'period': 5,
+                              'featureName': 'Open'}}
+
+        argMin = {'featureKey': 'argmin',
+                   'featureId': 'argmin',
+                   'params': {'period': 5,
+                              'featureName': 'Open'}}
+
+        bollinger_Lower = {'featureKey': 'bblf',
+                     'featureId': 'bollinger_bands_lower',
+                     'params': {'period': 5,
+                                'featureName': 'Open'}}
+
+        bollinger_Upper = {'featureKey': 'bblu',
+                     'featureId': 'bollinger_bands_upper',
+                     'params': {'period': 5,
+                                'featureName': 'Open'}}
+
+        delay = {'featureKey': 'delay',
+                     'featureId': 'delay',
+                     'params': {'period': 5,
+                                'featureName': 'Open'}}
+
+        difference = {'featureKey': 'diff',
+                     'featureId': 'difference',
+                     'params': {'period': 5,
+                                'featureName': 'Open'}}
+
+        direction = {'featureKey': 'dirctn',
+                     'featureId': 'direction',
+                     'params': {'period': 5,
+                                'featureName': 'Open'}}
+
+        ema = {'featureKey': 'ema',
+                     'featureId': 'exponential_moving_average',
+                     'params': {'period': 5,
+                                'featureName': 'Open'}}
+
+        macd = {'featureKey': 'macd',
+                     'featureId': 'macd',
+                     'params': {'period1': 5,
+                                'period2': 3,
+                                'featureName': 'Open'}}
+
+        momentum = {'featureKey': 'momentum',
+                     'featureId': 'momentum',
+                     'params': {'period': 5,
+                                'featureName': 'Open'}}
+
+        mov_avg = {'featureKey': 'mov_avg',
+                     'featureId': 'moving_average',
+                     'params': {'period': 5,
+                                'featureName': 'Open'}}
+
+        mov_corr = {'featureKey': 'mov_corr',
+                     'featureId': 'moving_correlation',
+                     'params': {'period': 5,
+                                'featureName1': 'Open',
+                                'featureName2': 'High'}}
+
+        mmax = {'featureKey': 'mmax',
+                     'featureId': 'moving_max',
+                     'params': {'period': 5,
+                                'featureName': 'Open'}}
+
+        mmin = {'featureKey': 'mmin',
+                     'featureId': 'moving_min',
+                     'params': {'period': 5,
+                                'featureName': 'Open'}}
+
+        msdev = {'featureKey': 'msdev',
+                     'featureId': 'moving_sdev',
+                     'params': {'period': 5,
+                                'featureName': 'Open'}}
+
+        msum = {'featureKey': 'msum',
+                     'featureId': 'moving_sum',
+                     'params': {'period': 5,
+                                'featureName': 'Open'}}
+
+        rank = {'featureKey': 'rank',
+                     'featureId': 'rank',
+                     'params': {'period': 5,
+                                'featureName': 'Open'}}
+
+        ratio = {'featureKey': 'ratio',
+                     'featureId': 'ratio',
+                     'params': {'featureName1': 'High',
+                                'featureName2': 'Open'}}
+
+        rsi = {'featureKey': 'rsi',
+                     'featureId': 'rsi',
+                     'params': {'period': 5,
+                                'featureName': 'Open'}}
+
+        scale = {'featureKey': 'scale',
+                     'featureId': 'scale',
+                     'params': {'period': 5,
+                                'featureName': 'Open',
+                                'scale': 2}}
+
+        vwap = {'featureKey': 'vwap',
+                     'featureId': 'vwap',
+                     'params': {'askVolume': 'Open',
+                                'bidVolume': 'High',
+                                'askPrice': 'Low',
+                                'bidPrice': 'Close'}}
+
+        return {INSTRUMENT_TYPE_STOCK : [ma2Dict, argMax, argMin, bollinger_Lower, bollinger_Upper, delay,
+                                         difference, direction, ema, macd, momentum, mov_avg, mov_corr, mmax, mmin, msdev,
+                                         msum, rank, ratio, rsi, scale, vwap]}
 
     def getTargetVariableConfigDicts(self):
         tv_ma25 = {'featureKey' : 'tv_ma25',
