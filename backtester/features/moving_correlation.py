@@ -27,9 +27,16 @@ class MovingCorrelationFeature(Feature):
     def computeForInstrumentData(cls, updateNum, featureParams, featureKey, featureManager):
         data1= featureManager.getFeatureDf(featureParams['featureName1'])
         data2= featureManager.getFeatureDf(featureParams['featureName2'])
+<<<<<<< HEAD
         if (data1 is None) or (data2 is None):
             logWarn("[%d] instrument data for \"%s\" is not available, can't calculate \"%s\"" % (updateNum, featureParams['featureName1'], featureKey))
             return None
         movingCorrelation = data1.rolling(window=featureParams['period'], min_periods=1).corr(data2)
         movingCorrelation.fillna(0.0, inplace=True)
+=======
+        if data1 or data2 is None:
+            logWarn("[%d] instrument data for \"%s\" is not available, can't calculate \"%s\"" % (updateNum, featureParams['featureName'], featureKey))
+            return None
+        movingCorrelation = data1.rolling(window=featureParams['period']).corr(data2)
+>>>>>>> rebase with vn_training_model_manager
         return movingCorrelation

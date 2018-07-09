@@ -43,7 +43,11 @@ class RatioMarketFeature(Feature):
     def computeForInstrumentData(cls, updateNum, featureParams, featureKey, featureManager):
         data1= featureManager.getFeatureDf(featureParams['featureName1'])
         data2= featureManager.getFeatureDf(featureParams['featureName2'])
+<<<<<<< HEAD
         if (data1 is None) or (data2 is None):
+=======
+        if data1 or data2 is None:
+>>>>>>> rebase with vn_training_model_manager
             logWarn("[%d] instrument data for \"%s\" is not available, can't calculate \"%s\"" % (updateNum, featureParams['featureName'], featureKey))
             return None
         ratio = data1/data2

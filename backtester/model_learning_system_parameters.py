@@ -44,11 +44,14 @@ class ModelLearningSystemParamters(object):
         for instrumentType in ModelConfigDicts:
             self.__modelConfigs[instrumentType] = list(map(lambda x: ModelConfig(x), ModelConfigDicts[instrumentType]))
 
+<<<<<<< HEAD
         self.__metricConfigs = {}
         MetricConfigDicts = self.getMetricConfigDicts()
         for instrumentType in MetricConfigDicts:
             self.__metricConfigs[instrumentType] = list(map(lambda x: MetricConfig(x), MetricConfigDicts[instrumentType]))
 
+=======
+>>>>>>> rebase with vn_training_model_manager
     def getInstrumentIds(self):
         return self.instrumentIds
 
@@ -89,6 +92,7 @@ class ModelLearningSystemParamters(object):
                    'params': {'period': 5,
                               'featureName': 'Open'}}
 
+<<<<<<< HEAD
         argMax = {'featureKey': 'argmax',
                    'featureId': 'argmax',
                    'params': {'period': 5,
@@ -202,6 +206,9 @@ class ModelLearningSystemParamters(object):
         return {INSTRUMENT_TYPE_STOCK : [ma2Dict, argMax, argMin, bollinger_Lower, bollinger_Upper, delay,
                                          difference, direction, ema, macd, momentum, mov_avg, mov_corr, mmax, mmin, msdev,
                                          msum, rank, ratio, rsi, scale, vwap]}
+=======
+        return {INSTRUMENT_TYPE_STOCK : [ma2Dict]}
+>>>>>>> rebase with vn_training_model_manager
 
     def getTargetVariableConfigDicts(self):
         tv_ma25 = {'featureKey' : 'tv_ma25',
@@ -214,17 +221,24 @@ class ModelLearningSystemParamters(object):
                    'params' : {'period' : 5,
                                'featureName' : 'ma_5',
                                'shift' : 5}}
+<<<<<<< HEAD
         tv = {'featureKey' : 'direction_tv',
                    'featureId' : 'direction',
                    'params' : {'period' : 5,
                                'featureName' : 'ma_5',
                                'shift' : 5}}
 
+=======
+>>>>>>> rebase with vn_training_model_manager
         Y = {'featureKey' : 'Y',
              'featureId' : '',
              'params' : {}}
 
+<<<<<<< HEAD
         return {INSTRUMENT_TYPE_STOCK : [tv]}
+=======
+        return {INSTRUMENT_TYPE_STOCK : [tv_ma25, tv_ma5]}
+>>>>>>> rebase with vn_training_model_manager
 
     def getFeatureSelectionConfigDicts(self):
         corr = {'featureSelectionKey': 'corr',
@@ -239,6 +253,7 @@ class ModelLearningSystemParamters(object):
                          'featureSelectionId' : 'generic_univariate_select',
                          'params' : {'scoreFunction' : 'f_classif',
                                      'mode' : 'k_best',
+<<<<<<< HEAD
                                      'modeParam' : 12}}
 
         rfecvSelect = {'featureSelectionKey': 'rfecv',
@@ -251,6 +266,10 @@ class ModelLearningSystemParamters(object):
                        'n_jobs' : 2}}
 
         return {INSTRUMENT_TYPE_STOCK : [genericSelect]}
+=======
+                                     'modeParam' : 30}}
+        return {INSTRUMENT_TYPE_STOCK : [corr]}
+>>>>>>> rebase with vn_training_model_manager
 
     def getFeatureTransformationConfigDicts(self):
         stdScaler = {'featureTransformKey': 'stdScaler',
@@ -281,6 +300,7 @@ class ModelLearningSystemParamters(object):
         classification_model = {'modelKey': 'logistic_regression',
                      'modelId' : 'logistic_regression',
                      'params' : {}}
+<<<<<<< HEAD
 
         mlp_classification_model = {'modelKey': 'mlp_classification',
                      'modelId' : 'mlp_classification',
@@ -298,6 +318,9 @@ class ModelLearningSystemParamters(object):
                                  'params' : {}}
 
         return {INSTRUMENT_TYPE_STOCK : [accuracy_score_metric]}
+=======
+        return {INSTRUMENT_TYPE_STOCK : [regression_model]}
+>>>>>>> rebase with vn_training_model_manager
 
     def getCustomFeatures(self):
         return {}
