@@ -3,10 +3,12 @@ from backtester.featureSelection.feature_selection import FeatureSelection
 from backtester.logger import *
 from backtester.featureSelection.correlation import PearsonCorrelation
 from backtester.featureSelection.generic_univariate_select import GenericUnivariateSelect
+from backtester.featureSelection.rfecv_selection import RecursiveFeatureSelectWithCrossValidation
 
 
 featureSelectionIdToClassDict = {'pearson_correlation' : PearsonCorrelation,
-                                 'generic_univariate_select' : GenericUnivariateSelect
+                                 'generic_univariate_select' : GenericUnivariateSelect,
+                                 'rfecv_selection' : RecursiveFeatureSelectWithCrossValidation
                                 }
 
 
