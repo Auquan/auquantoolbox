@@ -231,7 +231,17 @@ class ModelLearningSystemParamters(object):
                          'params' : {'scoreFunction' : 'f_classif',
                                      'mode' : 'k_best',
                                      'modeParam' : 30}}
-        return {INSTRUMENT_TYPE_STOCK : [corr]}
+
+        rfecvSelect = {'featureSelectionKey': 'rfecv',
+                       'featureSelectionId': 'rfecv_selection',
+                       'params' : {'estimator' : 'LinearRegression',
+                       'estimator_params' : {},
+                       'step' : 1,
+                       'cv' : None,
+                       'scoring' : None,
+                       'n_jobs' : 2}}
+
+        return {INSTRUMENT_TYPE_STOCK : [rfecvSelect]}
 
     def getFeatureTransformationConfigDicts(self):
         return {}
