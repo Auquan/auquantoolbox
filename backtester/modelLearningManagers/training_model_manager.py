@@ -1,4 +1,5 @@
 import pandas as pd
+import copy
 try:        # Python 3.x
     import _pickle as pickle
 except ImportError:
@@ -35,7 +36,7 @@ class TrainingModelManager(object):
         self._targetVariable = targetVariable
 
     def getModel(self):
-        return self._trainingModel
+        return copy.deepcopy(self._trainingModel)
 
     # add or update the model in the _trainingModel dict
     def addModel(self, model, modelKey=None):

@@ -1,4 +1,5 @@
 import pandas as pd
+import copy
 from collections import OrderedDict
 try:        # Python 3.x
     import _pickle as pickle
@@ -46,7 +47,7 @@ class FeatureTransformationManager(object):
         self.transformFeatures = self._transformFeaturesUsingFile
 
     def getTransformers(self):
-        return self.__transformers
+        return copy.deepcopy(self.__transformers)
 
     def _transformFeaturesUsingFile(self, instrumentData, transformationConfigs=None):
         self.__instrumentData = instrumentData
