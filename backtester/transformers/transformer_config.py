@@ -3,10 +3,12 @@ from backtester.transformers.transformer import Transformer
 from backtester.logger import *
 from backtester.transformers.standard_transform import StandardTransform
 from backtester.transformers.minmax_transform import MinMaxTransform
+from backtester.transformers.pca_transform import PCATransform
 
 
 featureTransformationIdToClassDict = {'standard_transform' : StandardTransform,
-                                      'minmax_transform' : MinMaxTransform
+                                      'minmax_transform' : MinMaxTransform,
+                                      'pca_transform' : PCATransform
                                      }
 
 
