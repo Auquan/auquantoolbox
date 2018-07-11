@@ -20,12 +20,7 @@ class ModelLearningSystemParamters(object):
         self.__instrumentFeatureConfigs = {}
         instrumentFeatureConfigDicts = self.getInstrumentFeatureConfigDicts()
         for instrumentType in instrumentFeatureConfigDicts:
-            if type(instrumentFeatureConfigDicts[instrumentType]) is list:
                 self.__instrumentFeatureConfigs[instrumentType] = list(map(lambda x: FeatureConfig(x), instrumentFeatureConfigDicts[instrumentType]))
-            elif type(instrumentFeatureConfigDicts[instrumentType]) is dict:
-                self.__instrumentFeatureConfigs[instrumentType] = {k : FeatureConfig(v) for k, v in instrumentFeatureConfigDicts[instrumentType]}
-            else:
-                logError("Unknown type of instruments' feature config dicts")
 
         self.__targetVariableConfigs = {}
         targetVariableConfigDicts = self.getTargetVariableConfigDicts()
@@ -239,15 +234,7 @@ class ModelLearningSystemParamters(object):
         return {INSTRUMENT_TYPE_STOCK : [corr]}
 
     def getFeatureTransformationConfigDicts(self):
-        stdScaler = {'featureTransformKey': 'stdScaler',
-                     'featureTransformId' : 'standard_transform',
-                     'params' : {}}
-
-        minmaxScaler = {'featureTransformKey' : 'minmaxScaler',
-                        'featureTransformId' : 'minmax_transform',
-                        'params' : {'low' : -1,
-                                    'high' : 1}}
-        return {INSTRUMENT_TYPE_STOCK : [stdScaler]}
+        return {}
 
     def getModelConfigDicts(self):
         regression_model = {'modelKey': 'linear_regression',
@@ -304,12 +291,3 @@ class ModelLearningSystemParamters(object):
             return self.__modelConfigs[instrumentType]
         else:
             return []
-
-    def getTrainingDataSource(self):
-        return self.trainingDataSource
-
-    def getValidationDataSource(self):
-        return self.validationDataSource
-
-    def getTestDataSource(self):
-        return self.testDataSource

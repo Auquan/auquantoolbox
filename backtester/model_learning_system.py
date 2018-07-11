@@ -68,7 +68,10 @@ class ModelLearningSystem:
         else:
             self.fixFeaturesData(dataSourceClass, actionDict, params.copy(), dropFeatures)
 
-        params['features'] = None # NOTE: A list of column names
+        if len(self.features) > 0:
+            params['features'] = self.features # A list of column names
+        else:
+            params['features'] = None
         params['featureFolderName'] = featureFolderName
         return FeaturesDataSource(**params)
 
@@ -280,15 +283,5 @@ if __name__ == '__main__':
     instrumentIds = ['AAPL', 'IBM']
     chunkSize = 1000
     mlsParams = ModelLearningSystemParamters(instrumentIds, chunkSize=chunkSize)
-    # YahooStockDataSource
-    # startDateStr = '2010/06/02'
-    # endDateStr = '2013/02/07'
-    # params = dict(cachedFolderName='yahooData/',
-    #              dataSetId='testTrading',
-    #              instrumentIds=instrumentIds,
-    #              startDateStr=startDateStr,
-    #              endDateStr=endDateStr,
-    #              liveUpdates=False)
-
     system1 = ModelLearningSystem(mlsParams, chunkSize=None)
     system1.runModels()
