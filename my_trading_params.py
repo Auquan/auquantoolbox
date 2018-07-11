@@ -42,6 +42,13 @@ class MyTradingParams(TradingSystemParameters):
         return self.instrumentIds
 
     '''
+    Returns the list of instrument IDs
+    '''
+
+    def getInstrumentIds(self):
+        return self.instrumentIds
+
+    '''
     Returns an instance of class DataParser. Source of data for instruments
     '''
 

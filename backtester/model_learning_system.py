@@ -288,8 +288,8 @@ class ModelLearningSystem:
                 print("=================================================================")
 
     def runModels(self):
-        # TODO: Find a better way to infer whether to use target variable from file or not
-        useTargetVaribleFromFile = False
+        # TODO: Find a better way to infer whether to use target variable from file or not (maybe through config dict)
+        useTargetVaribleFromFile = True
         useTimeFrequency = True
         targetVariableConfigs = self.mlsParams.getTargetVariableConfigsForInstrumentType(INSTRUMENT_TYPE_STOCK)
         modelConfigs = self.mlsParams.getModelConfigsForInstrumentType(INSTRUMENT_TYPE_STOCK)
