@@ -229,9 +229,9 @@ class ModelLearningSystemParamters(object):
 
         genericSelect = {'featureSelectionKey' : 'gus',
                          'featureSelectionId' : 'generic_univariate_select',
-                         'params' : {'scoreFunction' : 'f_classif',
+                         'params' : {'scoreFunction' : 'f_regression',
                                      'mode' : 'k_best',
-                                     'modeParam' : 30}}
+                                     'modeParam' : 12}}
 
         rfecvSelect = {'featureSelectionKey': 'rfecv',
                        'featureSelectionId': 'rfecv_selection',
@@ -242,7 +242,7 @@ class ModelLearningSystemParamters(object):
                        'scoring' : None,
                        'n_jobs' : 2}}
 
-        return {INSTRUMENT_TYPE_STOCK : [rfecvSelect]}
+        return {INSTRUMENT_TYPE_STOCK : [genericSelect]}
 
     def getFeatureTransformationConfigDicts(self):
         stdScaler = {'featureTransformKey': 'stdScaler',
@@ -253,7 +253,17 @@ class ModelLearningSystemParamters(object):
                         'featureTransformId' : 'minmax_transform',
                         'params' : {'low' : -1,
                                     'high' : 1}}
-        return {INSTRUMENT_TYPE_STOCK : [stdScaler]}
+
+        pcaScaler = {'featureTransformKey' : 'pcaScaler',
+                     'featureTransformId' : 'pca_transform',
+                     'params' : {'n_comp' : 6,
+                                 'copy' : True,
+                                 'whiten' : False,
+                                 'svd' : 'full',
+                                 'itr_power' : 'auto',
+                                 'random_state' : None}}
+
+        return {INSTRUMENT_TYPE_STOCK : [pcaScaler, minmaxScaler]}
 
     def getModelConfigDicts(self):
         regression_model = {'modelKey': 'linear_regression',

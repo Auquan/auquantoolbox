@@ -220,10 +220,7 @@ class ModelLearningSystem:
             key = targetVariableConfig.getFeatureKey()
             selectedInstrumentData = instrumentData.getBookData()[selectedFeatures[key]]
             self.__featureTransformationManager.transformFeatures(selectedInstrumentData)
-            columns = selectedInstrumentData.columns
-            transformedInstrumentData = pd.DataFrame(index=selectedInstrumentData.index, columns=columns)
-            transformedInstrumentData[columns] = self.__featureTransformationManager.getTransformedData()
-            # print(transformedInstrumentData[key])
+            transformedInstrumentData = pd.DataFrame(data=self.__featureTransformationManager.getTransformedData(), index=selectedInstrumentData.index)
             # self.__featureTransformationManager.writeTransformers('transformersss.pkl')
             self.__trainingModelManager.fitModel(transformedInstrumentData, targetVariablesData[key])
             self.__modelDict[instrumentId][key] = ModelData(instrumentId, targetVariableConfig, selectedFeatures[key],
@@ -247,9 +244,7 @@ class ModelLearningSystem:
             else:
                 selectedInstrumentData = instrumentData.getBookData()
             self.__featureTransformationManager.transformFeaturesUsingTransformers(selectedInstrumentData, modelData.getModelTransformers())
-            columns = selectedInstrumentData.columns
-            transformedInstrumentData = pd.DataFrame(index=selectedInstrumentData.index, columns=columns)
-            transformedInstrumentData[columns] = self.__featureTransformationManager.getTransformedData()
+            transformedInstrumentData = pd.DataFrame(data=self.__featureTransformationManager.getTransformedData(), index=selectedInstrumentData.index)
             for modelKey in modelData.getModels():
                 print("=================================================================")
                 print("Model Key:", modelKey, "| Stock:", instrumentId, '| targetVariable:', key)
