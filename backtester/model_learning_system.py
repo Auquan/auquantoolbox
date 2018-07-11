@@ -27,10 +27,13 @@ class ModelLearningSystem:
     # NOTE: For now, do not use this chunkSize because feature transformation and model fit doesn't support chunks
     def __init__(self, mlsParams, chunkSize=None):
         self.mlsParams = mlsParams
+        self.modelDir = 'savedModels'
+        if not os.path.isdir(self.modelDir):
+            os.makedirs(self.modelDir)
         self.__instrumentIds = mlsParams.getInstrumentIds()
-        self.__trainingDataSource = self.initializeDataSource(**mlsParams.getTrainingDataSourceParams())
-        # self.__validationDataSource = self.initializeDataSource(**mlsParams.getValidationDataSourceParams())
-        self.__testDataSource = self.initializeDataSource(**mlsParams.getTestDataSourceParams())
+        self.__trainingDataSource = self.initializeDataSource(mlsParams.getTrainingDataSourceParams())
+        self.__validationDataSource = self.initializeDataSource(mlsParams.getValidationDataSourceParams())
+        self.__testDataSource = self.initializeDataSource(mlsParams.getTestDataSourceParams())
         self.__chunkSize = chunkSize
         self.__targetVariableManager = TargetVariableManager(mlsParams, instrumentIds=self.__instrumentIds, chunkSize=self.__chunkSize)
         self.__featureSelectionManager = FeatureSelectionManager(mlsParams)
@@ -42,9 +45,11 @@ class ModelLearningSystem:
         # values are another dictionary with keys as targetVariableKey and value as ModelData
         self.__modelDict = {instrumentId : dict() for instrumentId in self.__instrumentIds}
 
-    def initializeDataSource(self, **params):
+    def initializeDataSource(self, params):
         # TODO: Add **kwargs in all the dataSource classes to support variable number of arguments and cleanup this mess
         # or find some nice way to generalize the function arguments in the dataSource classes
+        if params is None:
+            return None
         dataSourceClass = getattr(data_source_classes, params.pop('dataSourceName', DEFAULT_DATASOURCE))
         cachedFolderName = params.get('cachedFolderName', '')
         dataSetId = params.get('dataSetId', '')
@@ -71,7 +76,7 @@ class ModelLearningSystem:
         if len(self.features) > 0:
             params['features'] = self.features # A list of column names
         else:
-            params['features'] = None
+            params['features'] = None   # Selects all features
         params['featureFolderName'] = featureFolderName
         return FeaturesDataSource(**params)
 
@@ -205,6 +210,12 @@ class ModelLearningSystem:
     def getFeatureSet(self):
         return self.mlsParams.features
 
+    def getFileName(self, dir, ext, *args):
+        fileName = args[0]
+        for arg in args[1:]:
+            fileName = fileName + '_' + arg
+        return os.path.join(dir, fileName + ext)
+
     def findBestModel(self, instrumentId, useTargetVaribleFromFile=False, useTimeFrequency=True):
         # TODO: Some function arguments are hardcoded. Make it changeable
         instrumentData = self.getTrainingInstrurmentData(instrumentId)
@@ -223,17 +234,23 @@ class ModelLearningSystem:
             key = targetVariableConfig.getFeatureKey()
             selectedInstrumentData = instrumentData.getBookData()[selectedFeatures[key]]
             self.__featureTransformationManager.transformFeatures(selectedInstrumentData)
-            columns = selectedInstrumentData.columns
-            transformedInstrumentData = pd.DataFrame(index=selectedInstrumentData.index, columns=columns)
-            transformedInstrumentData[columns] = self.__featureTransformationManager.getTransformedData()
-            # print(transformedInstrumentData[key])
+            transformedInstrumentData = pd.DataFrame(data=self.__featureTransformationManager.getTransformedData(), index=selectedInstrumentData.index)
             # self.__featureTransformationManager.writeTransformers('transformersss.pkl')
             self.__trainingModelManager.fitModel(transformedInstrumentData, targetVariablesData[key])
             self.__modelDict[instrumentId][key] = ModelData(instrumentId, targetVariableConfig, selectedFeatures[key],
                                                         self.__featureTransformationManager.getTransformers(),
                                                         self.__trainingModelManager.getModel())
-
+            bestModel = self.compareModels(self.__modelDict[instrumentId][key])
+            self.__modelDict[instrumentId][key].setBestModel(bestModel)
+            fileName = self.getFileName(self.modelDir, '.pkl', instrumentId, key)
+            self.__modelDict[instrumentId][key].writeModelData(fileName)
             # print(self.__trainingModelManager.predict(transformedInstrumentData))
+
+    def compareModels(self, instrumentModelData):
+        # TODO: Compare models and return the best one
+        # Right now this returns the first one
+        for model in instrumentModelData.getModels().values():
+            return model
 
     def getFinalMetrics(self, instrumentId, dataHandler, dataParamsHandler, targetVariableConfigs, modelConfigDict, useTargetVaribleFromFile=False, useTimeFrequency=True):
         instrumentData = dataHandler(instrumentId)
@@ -250,9 +267,7 @@ class ModelLearningSystem:
             else:
                 selectedInstrumentData = instrumentData.getBookData()
             self.__featureTransformationManager.transformFeaturesUsingTransformers(selectedInstrumentData, modelData.getModelTransformers())
-            columns = selectedInstrumentData.columns
-            transformedInstrumentData = pd.DataFrame(index=selectedInstrumentData.index, columns=columns)
-            transformedInstrumentData[columns] = self.__featureTransformationManager.getTransformedData()
+            transformedInstrumentData = pd.DataFrame(data=self.__featureTransformationManager.getTransformedData(), index=selectedInstrumentData.index)
             for modelKey in modelData.getModels():
                 print("=================================================================")
                 print("Model Key:", modelKey, "| Stock:", instrumentId, '| targetVariable:', key)

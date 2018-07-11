@@ -1,4 +1,5 @@
 from backtester.trading_system_parameters import TradingSystemParameters
+from backtester.model_learning_system_parameters import ModelLearningSystemParamters
 from backtester.features.feature import Feature
 from backtester.dataSource.yahoo_data_source import YahooStockDataSource
 from backtester.executionSystem.simple_execution_system import SimpleExecutionSystem
@@ -25,6 +26,13 @@ class MyTradingParams(TradingSystemParameters):
         self.start = '2017/01/01'
         self.end = '2017/06/30'
         self.instrumentIds = ['AAPL', 'GOOG']
+        self.dataSourceName = 'YahooStockDataSource'
+        self.dataSourceParams = dict(cachedFolderName='yahooData/',
+                                    dataSetId='AuquanTrainingTest',
+                                    instrumentIds=self.instrumentIds,
+                                    startDateStr=self.start,
+                                    endDateStr=self.end,
+                                    event='history')
 
     '''
     Returns the list of instrument IDs
@@ -38,14 +46,6 @@ class MyTradingParams(TradingSystemParameters):
     '''
 
     def getDataParser(self):
-        self.dataSourceName = 'YahooStockDataSource'
-        self.dataSourceParams = dict(cachedFolderName='yahooData/',
-                                    dataSetId='AuquanTrainingTest',
-                                    instrumentIds=self.instrumentIds,
-                                    startDateStr=self.start,
-                                    endDateStr=self.end,
-                                    event='history')
-
         return YahooStockDataSource(**self.dataSourceParams)
 
     '''
@@ -146,7 +146,11 @@ class MyTradingParams(TradingSystemParameters):
                    'featureId': 'rsi',
                    'params': {'period': 30,
                               'featureName': 'Adj Close'}}
-        return {INSTRUMENT_TYPE_STOCK: [predictionDict, ma1Dict, ma2Dict, sdevDict, momDict, rsiDict]}
+        self.__stockFeatureConfigs = [predictionDict, ma1Dict, ma2Dict, sdevDict, momDict, rsiDict]
+        return {INSTRUMENT_TYPE_STOCK: self.__stockFeatureConfigs}
+
+    def getStockFeatureConfigDicts(self):
+        return self.__stockFeatureConfigs
 
     '''
     Returns an array of market feature config dictionaries
@@ -301,10 +305,9 @@ class MyCustomFeature(Feature):
 class MyModelLearningParams(ModelLearningSystemParamters):
     """
     """
-    def __init__(self, tsParams, splitRatio):
+    def __init__(self, tsParams, splitRatio, chunkSize=None):
         self.tsParams = tsParams
-        self.getInstrumentFeatureConfigDicts = tsParams.getInstrumentFeatureConfigDicts
-        super(MyModelLearningParams, self).__init__(tsParams.getInstrumentIds(), tsParams.chunkSize, tsParams.validationSplit)
+        super(MyModelLearningParams, self).__init__(tsParams.getInstrumentIds(), chunkSize)
         self.dropFeatures = None
         self.dataSourceTypes = ['training', 'validation', 'test']
         self.startDateStr = {}
@@ -343,7 +346,7 @@ class MyModelLearningParams(ModelLearningSystemParamters):
         params['dropFeatures'] = self.dropFeatures
         params['startDateStr'] = self.startDateStr[dataSourceType]
         params['endDateStr'] = self.endDateStr[dataSourceType]
-        params['liveUpdates'] = True
+        params['liveUpdates'] = False
         return params
 
     def getTrainingDataSourceParams(self):
@@ -354,6 +357,10 @@ class MyModelLearningParams(ModelLearningSystemParamters):
 
     def getTestDataSourceParams(self):
         return self.getDataSourceParams('test')
+
+    def getInstrumentFeatureConfigDicts(self):
+        stockFeatureConfigs = self.tsParams.getStockFeatureConfigDicts()
+        return {INSTRUMENT_TYPE_STOCK : stockFeatureConfigs}
 
     def getTargetVariableConfigDicts(self):
         # tv_ma25 = {'featureKey' : 'tv_ma25',
@@ -366,7 +373,7 @@ class MyModelLearningParams(ModelLearningSystemParamters):
              'params' : {}}
 
         targetVariableList = [Y]
-        
+
         # These features (or columns), if present in CSV files, will be dropped
         self.dropFeatures = [tv['featureKey'] for tv in targetVariableList]
         return {INSTRUMENT_TYPE_STOCK : targetVariableList}
