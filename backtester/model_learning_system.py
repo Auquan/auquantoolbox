@@ -83,7 +83,7 @@ class ModelLearningSystem:
         if len(self.features) > 0:
             params['features'] = self.features # A list of column names
         else:
-            params['features'] = None   # Selects all features
+            params['features'] = None
         params['featureFolderName'] = featureFolderName
         return FeaturesDataSource(**params)
 

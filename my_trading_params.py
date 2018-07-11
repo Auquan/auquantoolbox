@@ -42,10 +42,25 @@ class MyTradingParams(TradingSystemParameters):
         return self.instrumentIds
 
     '''
+    Returns the list of instrument IDs
+    '''
+
+    def getInstrumentIds(self):
+        return self.instrumentIds
+
+    '''
     Returns an instance of class DataParser. Source of data for instruments
     '''
 
     def getDataParser(self):
+        self.dataSourceName = 'YahooStockDataSource'
+        self.dataSourceParams = dict(cachedFolderName='yahooData/',
+                                    dataSetId='AuquanTrainingTest',
+                                    instrumentIds=self.instrumentIds,
+                                    startDateStr=self.start,
+                                    endDateStr=self.end,
+                                    event='history')
+
         return YahooStockDataSource(**self.dataSourceParams)
 
     '''
@@ -305,9 +320,10 @@ class MyCustomFeature(Feature):
 class MyModelLearningParams(ModelLearningSystemParamters):
     """
     """
-    def __init__(self, tsParams, splitRatio, chunkSize=None):
+    def __init__(self, tsParams, splitRatio):
         self.tsParams = tsParams
-        super(MyModelLearningParams, self).__init__(tsParams.getInstrumentIds(), chunkSize)
+        self.getInstrumentFeatureConfigDicts = tsParams.getInstrumentFeatureConfigDicts
+        super(MyModelLearningParams, self).__init__(tsParams.getInstrumentIds(), tsParams.chunkSize, tsParams.validationSplit)
         self.dropFeatures = None
         self.dataSourceTypes = ['training', 'validation', 'test']
         self.startDateStr = {}
@@ -346,7 +362,7 @@ class MyModelLearningParams(ModelLearningSystemParamters):
         params['dropFeatures'] = self.dropFeatures
         params['startDateStr'] = self.startDateStr[dataSourceType]
         params['endDateStr'] = self.endDateStr[dataSourceType]
-        params['liveUpdates'] = False
+        params['liveUpdates'] = True
         return params
 
     def getTrainingDataSourceParams(self):

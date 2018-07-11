@@ -89,7 +89,6 @@ class ModelLearningSystemParamters(object):
                    'params': {'period': 5,
                               'featureName': 'Open'}}
 
-<<<<<<< HEAD
         argMax = {'featureKey': 'argmax',
                    'featureId': 'argmax',
                    'params': {'period': 5,
@@ -203,13 +202,6 @@ class ModelLearningSystemParamters(object):
         return {INSTRUMENT_TYPE_STOCK : [ma2Dict, argMax, argMin, bollinger_Lower, bollinger_Upper, delay,
                                          difference, direction, ema, macd, momentum, mov_avg, mov_corr, mmax, mmin, msdev,
                                          msum, rank, ratio, rsi, scale, vwap]}
-=======
-        signDict = {'featureKey': 'sign',
-                   'featureId': 'sign',
-                   'params': {'featureName': 'Open'}}
-
-        return {INSTRUMENT_TYPE_STOCK : [ma2Dict, signDict]}
->>>>>>> add sign feature
 
     def getTargetVariableConfigDicts(self):
         tv_ma25 = {'featureKey' : 'tv_ma25',
