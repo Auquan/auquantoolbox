@@ -7,10 +7,9 @@ from backtester.logger import *
 
 
 class ModelLearningSystemParamters(object):
-    def __init__(self, symbols, chunkSize=None, validationSplit=0.1):
+    def __init__(self, symbols, chunkSize=None):
         self.instrumentIds = symbols
         self.chunkSize = chunkSize
-        self.validationSplit = validationSplit
 
         FeatureConfig.setupCustomFeatures(self.getCustomFeatures())
         FeatureSelectionConfig.setupCustomFeatureSelectionMethods(self.getCustomFeatureSelectionMethods())
