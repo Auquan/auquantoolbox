@@ -5,7 +5,7 @@ from pandas.tseries.offsets import CustomBusinessHour
 from pandas.tseries.offsets import CustomBusinessDay
 
 class CustomTimeRule(TimeRule):
-    def __init__(self, startDate, endDate, start_time='9:00', end_time='16:00', holidays = [], weekmask = 'Mon Tue Wed Thu Fri', calendar = None, frequency='H', sample='1'):
+    def __init__(self, startDate, endDate, startTime='9:00', endTime='16:00', holidays = [], weekmask = 'Mon Tue Wed Thu Fri', calendar = None, frequency='H', sample='1'):
         self.__startDate = startDate
         self.__endDate = endDate
         self.__sample = sample
@@ -15,12 +15,17 @@ class CustomTimeRule(TimeRule):
             raise ValueError('Frequency Value Not acceptable. Specify D, M, H, S')
         self.__frequency = frequency
 
+        start = datetime.strptime(startTime, '%H:%M')
+        self.startMinuteDelta = start.hour * 60 + start.minute
+        end = datetime.strptime(endTime, '%H:%M')
+        self.endMinuteDelta = end.hour * 60 + end.minute
+
         if(calendar != None):
             self.__bday = CustomBusinessDay(calendar = calendar)
-            self.__bhour =  CustomBusinessHour(start = start_time, end = end_time, calendar = calendar)
+            self.__bhour =  CustomBusinessHour(start = startTime, end = endTime, calendar = calendar)
         else:
             self.__bday = CustomBusinessDay(holidays = holidays, weekmask = weekmask)
-            self.__bhour = CustomBusinessHour(start = start_time, end = end_time, holidays = holidays, weekmask = weekmask)
+            self.__bhour = CustomBusinessHour(start = startTime, end = endTime, holidays = holidays, weekmask = weekmask)
 
     def createBusinessDaySeries(self):
         return pd.date_range(start=self.__startDate, end=self.__endDate, freq= self.__bday)
@@ -33,9 +38,9 @@ class CustomTimeRule(TimeRule):
         datetime_index = None
         for day in day_series:
             if(datetime_index is None):
-                datetime_index = pd.date_range(start=day+timedelta(minutes=560), end=day+timedelta(minutes=930), freq= self.__sample + ' min')
+                datetime_index = pd.date_range(start=day+timedelta(minutes=self.startMinuteDelta), end=day+timedelta(minutes=self.endMinuteDelta), freq= self.__sample + ' min')
             else:
-                datetime_index = datetime_index.append(pd.date_range(start=day+timedelta(minutes=560), end=day+timedelta(minutes=930), freq= self.__sample + ' min'))
+                datetime_index = datetime_index.append(pd.date_range(start=day+timedelta(minutes=self.startMinuteDelta), end=day+timedelta(minutes=self.endMinuteDelta), freq= self.__sample + ' min'))
         return datetime_index
 
     def createBusinessSecSeries(self):
@@ -43,9 +48,9 @@ class CustomTimeRule(TimeRule):
         datetime_index = None
         for day in day_series:
             if(datetime_index is None):
-                datetime_index = pd.date_range(start=day+timedelta(minutes=560), end=day+timedelta(minutes=930), freq= self.__sample + ' s')
+                datetime_index = pd.date_range(start=day+timedelta(minutes=self.startMinuteDelta), end=day+timedelta(minutes=self.endMinuteDelta), freq= self.__sample + ' s')
             else:
-                datetime_index = datetime_index.append(pd.date_range(start=day+timedelta(minutes=560), end=day+timedelta(minutes=930), freq= self.__sample + ' s'))
+                datetime_index = datetime_index.append(pd.date_range(start=day+timedelta(minutes=self.startMinuteDelta), end=day+timedelta(minutes=self.endMinuteDelta), freq= self.__sample + ' s'))
         return datetime_index
 
     def emitTimeToTrade(self):
