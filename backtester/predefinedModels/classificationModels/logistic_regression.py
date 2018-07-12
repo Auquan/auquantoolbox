@@ -25,24 +25,19 @@ class LogisticRegression(Model):
         self._model = linear_model.LogisticRegression(penalty=penalty, tol=tol, class_weight=classWeight,
                                                       multi_class=multiClass, n_jobs=nCPUs)
 
-    def fit(self, dataManager):
+    def fit(self, X, y):
         sampleWeight = self._params.get("sampleWeight", None)
-        features = dataManager.getFeaures()
-        targetVariable = dataManager.getTargetVariable()
-        self._model.fit(features, targetVariable, sample_weight=sampleWeight)
+        self._model.fit(X, y, sample_weight=sampleWeight)
 
-    def reTrain(self, dataManager):
+    def reTrain(self, X, y):
         # same as fit in this case
-        self.fit(dataManager)
+        self.fit(X, y)
 
-    def predict(self, dataManager, withProbability=False):
-        features = dataManager.getFeaures()
+    def predict(self, X, withProbability=False):
         if withProbability:
-            return self._model.predict(features), self._model.predict_proba(features)
-        return self._model.predict(features)
+            return self._model.predict(X), self._model.predict_proba(X)
+        return self._model.predict(X)
 
-    def evaluate(self, dataManager):
+    def evaluate(self, X, y):
         sampleWeight = self._params.get("sampleWeight", None)
-        features = dataManager.getFeaures()
-        targetVariable = dataManager.getTargetVariable()
-        return self._model.score(features, targetVariable, sample_weight=sampleWeight)
+        return self._model.score(X, y, sample_weight=sampleWeight)

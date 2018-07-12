@@ -27,7 +27,7 @@ class ModelLearningSystem:
     # NOTE: For now, do not use this chunkSize because feature transformation and model fit doesn't support chunks
     def __init__(self, mlsParams, chunkSize=None):
         self.mlsParams = mlsParams
-        self.modelDir = 'savedModels'
+        self.modelDir = mlsParams.modelDir
         if not os.path.isdir(self.modelDir):
             os.makedirs(self.modelDir)
         self.__instrumentIds = mlsParams.getInstrumentIds()
@@ -44,6 +44,12 @@ class ModelLearningSystem:
         # modelDict is the dictionary of models where keys are instrumentIds and
         # values are another dictionary with keys as targetVariableKey and value as ModelData
         self.__modelDict = {instrumentId : dict() for instrumentId in self.__instrumentIds}
+
+    def getFeatureTransformationManager(self):
+        return self.__featureTransformationManager
+
+    def getTrainingModelManager(self):
+        return self.__trainingModelManager
 
     def initializeDataSource(self, params):
         # TODO: Add **kwargs in all the dataSource classes to support variable number of arguments and cleanup this mess
@@ -172,6 +178,9 @@ class ModelLearningSystem:
     def getTrainingInstrurmentData(self, instrumentId):
         return self.__trainingDataSource.getInstrumentUpdates(instrumentId, self.__chunkSize)[instrumentId]
 
+    def getValidationInstrurmentData(self, instrumentId):
+        return self.__validationDataSource.getInstrumentUpdates(instrumentId, self.__chunkSize)[instrumentId]
+
     def getTestInstrurmentData(self, instrumentId):
         return self.__testDataSource.getInstrumentUpdates(instrumentId, self.__chunkSize)[instrumentId]
 
@@ -208,7 +217,9 @@ class ModelLearningSystem:
         # print(chunkNumber+1, targetVariable)
 
     def getFeatureSet(self):
-        return self.mlsParams.features
+        if len(self.features) == 0:
+            self.features = self.__trainingDataSource.getBookDataFeatures()
+        return self.features
 
     def getFileName(self, dir, ext, *args):
         fileName = args[0]
@@ -233,8 +244,8 @@ class ModelLearningSystem:
         for targetVariableConfig in targetVariableConfigs:
             key = targetVariableConfig.getFeatureKey()
             selectedInstrumentData = instrumentData.getBookData()[selectedFeatures[key]]
-            self.__featureTransformationManager.transformFeatures(selectedInstrumentData)
-            transformedInstrumentData = pd.DataFrame(data=self.__featureTransformationManager.getTransformedData(), index=selectedInstrumentData.index)
+            transformedInstrumentData = self.__featureTransformationManager.transformFeatures(selectedInstrumentData)
+            transformedInstrumentData = pd.DataFrame(data=transformedInstrumentData, index=selectedInstrumentData.index)
             # self.__featureTransformationManager.writeTransformers('transformersss.pkl')
             self.__trainingModelManager.fitModel(transformedInstrumentData, targetVariablesData[key])
             self.__modelDict[instrumentId][key] = ModelData(instrumentId, targetVariableConfig, selectedFeatures[key],
@@ -244,12 +255,12 @@ class ModelLearningSystem:
             self.__modelDict[instrumentId][key].setBestModel(bestModel)
             fileName = self.getFileName(self.modelDir, '.pkl', instrumentId, key)
             self.__modelDict[instrumentId][key].writeModelData(fileName)
-            # print(self.__trainingModelManager.predict(transformedInstrumentData))
+            self.__trainingModelManager.flushTrainingModels()
 
     def compareModels(self, instrumentModelData):
         # TODO: Compare models and return the best one
         # Right now this returns the first one
-        for model in instrumentModelData.getModels().values():
+        for modelKey, model in instrumentModelData.getModels().items():
             return model
 
     def getFinalMetrics(self, instrumentId, dataHandler, dataParamsHandler, targetVariableConfigs, modelConfigDict, useTargetVaribleFromFile=False, useTimeFrequency=True):
@@ -266,8 +277,8 @@ class ModelLearningSystem:
                 selectedInstrumentData = instrumentData.getBookData()[modelData.getModelFeatures()]
             else:
                 selectedInstrumentData = instrumentData.getBookData()
-            self.__featureTransformationManager.transformFeaturesUsingTransformers(selectedInstrumentData, modelData.getModelTransformers())
-            transformedInstrumentData = pd.DataFrame(data=self.__featureTransformationManager.getTransformedData(), index=selectedInstrumentData.index)
+            transformedInstrumentData = self.__featureTransformationManager.transformFeaturesUsingTransformers(selectedInstrumentData, modelData.getModelTransformers())
+            transformedInstrumentData = pd.DataFrame(data=transformedInstrumentData, index=selectedInstrumentData.index)
             for modelKey in modelData.getModels():
                 print("=================================================================")
                 print("Model Key:", modelKey, "| Stock:", instrumentId, '| targetVariable:', key)

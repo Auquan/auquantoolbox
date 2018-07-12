@@ -7,11 +7,11 @@ class Transformer(object):
     def getTransformer(self):
         return self
 
-    def partialTransform(self, dataManager):
+    def partialTransform(self, data):
         raise NotImplementedError
         return None
 
-    def transform(self, dataManager):
+    def transform(self, data):
         raise NotImplementedError
         return None
 

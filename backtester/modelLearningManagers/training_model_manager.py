@@ -18,19 +18,8 @@ class TrainingModelManager(object):
 
     def __init__(self, systemParams):
         self.systemParams = systemParams
-        self._features = None
-        self._targetVariable = None
         self._trainingModel = {}
         self._modelKeyPool = 1      # NOTE: Vulnerable to overflow :P
-
-    def getFeaures(self):
-        return self._features
-
-    def getTargetVariable(self):
-        return self._targetVariable
-
-    def setFeaures(self, features):
-        self._features = features
 
     def setTargetVariable(self, targetVariable):
         self._targetVariable = targetVariable
@@ -47,7 +36,7 @@ class TrainingModelManager(object):
         return modelKey
 
     # add or update the models in the _trainingModel dict
-    def addModels(self, models, modelKey=None):
+    def addModels(self, models):
         for modelKey in models:
             self.addModel(models[modelKey], modelKey)
 
@@ -73,7 +62,7 @@ class TrainingModelManager(object):
         elif isinstance(data, pd.DataFrame) or isinstance(data, pd.Series):
             timestamps = data.index
         else:
-            raise ValueError
+            return None
         return timestamps
 
     def modelConfigWrapper(func):
@@ -93,32 +82,41 @@ class TrainingModelManager(object):
     # fit multiple models on the same dataset
     @modelConfigWrapper
     def fitModel(self, features, targetVariable, modelConfig):
-        self._targetVariable = targetVariable
-        self._features = features.loc[self.computeWorkingTimestamps(targetVariable)]
+        timestamps = self.computeWorkingTimestamps(targetVariable)
+        if timestamps is not None and (isinstance(features, pd.DataFrame) or isinstance(features, pd.Series)):
+            features = features.loc[timestamps]
         modelKey = modelConfig.getKey()
         modelId = modelConfig.getId()
         modelParams = modelConfig.getParams()
         modelCls = modelConfig.getClassForModelId(modelId)
         self._trainingModel[modelKey] = modelCls(modelParams)
-        return self._trainingModel[modelKey].fit(self)
+        return self._trainingModel[modelKey].fit(features, targetVariable)
 
     @modelConfigWrapper
     def predict(self, features, modelConfig):
-        self._features = features
-        return self._trainingModel[modelConfig.getKey()].predict(self)
+        return self._trainingModel[modelConfig.getKey()].predict(features)
 
     @modelConfigWrapper
     def reTrain(self, features, targetVariable, modelConfig):
-        self._targetVariable = targetVariable
-        self._features = features.loc[self.computeWorkingTimestamps(targetVariable)]
-        return self._trainingModel[modelConfig.getKey()].reTrain(self)
+        timestamps = self.computeWorkingTimestamps(targetVariable)
+        if timestamps is not None and (isinstance(features, pd.DataFrame) or isinstance(features, pd.Series)):
+            features = features.loc[timestamps]
+        return self._trainingModel[modelConfig.getKey()].reTrain(features, targetVariable)
 
     @modelConfigWrapper
     def evaluateModel(self, features, targetVariable, modelConfig):
-        self._targetVariable = targetVariable
-        self._features = features.loc[self.computeWorkingTimestamps(targetVariable)]
-        return self._trainingModel[modelConfig.getKey()].evaluate(self)
+        timestamps = self.computeWorkingTimestamps(targetVariable)
+        if timestamps is not None and (isinstance(features, pd.DataFrame) or isinstance(features, pd.Series)):
+            features = features.loc[timestamps]
+        return self._trainingModel[modelConfig.getKey()].evaluate(features, targetVariable)
 
     def dumpModel(self, modelConfig):
         modelKey = modelConfig.getKey()
         del self._trainingModel[modelKey]
+
+    def flushTrainingModels(self):
+        keys = list(self._trainingModel.keys())
+        for key in keys:
+            del self._trainingModel[key]
+        del self._trainingModel
+        self._trainingModel = {}
