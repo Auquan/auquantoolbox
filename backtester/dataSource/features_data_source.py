@@ -54,6 +54,8 @@ class FeaturesDataSource(DataSource):
                 return None
             instrumentData[instrumentId] = InstrumentData(instrumentId, instrumentId, fileName,
                                                           chunkSize=chunkSize, usecols=self._usecols)
+            if self._bookDataFeatureKeys is None:
+                self._bookDataFeatureKeys = instrumentData[instrumentId].getBookDataFeatures()
             if self._startDateStr is not None and self._endDateStr is not None:
                 self._allTimes = instrumentData[instrumentId].filterDataByDates([(self._startDateStr, self._endDateStr)])
             self._timeFrequency = instrumentData[instrumentId].getTimeFrequency()

@@ -7,14 +7,14 @@ class Model(object):
         self._params = params
         self._model = None
 
-    def fit(self, dataManager):
+    def fit(self, X, y):
         raise NotImplementedError
 
-    def reTrain(self, dataManager):
+    def reTrain(self, X, y):
         raise NotImplementedError
 
-    def predict(self, dataManager):
+    def predict(self, X):
         raise NotImplementedError
 
-    def evaluate(self, dataManager):
+    def evaluate(self, X, y):
         raise NotImplementedError

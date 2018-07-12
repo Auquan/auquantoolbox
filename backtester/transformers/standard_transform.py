@@ -8,15 +8,15 @@ class StandardTransform(Transformer):
     def __init__(self, params):
         super(StandardTransform, self).__init__(params)
 
-    def transform(self, dataManager):
+    def transform(self, data):
         if self._transformer is None:
             withMean = self._params.get('with_mean', True)
             withStd = self._params.get('with_std', True)
             self._transformer = StandardScaler(with_mean=withMean, with_std=withStd)
-            return self._transformer.fit_transform(dataManager.getInstrumentData())
-        return self._transformer.transform(dataManager.getInstrumentData())
+            return self._transformer.fit_transform(data)
+        return self._transformer.transform(data)
 
-    def partialTransform(self, dataManager):
+    def partialTransform(self, data):
         # TODO: Use partial_fit to fit and transform in chunks
         raise NotImplementedError
 

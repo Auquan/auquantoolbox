@@ -18,22 +18,17 @@ class LinearRegression(Model):
         nCPUs = params.get('nCPUs', -1)
         self._model = linear_model.LinearRegression(normalize=normalize, n_jobs=nCPUs)
 
-    def fit(self, dataManager):
+    def fit(self, X, y):
         sampleWeight = self._params.get("sampleWeight", None)
-        features = dataManager.getFeaures()
-        targetVariable = dataManager.getTargetVariable()
-        self._model.fit(features, targetVariable, sample_weight=sampleWeight)
+        self._model.fit(X, y, sample_weight=sampleWeight)
 
-    def reTrain(self, dataManager):
+    def reTrain(self, X, y):
         # same as fit in this case
-        self.fit(dataManager)
+        self.fit(X, y)
 
-    def predict(self, dataManager):
-        features = dataManager.getFeaures()
-        return self._model.predict(features)
+    def predict(self, X):
+        return self._model.predict(X)
 
-    def evaluate(self, dataManager):
+    def evaluate(self, X, y):
         sampleWeight = self._params.get("sampleWeight", None)
-        features = dataManager.getFeaures()
-        targetVariable = dataManager.getTargetVariable()
-        return self._model.score(features, targetVariable, sample_weight=sampleWeight)
+        return self._model.score(X, y, sample_weight=sampleWeight)

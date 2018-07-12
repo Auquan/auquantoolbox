@@ -7,9 +7,10 @@ from backtester.logger import *
 
 
 class ModelLearningSystemParamters(object):
-    def __init__(self, symbols, chunkSize=None):
+    def __init__(self, symbols, chunkSize=None, modelDir='savedModels'):
         self.instrumentIds = symbols
         self.chunkSize = chunkSize
+        self.modelDir = modelDir
 
         FeatureConfig.setupCustomFeatures(self.getCustomFeatures())
         FeatureSelectionConfig.setupCustomFeatureSelectionMethods(self.getCustomFeatureSelectionMethods())
