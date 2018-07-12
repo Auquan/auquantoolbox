@@ -29,8 +29,14 @@ class CustomTimeRule(TimeRule):
         return pd.date_range(start=self.__startDate, end=self.__endDate, freq= self.__bhour)
 
     def createBusinessMinSeries(self):
-        hour_series = self.createBusinessHourSeries()
-        return pd.date_range(hour_series.min(), hour_series.max(), freq= self.__sample + ' min')
+        day_series = self.createBusinessDaySeries()
+        datetime_index = None
+        for day in day_series:
+            if(datetime_index is None):
+                datetime_index = pd.date_range(start=day+timedelta(minutes=570), end=day+timedelta(minutes=930), freq= self.__sample + ' min')
+            else:
+                datetime_index = datetime_index.append(pd.date_range(start=day+timedelta(minutes=570), end=day+timedelta(minutes=930), freq= self.__sample + ' min'))
+        return datetime_index
 
     def createBusinessSecSeries(self):
         hour_series = self.createBusinessHourSeries()
