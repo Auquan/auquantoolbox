@@ -39,8 +39,14 @@ class CustomTimeRule(TimeRule):
         return datetime_index
 
     def createBusinessSecSeries(self):
-        hour_series = self.createBusinessHourSeries()
-        return pd.date_range(hour_series.min(), hour_series.max(), freq= self.__sample + ' s')
+        day_series = self.createBusinessDaySeries()
+        datetime_index = None
+        for day in day_series:
+            if(datetime_index is None):
+                datetime_index = pd.date_range(start=day+timedelta(minutes=560), end=day+timedelta(minutes=930), freq= self.__sample + ' s')
+            else:
+                datetime_index = datetime_index.append(pd.date_range(start=day+timedelta(minutes=560), end=day+timedelta(minutes=930), freq= self.__sample + ' s'))
+        return datetime_index
 
     def emitTimeToTrade(self):
         time_range = None
