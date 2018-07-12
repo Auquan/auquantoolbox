@@ -1,4 +1,4 @@
-__version__ = '2.1.0'
+__version__ = '2.1.1'
 try:
     from urllib.request import urlopen
 except ImportError:
