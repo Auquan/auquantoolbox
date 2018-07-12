@@ -61,6 +61,7 @@ class ModelLearningSystem:
         if actionDict['exist']:
             logInfo("Features found!")
         elif actionDict['recalculate']:
+            print(params)
             dataSource = dataSourceClass(**params)
             featureManager = FeatureManager(self.mlsParams, dataSource, self.__instrumentIds, self.mlsParams.chunkSize,
                                             dropFeatures=dropFeatures, featureFolderName=featureFolderName, fingerprintFile=stockDataFileName)
@@ -101,7 +102,7 @@ class ModelLearningSystem:
         try:
             with open(stockDataFile, 'r') as fp:
                 fingerprint = json.load(fp)
-        except FileNotFoundError:
+        except :#FileNotFoundError:
             logWarn('stock_data.json file not found')
             return actionDict
         if lookbackSize != fingerprint['lookbackSize']:

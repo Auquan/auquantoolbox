@@ -4,13 +4,18 @@ from backtester.transformers.transformer_config import FeatureTransformationConf
 from backtester.predefinedModels.model_config import ModelConfig
 from backtester.constants import *
 from backtester.logger import *
-
+from dateutil import parser
+from datetime import timedelta
+from datetime import datetime
+from dateutil import parser
 
 class ModelLearningSystemParamters(object):
     def __init__(self, symbols, chunkSize=None, validationSplit=0.1):
         self.instrumentIds = symbols
         self.chunkSize = chunkSize
         self.validationSplit = validationSplit
+        self.startDateStr = {'training':'2013/02/02' , 'test':'2015/02/03'}
+        self.endDateStr = {'training': '2015/02/02', 'test':'2017/02/02'}
 
         FeatureConfig.setupCustomFeatures(self.getCustomFeatures())
         FeatureSelectionConfig.setupCustomFeatureSelectionMethods(self.getCustomFeatureSelectionMethods())
@@ -47,39 +52,61 @@ class ModelLearningSystemParamters(object):
         for instrumentType in ModelConfigDicts:
             self.__modelConfigs[instrumentType] = list(map(lambda x: ModelConfig(x), ModelConfigDicts[instrumentType]))
 
+        self.dropFeatures = self.getFeaturesToDrop()
+
     def getInstrumentIds(self):
         return self.instrumentIds
 
+    def getDataSourceParams(self, dataSourceType, dataSourceName, dataSourceBaseParams):
+        if self.startDateStr[dataSourceType] is None or self.endDateStr[dataSourceType] is None:
+            return None
+        params = dataSourceBaseParams.copy()
+        params['dataSourceName'] = dataSourceName
+        params['featureFolderName'] = '%sFeatures' % dataSourceType
+        params['dropFeatures'] = self.dropFeatures
+        params['startDateStr'] = self.startDateStr[dataSourceType]
+        params['endDateStr'] = self.endDateStr[dataSourceType]
+        params['liveUpdates'] = False
+        return params
+
+    def getDataSourceName(self):
+        return 'YahooStockDataSource'
+
+    def getDataSourceBaseParams(self):
+        return dict( cachedFolderName='yahooData/',
+                     dataSetId='testTrading',
+                     instrumentIds=self.instrumentIds)
+
+
     def getTrainingDataSourceParams(self):
         # raise NotImplementedError
-        startDateStr = '2013/02/02'
-        endDateStr = '2015/02/02'
-        return dict( dataSourceName='YahooStockDataSource',
-                     featureFolderName='trainingFeatures',
-                     dropFeatures=None,
-                     cachedFolderName='yahooData/',
-                     dataSetId='testTrading',
-                     instrumentIds=self.instrumentIds,
-                     startDateStr=startDateStr,
-                     endDateStr=endDateStr,
-                     liveUpdates=False)
+        return self.getDataSourceParams('training', self.getDataSourceName(), self.getDataSourceBaseParams())
 
     def getValidationDataSourceParams(self):
         raise NotImplementedError
 
     def getTestDataSourceParams(self):
         # raise NotImplementedError
-        startDateStr = '2015/02/03'
-        endDateStr = '2017/02/02'
-        return dict( dataSourceName='YahooStockDataSource',
-                     featureFolderName='testFeatures',
-                     dropFeatures=None,
-                     cachedFolderName='yahooData/',
-                     dataSetId='testTrading',
-                     instrumentIds=self.instrumentIds,
-                     startDateStr=startDateStr,
-                     endDateStr=endDateStr,
-                     liveUpdates=False)
+        return self.getDataSourceParams('test', self.getDataSourceName(), self.getDataSourceBaseParams())
+
+
+    def splitData(self, ratio, startDate, endDate, dataSourceTypes):
+        # NOTE: Length of ratio and dataSourceTypes must be same
+        # To skip a dataSourceType, set the corresponding ratio value to 0
+        if len(ratio) != len(dataSourceTypes):
+            raise ValueError
+        startDate = parser.parse(startDate)
+        endDate = parser.parse(endDate)
+        start = startDate
+        for r, key in zip(ratio, dataSourceTypes):
+            if r == 0:
+                self.startDateStr[key] = None
+                self.endDateStr[key] = None
+                continue
+            days = ((endDate - startDate + timedelta(1)).days * r) / sum(ratio)
+            self.startDateStr[key] = start.strftime('%Y/%m/%d')
+            self.endDateStr[key] = (start + timedelta(days=days) - timedelta(1)).strftime('%Y/%m/%d')
+            start = start + timedelta(days=days)
 
     def getInstrumentFeatureConfigDicts(self):
         ma2Dict = {'featureKey': 'ma_5',
@@ -217,6 +244,10 @@ class ModelLearningSystemParamters(object):
              'params' : {}}
 
         return {INSTRUMENT_TYPE_STOCK : [tv_ma25, tv_ma5]}
+
+    def getFeaturesToDrop(self):
+        # These features (or columns), if present in CSV files, will be dropped
+        return [tv['featureKey'] for tv in self.getTargetVariableConfigDicts()[INSTRUMENT_TYPE_STOCK]]
 
     def getFeatureSelectionConfigDicts(self):
         corr = {'featureSelectionKey': 'corr',

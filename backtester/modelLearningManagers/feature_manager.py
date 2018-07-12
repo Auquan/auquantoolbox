@@ -29,6 +29,7 @@ class FeatureManager(object):
                                                             featureFolderName=featureFolderName, lookbackSize=lookbackSize)
         self.__totalIter = 0
         self.__perfDict = {}
+        print(featureKeys)
         for featureKey in featureKeys:
             self.__perfDict[featureKey] = 0
 

@@ -6,11 +6,17 @@ from backtester.timeRule.us_time_rule import USTimeRule
 from backtester.executionSystem.simple_execution_system import SimpleExecutionSystem
 from backtester.orderPlacer.backtesting_order_placer import BacktestingOrderPlacer
 from backtester.trading_system import TradingSystem
-from backtester.version import updateCheck
+from backtester.model_learning_system_parameters import ModelLearningSystemParamters
+from backtester.model_learning_system import ModelLearningSystem
+from backtester.model_learning_and_trading_system import MLandBacktestSystem
+from backtester.features.feature_config import FeatureConfig
+from backtester.featureSelection.feature_selection_config import FeatureSelectionConfig
+from backtester.transformers.transformer_config import FeatureTransformationConfig
+from backtester.predefinedModels.model_config import ModelConfig
 from backtester.constants import *
+from backtester.logger import *
+from backtester.version import updateCheck
 import pandas as pd
-
-
 
 
 class MyTradingParams(TradingSystemParameters):
@@ -25,19 +31,26 @@ class MyTradingParams(TradingSystemParameters):
         self.start = '2007/12/31'
         self.end = '2017/12/31'
         self.instrumentIds = ['AAPL', 'GOOG']
+        self.__dataSourceName = 'YahooStockDataSource'
+        self.__dataSourceParams = dict(cachedFolderName='yahooData/',
+                                    dataSetId='test',
+                                    instrumentIds=self.instrumentIds,
+                                    startDateStr=self.start,
+                                    endDateStr=self.end)
+
+
+    def getDataSourceParams(self):
+        return self.__dataSourceParams
+
+    def getDataSourceName(self):
+        return self.__dataSourceName
 
     '''
     Returns an instance of class DataParser. Source of data for instruments
     '''
 
     def getDataParser(self):
-
-        return YahooStockDataSource(cachedFolderName='yahooData/',
-                                    dataSetId='test',
-                                    instrumentIds=self.instrumentIds,
-                                    startDateStr=self.start,
-                                    endDateStr=self.end,
-                                    event='history')
+        return YahooStockDataSource(**self.__dataSourceParams)
 
     '''
     Return starting capital - the initial amount of money you're putting into your trading system
@@ -112,23 +125,23 @@ class MyTradingParams(TradingSystemParameters):
         ma1Dict = {'featureKey': 'ma_90',
                    'featureId': 'moving_average',
                    'params': {'period': 90,
-                              'featureName': 'adjClose'}}
+                              'featureName': 'Adj Close'}}
         ma2Dict = {'featureKey': 'ma_5',
                    'featureId': 'moving_average',
                    'params': {'period': 5,
-                              'featureName': 'adjClose'}}
+                              'featureName': 'Adj Close'}}
         sdevDict = {'featureKey': 'sdev_90',
                     'featureId': 'moving_sdev',
                     'params': {'period': 90,
-                               'featureName': 'adjClose'}}
+                               'featureName': 'Adj Close'}}
         momDict = {'featureKey': 'mom_90',
                    'featureId': 'momentum',
                    'params': {'period': 30,
-                              'featureName': 'adjClose'}}
+                              'featureName': 'Adj Close'}}
         rsiDict = {'featureKey': 'rsi_30',
                    'featureId': 'rsi',
                    'params': {'period': 30,
-                              'featureName': 'adjClose'}}
+                              'featureName': 'Adj Close'}}
         return {INSTRUMENT_TYPE_STOCK: [predictionDict, ma1Dict, ma2Dict, sdevDict, momDict, rsiDict]}
 
     '''
@@ -229,7 +242,118 @@ class MyTradingParams(TradingSystemParameters):
 
 
     def getPriceFeatureKey(self):
-        return 'adjClose'
+        return 'Adj Close'
+
+    def getDates(self):
+        return {'startDate':self.start,
+                'endDate':self.end}
+
+    def setDates(self, dateDict):
+        self.start = dateDict['startDate']
+        self.end = dateDict['endDate']
+
+    def getInstrumentIds(self):
+        return self.instrumentIds
+
+    def getStockFeatureConfigDicts(self):
+        return self.__stockFeatureConfigs
+
+
+class MyModelLearningParams(ModelLearningSystemParamters):
+    """
+    """
+    def __init__(self, tsParams, splitRatio, chunkSize):
+        self.tsParams = tsParams
+        super(MyModelLearningParams, self).__init__(tsParams.getInstrumentIds(), chunkSize)
+        self.dropFeatures = None
+        self.dataSourceTypes = ['training', 'validation', 'test']
+        self.startDateStr = {} 
+        self.endDateStr = {}
+        self.splitData(splitRatio, self.tsParams.getDates()['startDate'], self.tsParams.getDates()['endDate'], self.dataSourceTypes)
+
+    def getTrainingDataSourceParams(self):
+        return self.getDataSourceParams('training', self.tsParams.getDataSourceName(), self.tsParams.getDataSourceParams())
+
+    def getValidationDataSourceParams(self):
+        return self.getDataSourceParams('validation', self.tsParams.getDataSourceName(), self.tsParams.getDataSourceParams())
+
+    def getTestDataSourceParams(self):
+        return self.getDataSourceParams('test', self.tsParams.getDataSourceName(), self.tsParams.getDataSourceParams())
+
+    def getInstrumentFeatureConfigDicts(self):
+        stockFeatureConfigs = self.tsParams.getInstrumentFeatureConfigDicts()
+        #TODO Better way to drop prediction dict if it exists
+        stockFeatureConfigs[INSTRUMENT_TYPE_STOCK].remove(stockFeatureConfigs[INSTRUMENT_TYPE_STOCK][0])
+        return stockFeatureConfigs
+
+    def getTargetVariableConfigDicts(self):
+        tv_ma25 = {'featureKey' : 'tv_ma25',
+                   'featureId' : 'moving_average',
+                   'params' : {'period' : 25,
+                               'featureName' : 'Adj Close',
+                               'shift' : 25}}
+        Y = {'featureKey' : 'Y',
+             'featureId' : '',
+             'params' : {}}
+
+        targetVariableList = [tv_ma25]
+
+        return {INSTRUMENT_TYPE_STOCK : targetVariableList}
+
+    def getFeatureSelectionConfigDicts(self):
+        corr = {'featureSelectionKey': 'corr',
+                'featureSelectionId' : 'pearson_correlation',
+                'params' : {'startPeriod' : 0,
+                            'endPeriod' : 60,
+                            'steps' : 10,
+                            'threshold' : 0.1,
+                            'topK' : 2}}
+
+        genericSelect = {'featureSelectionKey' : 'gus',
+                         'featureSelectionId' : 'generic_univariate_select',
+                         'params' : {'scoreFunction' : 'f_classif',
+                                     'mode' : 'k_best',
+                                     'modeParam' : 'all'}}
+        rfecvSelect = {'featureSelectionKey': 'rfecv',
+                       'featureSelectionId': 'rfecv_selection',
+                       'params' : {'estimator' : 'LinearRegression',
+                       'estimator_params' : {},
+                       'step' : 1,
+                       'cv' : None,
+                       'scoring' : None,
+                       'n_jobs' : 2}}
+        return {INSTRUMENT_TYPE_STOCK : [genericSelect]}
+
+    def getFeatureTransformationConfigDicts(self):
+        stdScaler = {'featureTransformKey': 'stdScaler',
+                     'featureTransformId' : 'standard_transform',
+                     'params' : {}}
+
+        minmaxScaler = {'featureTransformKey' : 'minmaxScaler',
+                        'featureTransformId' : 'minmax_transform',
+                        'params' : {'low' : -1,
+                                    'high' : 1}}
+
+        pcaScaler = {'featureTransformKey' : 'pcaScaler',
+                     'featureTransformId' : 'pca_transform',
+                     'params' : {'n_comp' : 4,
+                                 'copy' : True,
+                                 'whiten' : False,
+                                 'svd' : 'full',
+                                 'itr_power' : 'auto',
+                                 'random_state' : None}}
+        return {INSTRUMENT_TYPE_STOCK : [pcaScaler,minmaxScaler]}
+
+    def getModelConfigDicts(self):
+        regression_model = {'modelKey': 'linear_regression',
+                     'modelId' : 'linear_regression',
+                     'params' : {}}
+
+        classification_model = {'modelKey': 'logistic_regression',
+                     'modelId' : 'logistic_regression',
+                     'params' : {}}
+        return {INSTRUMENT_TYPE_STOCK : [regression_model]}
+
 
 
 class TrainingPredictionFeature(Feature):
@@ -288,8 +412,11 @@ if __name__ == "__main__":
         print('pip install -U auquan_toolbox')
     else:
         tsParams = MyTradingParams()
-        tradingSystem = TradingSystem(tsParams)
-        # Set onlyAnalyze to True to quickly generate csv files with all the features
-        # Set onlyAnalyze to False to run a full backtest
-        # Set makeInstrumentCsvs to False to not make instrument specific csvs in runLogs. This improves the performance BY A LOT
-        tradingSystem.startTrading(onlyAnalyze=False, shouldPlot=True, makeInstrumentCsvs=True)
+        mlsParams = MyModelLearningParams(tsParams,splitRatio=[0.7,0,0.3],chunkSize = 1000)
+        system = MLandBacktestSystem(tsParams, mlsParams)
+        system.trainAndBacktest()
+        # tradingSystem = TradingSystem(tsParams)
+        # # Set onlyAnalyze to True to quickly generate csv files with all the features
+        # # Set onlyAnalyze to False to run a full backtest
+        # # Set makeInstrumentCsvs to False to not make instrument specific csvs in runLogs. This improves the performance BY A LOT
+        # tradingSystem.startTrading(onlyAnalyze=False, shouldPlot=True, makeInstrumentCsvs=True)
