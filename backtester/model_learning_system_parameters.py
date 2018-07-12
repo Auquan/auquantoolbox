@@ -60,7 +60,7 @@ class ModelLearningSystemParamters(object):
                      liveUpdates=False)
 
     def getValidationDataSourceParams(self):
-        raise NotImplementedError
+        return None
 
     def getTestDataSourceParams(self):
         # raise NotImplementedError
@@ -211,11 +211,17 @@ class ModelLearningSystemParamters(object):
                    'params' : {'period' : 5,
                                'featureName' : 'ma_5',
                                'shift' : 5}}
+        tv = {'featureKey' : 'direction_tv',
+                   'featureId' : 'direction',
+                   'params' : {'period' : 5,
+                               'featureName' : 'ma_5',
+                               'shift' : 5}}
+
         Y = {'featureKey' : 'Y',
              'featureId' : '',
              'params' : {}}
 
-        return {INSTRUMENT_TYPE_STOCK : [tv_ma25, tv_ma5]}
+        return {INSTRUMENT_TYPE_STOCK : [tv]}
 
     def getFeatureSelectionConfigDicts(self):
         corr = {'featureSelectionKey': 'corr',
@@ -228,7 +234,7 @@ class ModelLearningSystemParamters(object):
 
         genericSelect = {'featureSelectionKey' : 'gus',
                          'featureSelectionId' : 'generic_univariate_select',
-                         'params' : {'scoreFunction' : 'f_regression',
+                         'params' : {'scoreFunction' : 'f_classif',
                                      'mode' : 'k_best',
                                      'modeParam' : 12}}
 
@@ -244,9 +250,6 @@ class ModelLearningSystemParamters(object):
         return {INSTRUMENT_TYPE_STOCK : [genericSelect]}
 
     def getFeatureTransformationConfigDicts(self):
-<<<<<<< HEAD
-        return {}
-=======
         stdScaler = {'featureTransformKey': 'stdScaler',
                      'featureTransformId' : 'standard_transform',
                      'params' : {}}
@@ -266,7 +269,6 @@ class ModelLearningSystemParamters(object):
                                  'random_state' : None}}
 
         return {INSTRUMENT_TYPE_STOCK : [pcaScaler, minmaxScaler]}
->>>>>>> add transformation method
 
     def getModelConfigDicts(self):
         regression_model = {'modelKey': 'linear_regression',
@@ -276,7 +278,16 @@ class ModelLearningSystemParamters(object):
         classification_model = {'modelKey': 'logistic_regression',
                      'modelId' : 'logistic_regression',
                      'params' : {}}
-        return {INSTRUMENT_TYPE_STOCK : [regression_model]}
+
+        mlp_classification_model = {'modelKey': 'mlp_classification',
+                     'modelId' : 'mlp_classification',
+                     'params' : {}}
+
+        svm_model = {'modelKey': 'svm_model',
+                     'modelId' : 'support_vector_machine',
+                     'params' : {}}
+
+        return {INSTRUMENT_TYPE_STOCK : [mlp_classification_model, svm_model]}
 
     def getCustomFeatures(self):
         return {}
