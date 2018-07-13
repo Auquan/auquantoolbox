@@ -56,7 +56,7 @@ class ModelLearningSystemParamters(object):
         endDateStr = '2015/02/02'
         return dict( dataSourceName='YahooStockDataSource',
                      featureFolderName='trainingFeatures',
-                     dropFeatures=None,
+                     dropFeatures=['Volume'],
                      cachedFolderName='yahooData/',
                      dataSetId='testTrading',
                      instrumentIds=self.instrumentIds,
@@ -73,7 +73,7 @@ class ModelLearningSystemParamters(object):
         endDateStr = '2017/02/02'
         return dict( dataSourceName='YahooStockDataSource',
                      featureFolderName='testFeatures',
-                     dropFeatures=None,
+                     dropFeatures=['Volume'],
                      cachedFolderName='yahooData/',
                      dataSetId='testTrading',
                      instrumentIds=self.instrumentIds,
@@ -87,7 +87,11 @@ class ModelLearningSystemParamters(object):
                    'params': {'period': 5,
                               'featureName': 'Open'}}
 
-        return {INSTRUMENT_TYPE_STOCK : [ma2Dict]}
+        signDict = {'featureKey': 'sign',
+                   'featureId': 'sign',
+                   'params': {'featureName': 'Open'}}
+
+        return {INSTRUMENT_TYPE_STOCK : [ma2Dict, signDict]}
 
     def getTargetVariableConfigDicts(self):
         tv_ma25 = {'featureKey' : 'tv_ma25',
