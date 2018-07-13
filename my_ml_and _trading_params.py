@@ -38,12 +38,13 @@ class MyTradingParams(TradingSystemParameters):
     def getInstrumentIds(self):
         return self.instrumentIds
 
-    '''
-    Returns the list of instrument IDs
-    '''
+    def getDates(self):
+        return {'startDate' : self.__startDate,
+                'endDate' : self.__endDate}
 
-    def getInstrumentIds(self):
-        return self.instrumentIds
+    def setDates(self, dateDict):
+        self.__startDate = dateDict['startDate']
+        self.__endDate = dateDict['endDate']
 
     '''
     Returns an instance of class DataParser. Source of data for instruments
@@ -83,8 +84,10 @@ class MyTradingParams(TradingSystemParameters):
     '''
 
     def getCustomFeatures(self):
-        return {'my_custom_feature': MyCustomFeature,
-                'prediction': TrainingPredictionFeature}
+        customFeatures = {'my_custom_feature': MyCustomFeature,
+                          'prediction': TrainingPredictionFeature}
+        customFeatures.update(self.setAdditionalCustomFeatures())
+        return customFeatures
 
     def getCustomFeatureSelectionMethods(self):
         return {}
@@ -94,6 +97,9 @@ class MyTradingParams(TradingSystemParameters):
 
     def getCustomModelMethods(self):
         return {}
+
+    def setAdditionalCustomFeatures(self, dicts={}):
+        return dicts
 
     '''
     Returns a dictionary with:
@@ -255,6 +261,68 @@ class MyTradingParams(TradingSystemParameters):
 
     def getPriceFeatureKey(self):
         return 'Adj Close'
+
+class MyModelLearningParams(ModelLearningSystemParamters):
+    """
+    """
+    def __init__(self, tsParams, splitRatio, chunkSize=None, modelDir='savedModels'):
+        self.tsParams = tsParams
+        super(MyModelLearningParams, self).__init__(tsParams.getInstrumentIds(), chunkSize, modelDir)
+        dates = self.tsParams.getDates()
+        self.splitData(splitRatio, dates['startDate'], dates['endDate'])
+
+    def getDataSourceName(self):
+        return self.tsParams.getDataSourceName()
+
+    def getDataSourceBaseParams(self):
+        return self.tsParams.getDataSourceParams()
+
+    def getInstrumentFeatureConfigDicts(self):
+        stockFeatureConfigs = self.tsParams.getStockFeatureConfigDicts()
+        return {INSTRUMENT_TYPE_STOCK : stockFeatureConfigs}
+
+    def getTargetVariableConfigDicts(self):
+        Y = {'featureKey' : 'Y',
+             'featureId' : '',
+             'params' : {}}
+        return {INSTRUMENT_TYPE_STOCK : [Y]}
+
+    def getFeatureSelectionConfigDicts(self):
+        corr = {'featureSelectionKey': 'corr',
+                'featureSelectionId' : 'pearson_correlation',
+                'params' : {'startPeriod' : 0,
+                            'endPeriod' : 60,
+                            'steps' : 10,
+                            'threshold' : 0.1,
+                            'topK' : 2}}
+
+        genericSelect = {'featureSelectionKey' : 'gus',
+                         'featureSelectionId' : 'generic_univariate_select',
+                         'params' : {'scoreFunction' : 'f_classif',
+                                     'mode' : 'k_best',
+                                     'modeParam' : 'all'}}
+        return {INSTRUMENT_TYPE_STOCK : [genericSelect]}
+
+    def getFeatureTransformationConfigDicts(self):
+        stdScaler = {'featureTransformKey': 'stdScaler',
+                     'featureTransformId' : 'standard_transform',
+                     'params' : {}}
+
+        minmaxScaler = {'featureTransformKey' : 'minmaxScaler',
+                        'featureTransformId' : 'minmax_transform',
+                        'params' : {'low' : -1,
+                                    'high' : 1}}
+        return {INSTRUMENT_TYPE_STOCK : [stdScaler]}
+
+    def getModelConfigDicts(self):
+        regression_model = {'modelKey': 'linear_regression',
+                     'modelId' : 'linear_regression',
+                     'params' : {}}
+
+        classification_model = {'modelKey': 'logistic_regression',
+                     'modelId' : 'logistic_regression',
+                     'params' : {}}
+        return {INSTRUMENT_TYPE_STOCK : [classification_model]}
 
 
 class TrainingPredictionFeature(Feature):
