@@ -29,8 +29,8 @@ def processResult(stats, dir, marketFeatures):
     if marketFeatures is not None and os.path.isfile(marketFeatures):
         df = pd.read_csv(marketFeatures, engine='python',
                          index_col='time', parse_dates=True)
-        resultDict['metrics'] = stats.keys()
-        resultDict['metrics_values'] = stats.values()
+        resultDict['metrics'] = list(stats.keys())
+        resultDict['metrics_values'] = list(stats.values())
         resultDict['score'] = stats['Score']
 
         sampledDf = resampleData(df['pnl'], '1H').last()

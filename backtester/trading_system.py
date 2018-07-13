@@ -186,4 +186,4 @@ class TradingSystem:
         dataToStore = {'market':marketFeaturesDf, 'instrument':instrumentLookbackData}
         with open('savedData%s'%datetime.strftime(datetime.now(), '%Y%m%d'), 'wb') as myFile:
             cPickle.dump(dataToStore, myFile)
-        return self.getFinalMetrics([self.startDate, timeOfUpdate], shouldPlot, False)
+        return self.getFinalMetrics([self.startDate, timeOfUpdate], shouldPlot, True)
