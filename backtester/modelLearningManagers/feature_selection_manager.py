@@ -67,3 +67,10 @@ class FeatureSelectionManager(object):
                     self.__selectedFeatures[targetVariableKey] = list(set(selectedFeatures).intersection(self.__selectedFeatures[targetVariableKey]))
                 else:
                     raise ValueError
+
+    def flushSelectedFeatures(self):
+        keys = list(self.__selectedFeatures.keys())
+        for key in keys:
+            del self.__selectedFeatures[key]
+        del self.__selectedFeatures
+        self.__selectedFeatures = {}

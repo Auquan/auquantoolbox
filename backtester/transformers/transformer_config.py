@@ -32,7 +32,10 @@ class FeatureTransformationConfig(Configurator):
 
     @classmethod
     def setupCustomFeatureTransformationMethods(cls, customIdToClass):
-        FeatureTransformationConfig.customIdToClassDict = customIdToClass
+        if len(FeatureTransformationConfig.customIdToClassDict) > 0:
+            FeatureTransformationConfig.customIdToClassDict.update(customIdToClass)
+        else:
+            FeatureTransformationConfig.customIdToClassDict = customIdToClass
 
     @classmethod
     def getClassForFeatureTransformationId(cls, featureTransformId):

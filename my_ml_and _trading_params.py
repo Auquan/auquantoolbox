@@ -38,26 +38,19 @@ class MyTradingParams(TradingSystemParameters):
     def getInstrumentIds(self):
         return self.instrumentIds
 
-    '''
-    Returns the list of instrument IDs
-    '''
+    def getDates(self):
+        return {'startDate' : self.__startDate,
+                'endDate' : self.__endDate}
 
-    def getInstrumentIds(self):
-        return self.instrumentIds
+    def setDates(self, dateDict):
+        self.__startDate = dateDict['startDate']
+        self.__endDate = dateDict['endDate']
 
     '''
     Returns an instance of class DataParser. Source of data for instruments
     '''
 
     def getDataParser(self):
-        self.dataSourceName = 'YahooStockDataSource'
-        self.dataSourceParams = dict(cachedFolderName='yahooData/',
-                                    dataSetId='AuquanTrainingTest',
-                                    instrumentIds=self.instrumentIds,
-                                    startDateStr=self.start,
-                                    endDateStr=self.end,
-                                    event='history')
-
         return YahooStockDataSource(**self.dataSourceParams)
 
     '''
@@ -91,8 +84,10 @@ class MyTradingParams(TradingSystemParameters):
     '''
 
     def getCustomFeatures(self):
-        return {'my_custom_feature': MyCustomFeature,
-                'prediction': TrainingPredictionFeature}
+        customFeatures = {'my_custom_feature': MyCustomFeature,
+                          'prediction': TrainingPredictionFeature}
+        customFeatures.update(self.setAdditionalCustomFeatures())
+        return customFeatures
 
     def getCustomFeatureSelectionMethods(self):
         return {}
@@ -102,6 +97,9 @@ class MyTradingParams(TradingSystemParameters):
 
     def getCustomModelMethods(self):
         return {}
+
+    def setAdditionalCustomFeatures(self, dicts={}):
+        return dicts
 
     '''
     Returns a dictionary with:
@@ -264,6 +262,68 @@ class MyTradingParams(TradingSystemParameters):
     def getPriceFeatureKey(self):
         return 'Adj Close'
 
+class MyModelLearningParams(ModelLearningSystemParamters):
+    """
+    """
+    def __init__(self, tsParams, splitRatio, chunkSize=None, modelDir='savedModels'):
+        self.tsParams = tsParams
+        super(MyModelLearningParams, self).__init__(tsParams.getInstrumentIds(), chunkSize, modelDir)
+        dates = self.tsParams.getDates()
+        self.splitData(splitRatio, dates['startDate'], dates['endDate'])
+
+    def getDataSourceName(self):
+        return self.tsParams.getDataSourceName()
+
+    def getDataSourceBaseParams(self):
+        return self.tsParams.getDataSourceParams()
+
+    def getInstrumentFeatureConfigDicts(self):
+        stockFeatureConfigs = self.tsParams.getStockFeatureConfigDicts()
+        return {INSTRUMENT_TYPE_STOCK : stockFeatureConfigs}
+
+    def getTargetVariableConfigDicts(self):
+        Y = {'featureKey' : 'Y',
+             'featureId' : '',
+             'params' : {}}
+        return {INSTRUMENT_TYPE_STOCK : [Y]}
+
+    def getFeatureSelectionConfigDicts(self):
+        corr = {'featureSelectionKey': 'corr',
+                'featureSelectionId' : 'pearson_correlation',
+                'params' : {'startPeriod' : 0,
+                            'endPeriod' : 60,
+                            'steps' : 10,
+                            'threshold' : 0.1,
+                            'topK' : 2}}
+
+        genericSelect = {'featureSelectionKey' : 'gus',
+                         'featureSelectionId' : 'generic_univariate_select',
+                         'params' : {'scoreFunction' : 'f_classif',
+                                     'mode' : 'k_best',
+                                     'modeParam' : 'all'}}
+        return {INSTRUMENT_TYPE_STOCK : [genericSelect]}
+
+    def getFeatureTransformationConfigDicts(self):
+        stdScaler = {'featureTransformKey': 'stdScaler',
+                     'featureTransformId' : 'standard_transform',
+                     'params' : {}}
+
+        minmaxScaler = {'featureTransformKey' : 'minmaxScaler',
+                        'featureTransformId' : 'minmax_transform',
+                        'params' : {'low' : -1,
+                                    'high' : 1}}
+        return {INSTRUMENT_TYPE_STOCK : [stdScaler]}
+
+    def getModelConfigDicts(self):
+        regression_model = {'modelKey': 'linear_regression',
+                     'modelId' : 'linear_regression',
+                     'params' : {}}
+
+        classification_model = {'modelKey': 'logistic_regression',
+                     'modelId' : 'logistic_regression',
+                     'params' : {}}
+        return {INSTRUMENT_TYPE_STOCK : [classification_model]}
+
 
 class TrainingPredictionFeature(Feature):
 
@@ -314,125 +374,6 @@ class MyCustomFeature(Feature):
         else:
             return currentValue * 0.5
 
-<<<<<<< HEAD
-class MyModelLearningParams(ModelLearningSystemParamters):
-    """
-    """
-    def __init__(self, tsParams, splitRatio):
-        self.tsParams = tsParams
-        self.getInstrumentFeatureConfigDicts = tsParams.getInstrumentFeatureConfigDicts
-        super(MyModelLearningParams, self).__init__(tsParams.getInstrumentIds(), tsParams.chunkSize, tsParams.validationSplit)
-        self.dropFeatures = None
-        self.dataSourceTypes = ['training', 'validation', 'test']
-        self.startDateStr = {}
-        self.endDateStr = {}
-        self.splitData(splitRatio)
-
-        # Change start and end date in tsParams
-        # Backtester will run the trading system only in between these dates
-        tsParams.start = self.startDateStr['test']
-        tsParams.end = self.endDateStr['test']
-
-    def splitData(self, ratio):
-        # NOTE: Length of ratio and dataSourceTypes must be same
-        # To skip a dataSourceType, set the corresponding ratio value to 0
-        if len(ratio) != len(self.dataSourceTypes):
-            raise ValueError
-        startDate = parser.parse(self.tsParams.start)
-        endDate = parser.parse(self.tsParams.end)
-        start = startDate
-        for r, key in zip(ratio, self.dataSourceTypes):
-            if r == 0:
-                self.startDateStr[key] = None
-                self.endDateStr[key] = None
-                continue
-            days = ((endDate - startDate + timedelta(1)) * r) / sum(ratio)
-            self.startDateStr[key] = start.strftime('%Y/%m/%d')
-            self.endDateStr[key] = (start + days - timedelta(1)).strftime('%Y/%m/%d')
-            start = start + days
-
-    def getDataSourceParams(self, dataSourceType):
-        if self.startDateStr[dataSourceType] is None or self.endDateStr[dataSourceType] is None:
-            return None
-        params = self.tsParams.dataSourceParams.copy()
-        params['dataSourceName'] = self.tsParams.dataSourceName
-        params['featureFolderName'] = '%sFeatures' % dataSourceType
-        params['dropFeatures'] = self.dropFeatures
-        params['startDateStr'] = self.startDateStr[dataSourceType]
-        params['endDateStr'] = self.endDateStr[dataSourceType]
-        params['liveUpdates'] = True
-        return params
-
-    def getTrainingDataSourceParams(self):
-        return self.getDataSourceParams('training')
-
-    def getValidationDataSourceParams(self):
-        return self.getDataSourceParams('validation')
-
-    def getTestDataSourceParams(self):
-        return self.getDataSourceParams('test')
-
-    def getInstrumentFeatureConfigDicts(self):
-        stockFeatureConfigs = self.tsParams.getStockFeatureConfigDicts()
-        return {INSTRUMENT_TYPE_STOCK : stockFeatureConfigs}
-
-    def getTargetVariableConfigDicts(self):
-        # tv_ma25 = {'featureKey' : 'tv_ma25',
-        #            'featureId' : 'moving_average',
-        #            'params' : {'period' : 25,
-        #                        'featureName' : 'ma_5',
-        #                        'shift' : 10}}
-        Y = {'featureKey' : 'Y',
-             'featureId' : '',
-             'params' : {}}
-
-        targetVariableList = [Y]
-
-        # These features (or columns), if present in CSV files, will be dropped
-        self.dropFeatures = [tv['featureKey'] for tv in targetVariableList]
-        return {INSTRUMENT_TYPE_STOCK : targetVariableList}
-
-    def getFeatureSelectionConfigDicts(self):
-        corr = {'featureSelectionKey': 'corr',
-                'featureSelectionId' : 'pearson_correlation',
-                'params' : {'startPeriod' : 0,
-                            'endPeriod' : 60,
-                            'steps' : 10,
-                            'threshold' : 0.1,
-                            'topK' : 2}}
-
-        genericSelect = {'featureSelectionKey' : 'gus',
-                         'featureSelectionId' : 'generic_univariate_select',
-                         'params' : {'scoreFunction' : 'f_classif',
-                                     'mode' : 'k_best',
-                                     'modeParam' : 30}}
-        return {INSTRUMENT_TYPE_STOCK : [genericSelect]}
-
-    def getFeatureTransformationConfigDicts(self):
-        stdScaler = {'featureTransformKey': 'stdScaler',
-                     'featureTransformId' : 'standard_transform',
-                     'params' : {}}
-
-        minmaxScaler = {'featureTransformKey' : 'minmaxScaler',
-                        'featureTransformId' : 'minmax_transform',
-                        'params' : {'low' : -1,
-                                    'high' : 1}}
-        return {INSTRUMENT_TYPE_STOCK : [stdScaler]}
-
-    def getModelConfigDicts(self):
-        regression_model = {'modelKey': 'linear_regression',
-                     'modelId' : 'linear_regression',
-                     'params' : {}}
-
-        classification_model = {'modelKey': 'logistic_regression',
-                     'modelId' : 'logistic_regression',
-                     'params' : {}}
-        return {INSTRUMENT_TYPE_STOCK : [classification_model]}
-
-
-
-=======
->>>>>>> add default model comparison method; fix custom feature issue; change model learning prediction feature; add flush methods
 
 if __name__ == "__main__":
     if updateCheck():

@@ -70,3 +70,10 @@ class FeatureTransformationManager(object):
         for transformerKey in transformers:
             instrumentData = transformers[transformerKey].transform(instrumentData)
         return instrumentData
+
+    def flushTransformers(self):
+        keys = list(self.__transformers.keys())
+        for key in keys:
+            del self.__transformers[key]
+        del self.__transformers
+        self.__transformers = OrderedDict()

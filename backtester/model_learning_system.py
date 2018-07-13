@@ -42,6 +42,13 @@ class ModelLearningSystem:
         # self.__trainingModelManager = RegressionModel(mlsParams)
         self.__trainingModelManager = ClassificationModel(mlsParams)
         self.__metricManager  = MetricManager(mlsParams)
+
+        self.__dataSourceHandlerDict = {
+            'training' : {'data' : self.getTrainingInstrurmentData, 'params' : self.mlsParams.getTrainingDataSourceParams},
+            'validation' : {'data' : self.getValidationInstrurmentData, 'params' : self.mlsParams.getValidationDataSourceParams},
+            'test' : {'data' : self.getTestInstrurmentData, 'params' : self.mlsParams.getTestDataSourceParams},
+            }
+
         # modelDict is the dictionary of models where keys are instrumentIds and
         # values are another dictionary with keys as targetVariableKey and value as ModelData
         self.__modelDict = {instrumentId : dict() for instrumentId in self.__instrumentIds}
@@ -196,6 +203,7 @@ class ModelLearningSystem:
     # Computes targetVariables of an instrument or reads from file
     # NOTE: 'dataParams' is required when 'useFile' is True
     def computeTargetVariables(self, instrumentData, instrumentId, targetVariableConfigs, useFile=False, dataParams=None, useTimeFrequency=True):
+        targetVariableConfigs = targetVariableConfigs if isinstance(targetVariableConfigs, list) else [targetVariableConfigs]
         targetVariableKeys = list(map(lambda x: x.getFeatureKey(), targetVariableConfigs))
         timeFrequency = instrumentData.getTimeFrequency() if useTimeFrequency else None
         if useFile:
@@ -252,22 +260,47 @@ class ModelLearningSystem:
             self.__modelDict[instrumentId][key] = ModelData(instrumentId, targetVariableConfig, selectedFeatures[key],
                                                         self.__featureTransformationManager.getTransformers(),
                                                         self.__trainingModelManager.getModel())
-            bestModel = self.compareModels(self.__modelDict[instrumentId][key])
+            bestModel = self.compareModels(instrumentId, self.__modelDict[instrumentId][key], targetVariableConfig, dataSourceType='training',
+                    useTargetVaribleFromFile=useTargetVaribleFromFile, useTimeFrequency=useTimeFrequency)
             self.__modelDict[instrumentId][key].setBestModel(bestModel)
             fileName = self.getFileName(self.modelDir, '.pkl', instrumentId, key)
             self.__modelDict[instrumentId][key].writeModelData(fileName)
             self.__trainingModelManager.flushTrainingModels()
+        self.__targetVariableManager.flushTargetVariables()
+        self.__featureTransformationManager.flushTransformers()
+        self.__featureSelectionManager.flushSelectedFeatures()
+        return
 
-    def compareModels(self, instrumentModelData):
-        # TODO: Compare models and return the best one
-        # Right now this returns the first one
-        for modelKey, model in instrumentModelData.getModels().items():
-            return model
+    def compareModels(self, instrumentId, modelData, targetVariableConfig, dataSourceType='validation', useTargetVaribleFromFile=False, useTimeFrequency=True):
+        # TODO: Compare models and return the best one using metric configs
+        # Right now this uses the default method of comparing model without using metric configs
+        instrumentData = self.__dataSourceHandlerDict[dataSourceType]['data'](instrumentId)
+        dataParams = self.__dataSourceHandlerDict[dataSourceType]['params']()
+        self.computeTargetVariables(instrumentData, instrumentId, targetVariableConfig,
+                                    useFile=useTargetVaribleFromFile, dataParams=dataParams,
+                                    useTimeFrequency=useTimeFrequency)
+        targetVariableData = self.getTargetVariables(targetVariableConfig)[targetVariableConfig.getFeatureKey()]
+        if len(modelData.getModelFeatures()) > 0:
+            selectedInstrumentData = instrumentData.getBookData()[modelData.getModelFeatures()]
+        else:
+            selectedInstrumentData = instrumentData.getBookData()
+        transformedInstrumentData = self.__featureTransformationManager.transformFeaturesUsingTransformers(selectedInstrumentData, modelData.getModelTransformers())
+        transformedInstrumentData = pd.DataFrame(data=transformedInstrumentData, index=selectedInstrumentData.index)
+        bestModel = None
+        bestScore = -np.inf
+        for modelKey, model in modelData.getModels().items():
+            score = model.evaluate(transformedInstrumentData, targetVariableData)
+            if score > bestScore:
+                bestModel = model
+                bestScore = score
+        print(instrumentId, bestScore, bestModel)
+        return bestModel
 
-    def getFinalMetrics(self, instrumentId, dataHandler, dataParamsHandler, targetVariableConfigs, modelConfigDict, useTargetVaribleFromFile=False, useTimeFrequency=True):
-        instrumentData = dataHandler(instrumentId)
+    def getFinalMetrics(self, instrumentId, dataSourceType, targetVariableConfigs, modelConfigDict, useTargetVaribleFromFile=False, useTimeFrequency=True):
+        instrumentData = self.__dataSourceHandlerDict[dataSourceType]['data'](instrumentId)
+        dataParams = self.__dataSourceHandlerDict[dataSourceType]['params']()
         self.computeTargetVariables(instrumentData, instrumentId, targetVariableConfigs,
-                                    useFile=useTargetVaribleFromFile, dataParams=dataParamsHandler(),
+                                    useFile=useTargetVaribleFromFile, dataParams=dataParams,
                                     useTimeFrequency=useTimeFrequency)
         targetVariablesData = self.getTargetVariables(targetVariableConfigs)
         # print(targetVariablesData)
@@ -300,11 +333,11 @@ class ModelLearningSystem:
             self.findBestModel(instrumentId, useTargetVaribleFromFile=useTargetVaribleFromFile, useTimeFrequency=useTimeFrequency)
             # print(self.__modelDict)
             print("Metrics on Training Data:")
-            self.getFinalMetrics(instrumentId, self.getTrainingInstrurmentData, self.mlsParams.getTrainingDataSourceParams,
-                                targetVariableConfigs, modelConfigDict, useTargetVaribleFromFile=useTargetVaribleFromFile, useTimeFrequency=useTimeFrequency)
+            self.getFinalMetrics(instrumentId, 'training' , targetVariableConfigs, modelConfigDict,
+                                useTargetVaribleFromFile=useTargetVaribleFromFile, useTimeFrequency=useTimeFrequency)
             print("Metrics on Test Data:")
-            self.getFinalMetrics(instrumentId, self.getTestInstrurmentData, self.mlsParams.getTestDataSourceParams,
-                                targetVariableConfigs, modelConfigDict, useTargetVaribleFromFile=useTargetVaribleFromFile, useTimeFrequency=useTimeFrequency)
+            self.getFinalMetrics(instrumentId, 'test', targetVariableConfigs, modelConfigDict,
+                                useTargetVaribleFromFile=useTargetVaribleFromFile, useTimeFrequency=useTimeFrequency)
 
 if __name__ == '__main__':
     instrumentIds = ['AAPL', 'IBM']

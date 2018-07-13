@@ -33,7 +33,10 @@ class ModelConfig(Configurator):
 
     @classmethod
     def setupCustomModelMethods(cls, customIdToClass):
-        ModelConfig.customIdToClassDict = customIdToClass
+        if len(ModelConfig.customIdToClassDict) > 0:
+            ModelConfig.customIdToClassDict.update(customIdToClass)
+        else:
+            ModelConfig.customIdToClassDict = customIdToClass
 
     @classmethod
     def getClassForModelId(cls, modelId):

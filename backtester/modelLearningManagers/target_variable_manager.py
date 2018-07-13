@@ -180,3 +180,10 @@ class TargetVariableManager(object):
             raise ValueError
         self.__targetVariables[key].update(tempDf)
         self.__targetVariables[key].fillna(method='ffill', inplace=True)
+
+    def flushTargetVariables(self):
+        keys = list(self.__targetVariables.keys())
+        for key in keys:
+            del self.__targetVariables[key]
+        del self.__targetVariables
+        self.__targetVariables = {}
