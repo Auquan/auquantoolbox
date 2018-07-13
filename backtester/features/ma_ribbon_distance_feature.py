@@ -15,7 +15,7 @@ class MARibbonDistanceFeature(Feature):
         instrumentLookbackData = instrumentManager.getLookbackInstrumentFeatures()
         dataDf = instrumentLookbackData.getFeatureDf(featureParams['featureName'])
         instrumentDict = instrumentManager.getAllInstrumentsByInstrumentId()
-        instrumentIds = instrumentDict.keys()
+        instrumentIds = list(instrumentDict.keys())
         rolling_means = pd.Series([np.zeros(featureParams['numRibbons'])] * len(instrumentDict), index=instrumentIds)
 
         space = int((featureParams['endPeriod'] - featureParams['startPeriod']) / (featureParams['numRibbons'] - 1))
