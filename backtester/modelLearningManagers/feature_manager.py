@@ -15,8 +15,10 @@ class FeatureManager(object):
         self.__dataParser = dataParser
         self.__chunkSize = chunkSize
         self.__fingerprintFile = fingerprintFile
-        if dropFeatures is not None:
+        if dropFeatures is not None and len(dropFeatures) > 0:
             self.__bookDataFeatures = [f for f in dataParser.getBookDataFeatures() if f not in dropFeatures]
+        else:
+            self.__bookDataFeatures = dataParser.getBookDataFeatures()
         instrumentFeatureConfigs = systemParams.getFeatureConfigsForInstrumentType(INSTRUMENT_TYPE_STOCK)
         instrumentFeatureKeys = map(lambda x: x.getFeatureKey(), instrumentFeatureConfigs)
         featureKeys = list(chain(self.__bookDataFeatures, instrumentFeatureKeys))

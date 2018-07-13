@@ -15,11 +15,11 @@ class MovingMaximumFeature(Feature):
         data = lookbackDataDf[featureParams['featureName']]
         return data[-featureParams['period']:].max()
 
-@classmethod
-def computeForInstrumentData(cls, updateNum, featureParams, featureKey, featureManager):
-    data = featureManager.getFeatureDf(featureParams['featureName'])
-    if data is None:
-        logWarn("[%d] instrument data for \"%s\" is not available, can't calculate \"%s\"" % (updateNum, featureParams['featureName'], featureKey))
-        return None
-    movingMax = data.rolling(window=featureParams['period'], min_periods=1).max()
-    return movingMax
+    @classmethod
+    def computeForInstrumentData(cls, updateNum, featureParams, featureKey, featureManager):
+        data = featureManager.getFeatureDf(featureParams['featureName'])
+        if data is None:
+            logWarn("[%d] instrument data for \"%s\" is not available, can't calculate \"%s\"" % (updateNum, featureParams['featureName'], featureKey))
+            return None
+        movingMax = data.rolling(window=featureParams['period'], min_periods=1).max()
+        return movingMax
