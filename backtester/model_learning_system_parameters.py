@@ -1,4 +1,3 @@
-import sys, os
 from backtester.features.feature_config import FeatureConfig
 from backtester.featureSelection.feature_selection_config import FeatureSelectionConfig
 from backtester.transformers.transformer_config import FeatureTransformationConfig
@@ -12,6 +11,7 @@ from datetime import datetime
 from dateutil import parser
 import numpy as np
 import pandas as pd
+
 class ModelLearningSystemParamters(object):
     def __init__(self, symbols, chunkSize=None, modelDir='savedModels'):
         self.instrumentIds = symbols
@@ -106,6 +106,9 @@ class ModelLearningSystemParamters(object):
             self.startDateStr[key] = start.strftime('%Y/%m/%d')
             self.endDateStr[key] = (start + days - timedelta(1)).strftime('%Y/%m/%d')
             start = start + days
+
+    def getInstrumentIds(self):
+        return self.instrumentIds
 
     def getInstrumentFeatureConfigDicts(self):
         ma2Dict = {'featureKey': 'ma_5',

@@ -32,10 +32,7 @@ class FeatureSelectionConfig(Configurator):
 
     @classmethod
     def setupCustomFeatureSelectionMethods(cls, customIdToClass):
-        if len(FeatureSelectionConfig.customIdToClassDict) > 0:
-            FeatureSelectionConfig.customIdToClassDict.update(customIdToClass)
-        else:
-            FeatureSelectionConfig.customIdToClassDict = customIdToClass
+        FeatureSelectionConfig.customIdToClassDict.update(customIdToClass)
 
     @classmethod
     def getClassForFeatureSelectonId(cls, featureSelectionId):

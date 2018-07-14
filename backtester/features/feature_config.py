@@ -116,10 +116,7 @@ class FeatureConfig:
 
     @classmethod
     def setupCustomFeatures(cls, customFeatureIdToFeatureCls):
-        if len(FeatureConfig.customFeatureIdToFeatureCls) > 0:
-            FeatureConfig.customFeatureIdToFeatureCls.update(customFeatureIdToFeatureCls)
-        else:
-            FeatureConfig.customFeatureIdToFeatureCls = customFeatureIdToFeatureCls
+        FeatureConfig.customFeatureIdToFeatureCls.update(customFeatureIdToFeatureCls)
 
     @classmethod
     def getClassForFeatureId(cls, featureId):
