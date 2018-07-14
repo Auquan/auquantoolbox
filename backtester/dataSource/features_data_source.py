@@ -20,7 +20,7 @@ def is_number(s):
 
 
 class FeaturesDataSource(DataSource):
-    def __init__(self, cachedFolderName, dataSetId, instrumentIds, features, startDateStr=None, endDateStr=None, featureFolderName='features', downloadUrl=None, timeKey=None, timeStringFormat=None, liveUpdates=True, pad=True):
+    def __init__(self, cachedFolderName, dataSetId, instrumentIds, features, startDateStr=None, endDateStr=None, featureFolderName='features', downloadUrl=None, timeKey=None, timeStringFormat=None, liveUpdates=True, pad=True, **dummyArgs):
         super(FeaturesDataSource, self).__init__(cachedFolderName, dataSetId, instrumentIds, startDateStr, endDateStr)
         self._usecols = features
         self._featureFolderName = featureFolderName

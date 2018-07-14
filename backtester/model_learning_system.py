@@ -1,7 +1,4 @@
 import sys, os
-parentPath = os.path.abspath("..")
-if parentPath not in sys.path:
-    sys.path.insert(0, parentPath)
 import pandas as pd
 import glob, json
 import numpy as np
@@ -19,6 +16,12 @@ from backtester.modelLearningManagers.classification_model import Classification
 from backtester.model_data import ModelData
 from backtester.constants import *
 from backtester.logger import *
+
+try:
+    FileNotFoundError
+except NameError:
+    # For Python2
+    FileNotFoundError = IOError
 
 class ModelLearningSystem:
 
@@ -101,7 +104,7 @@ class ModelLearningSystem:
             params['startDateStr'] = dates['startDate']
             params['endDateStr'] = dates['endDate']
             dataSource = dataSourceClass(**params)
-            featureManager = FeatureManager(self,mlsParams, dataSource, instrumentIds, self.mlsParams.chunkSize, dropFeatures=dropFeatures)
+            featureManager = FeatureManager(self.mlsParams, dataSource, instrumentIds, self.mlsParams.chunkSize, dropFeatures=dropFeatures)
             featureManager.computeInstrumentFeatures(instrumentIds, writeFeatures=True, prepend=dates['prepend'], updateFingerprint=True)
 
         if len(actionDict['instrumentIds']) > 0:
@@ -287,6 +290,7 @@ class ModelLearningSystem:
         bestModel = None
         bestScore = -np.inf
         for modelKey, model in modelData.getModels().items():
+            transformedInstrumentData = transformedInstrumentData.loc[self.__trainingModelManager.computeWorkingTimestamps(targetVariableData)]
             score = model.evaluate(transformedInstrumentData, targetVariableData)
             if score > bestScore:
                 bestModel = model
@@ -321,7 +325,7 @@ class ModelLearningSystem:
 
     def runModels(self):
         # TODO: Find a better way to infer whether to use target variable from file or not (maybe through config dict)
-        useTargetVaribleFromFile = True
+        useTargetVaribleFromFile = False
         useTimeFrequency = True
         targetVariableConfigs = self.mlsParams.getTargetVariableConfigsForInstrumentType(INSTRUMENT_TYPE_STOCK)
         modelConfigs = self.mlsParams.getModelConfigsForInstrumentType(INSTRUMENT_TYPE_STOCK)

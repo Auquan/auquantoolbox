@@ -1,5 +1,10 @@
+import sys, os
+parentPath = os.path.abspath(".")
+if parentPath not in sys.path:
+    sys.path.insert(0, parentPath)
 from backtester.trading_system_parameters import TradingSystemParameters
-from backtester.model_learning_system_parameters import ModelLearningSystemParamters
+from backtester.model_learning_system_parameters import ModelLearningSystemParamters, MLSTrainingPredictionFeature
+from backtester.model_learning_and_trading_system import MLandTradingSystem
 from backtester.features.feature import Feature
 from backtester.dataSource.yahoo_data_source import YahooStockDataSource
 from backtester.executionSystem.simple_execution_system import SimpleExecutionSystem
@@ -20,15 +25,15 @@ class MyTradingParams(TradingSystemParameters):
         super(MyTradingParams, self).__init__()
         self.count = 0
         self.params = {}
-        self.start = '2017/01/01'
-        self.end = '2017/06/30'
+        self.startDate = '2017/01/01'
+        self.endDate = '2017/06/30'
         self.instrumentIds = ['AAPL', 'GOOG']
         self.dataSourceName = 'YahooStockDataSource'
         self.dataSourceParams = dict(cachedFolderName='yahooData/',
                                     dataSetId='AuquanTrainingTest',
                                     instrumentIds=self.instrumentIds,
-                                    startDateStr=self.start,
-                                    endDateStr=self.end,
+                                    startDateStr=self.startDate,
+                                    endDateStr=self.endDate,
                                     event='history')
 
     '''
@@ -39,12 +44,18 @@ class MyTradingParams(TradingSystemParameters):
         return self.instrumentIds
 
     def getDates(self):
-        return {'startDate' : self.__startDate,
-                'endDate' : self.__endDate}
+        return {'startDate' : self.startDate,
+                'endDate' : self.endDate}
 
     def setDates(self, dateDict):
-        self.__startDate = dateDict['startDate']
-        self.__endDate = dateDict['endDate']
+        self.startDate = dateDict['startDate']
+        self.endDate = dateDict['endDate']
+
+    def getDataSourceName(self):
+        return self.dataSourceName
+
+    def getDataSourceParams(self):
+        return self.dataSourceParams
 
     '''
     Returns an instance of class DataParser. Source of data for instruments
@@ -86,7 +97,6 @@ class MyTradingParams(TradingSystemParameters):
     def getCustomFeatures(self):
         customFeatures = {'my_custom_feature': MyCustomFeature,
                           'prediction': TrainingPredictionFeature}
-        customFeatures.update(self.setAdditionalCustomFeatures())
         return customFeatures
 
     def getCustomFeatureSelectionMethods(self):
@@ -98,8 +108,6 @@ class MyTradingParams(TradingSystemParameters):
     def getCustomModelMethods(self):
         return {}
 
-    def setAdditionalCustomFeatures(self, dicts={}):
-        return dicts
 
     '''
     Returns a dictionary with:
@@ -156,7 +164,7 @@ class MyTradingParams(TradingSystemParameters):
                    'featureId': 'rsi',
                    'params': {'period': 30,
                               'featureName': 'Adj Close'}}
-        self.__stockFeatureConfigs = [predictionDict, ma1Dict, ma2Dict, sdevDict, momDict, rsiDict]
+        self.__stockFeatureConfigs = [ma1Dict, ma2Dict, sdevDict, momDict, rsiDict]
         return {INSTRUMENT_TYPE_STOCK: self.__stockFeatureConfigs}
 
     def getStockFeatureConfigDicts(self):
@@ -281,11 +289,20 @@ class MyModelLearningParams(ModelLearningSystemParamters):
         stockFeatureConfigs = self.tsParams.getStockFeatureConfigDicts()
         return {INSTRUMENT_TYPE_STOCK : stockFeatureConfigs}
 
+    def getCustomFeatures(self):
+        customFeatures = {'prediction': MLSTrainingPredictionFeature}
+        return customFeatures
+
     def getTargetVariableConfigDicts(self):
         Y = {'featureKey' : 'Y',
              'featureId' : '',
              'params' : {}}
-        return {INSTRUMENT_TYPE_STOCK : [Y]}
+        tv = {'featureKey' : 'direction_tv',
+                  'featureId' : 'direction',
+                  'params' : {'period' : 5,
+                              'featureName' : 'ma_5',
+                              'shift' : 5}}
+        return {INSTRUMENT_TYPE_STOCK : [tv]}
 
     def getFeatureSelectionConfigDicts(self):
         corr = {'featureSelectionKey': 'corr',
@@ -322,7 +339,16 @@ class MyModelLearningParams(ModelLearningSystemParamters):
         classification_model = {'modelKey': 'logistic_regression',
                      'modelId' : 'logistic_regression',
                      'params' : {}}
-        return {INSTRUMENT_TYPE_STOCK : [classification_model]}
+
+        mlp_classification_model = {'modelKey': 'mlp_classification',
+                    'modelId' : 'mlp_classification',
+                    'params' : {}}
+
+        svm_model = {'modelKey': 'svm_model',
+                    'modelId' : 'support_vector_machine',
+                    'params' : {}}
+
+        return {INSTRUMENT_TYPE_STOCK : [classification_model, mlp_classification_model, svm_model]}
 
 
 class TrainingPredictionFeature(Feature):
@@ -381,8 +407,6 @@ if __name__ == "__main__":
         print('pip install -U auquan_toolbox')
     else:
         tsParams = MyTradingParams()
-        tradingSystem = TradingSystem(tsParams)
-        # Set onlyAnalyze to True to quickly generate csv files with all the features
-        # Set onlyAnalyze to False to run a full backtest
-        # Set makeInstrumentCsvs to False to not make instrument specific csvs in runLogs. This improves the performance BY A LOT
-        tradingSystem.startTrading(onlyAnalyze=False, shouldPlot=True, makeInstrumentCsvs=True)
+        mlsParams = MyModelLearningParams(tsParams, splitRatio=[0.6, 0, 0.4], chunkSize=1000)
+        system = MLandTradingSystem(tsParams, mlsParams)
+        system.trainAndBacktest(onlyAnalyze=False, shouldPlot=True, makeInstrumentCsvs=True)

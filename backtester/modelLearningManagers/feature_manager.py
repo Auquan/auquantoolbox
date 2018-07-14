@@ -79,10 +79,11 @@ class FeatureManager(object):
             self.__instrumentDataManger.dumpInstrumentDataChunk()
         if not self.__instrumentDataManger.checkDataIntegrity(chunkNumber):
             logWarn("Some data is missing! Check logs")
-        if self.__chunkSize is None:
-            self.__instrumentDataManger.cleanup()
-        else:
-            self.__instrumentDataManger.cleanup(delInstrumentData=True)
+        # NOTE: For now, deleting instrument data regardless of chunkSize
+        # if self.__chunkSize is None:
+            # self.__instrumentDataManger.cleanup()
+        # else:
+        self.__instrumentDataManger.cleanup(delInstrumentData=True)
         if prepend is True:
             self.__instrumentDataManger.appendExistingInstrumentData(chunkSize=self.__chunkSize)
         self.__instrumentDataManger.saveInstrumentDataFingerprint(self.__fingerprintFile, update=updateFingerprint, prepend=prepend)

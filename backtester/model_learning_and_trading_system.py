@@ -30,7 +30,8 @@ class MLandTradingSystem(object):
         print('Setting Dates in TS Params')
         self.tsParams.setDates({'startDate':self.mlsParams.startDateStr['test'], 'endDate':self.mlsParams.endDateStr['test']})
 
-        self.loadModels(self.tsParams.getTargetVariableKey())
+        # NOTE: Selecting the first target variable key only as trading system doesn't support multiple target variable keys 
+        self.loadModels(self.mlsParams.getTargetVariableKeys()[0])
         self.setUpMLSTrainingPredictionFeature()
 
         print('Loaded Configs, Loading Backtester and Data')
