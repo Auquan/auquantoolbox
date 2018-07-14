@@ -10,6 +10,7 @@ from backtester.dataSource.yahoo_data_source import YahooStockDataSource
 from backtester.executionSystem.simple_execution_system import SimpleExecutionSystem
 from backtester.orderPlacer.backtesting_order_placer import BacktestingOrderPlacer
 from backtester.trading_system import TradingSystem
+from backtester.timeRule.us_time_rule import USTimeRule
 from backtester.version import updateCheck
 from backtester.constants import *
 import pandas as pd
@@ -25,12 +26,12 @@ class MyTradingParams(TradingSystemParameters):
         super(MyTradingParams, self).__init__()
         self.count = 0
         self.params = {}
-        self.startDate = '2017/01/01'
-        self.endDate = '2017/06/30'
+        self.startDate = '2007/12/31'
+        self.endDate = '2017/12/31'
         self.instrumentIds = ['AAPL', 'GOOG']
         self.dataSourceName = 'YahooStockDataSource'
         self.dataSourceParams = dict(cachedFolderName='yahooData/',
-                                    dataSetId='AuquanTrainingTest',
+                                    dataSetId='test',
                                     instrumentIds=self.instrumentIds,
                                     startDateStr=self.startDate,
                                     endDateStr=self.endDate,
@@ -83,7 +84,8 @@ class MyTradingParams(TradingSystemParameters):
     a lot of time, you realistically wont be able to keep upto pace.
     '''
     def getTimeRuleForUpdates(self):
-        return NotImplementedError
+        return USTimeRule(startDate = self.startDate,
+                          endDate = self.endDate)
 
     '''
     This is a way to use any custom features you might have made.
@@ -165,7 +167,7 @@ class MyTradingParams(TradingSystemParameters):
                    'params': {'period': 30,
                               'featureName': 'Adj Close'}}
         self.__stockFeatureConfigs = [ma1Dict, ma2Dict, sdevDict, momDict, rsiDict]
-        return {INSTRUMENT_TYPE_STOCK: self.__stockFeatureConfigs}
+        return {INSTRUMENT_TYPE_STOCK: self.__stockFeatureConfigs + [predictionDict]}
 
     def getStockFeatureConfigDicts(self):
         return self.__stockFeatureConfigs
@@ -225,10 +227,10 @@ class MyTradingParams(TradingSystemParameters):
             z_score[sdev==0] = 0
 
 
-            predictions[z_score>1] = 0  #Sell the stock
-            predictions[z_score<-1] = 1 #Buy the stock
-            predictions[(z_score<1) & (z_score>0.5)] = 0.25 # Don't sell but don't close existing positions either
-            predictions[(z_score>-1) & (z_score<-0.5)] = 0.75 # Don't buy but don't close existing positions either
+            predictions[z_score>1] = 1  #Buy the stock
+            predictions[z_score<-1] = 0 #Sell the stock
+            predictions[(z_score<1) & (z_score>0.5)] = 0.75 # Don't buy but don't close existing positions either
+            predictions[(z_score>-1) & (z_score<-0.5)] = 0.25 # Don't sell but don't close existing positions either
             predictions[(z_score>-.5) & (z_score<0.5)] = 0.5 # Close existing positions
 
         return predictions
@@ -246,7 +248,7 @@ class MyTradingParams(TradingSystemParameters):
                                  longLimit=10000,
                                  shortLimit=10000,
                                  capitalUsageLimit=0.10 * self.getStartingCapital(),
-                                 lotSize=1)
+                                 enterlotSize=1, exitlotSize=1)
 
     '''
     Returns the type of order placer we want to use. its an implementation of the class OrderPlacer.

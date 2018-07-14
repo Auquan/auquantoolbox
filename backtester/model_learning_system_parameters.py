@@ -109,10 +109,6 @@ class ModelLearningSystemParamters(object):
             self.startDateStr[key] = start.strftime('%Y/%m/%d')
             self.endDateStr[key] = (start + days - timedelta(1)).strftime('%Y/%m/%d')
             start = start + days
-        print("++++++++++++++++++++++++++++++++++++++++++++")
-        print(self.startDateStr, self.endDateStr)
-        print(startDateStr, endDateStr)
-        print("++++++++++++++++++++++++++++++++++++++++++++")
 
     def getInstrumentIds(self):
         return self.instrumentIds
@@ -337,7 +333,7 @@ class MLSTrainingPredictionFeature(Feature):
 
     @classmethod
     def computeForInstrument(cls, updateNum, time, featureParams, featureKey, instrumentManager):
-        predictions = pd.Series(0.5, index = instrumentManager.getAllInstrumentsByInstrumentId())
+        predictions = pd.Series(0.5, index=instrumentManager.getAllInstrumentsByInstrumentId())
         # holder for all the instrument features for all instruments
         lookbackInstrumentFeatures = instrumentManager.getLookbackInstrumentFeatures()
         for instrumentId in instrumentManager.getAllInstrumentsByInstrumentId():
