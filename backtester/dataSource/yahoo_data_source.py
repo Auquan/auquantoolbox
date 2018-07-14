@@ -166,7 +166,7 @@ class YahooStockDataSource(DataSource):
                     'high': float(row['High']),
                     'low': float(row['Low']),
                     'close': float(row['Close']),
-                    'adjClose' : float(row['Adj Close']),
+                    'Adj Close' : float(row['Adj Close']),
                     'volume': float(row['Volume'])}
 
         timeOfUpdate = datetime.strptime(row['Date'], '%Y-%m-%d')
