@@ -1,4 +1,4 @@
-import sys
+import sys, os
 parentPath = os.path.abspath("..")
 if parentPath not in sys.path:
     sys.path.insert(0, parentPath)
@@ -338,7 +338,7 @@ class ModelLearningSystem:
                                 useTargetVaribleFromFile=useTargetVaribleFromFile, useTimeFrequency=useTimeFrequency)
 
 if __name__ == '__main__':
-    instrumentIds = ['AAPL', 'IBM']
+    instrumentIds = ['SIZ', 'MLQ']
     chunkSize = 1000
     mlsParams = ModelLearningSystemParamters(instrumentIds, chunkSize=chunkSize)
     system1 = ModelLearningSystem(mlsParams, chunkSize=None)
