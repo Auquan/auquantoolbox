@@ -9,6 +9,7 @@ from backtester.logger import *
 from datetime import timedelta
 from datetime import datetime
 from dateutil import parser
+from fractions import Fraction
 import numpy as np
 import pandas as pd
 
@@ -97,15 +98,21 @@ class ModelLearningSystemParamters(object):
         startDate = parser.parse(startDateStr)
         endDate = parser.parse(endDateStr)
         start = startDate
+        sumFraction = Fraction(sum(ratio)).limit_denominator()
         for r, key in zip(ratio, self.dataSourceTypes):
             if r == 0:
                 self.startDateStr[key] = None
                 self.endDateStr[key] = None
                 continue
-            days = ((endDate - startDate + timedelta(1)) * r) / sum(ratio)
+            rFraction = Fraction(r).limit_denominator()
+            days = ((endDate - startDate + timedelta(1)) * rFraction.numerator * sumFraction.denominator) / (rFraction.denominator * sumFraction.numerator)
             self.startDateStr[key] = start.strftime('%Y/%m/%d')
             self.endDateStr[key] = (start + days - timedelta(1)).strftime('%Y/%m/%d')
             start = start + days
+        print("++++++++++++++++++++++++++++++++++++++++++++")
+        print(self.startDateStr, self.endDateStr)
+        print(startDateStr, endDateStr)
+        print("++++++++++++++++++++++++++++++++++++++++++++")
 
     def getInstrumentIds(self):
         return self.instrumentIds
@@ -272,6 +279,11 @@ class ModelLearningSystemParamters(object):
     #####################################################################
     ###      END OF OVERRIDING METHODS
     #####################################################################
+
+    def getTargetVariableKeys(self):
+        if len(self.getTargetVariableConfigDicts()) == 0:
+            return []
+        return [tv['featureKey'] for tv in self.getTargetVariableConfigDicts()[INSTRUMENT_TYPE_STOCK]]
 
     def getFeatureConfigsForInstrumentType(self, instrumentType):
         if instrumentType in self.__instrumentFeatureConfigs:
