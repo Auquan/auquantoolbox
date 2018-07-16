@@ -19,18 +19,18 @@ class MLandTradingSystem(object):
         self.selectedFeatures = {}
         self.transformers = {}
 
-    def trainAndBacktest(self, chunkSize=None, onlyAnalyze=False, shouldPlot=True, makeInstrumentCsvs=True):
+    def trainAndBacktest(self, chunkSize=None, onlyAnalyze=False, shouldPlot=True, makeInstrumentCsvs=True, useTargetVaribleFromFile=True, useTimeFrequency=True):
         print('Loading ModelLearningSystem')
         mlSystem = ModelLearningSystem(self.mlsParams, chunkSize=None)
         print('ModelLearningSystem Loaded, Training Model...')
-        mlSystem.runModels()
+        mlSystem.runModels(useTargetVaribleFromFile, useTimeFrequency)
         print('Model Trained, Modifying TS Params')
         # Change start and end date in tsParams
         # Backtester will run the trading system only in between these dates
         print('Setting Dates in TS Params')
         self.tsParams.setDates({'startDate':self.mlsParams.startDateStr['test'], 'endDate':self.mlsParams.endDateStr['test']})
 
-        # NOTE: Selecting the first target variable key only as trading system doesn't support multiple target variable keys 
+        # NOTE: Selecting the first target variable key only as trading system doesn't support multiple target variable keys
         self.loadModels(self.mlsParams.getTargetVariableKeys()[0])
         self.setUpMLSTrainingPredictionFeature()
 
