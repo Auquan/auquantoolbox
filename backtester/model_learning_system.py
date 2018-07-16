@@ -14,6 +14,7 @@ from backtester.model_learning_system_parameters import ModelLearningSystemParam
 from backtester.modelLearningManagers.target_variable_manager import TargetVariableManager
 from backtester.modelLearningManagers.feature_selection_manager import FeatureSelectionManager
 from backtester.modelLearningManagers.feature_transformation_manager import FeatureTransformationManager
+from backtester.modelLearningManagers.metric_manager import MetricManager
 from backtester.modelLearningManagers.regression_model import RegressionModel
 from backtester.modelLearningManagers.classification_model import ClassificationModel
 from backtester.model_data import ModelData
@@ -40,7 +41,7 @@ class ModelLearningSystem:
         self.__featureTransformationManager = FeatureTransformationManager(mlsParams)
         # self.__trainingModelManager = RegressionModel(mlsParams)
         self.__trainingModelManager = ClassificationModel(mlsParams)
-
+        self.__metricManager  = MetricManager(mlsParams)
         # modelDict is the dictionary of models where keys are instrumentIds and
         # values are another dictionary with keys as targetVariableKey and value as ModelData
         self.__modelDict = {instrumentId : dict() for instrumentId in self.__instrumentIds}

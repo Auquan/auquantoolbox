@@ -2,6 +2,7 @@ from backtester.features.feature_config import FeatureConfig
 from backtester.featureSelection.feature_selection_config import FeatureSelectionConfig
 from backtester.transformers.transformer_config import FeatureTransformationConfig
 from backtester.predefinedModels.model_config import ModelConfig
+from backtester.mlMetrics.metric_config import MetricConfig
 from backtester.constants import *
 from backtester.logger import *
 
@@ -16,6 +17,7 @@ class ModelLearningSystemParamters(object):
         FeatureSelectionConfig.setupCustomFeatureSelectionMethods(self.getCustomFeatureSelectionMethods())
         FeatureTransformationConfig.setupCustomFeatureTransformationMethods(self.getCustomFeatureTransformationMethods())
         ModelConfig.setupCustomModelMethods(self.getCustomModelMethods())
+        MetricConfig.setupCustomMetricMethods(self.getCustomMetricMethods())
 
         self.__instrumentFeatureConfigs = {}
         instrumentFeatureConfigDicts = self.getInstrumentFeatureConfigDicts()
@@ -41,6 +43,11 @@ class ModelLearningSystemParamters(object):
         ModelConfigDicts = self.getModelConfigDicts()
         for instrumentType in ModelConfigDicts:
             self.__modelConfigs[instrumentType] = list(map(lambda x: ModelConfig(x), ModelConfigDicts[instrumentType]))
+
+        self.__metricConfigs = {}
+        MetricConfigDicts = self.getMetricConfigDicts()
+        for instrumentType in MetricConfigDicts:
+            self.__metricConfigs[instrumentType] = list(map(lambda x: MetricConfig(x), MetricConfigDicts[instrumentType]))
 
     def getInstrumentIds(self):
         return self.instrumentIds
@@ -285,6 +292,13 @@ class ModelLearningSystemParamters(object):
 
         return {INSTRUMENT_TYPE_STOCK : [mlp_classification_model, svm_model]}
 
+    def getMetricConfigDicts(self):
+        accuracy_score_metric = {'metricKey' : 'accuracy_score',
+                                 'metricId' : 'accuracy_score',
+                                 'params' : {}}
+
+        return {INSTRUMENT_TYPE_STOCK : [accuracy_score_metric]}
+
     def getCustomFeatures(self):
         return {}
 
@@ -296,6 +310,9 @@ class ModelLearningSystemParamters(object):
 
     def getCustomModelMethods(self):
         return {}
+
+    def getCustomMetricMethods(self):
+        return{}
 
     #####################################################################
     ###      END OF OVERRIDING METHODS
@@ -328,5 +345,11 @@ class ModelLearningSystemParamters(object):
     def getModelConfigsForInstrumentType(self, instrumentType):
         if instrumentType in self.__modelConfigs:
             return self.__modelConfigs[instrumentType]
+        else:
+            return []
+
+    def getMetricConfigsForInstrumentType(self, instrumentType):
+        if instrumentType in self.__metricConfigs:
+            return self.__metricConfigs[instrumentType]
         else:
             return []
