@@ -14,7 +14,7 @@ def updateCheck():
     '''
     updateStr = ''
     try:
-        toolboxJson = urlopen('https://pypi.python.org/pypi/auquan_toolbox/json')
+        toolboxJson = urlopen('https://pypi.python.org/pypi/auquan_toolbox_beta/json')
     except Exception as e:
         return False
 

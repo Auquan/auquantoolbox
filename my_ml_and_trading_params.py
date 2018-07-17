@@ -411,4 +411,4 @@ if __name__ == "__main__":
         tsParams = MyTradingParams()
         mlsParams = MyModelLearningParams(tsParams, splitRatio=[0.6, 0, 0.4], chunkSize=1000)
         system = MLandTradingSystem(tsParams, mlsParams)
-        system.trainAndBacktest(onlyAnalyze=False, shouldPlot=True, makeInstrumentCsvs=True)
+        system.trainAndBacktest(onlyAnalyze=False, shouldPlot=True, makeInstrumentCsvs=True, useTargetVaribleFromFile=False)
