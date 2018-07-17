@@ -260,10 +260,11 @@ class ModelLearningSystem:
             transformedInstrumentData = pd.DataFrame(data=transformedInstrumentData, index=selectedInstrumentData.index)
             # self.__featureTransformationManager.writeTransformers('transformersss.pkl')
             self.__trainingModelManager.fitModel(transformedInstrumentData, targetVariablesData[key])
+            predictedVariablesData = self.__trainingModelManager.predict(transformedInstrumentData)
             self.__modelDict[instrumentId][key] = ModelData(instrumentId, targetVariableConfig, selectedFeatures[key],
                                                         self.__featureTransformationManager.getTransformers(),
                                                         self.__trainingModelManager.getModel())
-            bestModel = self.compareModels(instrumentId, self.__modelDict[instrumentId][key], targetVariableConfig, dataSourceType='training',
+            bestModel = self.compareModels(instrumentId, self.__modelDict[instrumentId][key], targetVariableConfig, predictedVariablesData, dataSourceType='training',
                     useTargetVaribleFromFile=useTargetVaribleFromFile, useTimeFrequency=useTimeFrequency)
             self.__modelDict[instrumentId][key].setBestModel(bestModel)
             fileName = self.getFileName(self.modelDir, '.pkl', instrumentId, key)
@@ -274,9 +275,10 @@ class ModelLearningSystem:
         self.__featureSelectionManager.flushSelectedFeatures()
         return
 
-    def compareModels(self, instrumentId, modelData, targetVariableConfig, dataSourceType='validation', useTargetVaribleFromFile=False, useTimeFrequency=True):
+    def compareModels(self, instrumentId, modelData, targetVariableConfig, predictedVariablesData, dataSourceType='validation', useTargetVaribleFromFile=False, useTimeFrequency=True):
         # TODO: Compare models and return the best one using metric configs
         # Right now this uses the default method of comparing model without using metric configs
+        metricConfigs = self.mlsParams.getMetricConfigsForInstrumentType(INSTRUMENT_TYPE_STOCK)
         instrumentData = self.__dataSourceHandlerDict[dataSourceType]['data'](instrumentId)
         dataParams = self.__dataSourceHandlerDict[dataSourceType]['params']()
         self.computeTargetVariables(instrumentData, instrumentId, targetVariableConfig,
@@ -288,17 +290,39 @@ class ModelLearningSystem:
         else:
             selectedInstrumentData = instrumentData.getBookData()
         transformedInstrumentData = self.__featureTransformationManager.transformFeaturesUsingTransformers(selectedInstrumentData, modelData.getModelTransformers())
-        transformedInstrumentData = pd.DataFrame(data=transformedInstrumentData, index=selectedInstrumentData.index)
+        transformedInstrumentData = pd.DataFrame(data = transformedInstrumentData, index = selectedInstrumentData.index)
         bestModel = None
+        mBestModel = {}
         bestScore = -np.inf
-        for modelKey, model in modelData.getModels().items():
-            transformedInstrumentData = transformedInstrumentData.loc[self.__trainingModelManager.computeWorkingTimestamps(targetVariableData)]
-            score = model.evaluate(transformedInstrumentData, targetVariableData)
-            if score > bestScore:
-                bestModel = model
-                bestScore = score
-        print(instrumentId, bestScore, bestModel)
-        return bestModel
+        mBestScore = {}
+        for metricConfig in metricConfigs:
+            key = metricConfig.getKey()
+            mBestScore[key] = -np.inf
+            mBestModel[key] = None
+            mscore = {}
+        if metricConfigs is None:
+            for modelKey, model in modelData.getModels().items():
+                transformedInstrumentData = transformedInstrumentData.loc[self.__trainingModelManager.computeWorkingTimestamps(targetVariableData)]
+                score = model.evaluate(transformedInstrumentData, targetVariableData)
+                if score > bestScore:
+                    bestModel = model
+                    bestScore = score
+                print("the best model ")
+                print(instrumentId, bestScore, bestModel)
+                return bestModel
+        else:
+            for metricConfig in metricConfigs:
+                key = metricConfig.getKey()
+                for modelKey, model in modelData.getModels().items():
+                    transformedInstrumentData = transformedInstrumentData.loc[self.__trainingModelManager.computeWorkingTimestamps(targetVariableData)]
+                    mscore = self.__metricManager.calculateMetrics(targetVariableData, predictedVariablesData[modelKey], metricConfigs)
+                    if mscore[key] > mBestScore[key]:
+                        mBestModel[key] = model
+                        mBestScore[key] = mscore[key]
+                print("the best model for " + key)
+                print(instrumentId, mBestScore, mBestModel)
+            return mBestModel[self.mlsParams.getMetricSelectionKey()]
+
 
     def getFinalMetrics(self, instrumentId, dataSourceType, targetVariableConfigs, modelConfigDict, useTargetVaribleFromFile=False, useTimeFrequency=True):
         instrumentData = self.__dataSourceHandlerDict[dataSourceType]['data'](instrumentId)

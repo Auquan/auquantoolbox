@@ -2,9 +2,11 @@ from backtester.configurator import Configurator
 from backtester.mlMetrics.metric import Metric
 from backtester.logger import *
 from backtester.mlMetrics.classificationMetrics.accuracy_score_metric import AccuracyScoreMetric
+from backtester.mlMetrics.regressionMetrics.explained_variance_score_metric import ExplainedVarianceScoreMetric
 
 
-metricIdToClassDict = {'accuracy_score' : AccuracyScoreMetric}
+metricIdToClassDict = {'accuracy_score' : AccuracyScoreMetric,
+                       'explained_variance_score': ExplainedVarianceScoreMetric}
 
 
 class MetricConfig(Configurator):

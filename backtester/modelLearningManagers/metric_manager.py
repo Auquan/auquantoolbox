@@ -7,7 +7,6 @@ class MetricManager(object):
 
     def __init__(self, systemParams):
         self.systemParams = systemParams
-        self.metricData = {}
 
     def getMetrics(self):
         return self.metricData
@@ -35,20 +34,12 @@ class MetricManager(object):
             return None
         return timestamps
 
-    def calculateMetrics(self, targetVariablesData, predictedVariablesData, modelConfigs, metricConfigs = None):
-        if metricConfigs is None:
-            metricConfigs = self.systemParams.getMetricConfigsForInstrumentType(INSTRUMENT_TYPE_STOCK)
-
-        for modelConfig in modelConfigs:
-            key = modelConfig.getKey()
-            timestamps = self.computeWorkingTimestamps(targetVariablesData)
-            if timestamps is not None and (isinstance(predictedVariablesData[key], pd.DataFrame) or isinstance(predictedVariablesData[key], pd.Series)):
-                predictedVariablesData[key] = predictedVariablesData[key].loc[timestamps]
-            for metricConfig in metricConfigs:
-                metricKey = metricConfig.getKey()
-                metricId = metricConfig.getId()
-                metricParams = metricConfig.getParams()
-                metricCls = metricConfig.getClassForMetricId(metricId)
-
-                self.metricData = metricCls.computeMetrics(metricParams, targetVariablesData, predictedVariablesData[key])
-            print(self.metricData)
+    def calculateMetrics(self, targetVariablesData, predictedVariablesData, metricConfigs):
+        score = {}
+        for metricConfig in metricConfigs:
+            metricKey = metricConfig.getKey()
+            metricId = metricConfig.getId()
+            metricParams = metricConfig.getParams()
+            metricCls = metricConfig.getClassForMetricId(metricId)
+            score[metricKey] = metricCls.computeMetrics(metricParams, targetVariablesData, predictedVariablesData)
+        return score

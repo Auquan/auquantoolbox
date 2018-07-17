@@ -36,11 +36,6 @@ class ExpMovingAverageFeature(Feature):
         if data is None:
             logWarn("[%d] instrument data for \"%s\" is not available, can't calculate \"%s\"" % (updateNum, featureParams['featureName'], featureKey))
             return None
-<<<<<<< HEAD
         halflife = featureParams['period']
         expMovingAvg = data.ewm(halflife=halflife, adjust=False).mean()
-=======
-        movingAvg = data.rolling(window=featureParams['period'], min_periods=1).mean()
-        expMovingAvg
->>>>>>> rebase with vn_training_model_manager
         return expMovingAvg

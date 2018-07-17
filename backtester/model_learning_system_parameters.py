@@ -250,7 +250,17 @@ class ModelLearningSystemParamters(object):
                                  'metricId' : 'accuracy_score',
                                  'params' : {}}
 
-        return {INSTRUMENT_TYPE_STOCK : [accuracy_score_metric]}
+        explained_variance_score_metric = {'metricKey' : 'explained_variance_score',
+                                    'metricId' : 'explained_variance_score',
+                                    'params' : {}}
+
+        return {INSTRUMENT_TYPE_STOCK : [explained_variance_score_metric]}
+
+    def getMetricSelectionKey(self):
+        variance = 'explained_variance_score'
+        accuracy = 'accuracy_score_metric'
+
+        return variance
 
     def getCustomFeatures(self):
         return {}

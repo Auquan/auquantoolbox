@@ -26,10 +26,6 @@ class MACDFeature(Feature):
             logWarn("[%d] instrument data for \"%s\" is not available, can't calculate \"%s\"" % (updateNum, featureParams['featureName'], featureKey))
             return None
         movingAvg1 = data.rolling(window=featureParams['period1'], min_periods=1).mean()
-<<<<<<< HEAD
         movingAvg2 = data.rolling(window=featureParams['period2'], min_periods=1).mean()
-=======
-        movingAvg2 = data.rolling(window=featureParams['period2'], min_periods=2).mean()
->>>>>>> rebase with vn_training_model_manager
         macd = movingAvg1-movingAvg2
         return macd

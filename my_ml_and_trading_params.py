@@ -299,8 +299,8 @@ class MyModelLearningParams(ModelLearningSystemParamters):
         Y = {'featureKey' : 'Y',
              'featureId' : '',
              'params' : {}}
-        tv = {'featureKey' : 'direction_tv',
-                  'featureId' : 'direction',
+        tv = {'featureKey' : 'difference_tv',
+                  'featureId' : 'difference',
                   'params' : {'period' : 5,
                               'featureName' : 'ma_5',
                               'shift' : 5}}
@@ -346,11 +346,15 @@ class MyModelLearningParams(ModelLearningSystemParamters):
                     'modelId' : 'mlp_classification',
                     'params' : {}}
 
+        mlp_regression_model = {'modelKey': 'mlp_regression',
+                    'modelId' : 'mlp_regression',
+                    'params' : {}}
+
         svm_model = {'modelKey': 'svm_model',
                     'modelId' : 'support_vector_machine',
                     'params' : {}}
 
-        return {INSTRUMENT_TYPE_STOCK : [classification_model, mlp_classification_model, svm_model]}
+        return {INSTRUMENT_TYPE_STOCK : [regression_model, mlp_regression_model]}
 
 
 class TrainingPredictionFeature(Feature):
