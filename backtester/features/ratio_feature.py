@@ -47,5 +47,7 @@ class RatioMarketFeature(Feature):
             logWarn("[%d] instrument data for \"%s\" is not available, can't calculate \"%s\"" % (updateNum, featureParams['featureName'], featureKey))
             return None
         ratio = data1/data2
-        ratio[ratio==np.Inf]=0
+        ratio.replace(np.Inf,np.nan, inplace=True)
+        ratio.replace(-np.Inf,np.nan,inplace=True)
+        ratio.fillna(0,inplace=True)
         return ratio

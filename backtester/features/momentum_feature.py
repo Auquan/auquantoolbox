@@ -36,7 +36,9 @@ class MomentumFeature(Feature):
         if data is None:
             logWarn("[%d] instrument data for \"%s\" is not available, can't calculate \"%s\"" % (updateNum, featureParams['featureName'], featureKey))
             return None
-        mid = data.shift(featureParams['period']).fillna(0.00)
+        mid = data.shift(featureParams['period']).fillna(method='pad')
         momentum = ((data/mid)-1)*100
-        momentum[momentum == np.Inf] = 0.00
+        momentum.replace(np.Inf,np.nan, inplace=True)
+        momentum.replace(-np.Inf,np.nan,inplace=True)
+        momentum.fillna(0,inplace=True)
         return momentum

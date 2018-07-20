@@ -20,6 +20,7 @@ class MLandTradingSystem(object):
         self.transformers = {}
 
     def trainAndBacktest(self, chunkSize=None, onlyAnalyze=False, shouldPlot=True, makeInstrumentCsvs=True, useTargetVaribleFromFile=True, useTimeFrequency=True):
+        print("=================================================================")
         print('Loading ModelLearningSystem')
         mlSystem = ModelLearningSystem(self.mlsParams, chunkSize=None)
         print('ModelLearningSystem Loaded, Training Model...')

@@ -123,6 +123,8 @@ class InstrumentData(object):
             df = pd.DataFrame(index=timeUpdates, columns=self.__bookData.columns)
             df.at[self.__bookData.index] = self.__bookData.copy()
             df.fillna(method=method, inplace=True)
+            df.replace(np.Inf,np.nan, inplace=True)
+            df.replace(-np.Inf,np.nan, inplace=True)
             df.fillna(0.0, inplace=True)
             del self.__bookData
             self.__bookData = df

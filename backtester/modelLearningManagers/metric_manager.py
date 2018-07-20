@@ -30,7 +30,6 @@ class MetricManager(object):
         elif isinstance(data, pd.DataFrame) or isinstance(data, pd.Series):
             timestamps = data.index
         else:
-            print("hello")
             return None
         return timestamps
 

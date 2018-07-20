@@ -242,17 +242,18 @@ class ModelLearningSystem:
     def findBestModel(self, instrumentId, useTargetVaribleFromFile=False, useTimeFrequency=True):
         # TODO: Some function arguments are hardcoded. Make it changeable
         instrumentData = self.getTrainingInstrurmentData(instrumentId)
+        a = instrumentData.getBookData()
+        a.dropna()
         targetVariableConfigs = self.mlsParams.getTargetVariableConfigsForInstrumentType(INSTRUMENT_TYPE_STOCK)
         modelConfigs = self.mlsParams.getModelConfigsForInstrumentType(INSTRUMENT_TYPE_STOCK)
         self.computeTargetVariables(instrumentData, instrumentId, targetVariableConfigs,
                                     useFile=useTargetVaribleFromFile, dataParams=self.mlsParams.getTrainingDataSourceParams(),
                                     useTimeFrequency=useTimeFrequency)
         targetVariablesData = self.getTargetVariables(targetVariableConfigs)
-        # print(targetVariablesData)
-        self.__featureSelectionManager.pruneFeatures(instrumentData.getBookData(), targetVariablesData,
+        self.__featureSelectionManager.pruneFeatures(a, targetVariablesData, instrumentId,
                                                      aggregationMethod='intersect')
         selectedFeatures = self.__featureSelectionManager.getAllSelectedFeatures()
-        print("Selected Features for %s:" % instrumentId, selectedFeatures)
+
         for targetVariableConfig in targetVariableConfigs:
             key = targetVariableConfig.getFeatureKey()
             selectedInstrumentData = instrumentData.getBookData()[selectedFeatures[key]]
@@ -307,21 +308,25 @@ class ModelLearningSystem:
                 if score > bestScore:
                     bestModel = model
                     bestScore = score
-                print("the best model ")
-                print(instrumentId, bestScore, bestModel)
+                logImportantInfo("The best model")
+                logImportantInfoMultiple(instrumentId, bestScore, bestModel)
                 return bestModel
         else:
             for metricConfig in metricConfigs:
                 key = metricConfig.getKey()
+                logImportantInfo("Evaluation scores for the metric "+key)
                 for modelKey, model in modelData.getModels().items():
                     transformedInstrumentData = transformedInstrumentData.loc[self.__trainingModelManager.computeWorkingTimestamps(targetVariableData)]
                     mscore = self.__metricManager.calculateMetrics(targetVariableData, predictedVariablesData[modelKey], metricConfigs)
+                    logImportantInfo("Score of the model "+modelKey+" is %f" %mscore[key])
                     if mscore[key] > mBestScore[key]:
                         mBestModel[key] = model
                         mBestScore[key] = mscore[key]
-                print("the best model for " + key)
-                print(instrumentId, mBestScore, mBestModel)
-            return mBestModel[self.mlsParams.getMetricSelectionKey()]
+                logImportantInfo("the best model for " + key)
+                logImportantInfoMultiple(instrumentId, mBestScore, mBestModel)
+            chosen_metric = self.mlsParams.getMetricSelectionKey()
+            logImportantInfo("Running backtester for the chosen metric i.e "+chosen_metric)
+            return mBestModel[chosen_metric]
 
 
     def getFinalMetrics(self, instrumentId, dataSourceType, targetVariableConfigs, modelConfigDict, useTargetVaribleFromFile=False, useTimeFrequency=True):
@@ -342,12 +347,10 @@ class ModelLearningSystem:
             transformedInstrumentData = self.__featureTransformationManager.transformFeaturesUsingTransformers(selectedInstrumentData, modelData.getModelTransformers())
             transformedInstrumentData = pd.DataFrame(data=transformedInstrumentData, index=selectedInstrumentData.index)
             for modelKey in modelData.getModels():
-                print("=================================================================")
-                print("Model Key:", modelKey, "| Stock:", instrumentId, '| targetVariable:', key)
+                logImportantInfoMultiple("Model Key:", modelKey, "| Stock:", instrumentId, '| targetVariable:', key)
                 self.__trainingModelManager.addModel(modelData.getModelByModelKey(modelKey), modelKey)
-                print(self.__trainingModelManager.evaluateModel(transformedInstrumentData, targetVariablesData[key],
+                logImportantInfoMultiple(self.__trainingModelManager.evaluateModel(transformedInstrumentData, targetVariablesData[key],
                                                                 modelConfig=modelConfigDict[modelKey]))
-                print("=================================================================")
 
     def runModels(self, useTargetVaribleFromFile=True, useTimeFrequency =True):
         # TODO: Find a better way to infer whether to use target variable from file or not (maybe through config dict)
@@ -355,13 +358,13 @@ class ModelLearningSystem:
         modelConfigs = self.mlsParams.getModelConfigsForInstrumentType(INSTRUMENT_TYPE_STOCK)
         modelConfigDict = {config.getKey() : config for config in modelConfigs}
         for instrumentId in self.__instrumentIds:
-            print("STOCK:", instrumentId)
+            logImportantInfo("For Instrument Type STOCK: "+instrumentId)
             self.findBestModel(instrumentId, useTargetVaribleFromFile=useTargetVaribleFromFile, useTimeFrequency=useTimeFrequency)
             # print(self.__modelDict)
-            print("Metrics on Training Data:")
+            logImportantInfo("Metrics on Training Data:")
             self.getFinalMetrics(instrumentId, 'training' , targetVariableConfigs, modelConfigDict,
                                 useTargetVaribleFromFile=useTargetVaribleFromFile, useTimeFrequency=useTimeFrequency)
-            print("Metrics on Test Data:")
+            logImportantInfo("Metrics on Test Data:")
             self.getFinalMetrics(instrumentId, 'test', targetVariableConfigs, modelConfigDict,
                                 useTargetVaribleFromFile=useTargetVaribleFromFile, useTimeFrequency=useTimeFrequency)
 

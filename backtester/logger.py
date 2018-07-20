@@ -1,7 +1,7 @@
-def log(msg, verbose):
+import pandas as pd
+def log(msg, verbose ):
     if verbose:
         print(msg)
-
 
 def logError(msg, verbose=True):
     log('Error: ' + msg, verbose)
@@ -10,6 +10,12 @@ def logError(msg, verbose=True):
 def logInfo(msg, verbose=False):
     log('Info: ' + msg, verbose)
 
+def logImportantInfo(msg , verbose = False):
+        log('ImportantInfo: '+ msg, verbose)
+
+def logImportantInfoMultiple(*args, verbose = False):
+        for x in args:
+            log(x, verbose)
 
 def logWarn(msg, verbose=True):
     log('Warn: ' + msg, verbose)

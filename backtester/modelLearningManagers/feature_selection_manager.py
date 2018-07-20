@@ -36,7 +36,7 @@ class FeatureSelectionManager(object):
         else:
             raise ValueError
 
-    def pruneFeatures(self, instrumentData, targetVariables, featureSelectionConfigs=None, aggregationMethod='intersect'):
+    def pruneFeatures(self, instrumentData, targetVariables, instrumentId, featureSelectionConfigs=None, aggregationMethod='intersect'):
         if featureSelectionConfigs is None:
             featureSelectionConfigs = self.systemParams.getFeatureSelectionConfigsForInstrumentType(INSTRUMENT_TYPE_STOCK)
         featureKeys = self.getKeysFromData(instrumentData)
@@ -59,14 +59,25 @@ class FeatureSelectionManager(object):
                 featureSelectionCls = featureSelectionConfig.getClassForFeatureSelectonId(featureSelectionId)
                 selectedFeatures = featureSelectionCls.extractImportantFeatures(targetVariableKey, featureKeys,
                                                                                   featureSelectionParams, self)
+                logImportantInfo("Lets see the features left after each selection method")
+                logImportantInfo("for the target variable key "+targetVariableKey)
                 if self.__selectedFeatures[targetVariableKey] == []:
                     self.__selectedFeatures[targetVariableKey] = selectedFeatures
+                    logImportantInfo("The selected features after first feature selection method "+featureSelectionKey)
+                    logImportantInfoMultiple(self.__selectedFeatures[targetVariableKey])
                 elif aggregationMethod == 'union':
                     self.__selectedFeatures[targetVariableKey] = list(set(selectedFeatures).union(self.__selectedFeatures[targetVariableKey]))
+                    logImportantInfo("The selected features after union between previous selected features and "+featureSelectionKey)
+                    logImportantInfoMultiple(self.__selectedFeatures[targetVariableKey])
                 elif aggregationMethod == 'intersect':
                     self.__selectedFeatures[targetVariableKey] = list(set(selectedFeatures).intersection(self.__selectedFeatures[targetVariableKey]))
+                    logImportantInfo("The selected features after intersection between previous selected features and "+featureSelectionKey)
+                    logImportantInfoMultiple(self.__selectedFeatures[targetVariableKey])
                 else:
                     raise ValueError
+            logImportantInfo("after feature selection, the selected features are ")
+            logImportantInfoMultiple(selectedFeatures)
+            logImportantInfo("-----------------------------------------------------------------")
 
     def flushSelectedFeatures(self):
         keys = list(self.__selectedFeatures.keys())

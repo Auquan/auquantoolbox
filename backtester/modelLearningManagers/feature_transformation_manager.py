@@ -54,7 +54,6 @@ class FeatureTransformationManager(object):
     def _transformFeaturesUsingConfigs(self, instrumentData, transformationConfigs=None):
         if transformationConfigs is None:
             transformationConfigs = self.systemParams.getFeatureTransformationConfigsForInstrumentType(INSTRUMENT_TYPE_STOCK)
-
         for transformationConfig in transformationConfigs:
             transformationKey = transformationConfig.getKey()
             transformationId = transformationConfig.getId()
@@ -62,6 +61,8 @@ class FeatureTransformationManager(object):
             transformationCls = transformationConfig.getClassForFeatureTransformationId(transformationId)
             self.__transformers[transformationKey] = transformationCls(transformationParams)
             instrumentData = self.__transformers[transformationKey].transform(instrumentData)
+            logImportantInfo("The transformed InstrumentData after applying the transformation method "+ transformationKey)
+            logImportantInfoMultiple(instrumentData)
         return instrumentData
 
     def transformFeaturesUsingTransformers(self, instrumentData, transformers):

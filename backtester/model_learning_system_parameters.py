@@ -31,33 +31,58 @@ class ModelLearningSystemParamters(object):
 
         self.__instrumentFeatureConfigs = {}
         instrumentFeatureConfigDicts = self.getInstrumentFeatureConfigDicts()
+        logImportantInfo("The features added from the given book data features are ")
         for instrumentType in instrumentFeatureConfigDicts:
-                self.__instrumentFeatureConfigs[instrumentType] = list(map(lambda x: FeatureConfig(x), instrumentFeatureConfigDicts[instrumentType]))
-
-        self.__targetVariableConfigs = {}
-        targetVariableConfigDicts = self.getTargetVariableConfigDicts()
-        for instrumentType in targetVariableConfigDicts:
-            self.__targetVariableConfigs[instrumentType] = list(map(lambda x: FeatureConfig(x), targetVariableConfigDicts[instrumentType]))
+            listi = instrumentFeatureConfigDicts[instrumentType]
+            for item in listi:
+                logImportantInfo(item['featureKey'])
+            self.__instrumentFeatureConfigs[instrumentType] = list(map(lambda x: FeatureConfig(x), instrumentFeatureConfigDicts[instrumentType]))
 
         self.__featureSelectionConfigs = {}
         featureSelectionConfigDicts = self.getFeatureSelectionConfigDicts()
+        logImportantInfo("The feature selection methods applied on the features in order are")
         for instrumentType in featureSelectionConfigDicts:
+            listi = featureSelectionConfigDicts[instrumentType]
+            for item in listi:
+                logImportantInfo(item['featureSelectionKey'])
             self.__featureSelectionConfigs[instrumentType] = list(map(lambda x: FeatureSelectionConfig(x), featureSelectionConfigDicts[instrumentType]))
 
         self.__featureTransformationConfigs = {}
+        logImportantInfo("The feature transformation methods applied on the features in order are")
         featureTransformationConfigDicts = self.getFeatureTransformationConfigDicts()
         for instrumentType in featureTransformationConfigDicts:
+            listi = featureTransformationConfigDicts[instrumentType]
+            for item in listi:
+                logImportantInfo(item['featureTransformKey'])
             self.__featureTransformationConfigs[instrumentType] = list(map(lambda x: FeatureTransformationConfig(x), featureTransformationConfigDicts[instrumentType]))
 
         self.__modelConfigs = {}
+        logImportantInfo("The Machine Learning models applied are")
         ModelConfigDicts = self.getModelConfigDicts()
         for instrumentType in ModelConfigDicts:
+            listi = ModelConfigDicts[instrumentType]
+            for item in listi:
+                logImportantInfo(item['modelKey'])
             self.__modelConfigs[instrumentType] = list(map(lambda x: ModelConfig(x), ModelConfigDicts[instrumentType]))
 
         self.__metricConfigs = {}
+        logImportantInfo("The metrics used to compare Machine Learning models are")
         MetricConfigDicts = self.getMetricConfigDicts()
         for instrumentType in MetricConfigDicts:
+            listi = MetricConfigDicts[instrumentType]
+            for item in listi:
+                logImportantInfo(item['metricKey'])
             self.__metricConfigs[instrumentType] = list(map(lambda x: MetricConfig(x), MetricConfigDicts[instrumentType]))
+
+        self.__targetVariableConfigs = {}
+        logImportantInfo("The target variables formed by shifting fatures are")
+        targetVariableConfigDicts = self.getTargetVariableConfigDicts()
+        for instrumentType in targetVariableConfigDicts:
+            listi = targetVariableConfigDicts[instrumentType]
+            for item in listi:
+                logImportantInfoMultiple(item['featureKey']+" formed by shifting "+item['params']['featureName'])
+            self.__targetVariableConfigs[instrumentType] = list(map(lambda x: FeatureConfig(x), targetVariableConfigDicts[instrumentType]))
+
 
     def getInstrumentIds(self):
         return self.instrumentIds
