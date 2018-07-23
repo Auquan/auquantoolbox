@@ -287,6 +287,12 @@ class ModelLearningSystemParamters(object):
 
         return variance
 
+    def getPlotkey(self):
+        classification_key = 'confusion_matrix'
+        regression_key = 'scatter'
+
+        return regression_key
+
     def getCustomFeatures(self):
         return {}
 

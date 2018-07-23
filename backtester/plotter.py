@@ -1,8 +1,12 @@
 import pandas as pd
 import numpy as np
 import plotly
+import itertools
 from plotly.graph_objs import Scatter, Layout
+from plotly.offline import plot
+import matplotlib.pyplot as plt
 from os import listdir
+from sklearn.metrics import confusion_matrix
 from os.path import isfile, join, basename
 from backtester.metrics.metrics import Metrics
 from backtester.logger import *
@@ -83,3 +87,52 @@ def generateData(fileName, startingCapital, benchmark_pnl):
     if benchmark_pnl is not None:
         data += [Scatter(x=df.index,y=100 * benchmark_pnl, name='Benchmark (%)')]
     return data
+
+def generateRegressionModelEvaluationGraph(actual_values, predicted_values):
+    trace1 = Scatter(x = actual_values, y = predicted_values, mode = "markers", name = "actual vs predicted",
+                    marker = dict(color = 'rgba(16, 112, 2, 0.8)'))
+    p = max(actual_values.max(), predicted_values.max())
+    q = min(actual_values.min(), predicted_values.min())
+    x1 = np.linspace(p, q)
+    y1 = x1
+    trace2 = Scatter(x = x1, y = y1, mode = "lines", name = "when actual equals predicted",
+                    marker = dict(color = 'rgba(191, 63, 191, 0.8)'))
+    data = [trace1, trace2]
+    layout = dict(title = 'actual_values vs predicted_values',
+              xaxis= dict(title= 'actual_values',ticklen= 5,zeroline= False),
+              yaxis= dict(title= 'predicted_values',ticklen= 5,zeroline= False)
+             )
+    fig = dict(data = data, layout = layout)
+    plot(fig)
+
+def generateClassificationModelEvaluationGraph(actual_values, predicted_values, normalize = False):
+    cm = confusion_matrix(actual_values, predicted_values)
+    cmap = plt.cm.Blues
+    length = len(cm)
+    title = "confusion matrix without normalization"
+    if normalize:
+        cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+        title = "confusion matrix with normalization"
+    classes = np.unique(actual_values)
+    tick_marks = []
+    for x in range(length):
+        tick_marks.insert(x,np.sum(cm[x]))
+    plt.figure()
+    plt.imshow(cm, interpolation='nearest', cmap=cmap)
+    plt.title(title)
+    plt.colorbar()
+    tick_marks = np.arange(len(classes))
+    plt.xticks(tick_marks, classes, rotation=45)
+    plt.yticks(tick_marks, classes)
+
+    fmt = '.2f' if normalize else 'd'
+    thresh = cm.max() / 2.
+    for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
+        plt.text(j, i, format(cm[i, j], fmt),
+                 horizontalalignment="center",
+                 color="white" if cm[i, j] > thresh else "black")
+
+    plt.tight_layout()
+    plt.ylabel('True label')
+    plt.xlabel('Predicted label')
+    plt.show()

@@ -166,7 +166,12 @@ class MyTradingParams(TradingSystemParameters):
                    'featureId': 'rsi',
                    'params': {'period': 30,
                               'featureName': 'Adj Close'}}
-        self.__stockFeatureConfigs = [ma1Dict, ma2Dict, sdevDict, momDict, rsiDict]
+        signDict = {'featureKey' : 'scale',
+                    'featureId' : 'scale',
+                    'params' : {'period': 3,
+                               'featureName': 'Adj Close',
+                               'scale': 3}}
+        self.__stockFeatureConfigs = [ma1Dict, ma2Dict, sdevDict, momDict, rsiDict, signDict]
         return {INSTRUMENT_TYPE_STOCK: self.__stockFeatureConfigs + [predictionDict]}
 
     def getStockFeatureConfigDicts(self):
@@ -303,6 +308,11 @@ class MyModelLearningParams(ModelLearningSystemParamters):
                   'featureId' : 'difference',
                   'params' : {'period' : 5,
                               'featureName' : 'ma_5',
+                              'shift' : 5}}
+        ctv = {'featureKey' : 'sign_tv',
+                  'featureId' : 'sign',
+                  'params' : {'period': 5,
+                              'featureName' : 'mom_90',
                               'shift' : 5}}
         return {INSTRUMENT_TYPE_STOCK : [tv]}
 

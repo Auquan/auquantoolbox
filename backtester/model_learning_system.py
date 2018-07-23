@@ -17,6 +17,7 @@ from backtester.modelLearningManagers.classification_model import Classification
 from backtester.model_data import ModelData
 from backtester.constants import *
 from backtester.logger import *
+from backtester.plotter import *
 
 try:
     FileNotFoundError
@@ -239,6 +240,14 @@ class ModelLearningSystem:
             fileName = fileName + '_' + arg
         return os.path.join(dir, fileName + ext)
 
+    def runSuitablePlot(self, key, actual_values, predicted_values):
+        if key == 'confusion_matrix':
+            generateClassificationModelEvaluationGraph(actual_values, predicted_values)
+        elif key == 'scatter':
+            generateRegressionModelEvaluationGraph(actual_values, predicted_values)
+        else:
+            return None
+
     def findBestModel(self, instrumentId, useTargetVaribleFromFile=False, useTimeFrequency=True):
         # TODO: Some function arguments are hardcoded. Make it changeable
         instrumentData = self.getTrainingInstrurmentData(instrumentId)
@@ -294,12 +303,14 @@ class ModelLearningSystem:
         transformedInstrumentData = pd.DataFrame(data = transformedInstrumentData, index = selectedInstrumentData.index)
         bestModel = None
         mBestModel = {}
+        mBestModelKey = {}
         bestScore = -np.inf
         mBestScore = {}
         for metricConfig in metricConfigs:
             key = metricConfig.getKey()
             mBestScore[key] = -np.inf
             mBestModel[key] = None
+            mBestModelKey[key] = None
             mscore = {}
         if metricConfigs is None:
             for modelKey, model in modelData.getModels().items():
@@ -321,11 +332,16 @@ class ModelLearningSystem:
                     logImportantInfo("Score of the model "+modelKey+" is %f" %mscore[key])
                     if mscore[key] > mBestScore[key]:
                         mBestModel[key] = model
+                        mBestModelKey[key] = modelKey
                         mBestScore[key] = mscore[key]
                 logImportantInfo("the best model for " + key)
                 logImportantInfoMultiple(instrumentId, mBestScore, mBestModel)
             chosen_metric = self.mlsParams.getMetricSelectionKey()
-            logImportantInfo("Running backtester for the chosen metric i.e "+chosen_metric)
+            chosen_model_key = mBestModelKey[chosen_metric]
+            #plotting
+            suitable_plotting_method_key = self.mlsParams.getPlotkey()
+            self.runSuitablePlot(suitable_plotting_method_key, targetVariableData, predictedVariablesData[chosen_model_key])
+            logImportantInfo("Running backtester for the best model according to chosen metric i.e "+chosen_metric)
             return mBestModel[chosen_metric]
 
 
