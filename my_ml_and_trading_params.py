@@ -285,6 +285,8 @@ class MyModelLearningParams(ModelLearningSystemParamters):
         super(MyModelLearningParams, self).__init__(tsParams.getInstrumentIds(), chunkSize, modelDir)
         dates = self.tsParams.getDates()
         self.splitData(splitRatio, dates['startDate'], dates['endDate'])
+        self.classificationModelKeys = ['mlp_classification', 'logistic_regression', 'svm_model']
+        self.regressionModelKeys = ['linear_regression', 'mlp_regression']
 
     def getDataSourceName(self):
         return self.tsParams.getDataSourceName()
@@ -314,7 +316,7 @@ class MyModelLearningParams(ModelLearningSystemParamters):
                   'params' : {'period': 5,
                               'featureName' : 'mom_90',
                               'shift' : 5}}
-        return {INSTRUMENT_TYPE_STOCK : [tv]}
+        return {INSTRUMENT_TYPE_STOCK : [ctv]}
 
     def getFeatureSelectionConfigDicts(self):
         corr = {'featureSelectionKey': 'corr',
@@ -344,28 +346,43 @@ class MyModelLearningParams(ModelLearningSystemParamters):
         return {INSTRUMENT_TYPE_STOCK : [stdScaler]}
 
     def getModelConfigDicts(self):
-        regression_model = {'modelKey': 'linear_regression',
+        regressionModel = {'modelKey': 'linear_regression',
                      'modelId' : 'linear_regression',
                      'params' : {}}
 
-        classification_model = {'modelKey': 'logistic_regression',
+        classificationModel = {'modelKey': 'logistic_regression',
                      'modelId' : 'logistic_regression',
                      'params' : {}}
 
-        mlp_classification_model = {'modelKey': 'mlp_classification',
+        mlpClassificationModel = {'modelKey': 'mlp_classification',
                     'modelId' : 'mlp_classification',
                     'params' : {}}
 
-        mlp_regression_model = {'modelKey': 'mlp_regression',
+        mlpRegressionModel = {'modelKey': 'mlp_regression',
                     'modelId' : 'mlp_regression',
                     'params' : {}}
 
-        svm_model = {'modelKey': 'svm_model',
+        svmModel = {'modelKey': 'svm_model',
                     'modelId' : 'support_vector_machine',
                     'params' : {}}
 
-        return {INSTRUMENT_TYPE_STOCK : [regression_model, mlp_regression_model]}
+        return {INSTRUMENT_TYPE_STOCK : [classificationModel, mlpClassificationModel]}
 
+    def getMetricConfigDicts(self):
+        accuracyScoreMetric = {'metricKey' : 'accuracy_score',
+                                 'metricId' : 'accuracy_score',
+                                 'params' : {}}
+
+        explainedVarianceScoreMetric = {'metricKey' : 'explained_variance_score',
+                                    'metricId' : 'explained_variance_score',
+                                    'params' : {}}
+
+        return {INSTRUMENT_TYPE_STOCK : [explainedVarianceScoreMetric]}
+
+    def getMetricSelectionKey(self):
+        variance = 'explained_variance_score'
+        accuracy = 'accuracy_score'
+        return variance
 
 class TrainingPredictionFeature(Feature):
 

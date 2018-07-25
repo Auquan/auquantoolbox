@@ -88,49 +88,49 @@ def generateData(fileName, startingCapital, benchmark_pnl):
         data += [Scatter(x=df.index,y=100 * benchmark_pnl, name='Benchmark (%)')]
     return data
 
-def generateRegressionModelEvaluationGraph(actual_values, predicted_values):
-    trace1 = Scatter(x = actual_values, y = predicted_values, mode = "markers", name = "actual vs predicted",
+def generateRegressionModelEvaluationGraph(actualValues, predictedValues):
+    trace1 = Scatter(x = actualValues, y = predictedValues, mode = "markers", name = "actual vs predicted",
                     marker = dict(color = 'rgba(16, 112, 2, 0.8)'))
-    p = max(actual_values.max(), predicted_values.max())
-    q = min(actual_values.min(), predicted_values.min())
+    p = max(actualValues.max(), predictedValues.max())
+    q = min(actualValues.min(), predictedValues.min())
     x1 = np.linspace(p, q)
     y1 = x1
     trace2 = Scatter(x = x1, y = y1, mode = "lines", name = "when actual equals predicted",
                     marker = dict(color = 'rgba(191, 63, 191, 0.8)'))
     data = [trace1, trace2]
-    layout = dict(title = 'actual_values vs predicted_values',
-              xaxis= dict(title= 'actual_values',ticklen= 5,zeroline= False),
-              yaxis= dict(title= 'predicted_values',ticklen= 5,zeroline= False)
+    layout = dict(title = 'actualValues vs predictedValues',
+              xaxis= dict(title= 'actualValues',ticklen= 5,zeroline= False),
+              yaxis= dict(title= 'predictedValues',ticklen= 5,zeroline= False)
              )
     fig = dict(data = data, layout = layout)
     plot(fig)
 
-def generateClassificationModelEvaluationGraph(actual_values, predicted_values, normalize = False):
-    cm = confusion_matrix(actual_values, predicted_values)
+def generateClassificationModelEvaluationGraph(actualValues, predictedValues, normalize = False):
+    confusionMatrix = confusion_matrix(actualValues, predictedValues)
     cmap = plt.cm.Blues
-    length = len(cm)
+    length = len(confusionMatrix)
     title = "confusion matrix without normalization"
     if normalize:
-        cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+        confusionMatrix = confusionMatrix.astype('float') / confusionMatrix.sum(axis=1)[:, np.newaxis]
         title = "confusion matrix with normalization"
-    classes = np.unique(actual_values)
-    tick_marks = []
+    classes = np.unique(actualValues)
+    tickMarks = []
     for x in range(length):
-        tick_marks.insert(x,np.sum(cm[x]))
+        tickMarks.insert(x,np.sum(confusionMatrix[x]))
     plt.figure()
-    plt.imshow(cm, interpolation='nearest', cmap=cmap)
+    plt.imshow(confusionMatrix, interpolation='nearest', cmap=cmap)
     plt.title(title)
     plt.colorbar()
-    tick_marks = np.arange(len(classes))
-    plt.xticks(tick_marks, classes, rotation=45)
-    plt.yticks(tick_marks, classes)
+    tickMarks = np.arange(len(classes))
+    plt.xticks(tickMarks, classes, rotation=45)
+    plt.yticks(tickMarks, classes)
 
     fmt = '.2f' if normalize else 'd'
-    thresh = cm.max() / 2.
-    for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
-        plt.text(j, i, format(cm[i, j], fmt),
+    thresh = confusionMatrix.max() / 2.
+    for i, j in itertools.product(range(confusionMatrix.shape[0]), range(confusionMatrix.shape[1])):
+        plt.text(j, i, format(confusionMatrix[i, j], fmt),
                  horizontalalignment="center",
-                 color="white" if cm[i, j] > thresh else "black")
+                 color="white" if confusionMatrix[i, j] > thresh else "black")
 
     plt.tight_layout()
     plt.ylabel('True label')

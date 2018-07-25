@@ -271,27 +271,13 @@ class ModelLearningSystemParamters(object):
         return {}
 
     def getMetricConfigDicts(self):
-        accuracy_score_metric = {'metricKey' : 'accuracy_score',
-                                 'metricId' : 'accuracy_score',
-                                 'params' : {}}
-
-        explained_variance_score_metric = {'metricKey' : 'explained_variance_score',
-                                    'metricId' : 'explained_variance_score',
-                                    'params' : {}}
-
-        return {INSTRUMENT_TYPE_STOCK : [explained_variance_score_metric]}
+        return {}
 
     def getMetricSelectionKey(self):
-        variance = 'explained_variance_score'
-        accuracy = 'accuracy_score_metric'
-
-        return variance
+        return None
 
     def getPlotkey(self):
-        classification_key = 'confusion_matrix'
-        regression_key = 'scatter'
-
-        return regression_key
+        return None
 
     def getCustomFeatures(self):
         return {}

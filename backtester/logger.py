@@ -1,5 +1,5 @@
 import pandas as pd
-def log(msg, verbose ):
+def log(msg, verbose = False ):
     if verbose:
         print(msg)
 
@@ -10,12 +10,12 @@ def logError(msg, verbose=True):
 def logInfo(msg, verbose=False):
     log('Info: ' + msg, verbose)
 
-def logImportantInfo(msg , verbose = False):
+def logImportantInfo(msg , verbose = True):
         log('ImportantInfo: '+ msg, verbose)
 
-def logImportantInfoMultiple(*args, verbose = False):
+def logImportantInfoMultiple(*args, **kwargs):
         for x in args:
-            log(x, verbose)
+            log(x, kwargs.pop('verbose', None))
 
 def logWarn(msg, verbose=True):
     log('Warn: ' + msg, verbose)

@@ -240,13 +240,16 @@ class ModelLearningSystem:
             fileName = fileName + '_' + arg
         return os.path.join(dir, fileName + ext)
 
-    def runSuitablePlot(self, key, actual_values, predicted_values):
-        if key == 'confusion_matrix':
-            generateClassificationModelEvaluationGraph(actual_values, predicted_values)
-        elif key == 'scatter':
-            generateRegressionModelEvaluationGraph(actual_values, predicted_values)
-        else:
-            return None
+    def runSuitablePlot(self, modelData, actualValues, predictedValues):
+        for modelKey, model in modelData.getModels().items():
+            if modelKey in self.mlsParams.classificationModelKeys:
+                generateClassificationModelEvaluationGraph(actualValues, predictedValues)
+                break
+            elif modelKey in self.mlsParams.regressionModelKeys:
+                generateRegressionModelEvaluationGraph(actualValues, predictedValues)
+                break
+            else:
+                logWarn("no modelconfigs given ")
 
     def findBestModel(self, instrumentId, useTargetVaribleFromFile=False, useTimeFrequency=True):
         # TODO: Some function arguments are hardcoded. Make it changeable
@@ -277,6 +280,7 @@ class ModelLearningSystem:
             bestModel = self.compareModels(instrumentId, self.__modelDict[instrumentId][key], targetVariableConfig, predictedVariablesData, dataSourceType='training',
                     useTargetVaribleFromFile=useTargetVaribleFromFile, useTimeFrequency=useTimeFrequency)
             self.__modelDict[instrumentId][key].setBestModel(bestModel)
+
             fileName = self.getFileName(self.modelDir, '.pkl', instrumentId, key)
             self.__modelDict[instrumentId][key].writeModelData(fileName)
             self.__trainingModelManager.flushTrainingModels()
@@ -336,14 +340,11 @@ class ModelLearningSystem:
                         mBestScore[key] = mscore[key]
                 logImportantInfo("the best model for " + key)
                 logImportantInfoMultiple(instrumentId, mBestScore, mBestModel)
-            chosen_metric = self.mlsParams.getMetricSelectionKey()
-            chosen_model_key = mBestModelKey[chosen_metric]
-            #plotting
-            suitable_plotting_method_key = self.mlsParams.getPlotkey()
-            self.runSuitablePlot(suitable_plotting_method_key, targetVariableData, predictedVariablesData[chosen_model_key])
-            logImportantInfo("Running backtester for the best model according to chosen metric i.e "+chosen_metric)
-            return mBestModel[chosen_metric]
-
+            chosenMetric = self.mlsParams.getMetricSelectionKey()
+            chosenModelKey = mBestModelKey[chosenMetric]
+            self.runSuitablePlot(modelData, targetVariableData, predictedVariablesData[chosenModelKey])
+            logImportantInfo("Running backtester for the best model according to chosen metric i.e "+chosenMetric)
+            return mBestModel[chosenMetric]
 
     def getFinalMetrics(self, instrumentId, dataSourceType, targetVariableConfigs, modelConfigDict, useTargetVaribleFromFile=False, useTimeFrequency=True):
         instrumentData = self.__dataSourceHandlerDict[dataSourceType]['data'](instrumentId)
