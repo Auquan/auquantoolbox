@@ -205,7 +205,7 @@ class MyTradingParams(TradingSystemParameters):
                                  longLimit=10000,
                                  shortLimit=10000,
                                  capitalUsageLimit=0.10 * self.getStartingCapital(),
-                                 lotSize=1)
+                                 enterlotSize=1, exitlotSize=1)
 
     '''
     Returns the type of order placer we want to use. its an implementation of the class OrderPlacer.
