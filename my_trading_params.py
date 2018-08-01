@@ -5,6 +5,7 @@ from backtester.dataSource.yahoo_data_source import YahooStockDataSource
 from backtester.executionSystem.simple_execution_system import SimpleExecutionSystem
 from backtester.orderPlacer.backtesting_order_placer import BacktestingOrderPlacer
 from backtester.trading_system import TradingSystem
+from backtester.timeRule.us_time_rule import USTimeRule
 from backtester.version import updateCheck
 from backtester.constants import *
 import pandas as pd
@@ -57,7 +58,8 @@ class MyTradingParams(TradingSystemParameters):
     a lot of time, you realistically wont be able to keep upto pace.
     '''
     def getTimeRuleForUpdates(self):
-        return NotImplementedError
+        return USTimeRule(startDate = self.start,
+                          endDate = self.end)
 
     '''
     This is a way to use any custom features you might have made.
@@ -110,23 +112,23 @@ class MyTradingParams(TradingSystemParameters):
         ma1Dict = {'featureKey': 'ma_90',
                    'featureId': 'moving_average',
                    'params': {'period': 90,
-                              'featureName': 'Adj Close'}}
+                              'featureName': 'adjClose'}}
         ma2Dict = {'featureKey': 'ma_5',
                    'featureId': 'moving_average',
                    'params': {'period': 5,
-                              'featureName': 'Adj Close'}}
+                              'featureName': 'adjClose'}}
         sdevDict = {'featureKey': 'sdev_90',
                     'featureId': 'moving_sdev',
                     'params': {'period': 90,
-                               'featureName': 'Adj Close'}}
+                               'featureName': 'adjClose'}}
         momDict = {'featureKey': 'mom_90',
                    'featureId': 'momentum',
                    'params': {'period': 30,
-                              'featureName': 'Adj Close'}}
+                              'featureName': 'adjClose'}}
         rsiDict = {'featureKey': 'rsi_30',
                    'featureId': 'rsi',
                    'params': {'period': 30,
-                              'featureName': 'Adj Close'}}
+                              'featureName': 'adjClose'}}
         return {INSTRUMENT_TYPE_STOCK: [predictionDict, ma1Dict, ma2Dict, sdevDict, momDict, rsiDict]}
 
     '''
@@ -205,7 +207,7 @@ class MyTradingParams(TradingSystemParameters):
                                  longLimit=10000,
                                  shortLimit=10000,
                                  capitalUsageLimit=0.10 * self.getStartingCapital(),
-                                 lotSize=1)
+                                 enterlotSize=1, exitlotSize=1)
 
     '''
     Returns the type of order placer we want to use. its an implementation of the class OrderPlacer.
@@ -227,7 +229,7 @@ class MyTradingParams(TradingSystemParameters):
 
 
     def getPriceFeatureKey(self):
-        return 'Adj Close'
+        return 'adjClose'
 
 
 class TrainingPredictionFeature(Feature):
