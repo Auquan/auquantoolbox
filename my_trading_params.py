@@ -5,6 +5,7 @@ from backtester.dataSource.yahoo_data_source import YahooStockDataSource
 from backtester.executionSystem.simple_execution_system import SimpleExecutionSystem
 from backtester.orderPlacer.backtesting_order_placer import BacktestingOrderPlacer
 from backtester.trading_system import TradingSystem
+from backtester.timeRule.us_time_rule import USTimeRule
 from backtester.version import updateCheck
 from backtester.constants import *
 import pandas as pd
@@ -57,7 +58,8 @@ class MyTradingParams(TradingSystemParameters):
     a lot of time, you realistically wont be able to keep upto pace.
     '''
     def getTimeRuleForUpdates(self):
-        return NotImplementedError
+        return USTimeRule(startDate = self.startDate,
+                          endDate = self.endDate)
 
     '''
     This is a way to use any custom features you might have made.
