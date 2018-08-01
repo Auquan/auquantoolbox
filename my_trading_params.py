@@ -141,7 +141,7 @@ class MyTradingParams(TradingSystemParameters):
 
     def getMarketFeatureConfigDicts(self):
     # ADD RELEVANT FEATURES HERE
-        scoreDict = {'featureKey': 'score',
+        scoreDict = {'featureKey': 'Score',
                      'featureId': 'score_ll',
                      'params': {'featureName': self.getPriceFeatureKey(),
                                 'instrument_score_feature': 'pnl'}}
