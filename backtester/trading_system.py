@@ -148,7 +148,7 @@ class TradingSystem:
             generateGraph(self.instrumentManager.getDataDf(), self.stateWriter.getMarketFeaturesFilename(), metricString, None)
         return resultDict
 
-    def startTrading(self, onlyAnalyze=False, shouldPlot=True, makeInstrumentCsvs=True):
+    def startTrading(self, onlyAnalyze=False, shouldPlot=True, makeInstrumentCsvs=True,createResultDict=False):
         self.stateWriter = StateWriter('runLogs', datetime.strftime(datetime.now(), '%Y%m%d_%H%M%S'), not makeInstrumentCsvs)
         # TODO: Figure out a good way to handle order parsers with live data later on.
         groupedInstrumentUpdates = self.dataParser.emitInstrumentUpdates()
@@ -186,4 +186,4 @@ class TradingSystem:
         dataToStore = {'market':marketFeaturesDf, 'instrument':instrumentLookbackData}
         with open('savedData%s'%datetime.strftime(datetime.now(), '%Y%m%d'), 'wb') as myFile:
             cPickle.dump(dataToStore, myFile)
-        return self.getFinalMetrics([self.startDate, timeOfUpdate], shouldPlot, True)
+        return self.getFinalMetrics([self.startDate, timeOfUpdate], shouldPlot, createResultDict)
