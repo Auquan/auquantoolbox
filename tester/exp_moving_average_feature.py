@@ -1,13 +1,9 @@
 from backtester.features.feature import Feature
-import pandas as pd
-import numpy as np
+import math
 
 
-class SignFeature(Feature):
+class ExpMovingAverageFeature(Feature):
 
-    '''
-    Computing for Instrument.
-    '''
     @classmethod
     def computeForInstrument(cls, updateNum, time, featureParams, featureKey, instrumentManager):
         instrumentLookbackData = instrumentManager.getLookbackInstrumentFeatures()
@@ -16,8 +12,16 @@ class SignFeature(Feature):
             raise ValueError('data cannot be null')
             logWarn("[%d] instrument data for \"%s\" is not available, can't calculate \"%s\"" % (updateNum, featureParams['featureName'], featureKey))
             return None
-        data.fillna(0,inplace=True)
-        return np.sign(data.iloc[-1])
+        if featureParams['period']==0:
+            raise ValueError('period cannot be 0')
+            return None
+        if len(data.index) >= 1:
+            prev_ema = data.iloc[-1]
+        else:
+            prev_ema = instrumentLookbackData.getFeatureDf(featureParams['featureName']).iloc[-1]
+        halflife = featureParams['period']
+        alpha = 1 - math.exp(math.log(0.5) / halflife)
+        return alpha
 
     @classmethod
     def computeForMarket(cls, updateNum, time, featureParams, featureKey, currentMarketFeatures, instrumentManager):
@@ -27,8 +31,16 @@ class SignFeature(Feature):
             raise ValueError('data cannot be null')
             logWarn("[%d] instrument data for \"%s\" is not available, can't calculate \"%s\"" % (updateNum, featureParams['featureName'], featureKey))
             return None
-        data = np.nan_to_num(float(data.iloc[-1]))
-        return np.sign(data)
+        if featureParams['period']==0:
+            raise ValueError('period cannot be 0')
+            return None
+        if len(data.index) >= 1:
+            prev_ema = data.iloc[-1]
+        else:
+            prev_ema = instrumentLookbackData.getFeatureDf(featureParams['featureName']).iloc[-1]
+        halflife = featureParams['period']
+        alpha = 1 - math.exp(math.log(0.5) / halflife)
+        return alpha
 
     @classmethod
     def computeForInstrumentData(cls, updateNum, featureParams, featureKey, featureManager):
@@ -37,5 +49,9 @@ class SignFeature(Feature):
             raise ValueError('data cannot be null')
             logWarn("[%d] instrument data for \"%s\" is not available, can't calculate \"%s\"" % (updateNum, featureParams['featureName'], featureKey))
             return None
-        data.fillna(0,inplace=True)
-        return np.sign(data)
+        if featureParams['period']==0:
+            raise ValueError('period cannot be 0')
+            return None
+        halflife = featureParams['period']
+        expMovingAvg = data.ewm(halflife=halflife, adjust=False).mean()
+        return expMovingAvg.fillna(0)
