@@ -19,6 +19,9 @@ class MovingSDevFeature(Feature):
         data.replace(-np.Inf,np.nan,inplace=True)
         data.fillna(0,inplace=True)
         sdev = data[-featureParams['period']:].std()
+        sdev.replace(np.Inf,np.nan, inplace=True)
+        sdev.replace(-np.Inf,np.nan,inplace=True)
+        sdev.fillna(0,inplace=True)
         return sdev
 
     @classmethod
@@ -32,6 +35,9 @@ class MovingSDevFeature(Feature):
         if featureParams['period']==0:
             raise ValueError('period cannot be 0')
             return None
+        data.replace(np.Inf,np.nan, inplace=True)
+        data.replace(-np.Inf,np.nan,inplace=True)
+        data.fillna(0,inplace=True)
         sdev = data[-featureParams['period']:].std()
         if(math.isinf(sdev)):
             sdev = 0
@@ -50,6 +56,9 @@ class MovingSDevFeature(Feature):
         if featureParams['period']==0:
             raise ValueError('period cannot be 0')
             return None
+        data.replace(np.Inf,np.nan, inplace=True)
+        data.replace(-np.Inf,np.nan,inplace=True)
+        data.fillna(0,inplace=True)
         movingStd = data.rolling(window=featureParams['period'], min_periods=1).std()
         movingStd.replace(np.Inf,np.nan, inplace=True)
         movingStd.replace(-np.Inf,np.nan,inplace=True)

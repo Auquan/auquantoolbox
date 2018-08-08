@@ -22,7 +22,7 @@ def mockInstrumentLookbackData():
 	return Mock(spec=InstrumentsLookbackData)
 
 def test_moving_avg(mockInstrumentManager, mockFeatureManager, mockInstrumentLookbackData):
-    for i in range(1,3):
+    for i in range(1,4):
         dataSet = Initialize.getDataSet(i)
         mockInstrumentManager.getLookbackInstrumentFeatures.return_value = mockInstrumentLookbackData
         mockInstrumentLookbackData.getFeatureDf.return_value=dataSet["data"]
