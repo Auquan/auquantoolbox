@@ -2,6 +2,7 @@ from backtester.dataSource.data_source import DataSource
 from backtester.instrumentUpdates import *
 import os
 from datetime import datetime
+from dateutil import parser
 import csv
 from backtester.logger import *
 try:
@@ -28,13 +29,11 @@ def checkDate(lineItem):
         return False
 
 class QuandlDataSource(DataSource):
-    def __init__(self, cachedFolderName, dataSetId, instrumentIds, startDate, endDate, liveUpdates=True, pad=True):
-        super(QuandlDataSource, self).__init__(cachedFolderName, dataSetId, instrumentIds, startDate, endDate)
-        if(not checkDate(startDate)):
-            self.__startDate = datetime.strptime(startDate, '%Y/%m/%d').strftime('%Y-%m-%d')
-        if(not checkDate(endDate)):
-            self.__endDate = datetime.strptime(endDate, '%Y/%m/%d').strftime('%Y-%m-%d')
-        self.__dateAppend = "_%sto%s"%(datetime.strptime(startDate, '%Y/%m/%d').strftime('%Y-%m-%d'),datetime.strptime(startDate, '%Y/%m/%d').strftime('%Y-%m-%d'))
+    def __init__(self, cachedFolderName, dataSetId, instrumentIds, startDateStr, endDateStr, liveUpdates=True, pad=True):
+        super(QuandlDataSource, self).__init__(cachedFolderName, dataSetId, instrumentIds, startDateStr, endDateStr)
+        self.__startDateStr = parser.parse(startDateStr).strftime('%Y-%m-%d')
+        self.__endDateStr = parser.parse(endDateStr).strftime('%Y-%m-%d')
+        self.__dateAppend = "_%sto%s"%(parser.parse(startDateStr).strftime('%Y-%m-%d'), parser.parse(endDateStr).strftime('%Y-%m-%d'))
         self.__bookDataByFeature = {}
         if liveUpdates:
             self._allTimes, self._groupedInstrumentUpdates = self.getGroupedInstrumentUpdates()
@@ -43,13 +42,12 @@ class QuandlDataSource(DataSource):
             self._bookDataFeatureKeys = self.__bookDataByFeature.keys()
         else:
             self._allTimes, self._bookDataByInstrument = self.getAllInstrumentUpdates()
-            self._bookDataFeatureKeys = list(self._bookDataByInstrument[self._instrumentIds[0]].columns)
             if pad:
                 self.padInstrumentUpdates()
-            self.filterUpdatesByDates([(startDate, endDate)])
+            self.filterUpdatesByDates([(startDateStr, endDateStr)])
 
     def downloadFile(self, instrumentId, downloadLocation):
-        url = 'https://www.quandl.com/api/v3/datasets/WIKI/%s.csv?start_date=%s&end_date=%s'%(instrumentId,self.__startDate,self.__endDate)
+        url = 'https://www.quandl.com/api/v3/datasets/WIKI/%s.csv?start_date=%s&end_date=%s'%(instrumentId,self.__startDateStr,self.__endDateStr)
         try:
             response = urlopen(url)
         except ue.HTTPError:
@@ -104,7 +102,7 @@ class QuandlDataSource(DataSource):
             if is_number(bookData[key]):
                 bookData[key] = float(bookData[key])
         timeKey = 'Date'
-        timeOfUpdate = datetime.strptime(row[timeKey], '%Y-%m-%d')
+        timeOfUpdate = parser.parse(row[timeKey])
         bookData.pop(timeKey, None)
         inst = StockInstrumentUpdate(stockInstrumentId=instrumentId,
                                      tradeSymbol=instrumentId,

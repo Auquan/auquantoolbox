@@ -29,3 +29,13 @@ class ExpMovingAverageFeature(Feature):
         alpha = 1 - math.exp(math.log(0.5) / halflife)
         avg = lookbackDataDf[featureParams['featureName']].iloc[-1] * alpha + prev_ema * (1 - alpha)
         return avg
+
+    @classmethod
+    def computeForInstrumentData(cls, updateNum, featureParams, featureKey, featureManager):
+        data = featureManager.getFeatureDf(featureParams['featureName'])
+        if data is None:
+            logWarn("[%d] instrument data for \"%s\" is not available, can't calculate \"%s\"" % (updateNum, featureParams['featureName'], featureKey))
+            return None
+        halflife = featureParams['period']
+        expMovingAvg = data.ewm(halflife=halflife, adjust=False).mean()
+        return expMovingAvg

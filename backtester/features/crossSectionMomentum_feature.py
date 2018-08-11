@@ -1,6 +1,6 @@
 from backtester.features.feature import Feature
 import pandas as pd
-
+import numpy as np
 
 class CrossSectionMomentumFeature(Feature):
 
@@ -18,6 +18,10 @@ class CrossSectionMomentumFeature(Feature):
             instrument = allInstruments[instrumentId]
             data[instrumentId] = instrument.getDataDf()[featureParams['featureName']]
         df = pd.DataFrame(data)
+        df=df.replace([np.nan, np.inf, -np.inf], 0)
         R = (df / df.shift(featureParams['period']))
+        R = R.replace([np.nan, np.inf, -np.inf], 0)
         ranks = (R.T - R.T.mean()).T.mean()
+        ranks=ranks.replace([np.nan, np.inf, -np.inf], 0)
         return ranks
+        

@@ -2,6 +2,7 @@ from backtester.dataSource.data_source import DataSource
 from backtester.instrumentUpdates import *
 import os
 from datetime import datetime
+from dateutil import parser
 import csv
 from backtester.logger import *
 try:
@@ -19,17 +20,17 @@ def is_number(s):
 
 
 class CsvDataSource(DataSource):
-    def __init__(self, cachedFolderName, dataSetId, instrumentIds, downloadUrl = None, timeKey = None, timeStringFormat = None, startDateStr=None, endDateStr=None, liveUpdates=True, pad=True):
+    def __init__(self, cachedFolderName, dataSetId, instrumentIds, downloadUrl=None, timeKey=None, timeStringFormat=None, startDateStr=None, endDateStr=None, usecols=None, liveUpdates=True, pad=True):
         super(CsvDataSource, self).__init__(cachedFolderName, dataSetId, instrumentIds, startDateStr, endDateStr)
         self._downloadUrl = downloadUrl
         self._timeKey = timeKey
         self._timeStringFormat = timeStringFormat
+        self._usecols = usecols
         self.ensureAllInstrumentsFile(dataSetId)
         if liveUpdates:
             self._allTimes, self._groupedInstrumentUpdates = self.getGroupedInstrumentUpdates()
         else:
             self._allTimes, self._bookDataByInstrument = self.getAllInstrumentUpdates()
-            self._bookDataFeatureKeys = list(self._bookDataByInstrument[self._instrumentIds[0]].columns)
             if pad:
                 self.padInstrumentUpdates()
             if (startDateStr is not None) and (endDateStr is not None):
@@ -102,7 +103,10 @@ class CsvDataSource(DataSource):
             if is_number(bookData[key]):
                 bookData[key] = float(bookData[key])
         timeKey = self._timeKey
-        timeOfUpdate = datetime.strptime(row[timeKey], self._timeStringFormat)
+        if self._timeStringFormat is None:
+            timeOfUpdate = parser.parse(row[timeKey])
+        else:
+            timeOfUpdate = datetime.strptime(row[timeKey], self._timeStringFormat)
         bookData.pop(timeKey, None)
         inst = StockInstrumentUpdate(stockInstrumentId=instrumentId,
                                      tradeSymbol=instrumentId,

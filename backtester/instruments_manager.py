@@ -219,7 +219,6 @@ class InstrumentManager:
             start = time.time()
             featureKey = featureConfig.getFeatureKey()
             featureId = featureConfig.getFeatureId()
-            featureKey = featureConfig.getFeatureKey()
             featureParams = featureConfig.getFeatureParams()
             featureCls = FeatureConfig.getClassForFeatureId(featureId)
             featureVal = featureCls.computeForInstrument(updateNum=self.__totalIter,

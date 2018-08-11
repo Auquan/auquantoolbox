@@ -7,6 +7,7 @@ import requests
 import re
 from time import mktime as mktime
 from itertools import groupby
+from datetime import timedelta
 
 
 def getCookieForYahoo(instrumentId):
@@ -29,6 +30,8 @@ def downloadFileFromYahoo(startDate, endDate, instrumentId, fileName, event='his
     logInfo('Downloading %s' % fileName)
     cookie, crumb = getCookieForYahoo(instrumentId)
     start = int(mktime(startDate.timetuple()))
+    # BUG: Fix timezone
+    endDate = endDate + timedelta(days=1)
     end = int(mktime(endDate.timetuple()))
     url = 'https://query1.finance.yahoo.com/v7/finance/download/%s?period1=%s&period2=%s&interval=1d&events=%s&crumb=%s' % (instrumentId, start, end, event, crumb)
     data = requests.get(url, cookies={'B': cookie})

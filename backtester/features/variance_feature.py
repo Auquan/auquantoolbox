@@ -1,5 +1,6 @@
 from backtester.features.feature import Feature
 import pandas as pd
+import numpy as np
 
 
 class VarianceFeature(Feature):
@@ -20,6 +21,10 @@ class VarianceFeature(Feature):
 
         pnlDataDf = instrumentLookbackData.getFeatureDf(pnlKey)
         varDataDf = instrumentLookbackData.getFeatureDf(featureKey)
+        pnlDataDf = pnlDataDf.replace([np.nan, np.inf, -np.inf], 0)
+        varDataDf = varDataDf.replace([np.nan, np.inf, -np.inf], 0)	
+        if pnlDataDf.empty or varDataDf.empty or len(pnlDataDf)<2 or len(varDataDf)<2:
+        		return zeroSeries
 
         sqSum = float(prevCount) * varDataDf.iloc[-1]
 
@@ -40,16 +45,19 @@ class VarianceFeature(Feature):
         lookbackMarketDataDf = instrumentManager.getDataDf()
         if len(lookbackMarketDataDf) <= 2 or instrumentManager is None:
             # First Iteration
-            return 0
+            return np.float64(0.0)
         if 'pnlKey' in featureParams:
             pnlKey = featureParams['pnlKey']
 
         prevCount = updateNum - 1
-
+        
         pnlDict = lookbackMarketDataDf[pnlKey]
         varDict = lookbackMarketDataDf[featureKey]
+        pnlDict = pnlDict.replace([np.nan, np.inf, -np.inf], 0)
+        varDict = varDict.replace([np.nan, np.inf, -np.inf], 0)
         if len(varDict) <= 1:
-            return 0
+            return np.float64(0.0)
+        
 
         sqSum = 0 if (len(varDict) <= 1) else float(prevCount) * varDict.iloc[-2]
 

@@ -27,3 +27,15 @@ class VwapPriceInstrumentFeature(Feature):
     @classmethod
     def computeForMarket(cls, updateNum, time, featureParams, featureKey, currentMarketFeatures, instrumentManager):
         raise NotImplementedError
+
+    @classmethod
+    def computeForInstrumentData(cls, updateNum, featureParams, featureKey, featureManager):
+        askVolume = featureManager.getFeatureDf(featureParams['askVolume'])
+        bidVolume = featureManager.getFeatureDf(featureParams['bidVolume'])
+        askPrice = featureManager.getFeatureDf(featureParams['askPrice'])
+        bidPrice = featureManager.getFeatureDf(featureParams['bidPrice'])
+        totalVolume = (askVolume + bidVolume)
+        vwap = ((askPrice * askVolume) + (bidPrice * bidVolume)) / totalVolume
+
+        vwap[vwap == np.Inf] = 0
+        return vwap

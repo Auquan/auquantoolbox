@@ -1,5 +1,6 @@
 import os, sys
 from datetime import datetime
+from dateutil import parser
 from backtester.instrumentUpdates import *
 from backtester.constants import *
 from backtester.logger import *
@@ -109,7 +110,7 @@ class InstrumentsFromFile():
 class YahooStockDataSource(DataSource):
     def __init__(self, cachedFolderName, dataSetId, instrumentIds, startDateStr, endDateStr, event='history', adjustPrice=False, downloadId=".NS", liveUpdates=True, pad=True):
         super(YahooStockDataSource, self).__init__(cachedFolderName, dataSetId, instrumentIds, startDateStr, endDateStr)
-        self.__dateAppend = "_%sto%s"%(datetime.strptime(startDateStr, '%Y/%m/%d').strftime('%Y-%m-%d'),datetime.strptime(startDateStr, '%Y/%m/%d').strftime('%Y-%m-%d'))
+        self.__dateAppend = "_%sto%s"%(parser.parse(startDateStr).strftime('%Y-%m-%d'),parser.parse(endDateStr).strftime('%Y-%m-%d'))
         self.__downloadId = downloadId
         self.__bookDataByFeature = {}
         self.__adjustPrice = adjustPrice
@@ -121,7 +122,6 @@ class YahooStockDataSource(DataSource):
             self._bookDataFeatureKeys = self.__bookDataByFeature.keys()
         else:
             self._allTimes, self._bookDataByInstrument = self.getAllInstrumentUpdates()
-            self._bookDataFeatureKeys = list(self._bookDataByInstrument[self._instrumentIds[0]].columns)
             if pad:
                 self.padInstrumentUpdates()
             self.filterUpdatesByDates([(startDateStr, endDateStr)])
@@ -166,7 +166,7 @@ class YahooStockDataSource(DataSource):
                     'high': float(row['High']),
                     'low': float(row['Low']),
                     'close': float(row['Close']),
-                    'adjClose' : float(row['Adj Close']),
+                    'Adj Close' : float(row['Adj Close']),
                     'volume': float(row['Volume'])}
 
         timeOfUpdate = datetime.strptime(row['Date'], '%Y-%m-%d')
@@ -203,6 +203,6 @@ if __name__ == "__main__":
                                      startDateStr=startDateStr,
                                      endDateStr=endDateStr,
                                      event='history',
-                                     liveUpdates=True)
-    print(next(yds.emitInstrumentUpdates()))
+                                     liveUpdates=False)
+    print(next(yds.emitAllInstrumentUpdates()['IBM'].getBookDataChunk(100)))
     print(yds.getBookDataFeatures())

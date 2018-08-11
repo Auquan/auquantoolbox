@@ -11,7 +11,7 @@ class MaxDrawdownFeature(Feature):
     '''
     @classmethod
     def computeForInstrument(cls, featureParams, featureKey, currentFeatures, instrument, instrumentManager):
-        raise NotImplemented
+        raise NotImplementedError
 
         return None
 
@@ -32,11 +32,18 @@ class MaxDrawdownFeature(Feature):
         if len(portfolioValueDict) <= 1:
             return {'maxPortfolioValue': 0, 'maxDrawdown': 0}
         drawdownDict = lookbackMarketDataDf[featureKey].iloc[-2]
+        try:
+                maxPortfolioValue = portfolioValueDict.iloc[-1] if drawdownDict['maxPortfolioValue'] < portfolioValueDict.iloc[-1] \
+                    else drawdownDict['maxPortfolioValue']
 
-        maxPortfolioValue = portfolioValueDict.iloc[-1] if drawdownDict['maxPortfolioValue'] < portfolioValueDict.iloc[-1] \
-            else drawdownDict['maxPortfolioValue']
+                maxDrawdown = maxPortfolioValue - portfolioValueDict.iloc[-1] if drawdownDict['maxDrawdown'] < maxPortfolioValue - portfolioValueDict.iloc[-1] \
+                    else drawdownDict['maxDrawdown']
 
-        maxDrawdown = maxPortfolioValue - portfolioValueDict.iloc[-1] if drawdownDict['maxDrawdown'] < maxPortfolioValue - portfolioValueDict.iloc[-1] \
-            else drawdownDict['maxDrawdown']
+                return {'maxPortfolioValue': maxPortfolioValue, 'maxDrawdown': maxDrawdown}
+        except KeyError:
+                raise KeyError("The Dict is Empty")
+        except TypeError:
+        			 raise TypeError("The Dict has a wrong Datatype"	)
 
-        return {'maxPortfolioValue': maxPortfolioValue, 'maxDrawdown': maxDrawdown}
+        #
+

@@ -24,3 +24,13 @@ class DifferenceFeature(Feature):
         if len(data.index) < featureParams['period']:
             return 0
         return data[-1] - data[-featureParams['period']]
+
+    @classmethod
+    def computeForInstrumentData(cls, updateNum, featureParams, featureKey, featureManager):
+        data = featureManager.getFeatureDf(featureParams['featureName'])
+        if data is None:
+            logWarn("[%d] instrument data for \"%s\" is not available, can't calculate \"%s\"" % (updateNum, featureParams['featureName'], featureKey))
+            return None
+        mid = data.shift(featureParams['period']).fillna(0.0)
+        difference=data-mid
+        return difference

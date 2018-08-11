@@ -1,4 +1,5 @@
 from backtester.features.feature import Feature
+from backtester.logger import *
 
 # Average of feature name over some number of previous data points including current.
 # number of data points specified by user
@@ -21,3 +22,12 @@ class MovingAverageFeature(Feature):
         if len(data) < 1:
             return 0
         return avg
+
+    @classmethod
+    def computeForInstrumentData(cls, updateNum, featureParams, featureKey, featureManager):
+        data = featureManager.getFeatureDf(featureParams['featureName'])
+        if data is None:
+            logWarn("[%d] instrument data for \"%s\" is not available, can't calculate \"%s\"" % (updateNum, featureParams['featureName'], featureKey))
+            return None
+        movingAvg = data.rolling(window=featureParams['period'], min_periods=1).mean()
+        return movingAvg

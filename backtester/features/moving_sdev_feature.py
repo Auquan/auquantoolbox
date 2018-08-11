@@ -18,3 +18,12 @@ class MovingSDevFeature(Feature):
         if len(data) < 1:
             return 0
         return sdev
+
+    @classmethod
+    def computeForInstrumentData(cls, updateNum, featureParams, featureKey, featureManager):
+        data = featureManager.getFeatureDf(featureParams['featureName'])
+        if data is None:
+            logWarn("[%d] instrument data for \"%s\" is not available, can't calculate \"%s\"" % (updateNum, featureParams['featureName'], featureKey))
+            return None
+        movingStd = data.rolling(window=featureParams['period'], min_periods=1).std().fillna(0.00)
+        return movingStd
