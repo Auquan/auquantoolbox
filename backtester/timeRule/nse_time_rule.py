@@ -23,16 +23,13 @@ class NSETimeRule(CustomTimeRule):
                'Referer': 'https://www.nseindia.com/products/content/equities/equities/mrkt_timing_holidays.htm',
                'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
                'X-Requested-With': 'XMLHttpRequest'}
-        url = 'https://www.nseindia.com/products/content/equities/equities/mrkt_timing_holidays.htm'
+        url = 'https://www.nseindia.com/global/content/market_timings_holidays/market_timings_holidays.jsp?pageName=0&dateRange=&fromDate=01-01-2010&toDate=31-12-2018&tabActive=trading&load=false'
         req = Request(url, headers=hdr)
         try:
             page = urlopen(req)
             content = page.read().decode('utf8')
             soup = BeautifulSoup(content, 'lxml')
-            holiday_dates = soup.find(id="tab20Content").find_all(style="text-align:right")
-            holidays = []
-            for date in holiday_dates:
-                holidays.append(datetime.strptime(date.get_text(), '%d-%b-%Y'))
+            holidays = [datetime.strptime(date.get_text(), '%d-%b-%Y') for date in soup.find_all(class_="number")]
             return holidays
         except HTTPError as e:
             print(e.fp.read())
