@@ -34,7 +34,7 @@ class ScoreFairValueFeature(Feature):
             return np.sqrt(temp)
         except IndexError:
             raise IndexError('Empty DataFrame')
-            
+
     '''
     Computing for Market. By default defers to computeForLookbackData
     '''

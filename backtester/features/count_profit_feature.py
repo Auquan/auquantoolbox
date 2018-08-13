@@ -51,4 +51,3 @@ class CountProfitFeature(Feature):
         if (pnl > 0):
             countProfit += 1
         return countProfit
-

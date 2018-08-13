@@ -20,6 +20,7 @@ class MovingCorrelationFeature(Feature):
         lookbackMarketFeaturesDf = instrumentManager.getDataDf()
         x = lookbackMarketFeaturesDf[featureParams['featureName1']]
         y = lookbackMarketFeaturesDf[featureParams['featureName2']]
+
         if (len(x) < 1) or (len(y) < 1):
             return 0
         return round((x.rolling(featureParams['period'],min_periods=1).corr(y)).iloc[-1], 3)
@@ -34,4 +35,3 @@ class MovingCorrelationFeature(Feature):
         movingCorrelation = data1.rolling(window=featureParams['period'], min_periods=1).corr(data2)
         movingCorrelation.fillna(0.0, inplace=True)
         return movingCorrelation
-

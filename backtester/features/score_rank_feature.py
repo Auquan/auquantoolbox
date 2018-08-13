@@ -40,4 +40,3 @@ class ScoreRankFeature(Feature):
         score = ((rank - p ) * (rank - rank.mean())).abs().sum()
         cumulativeScore -= score/len(allInstruments)
         return score
-

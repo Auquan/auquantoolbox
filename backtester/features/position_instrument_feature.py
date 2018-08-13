@@ -12,8 +12,6 @@ class PositionInstrumentFeature(Feature):
        instrumentsDict = instrumentManager.getAllInstrumentsByInstrumentId()
        if len(instrumentsDict) == 0:
            raise ValueError('instrumentDict is empty')
-           print ("AAAAA")
-           #logWarn("[%d] instrument data for \"%s\" is not available, can't calculate \"%s\"" % (updateNum, featureParams['featureName'], featureKey))
            return None
        positionDict = {}
        for instrumentId in instrumentsDict:

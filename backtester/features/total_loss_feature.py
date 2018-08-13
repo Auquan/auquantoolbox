@@ -51,4 +51,3 @@ class TotalLossFeature(Feature):
         if (pnl < 0):
             totalLoss += np.abs(pnl)
         return totalLoss
-

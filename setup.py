@@ -11,7 +11,7 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(
-    name='auquan_toolbox',
+    name='auquan_toolbox_beta',
     version=__version__,
 
     description='Auquan Toolbox for developing strategies and backtesting',
@@ -62,5 +62,5 @@ setup(
     # your project is installed. For an analysis of "install_requires" vs pip's
     # requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
-    install_requires=['requests', 'plotly', 'numpy', 'pandas', 'bs4', 'scipy', 'sklearn', 'lxml']
+    install_requires=['requests', 'plotly', 'numpy', 'pandas', 'bs4', 'scipy', 'sklearn']
 )

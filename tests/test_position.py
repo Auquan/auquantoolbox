@@ -16,8 +16,8 @@ def mockInstrumentManager():
 def test_positionInstrument(mockInstrumentManager):
    dict = {'a':'okay','b':'notokay'}
    position = OrderedDict()
-   position['a'] = 2
-   position['b'] = 1
+   position['a'] = 1
+   position['b'] = 2
 
    featureParams  = {'featureName' : 'open'}
    mockInstrumentManager.getAllInstrumentsByInstrumentId.return_value = dict

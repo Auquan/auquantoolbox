@@ -21,7 +21,7 @@ class CountLossFeature(Feature):
         else:
             countLoss = prevData.iloc[-1]
             prevPnl = pnlData.iloc[-2]
-			
+
         if prevData.empty or pnlData.empty:
         		return countLoss
 
@@ -51,4 +51,3 @@ class CountLossFeature(Feature):
         if (pnl < 0):
             countLoss += 1
         return countLoss
-

@@ -32,4 +32,3 @@ class FeesFeature(Feature):
     def computeForMarket(cls, updateNum, time, featureParams, featureKey, currentMarketFeatures, instrumentManager):
         raise NotImplementedError
         return None
-

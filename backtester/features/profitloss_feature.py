@@ -45,4 +45,3 @@ class ProfitLossFeature(Feature):
         if len(pnlDict) < 1:
             return 0
         return instrumentManager.getLookbackInstrumentFeatures().getFeatureDf(pnlKey).iloc[-1].sum()
-

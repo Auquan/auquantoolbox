@@ -5,7 +5,7 @@ import numpy as np
 class CrossSectionMomentumFeature(Feature):
 
     '''
-    Computing for Market. 
+    Computing for Market.
     '''
     @classmethod
     def computeForMarket(cls, updateNum, time, featureParams, featureKey, currentMarketFeatures, instrumentManager):
@@ -24,4 +24,3 @@ class CrossSectionMomentumFeature(Feature):
         ranks = (R.T - R.T.mean()).T.mean()
         ranks=ranks.replace([np.nan, np.inf, -np.inf], 0)
         return ranks
-        
