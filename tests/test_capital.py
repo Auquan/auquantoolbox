@@ -29,7 +29,7 @@ def test_capital(mock_instrumentmanager, mock_instrumentlookbackdata):
                                 df=data["price"]
                                 return df
                         if (value==f['fees']):
-                                df=data["fees"]
+                                df=pd.DataFrame(data["fees"])
                                 return df
                         if (value=="featureKey"):
                                 df=pd.DataFrame(data["featureKey"])
@@ -41,7 +41,7 @@ def test_capital(mock_instrumentmanager, mock_instrumentlookbackdata):
                 mock_instrumentmanager.getLookbackInstrumentFeatures.return_value = mock_instrumentlookbackdata
                 mock_instrumentlookbackdata.getFeatureDf=MagicMock(side_effect=sideeffect)
                 resultforMarket = CapitalFeature.computeForMarket(i, "", dataSet["featureParams"], "featureKey", {}, mock_instrumentmanager)
-                assert resultforInstrument == dataSet["cap"]
+                assert list(resultforInstrument) == [dataSet["cap"]]
                 assert resultforMarket == dataSet["capM"]
         for i in range(0,1):
                 dataSet = initialize.getThirdDataSet(i)
@@ -50,3 +50,4 @@ def test_capital(mock_instrumentmanager, mock_instrumentlookbackdata):
                         CapitalFeature.computeForInstrument(i, "", dataSet["featureParams"], "featureKey", mock_instrumentmanager)
                 with pytest.raises(IndexError):
                         CapitalFeature.computeForMarket(i, "", dataSet["featureParams"], "featureKey", {}, mock_instrumentmanager)
+

@@ -25,8 +25,7 @@ class CapitalFeature(Feature):
                      previousPosition = positionData.iloc[-2]
                      previousPrice = priceData.iloc[-2]
                  currentFees = instrumentLookbackData.getFeatureDf(featureParams['fees']).iloc[-1]
-                 if np.isnan(currentFees) or np.isinf(currentFees):
-                         currentFees=0.0
+                 currentFees = currentFees.replace([np.nan, np.inf, -np.inf], 0)
                  if 'capitalReqPercent' in featureParams:
                      capitalReqPercent = featureParams['capitalReqPercent']
                  else:
