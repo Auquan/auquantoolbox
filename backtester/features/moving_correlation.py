@@ -11,9 +11,7 @@ class MovingCorrelationFeature(Feature):
         x = instrumentLookbackData.getFeatureDf(featureParams['featureName1'])
         y = instrumentLookbackData.getFeatureDf(featureParams['featureName2'])
 
-        if (len(x) < 1) or (len(y) < 1):
-            return 0
-        return (x.rolling(featureParams['period'],min_periods=1).corr(y)).iloc[-1]
+        return (x.rolling(featureParams['period']).corr(y)).iloc[-1]
 
     @classmethod
     def computeForMarket(cls, updateNum, time, featureParams, featureKey, currentMarketFeatures, instrumentManager):
@@ -23,7 +21,7 @@ class MovingCorrelationFeature(Feature):
 
         if (len(x) < 1) or (len(y) < 1):
             return 0
-        return round((x.rolling(featureParams['period'],min_periods=1).corr(y)).iloc[-1], 3)
+        return round((x.rolling(featureParams['period']).corr(y)).iloc[-1], 3)
 
     @classmethod
     def computeForInstrumentData(cls, updateNum, featureParams, featureKey, featureManager):

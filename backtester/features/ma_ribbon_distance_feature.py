@@ -13,21 +13,21 @@ class MARibbonDistanceFeature(Feature):
     @classmethod
     def computeForInstrument(cls, updateNum, time, featureParams, featureKey, instrumentManager):
         instrumentLookbackData = instrumentManager.getLookbackInstrumentFeatures()
-        dataDf = instrumentLookbackData.getFeatureDf(featureParams['featureName']) #df
-        instrumentDict = instrumentManager.getAllInstrumentsByInstrumentId() #dictofobjects
-        instrumentIds = list(instrumentDict.keys()) #list of indexes
-        rolling_means = pd.Series([np.zeros(featureParams['numRibbons'])] * len(instrumentDict), index=instrumentIds) #series
+        dataDf = instrumentLookbackData.getFeatureDf(featureParams['featureName'])
+        instrumentDict = instrumentManager.getAllInstrumentsByInstrumentId()
+        instrumentIds = list(instrumentDict.keys())
+        rolling_means = pd.Series([np.zeros(featureParams['numRibbons'])] * len(instrumentDict), index=instrumentIds)
 
-        space = int((featureParams['endPeriod'] - featureParams['startPeriod']) / (featureParams['numRibbons'] - 1)) #int
+        space = int((featureParams['endPeriod'] - featureParams['startPeriod']) / (featureParams['numRibbons'] - 1))
 
-        collatedData = {} #dict
-        for idx in np.linspace(featureParams['startPeriod'], featureParams['endPeriod'], featureParams['numRibbons']): #divided
-            i = int(idx) #int
-            collatedData[i] = dataDf[-i:].mean() #float
+        collatedData = {}
+        for idx in np.linspace(featureParams['startPeriod'], featureParams['endPeriod'], featureParams['numRibbons']):
+            i = int(idx)
+            collatedData[i] = dataDf[-i:].mean()
             for instrumentId in instrumentIds:
-                rolling_means[instrumentId][i / space - 1] = collatedData[i][instrumentId] #???
+                rolling_means[instrumentId][i / space - 1] = collatedData[i][instrumentId]
 
-        toRtn = {} #dict
+        toRtn = {}
         for instrumentId in instrumentIds:
             ranking = stats.rankdata(rolling_means[instrumentId])
             d = spatial.distance.hamming(ranking, range(1, 1 + len(rolling_means[instrumentId])))
