@@ -4,7 +4,8 @@ class Initialize(object):
     def getDataSet(c):
         if(c==1):
             data = {'open':[3.14, 2.82, -1.98, 5.67, 4.65, 7.89, 4.98, 9.02, -2.87, 0.11],
-                    'high':[1.77, 1.68, np.nan, 2.38, 2.16, 2.80, 2.23, 3.00, np.nan, 0.33]}
+                    'high':[1.77, 1.68, np.nan, 2.38, 2.16, 2.80, 2.23, 3.00, np.nan, 0.33],
+                    'ema':[0.0, 3.140000, 3.098576, 2.441157, 2.859129, 3.090956, 3.712190, 3.876307, 4.542155, 3.582656]}
             df = pd.DataFrame(data = data)
             featureParams  = {'featureName' : 'open', 'featureName1' : 'open', 'featureName2' : 'high', 'period' : 5, 'period1' : 5, 'period2' : 3, 'scale' : 3, 'instrumentId1' : 'open', 'instrumentId2' : 'high',
                               'askPrice' : 'open', 'askVolume' : 'high', 'bidPrice' : 'open', 'bidVolume' : 'high'}
@@ -31,7 +32,8 @@ class Initialize(object):
 
         if(c==2):
             data = {'open':[np.inf, 1.05, np.nan, 0.00, 7.86, 3.96],
-                    'high':[-np.inf, 3.01, np.nan, 5.67, 1.00, 0.00]}
+                    'high':[-np.inf, 3.01, np.nan, 5.67, 1.00, 0.00],
+                    'ema':[0.0, 0.000000, 1.050000, 1.050000, 0.790972, 2.249309]}
             df = pd.DataFrame(data = data)
             featureParams  = {'featureName' : 'open', 'featureName1' : 'open', 'featureName2' : 'high', 'period' : 3, 'period1':3, 'period2': 2, 'scale' : 3, 'instrumentId1' : 'open', 'instrumentId2' : 'high',
                               'askPrice' : 'open', 'askVolume' : 'high', 'bidPrice' : 'open', 'bidVolume' : 'high'}
@@ -58,7 +60,8 @@ class Initialize(object):
 
         if(c==3):
             data = {'open':[np.inf, 1.05, np.nan, 0.00, 7.86, 3.96],
-                    'high':[-np.inf, 3.01, np.nan, 5.67, 1.00, 0.00]}
+                    'high':[-np.inf, 3.01, np.nan, 5.67, 1.00, 0.00],
+                    'ema':[0.0, 0.000000, 1.050000, 1.050000, 0.955675, 1.528706]}
             df = pd.DataFrame(data = data)
             featureParams  = {'featureName' : 'open', 'featureName1' : 'open', 'featureName2' : 'high', 'period' : 8, 'period1':8, 'period2': 10, 'scale' : 3, 'instrumentId1' : 'open', 'instrumentId2' : 'high',
                               'askPrice' : 'open', 'askVolume' : 'high', 'bidPrice' : 'open', 'bidVolume' : 'high'}

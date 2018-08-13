@@ -25,12 +25,10 @@ def test_expMovingAvg(mockInstrumentManager, mockFeatureManager, mockInstrumentL
     for i in range(1,4):
         dataSet = Initialize.getDataSet(i)
         mockInstrumentManager.getLookbackInstrumentFeatures.return_value = mockInstrumentLookbackData
-        mockInstrumentLookbackData.getFeatureDf.return_value=dataSet["data"]
-        alpha = ExpMovingAverageFeature.computeForInstrument(i, "", dataSet["featureParams"], "ma_m", mockInstrumentManager)
-        resultInstrument = (dataSet['data']['open'].iloc[-1])*alpha+(1-alpha)*dataSet['ema'][-2]
-        mockInstrumentManager.getDataDf.return_value = dataSet["data"]
-        alpha = ExpMovingAverageFeature.computeForMarket(i, "", dataSet["featureParams"], "ma_m", {}, mockInstrumentManager)
-        resultMarket = (dataSet['data']['open'].iloc[-1])*alpha+(1-alpha)*dataSet['ema'][-2]
+        mockInstrumentLookbackData.getFeatureDf.return_value=dataSet['data']
+        resultInstrument = ExpMovingAverageFeature.computeForInstrument(i, "", dataSet["featureParams"], "ma_m", mockInstrumentManager)
+        mockInstrumentManager.getDataDf.return_value = dataSet['data']
+        resultMarket = ExpMovingAverageFeature.computeForMarket(i, "", dataSet["featureParams"], "ma_m", {}, mockInstrumentManager)
         mockFeatureManager.getFeatureDf.return_value = dataSet["data"]
         resultInstrumentData = ExpMovingAverageFeature.computeForInstrumentData(i, dataSet["featureParams"], "ma_m", mockFeatureManager )
         assert round(resultMarket,2) == round(dataSet['ema'][-1],2)
