@@ -18,3 +18,4 @@ from backtester.trading_system_parameters import *
 from backtester.trading_system import *
 from backtester.version import *
 from backtester.timeRule import *
+from backtester.versions import *
