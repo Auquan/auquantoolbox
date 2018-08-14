@@ -102,7 +102,7 @@ class InstrumentManager:
         marketFeatureKeys = list(chain(columns, compulsoryColumns))
         self.__lookbackMarketFeatures = LookbackData(tsParams.getLookbackSize(), marketFeatureKeys, initializer)
 
-        self.__bookDataFeatures = bookDataFeatures
+        self.__bookDataFeatures = bookDataFeatures or {}
         self.__compulsoryInstrumentFeatureConfigs = getCompulsoryInstrumentFeatureConfigs(tsParams, INSTRUMENT_TYPE_STOCK)
         instrumentFeatureConfigs = tsParams.getFeatureConfigsForInstrumentType(INSTRUMENT_TYPE_STOCK)
         compulsoryInstrumentFeatureKeys = map(lambda x: x.getFeatureKey(), self.__compulsoryInstrumentFeatureConfigs)
