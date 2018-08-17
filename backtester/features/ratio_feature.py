@@ -25,9 +25,11 @@ class RatioMarketFeature(Feature):
         instrument1 = instrumentManager.getInstrument(instrumentId1)
         instrumentId2 = featureParams['instrumentId2']
         instrument2 = instrumentManager.getInstrument(instrumentId2)
-        checkDataMultiple(instrument1, instrument2)
+        if (instrument1 is None) or (instrument2 is None):
+            return 0
         instrumentLookbackData = instrumentManager.getLookbackInstrumentFeatures()
         dataDf = instrumentLookbackData.getFeatureDf(feature)
+        checkData(dataDf)
         instrument1Price = dataDf[instrumentId1].iloc[-1]
         instrument2Price = dataDf[instrumentId2].iloc[-1]
         if instrument2Price == 0:
