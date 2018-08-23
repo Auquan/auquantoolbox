@@ -66,3 +66,4 @@ class CustomTimeRule(TimeRule):
 
         for timestamp in time_range:
             yield timestamp
+            

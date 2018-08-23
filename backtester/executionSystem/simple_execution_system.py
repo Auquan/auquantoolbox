@@ -21,15 +21,21 @@ class SimpleExecutionSystem(BaseExecutionSystem):
         instrumentLookbackData = instrumentsManager.getLookbackInstrumentFeatures()
         try:
             price = instrumentLookbackData.getFeatureDf(self.priceFeature).iloc[-1]
+            price = price.replace([np.nan, np.inf, -np.inf], 0)
             return price
         except KeyError:
                 logError('You have specified Dollar Limit but Price Feature Key %s does not exist'%self.priceFeature)
-
+        except IndexError:
+        		logError('The DataFrame is empty')
 
 
     def getLongLimit(self, instrumentIds, price):
         if isinstance(self.longLimit, pd.DataFrame):
-            return self.convertLimit(self.longLimit, price)
+            if self.longLimit.shape[0]==1:
+                longLimitSeries = self.longLimit.iloc[-1]
+            if self.longLimit.shape[1]==1:
+                longLimitSeries = self.longLimit.T.iloc[-1]
+            return self.convertLimit(longLimitSeries, price)
         if isinstance(self.longLimit, dict):
             longLimitDf = pd.Series(self.longLimit)
             return self.convertLimit(longLimitDf, price)
@@ -38,7 +44,11 @@ class SimpleExecutionSystem(BaseExecutionSystem):
 
     def getShortLimit(self, instrumentIds, price):
         if isinstance(self.shortLimit, pd.DataFrame):
-            return self.convertLimit(self.shortLimit, price)
+            if self.shortLimit.shape[0]==1:
+                shortLimitSeries = self.shortLimit.iloc[-1]
+            if self.shortLimit.shape[1]==1:
+                shortLimitSeries = self.shortLimit.T.iloc[-1]
+            return self.convertLimit(shortLimitSeries, price)
         if isinstance(self.shortLimit, dict):
             shortLimitDf = pd.Series(self.shortLimit)
             return self.convertLimit(shortLimitDf, price)
@@ -47,7 +57,11 @@ class SimpleExecutionSystem(BaseExecutionSystem):
 
     def getEnterLotSize(self, instrumentIds, price):
         if isinstance(self.enterlotSize, pd.DataFrame):
-            return self.convertLimit(self.lotSize, price)
+            if self.enterlotSize.shape[0]==1:
+                enterlotSeries = self.enterlotSize.iloc[-1]
+            if self.enterlotSize.shape[1]==1:
+                enterlotSeries = self.enterlotSize.T.iloc[-1]
+            return self.convertLimit(enterlotSeries, price)
         if isinstance(self.enterlotSize, dict):
             lotSizeDf = pd.Series(self.enterlotSize)
             return self.convertLimit(lotSizeDf, price)
@@ -56,7 +70,11 @@ class SimpleExecutionSystem(BaseExecutionSystem):
 
     def getExitLotSize(self, instrumentIds, price):
         if isinstance(self.exitlotSize, pd.DataFrame):
-            return self.convertLimit(self.lotSize, price)
+            if self.exitlotSize.shape[0]==1:
+                exitlotSeries = self.exitlotSize.iloc[-1]
+            if self.exitlotSize.shape[1]==1:
+                exitlotSeries = self.exitlotSize.T.iloc[-1]
+            return self.convertLimit(exitlotSeries, price)
         if isinstance(self.exitlotSize, dict):
             lotSizeDf = pd.Series(self.exitlotSize)
             return self.convertLimit(lotSizeDf, price)
@@ -89,7 +107,7 @@ class SimpleExecutionSystem(BaseExecutionSystem):
         currentPredictions = instrumentLookbackData.getFeatureDf('prediction').iloc[-1]
         executions = self.exitPosition(time, instrumentsManager, currentPredictions)
         executions += self.enterPosition(time, instrumentsManager, currentPredictions, capital)
-        # executions is a series with stocknames as index and positions to execute as column (-10 means sell 10)
+
         return self.getInstrumentExecutionsFromExecutions(time, executions)
 
     def getExecutionsAtClose(self, time, instrumentsManager):
@@ -119,9 +137,9 @@ class SimpleExecutionSystem(BaseExecutionSystem):
             return executions
         executions[self.exitCondition(currentPredictions, instrumentsManager)] = -np.sign(position)*\
                                 np.minimum(self.getExitLotSize(positionData.columns, price) , np.abs(position))
+
         executions[self.hackCondition(currentPredictions, instrumentsManager)] = -np.sign(position)*\
                                 np.minimum(self.getExitLotSize(positionData.columns, price) , np.abs(position))
-
         return executions
 
     def enterPosition(self, time, instrumentsManager, currentPredictions, capital):
@@ -134,7 +152,6 @@ class SimpleExecutionSystem(BaseExecutionSystem):
             self.getEnterLotSize(positionData.columns, price) * self.getBuySell(currentPredictions, instrumentsManager)
         # No executions if at position limit
         executions[self.atPositionLimit(capital, positionData, price)] = 0
-
         return executions
 
     def getBuySell(self, currentPredictions, instrumentsManager):

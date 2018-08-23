@@ -1,6 +1,8 @@
 from backtester.timeRule.time_rule import TimeRule
+from backtester.logger import *
 from datetime import datetime, timedelta
 import os
+import warnings
 try:
     from urllib2 import urlopen
 except ImportError:
@@ -20,26 +22,26 @@ class QuantQuestTimeRule(TimeRule):
             os.mkdir(cachedFolderName + '/' + dataSetId)
 
     def getFileName(self):
-        return self.__cachedFolderName + self.__dataSetId + '/date_list.txt'
+        return self.__cachedFolderName + '/' + self.__dataSetId + '/date_list.txt'
 
     def downloadFile(self, dataSetId, downloadLocation):
         url = 'https://raw.githubusercontent.com/Auquan/auquan-historical-data/master/qq2Data/%s/date_list.txt' % (
             dataSetId)
-        response = urlopen(url)
-        status = response.getcode()
-        if status == 200:
+        try:
+            response = urlopen(url)
             print('Downloading date list to file: %s' % (downloadLocation))
             with open(downloadLocation, 'w') as f:
                 f.write(response.read().decode('utf8'))
             return True
-        else:
-            logError('File not found. Please check settings!')
-            return False
+        except:
+        		logError('File not found. Please check settings!')
+        		return False
 
     def emitTimeToTrade(self):
         fileName = self.getFileName()
         if not os.path.exists(self.__cachedFolderName):
-            os.mkdir(self.cachedFolderName, 0o755)
+            os.mkdir(self.__cachedFolderName, 0o755)
+            os.mkdir(self.__cachedFolderName + '/' + self.__dataSetId)
         if not os.path.isfile(fileName):
             if not self.downloadFile(self.__dataSetId, fileName):
                 logError('File not found %s:' % (fileName))
@@ -52,6 +54,7 @@ class QuantQuestTimeRule(TimeRule):
                 start = dateOfUpdate + timedelta(minutes=17, hours=9)
                 end = dateOfUpdate + timedelta(minutes=29, hours=15)
                 current = start
+                print (current)
                 while (current <= end):
                     yield current
                     current += timedelta(minutes=1)
