@@ -5,7 +5,7 @@ import os.path
 import csv
 from bs4 import BeautifulSoup
 try:
-    from urllib.request import Request, urlopen  # Python 3
+    from urllib.request import Request, urlopen, HTTPError  # Python 3
 except ImportError:
     from urllib2 import Request, urlopen, HTTPError  # Python 2
 
