@@ -1,6 +1,7 @@
 import pandas as pd
 import os, csv
 from datetime import datetime
+from backtester.logger import *
 from backtester.dataSource.data_source_utils import groupAndSortByTimeUpdates
 
 class DataSource(object):
@@ -12,7 +13,7 @@ class DataSource(object):
             self._instrumentIds = instrumentIds
         else:
             self._instrumentIds = self.getAllInstrumentIds()
-
+	
         if startDateStr and endDateStr:
             # # TODO: write method to also parse date string in different formats
             self._startDate = datetime.strptime(startDateStr, "%Y/%m/%d")
@@ -32,8 +33,10 @@ class DataSource(object):
 
     # returns a list of all instrument identifiers
     def getAllInstrumentIds(self):
+        print ("``````````````````````````")
         logError("No instrument provided")
         raise NotImplementedError
+        print ("`````````````````````````")
 
     # returns a list of instrument identifiers
     def getInstrumentIds(self):
@@ -49,8 +52,9 @@ class DataSource(object):
     def emitInstrumentUpdates(self):
         if self._groupedInstrumentUpdates is None:
             logError("groupedInstrumentUpdates has not been computed")
-        for timeOfUpdate, instrumentUpdates in self._groupedInstrumentUpdates:
-            yield([timeOfUpdate, instrumentUpdates])
+        else:
+            for timeOfUpdate, instrumentUpdates in self._groupedInstrumentUpdates:
+                yield([timeOfUpdate, instrumentUpdates])
 
     # emits the dict of all instrument updates where
     # keys are instrumentId and values are pandas dataframe
@@ -100,7 +104,7 @@ class DataSource(object):
                 del self._bookDataByInstrument[instrumentId]
                 self._bookDataByInstrument[instrumentId] = df
                 self._bookDataByInstrument[instrumentId].fillna(method='ffill', inplace=True)
-                self._bookDataByInstrument[instrumentId].fillna(0.0, inplace=True)
+                self._bookDataByInstrument[instrumentId].fillna(0.0, inplace=True)   
 
     # accretes all instrument updates using emitInstrumentUpdates method
     def processAllInstrumentUpdates(self, pad=True):

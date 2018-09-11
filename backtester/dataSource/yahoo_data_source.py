@@ -128,6 +128,9 @@ class YahooStockDataSource(DataSource):
 
     def getFileName(self, instrumentId):
         return self._cachedFolderName + self._dataSetId + '/' + instrumentId + '%s.csv'%self.__dateAppend
+        
+    def getFileName1(self, dataId,instrumentId):
+        return self._cachedFolderName + dataId + '/' + instrumentId + '%s.csv'%self.__dateAppend
 
     def downloadAndAdjustData(self, instrumentId, fileName):
         if not os.path.isfile(fileName):

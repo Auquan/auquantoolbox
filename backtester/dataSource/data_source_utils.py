@@ -1,6 +1,7 @@
 from backtester.instrumentUpdates import *
 from backtester.constants import *
 from backtester.logger import *
+import pandas as pd
 import os
 import os.path
 import requests
@@ -14,15 +15,19 @@ def getCookieForYahoo(instrumentId):
     url = 'https://finance.yahoo.com/quote/%s/history' % (instrumentId)
     req = requests.get(url)
     txt = req.content
-    cookie = req.cookies['B']
-    pattern = re.compile('.*"CrumbStore":\{"crumb":"(?P<crumb>[^"]+)"\}')
+    try:
+        cookie = req.cookies['B']
+        pattern = re.compile('.*"CrumbStore":\{"crumb":"(?P<crumb>[^"]+)"\}')
 
-    for line in txt.splitlines():
-        m = pattern.match(line.decode("utf-8"))
-        if m is not None:
-            crumb = m.groupdict()['crumb']
-            crumb = crumb.replace(u'\\u002F', '/')
-    return cookie, crumb  # return a tuple of crumb and cookie
+        for line in txt.splitlines():
+            m = pattern.match(line.decode("utf-8"))
+            if m is not None:
+                crumb = m.groupdict()['crumb']
+                crumb = crumb.replace(u'\\u002F', '/')
+        return cookie, crumb
+    except:
+        print ("The url is not Correct")
+        return None,None
 
 
 def downloadFileFromYahoo(startDate, endDate, instrumentId, fileName, event='history'):
@@ -64,25 +69,31 @@ def getAllTimeStamps(groupedInstrumentUpdates):
     return timeUpdates
 
 def getMultipliers(self,instrumentId, fileName, downloadId):
-        divFile = self.getFileName('div', instrumentId)
-        splitFile = self.getFileName('split', instrumentId)
+        divFile = self.getFileName1('div', instrumentId)
+        splitFile = self.getFileName1('split', instrumentId)
         if not (os.path.isfile(divFile) and os.path.isfile(splitFile)):
-            self.ensureDirectoryExists('div')
-            self.ensureDirectoryExists('split')
-            downloadFileFromYahoo(self.startDate, self.endDate, '%s%s'%(instrumentId,downloadId), divFile, event='div')
-            downloadFileFromYahoo(self.startDate, self.endDate, '%s%s'%(instrumentId,downloadId), splitFile, event='split')
-        div = pd.read_csv(divFile, engine='python', index_col='Date', parse_dates=True)
-        split = pd.read_csv(splitFile, engine='python', index_col='Date', parse_dates=True)
-        prices = pd.read_csv(fileName, engine='python', index_col='Date', parse_dates=True)
+            self.ensureDirectoryExists(self._cachedFolderName, 'div')
+            self.ensureDirectoryExists(self._cachedFolderName, 'split')
+            downloadFileFromYahoo(self._startDate, self._endDate, '%s%s'%(instrumentId,downloadId), divFile, event='div')
+            downloadFileFromYahoo(self._startDate, self._endDate, '%s%s'%(instrumentId,downloadId), splitFile, event='split')
+        try:
+            div = pd.read_csv(divFile, engine='python', index_col='Date', parse_dates=True)
+            split = pd.read_csv(splitFile, engine='python', index_col='Date', parse_dates=True)
+            prices = pd.read_csv(fileName, engine='python', index_col='Date', parse_dates=True)
+        except:
+            return None
         temp = pd.concat([div, prices], axis=1).fillna(0)
         interim = (temp['Close'] - temp['Dividends']) / temp['Close']
+        interim=interim.fillna(method='pad').fillna(1)
         multiplier1 = interim.sort_index(ascending=False).cumprod().sort_index(ascending=True)
         temp2 = split['Stock Splits'].str.split('/', expand=True)
         if len(temp2.index) > 0:
             temp_mult = pd.to_numeric(temp2[1]) / pd.to_numeric(temp2[0])
+            temp_mult=temp_mult.fillna(method='pad').fillna(1)
             multiplier2 = temp_mult.sort_index(ascending=False).cumprod().sort_index(ascending=True)
         else:
             multiplier2 = pd.Series(1, index=multiplier1.index)
         multiplier = pd.concat([multiplier1, multiplier2], axis=1).fillna(method='bfill').fillna(1)
         multiplier[1] = multiplier[1].shift(-1).fillna(1)
-        return multiplier
+        return multiplier,temp
+

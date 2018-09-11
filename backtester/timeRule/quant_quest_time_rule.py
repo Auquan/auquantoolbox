@@ -37,11 +37,11 @@ class QuantQuestTimeRule(TimeRule):
         		logError('File not found. Please check settings!')
         		return False
 
-    def emitTimeToTrade(self):
+    def emitTimeToTrade(self):    
         fileName = self.getFileName()
         if not os.path.exists(self.__cachedFolderName):
             os.mkdir(self.__cachedFolderName, 0o755)
-            os.mkdir(self.__cachedFolderName + '/' + self.__dataSetId)
+            os.mkdir(self.__cachedFolderName + '/' + self.__dataSetId)            
         if not os.path.isfile(fileName):
             if not self.downloadFile(self.__dataSetId, fileName):
                 logError('File not found %s:' % (fileName))

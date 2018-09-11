@@ -1,5 +1,7 @@
-import time
+import time, os
 from backtester.dataSource.data_source import DataSource
+from backtester.instrumentUpdates import *
+from datetime import datetime
 
 
 class LogfileDataSource(DataSource):
@@ -8,6 +10,16 @@ class LogfileDataSource(DataSource):
         self.file = open(fileName, "r")
         self.file.seek(0, 2)
         self.unfinishedLine = ''
+        # TODO: Fix the super call
+        '''
+        Temporarily fixed the super call for liveUpdates=False
+        '''
+        folderName=os.path.dirname(self.fileName)
+        self.dataSetId='Logfile'
+        self.instrumentIds=['AAE','AGG']
+        startDateStr='2018/01/01'
+        endDateStr='2018/02/01'
+        super(LogfileDataSource, self).__init__(folderName, self.dataSetId, self.instrumentIds, startDateStr, endDateStr)
         if not liveUpdates:
             self.processAllInstrumentUpdates()
             self.filterUpdatesByDates()
@@ -18,6 +30,20 @@ class LogfileDataSource(DataSource):
     '''
     def processLineIntoInstrumentUpdate(self, line):
         return line
+
+    '''
+    Will use child class's processLine
+    '''
+    # TODO: 
+    def processLine(self, line):
+        lineItems = line.split()
+        inst = FutureInstrumentUpdate(futureInstrumentId='AAG',
+                                      tradeSymbol=None,
+                                      timeOfUpdate=None,
+                                      bookData=None,
+                                      expiryTime=datetime.strptime("2/1/2018","%m/%d/%Y"),
+                                      underlyingInstrumentId='NA')
+        return inst
 
     def emitInstrumentUpdates(self):
         while True:
@@ -31,3 +57,4 @@ class LogfileDataSource(DataSource):
                         yield(instrumentUpdate)
             else:
                 time.sleep(0.1)
+

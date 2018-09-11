@@ -51,14 +51,15 @@ class CsvDataSource(DataSource):
         else:
             url = '%s/stock_list.txt' % (self._downloadUrl)
         print(url)
-        response = urlopen(url)
-        status = response.getcode()
-        if status == 200:
-            print('Downloading list of stocks to file: %s' % (stockListFileName))
-            with open(stockListFileName, 'w') as f:
-                f.write(response.read().decode('utf8'))
-            return True
-        else:
+        try:
+            response = urlopen(url)
+            status = response.getcode()
+            if status == 200:
+                print('Downloading list of stocks to file: %s' % (stockListFileName))
+                with open(stockListFileName, 'w') as f:
+                    f.write(response.read().decode('utf8'))
+                return True
+        except:
             logError('File not found. Please check internet')
             return False
 
@@ -81,14 +82,15 @@ class CsvDataSource(DataSource):
         else:
             url = '%s/%s.csv' % (self._downloadUrl, instrumentId)
 
-        response = urlopen(url)
-        status = response.getcode()
-        if status == 200:
-            print('Downloading %s data to file: %s' % (instrumentId, downloadLocation))
-            with open(downloadLocation, 'w') as f:
-                f.write(response.read().decode('utf8'))
-            return True
-        else:
+        try:
+            response = urlopen(url)
+            status = response.getcode()
+            if status == 200:
+                print('Downloading %s data to file: %s' % (instrumentId, downloadLocation))
+                with open(downloadLocation, 'w') as f:
+                    f.write(response.read().decode('utf8'))
+                return True
+        except:
             logError('File not found. Please check settings!')
             return False
 
@@ -114,3 +116,4 @@ class CsvDataSource(DataSource):
         if self._bookDataFeatureKeys is None:
             self._bookDataFeatureKeys = bookData.keys()  # just setting to the first one we encounter
         return inst
+        

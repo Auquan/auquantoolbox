@@ -12,8 +12,8 @@ class QQExecutionSystem(SimpleExecutionSystemWithFairValue):
         super(QQExecutionSystem, self).__init__(enter_threshold_deviation=basisEnter_threshold,
                                                 exit_threshold_deviation=basisExit_threshold,
                                                 longLimit=basisLongLimit, shortLimit=basisShortLimit,
-                                                capitalUsageLimit=basisCapitalUsageLimit, lotSize=basisLotSize,
-                                                limitType=basisLimitType, price=price)
+                                                capitalUsageLimit=basisCapitalUsageLimit, enterlotSize=basisLotSize,
+                                                exitlotSize=basisLotSize,limitType=basisLimitType, price=price)
         self.fees = feeDict
         self.thresholdParam = basis_thresholdParam
 

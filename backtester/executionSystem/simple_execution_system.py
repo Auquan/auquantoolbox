@@ -26,7 +26,7 @@ class SimpleExecutionSystem(BaseExecutionSystem):
         except KeyError:
                 logError('You have specified Dollar Limit but Price Feature Key %s does not exist'%self.priceFeature)
         except IndexError:
-        		logError('The DataFrame is empty')
+        			 logError('The DataFrame is empty')
 
 
     def getLongLimit(self, instrumentIds, price):
@@ -107,7 +107,7 @@ class SimpleExecutionSystem(BaseExecutionSystem):
         currentPredictions = instrumentLookbackData.getFeatureDf('prediction').iloc[-1]
         executions = self.exitPosition(time, instrumentsManager, currentPredictions)
         executions += self.enterPosition(time, instrumentsManager, currentPredictions, capital)
-
+        
         return self.getInstrumentExecutionsFromExecutions(time, executions)
 
     def getExecutionsAtClose(self, time, instrumentsManager):
@@ -131,13 +131,13 @@ class SimpleExecutionSystem(BaseExecutionSystem):
         position = positionData.iloc[-1]
         price = self.getPriceSeries(instrumentsManager)
         executions = pd.Series([0] * len(positionData.columns), index=positionData.columns)
-
+        
         if closeAllPositions:
             executions = -position
             return executions
         executions[self.exitCondition(currentPredictions, instrumentsManager)] = -np.sign(position)*\
                                 np.minimum(self.getExitLotSize(positionData.columns, price) , np.abs(position))
-
+        
         executions[self.hackCondition(currentPredictions, instrumentsManager)] = -np.sign(position)*\
                                 np.minimum(self.getExitLotSize(positionData.columns, price) , np.abs(position))
         return executions
@@ -174,3 +174,4 @@ class SimpleExecutionSystem(BaseExecutionSystem):
 
     def hackCondition(self, currentPredictions, instrumentsManager):
         return pd.Series(False, index=currentPredictions.index)
+

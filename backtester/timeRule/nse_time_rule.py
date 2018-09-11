@@ -5,7 +5,7 @@ import os.path
 import csv
 from bs4 import BeautifulSoup
 try:
-    from urllib.request import Request, urlopen, HTTPError  # Python 3
+    from urllib.request import Request, urlopen  # Python 3
 except ImportError:
     from urllib2 import Request, urlopen, HTTPError  # Python 2
 
@@ -23,10 +23,7 @@ class NSETimeRule(CustomTimeRule):
                'Referer': 'https://www.nseindia.com/products/content/equities/equities/mrkt_timing_holidays.htm',
                'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
                'X-Requested-With': 'XMLHttpRequest'}
-        #May possibly break on 1st january in case NSE does not post the holidays for the new year on time
-        fromDate = (datetime(2010, 1, 1)).strftime("%d-%m-%Y")
-        toDate = datetime(datetime.now().year, 12, 31).strftime("%d-%m-%Y")
-        url = 'https://www.nseindia.com/global/content/market_timings_holidays/market_timings_holidays.jsp?pageName=0&dateRange=&fromDate=%s&toDate=%s&tabActive=trading&load=false' % (fromDate,toDate) 
+        url = 'https://www.nseindia.com/global/content/market_timings_holidays/market_timings_holidays.jsp?pageName=0&dateRange=&fromDate=01-01-2010&toDate=31-12-2018&tabActive=trading&load=false'
         req = Request(url, headers=hdr)
         try:
             page = urlopen(req)

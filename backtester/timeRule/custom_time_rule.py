@@ -63,7 +63,7 @@ class CustomTimeRule(TimeRule):
             time_range = self.createBusinessMinSeries()
         elif(self.__frequency == 'S'):
             time_range = self.createBusinessSecSeries()
-
+			
         for timestamp in time_range:
             yield timestamp
             
