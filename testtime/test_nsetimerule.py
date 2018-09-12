@@ -1,7 +1,9 @@
+import os,sys,shutil
+sys.path.append(os.path.abspath('..'))
 from backtester.timeRule.nse_time_rule import NSETimeRule
 from unittest.mock import Mock, MagicMock
 import pytest
-from initialize import Initialize
+from initializetime import Initialize
 def test_nsetimerule():
         initialize = Initialize()
         for i in range(0,4):

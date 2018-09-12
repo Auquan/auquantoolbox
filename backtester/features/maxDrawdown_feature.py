@@ -11,7 +11,7 @@ class MaxDrawdownFeature(Feature):
     '''
     @classmethod
     def computeForInstrument(cls, featureParams, featureKey, currentFeatures, instrument, instrumentManager):
-        raise NotImplemented
+        raise NotImplementedError
 
         return None
 
@@ -22,6 +22,7 @@ class MaxDrawdownFeature(Feature):
     def computeForMarket(cls, updateNum, time, featureParams, featureKey, currentMarketFeatures, instrumentManager):
         portfolioValueKey = 'portfolio_value'
         lookbackMarketDataDf = instrumentManager.getDataDf()
+        
         if len(lookbackMarketDataDf) < 1 or instrumentManager is None:
             # First Iteration
             return 0
@@ -32,11 +33,15 @@ class MaxDrawdownFeature(Feature):
         if len(portfolioValueDict) <= 1:
             return {'maxPortfolioValue': 0, 'maxDrawdown': 0}
         drawdownDict = lookbackMarketDataDf[featureKey].iloc[-2]
+        try:
+                maxPortfolioValue = portfolioValueDict.iloc[-1] if drawdownDict['maxPortfolioValue'] < portfolioValueDict.iloc[-1] \
+                    else drawdownDict['maxPortfolioValue']
 
-        maxPortfolioValue = portfolioValueDict.iloc[-1] if drawdownDict['maxPortfolioValue'] < portfolioValueDict.iloc[-1] \
-            else drawdownDict['maxPortfolioValue']
+                maxDrawdown = maxPortfolioValue - portfolioValueDict.iloc[-1] if drawdownDict['maxDrawdown'] < maxPortfolioValue - portfolioValueDict.iloc[-1] \
+                    else drawdownDict['maxDrawdown']
 
-        maxDrawdown = maxPortfolioValue - portfolioValueDict.iloc[-1] if drawdownDict['maxDrawdown'] < maxPortfolioValue - portfolioValueDict.iloc[-1] \
-            else drawdownDict['maxDrawdown']
+                return {'maxPortfolioValue': maxPortfolioValue, 'maxDrawdown': maxDrawdown}
+        except KeyError:
+                raise KeyError("ASDASDAD")
 
-        return {'maxPortfolioValue': maxPortfolioValue, 'maxDrawdown': maxDrawdown}
+        #

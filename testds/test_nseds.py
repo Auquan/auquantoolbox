@@ -1,3 +1,5 @@
+import os,sys,shutil
+sys.path.append(os.path.abspath('..'))
 from backtester.dataSource.nse_data_source import *
 from backtester.instrumentUpdates import *
 from backtester.logger import *
@@ -6,7 +8,7 @@ from datetime import datetime, time, timedelta
 from unittest.mock import Mock, MagicMock
 import pytest
 import pandas as pd
-from initialize import Initialize
+from initializeds import Initialize
 import os
 
 def test_logfileds():

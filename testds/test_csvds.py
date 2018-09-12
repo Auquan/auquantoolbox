@@ -1,11 +1,12 @@
+import os,sys,shutil
+sys.path.append(os.path.abspath('..'))
 from backtester.dataSource.csv_data_source import *
 from backtester.instrumentUpdates import *
 from backtester.logger import *
-import os,sys,shutil
 from datetime import datetime, time, timedelta
 from unittest.mock import Mock, MagicMock
 import pytest
-from initialize import Initialize
+from initializeds import Initialize
 
 def test_datasource():
         initialize=Initialize()

@@ -9,3 +9,4 @@ class PortfolioValueFeature(Feature):
     @classmethod
     def computeForMarket(cls, updateNum, time, featureParams, featureKey, currentMarketFeatures, instrumentManager):
         return featureParams['initial_capital'] + currentMarketFeatures[featureParams['pnl']]
+        

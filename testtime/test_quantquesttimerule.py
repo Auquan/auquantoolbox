@@ -1,8 +1,10 @@
+import os,sys,shutil
+sys.path.append(os.path.abspath('..'))
 from backtester.timeRule.quant_quest_time_rule import QuantQuestTimeRule
 from unittest.mock import Mock, MagicMock
 import pandas as pd
 import pytest
-from initialize import Initialize
+from initializetime import Initialize
 from datetime import datetime, timedelta
 import os
 try:

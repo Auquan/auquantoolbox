@@ -1,3 +1,5 @@
+import os,sys,shutil
+sys.path.append(os.path.abspath('..'))
 from backtester.executionSystem.base_execution_system import *
 from backtester.executionSystem.pair_execution_system import PairExecutionSystem
 from backtester.instruments_manager import *
@@ -9,7 +11,7 @@ from collections import OrderedDict
 import math
 import pandas as pd
 import pytest
-from initialize import Initialize
+from initializeexec import Initialize
 import numpy as np
 
 @pytest.fixture

@@ -1,3 +1,5 @@
+import os,sys,shutil
+sys.path.append(os.path.abspath('..'))
 from backtester.executionSystem.simple_execution_system_fairvalue import SimpleExecutionSystemWithFairValue
 from backtester.instruments_manager import *
 from backtester.instruments_lookback_data import *
@@ -5,7 +7,7 @@ from unittest.mock import Mock, MagicMock
 from collections import OrderedDict
 import pandas as pd
 import pytest
-from initialize import Initialize
+from initializeexec import Initialize
 import numpy as np
 
 @pytest.fixture

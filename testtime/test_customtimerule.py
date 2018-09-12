@@ -1,7 +1,9 @@
+import os,sys,shutil
+sys.path.append(os.path.abspath('..'))
 from backtester.timeRule.custom_time_rule import CustomTimeRule
 from unittest.mock import Mock, MagicMock
 import pytest
-from initialize import Initialize
+from initializetime import Initialize
 def test_customtimerule():
         initialize = Initialize()
         for i in range(0,4):

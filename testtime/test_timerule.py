@@ -1,3 +1,5 @@
+import os,sys,shutil
+sys.path.append(os.path.abspath('..'))
 from backtester.timeRule.time_rule import TimeRule
 import pytest
 

@@ -1,3 +1,5 @@
+import os,sys,shutil
+sys.path.append(os.path.abspath('..'))
 from backtester.executionSystem.base_execution_system import InstrumentExection, BaseExecutionSystem
 from backtester.instruments_manager import *
 from unittest.mock import Mock

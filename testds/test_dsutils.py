@@ -1,13 +1,14 @@
+import os, sys,shutil
+sys.path.append(os.path.abspath('..'))
 from backtester.dataSource.data_source_utils import *
 from backtester.dataSource.yahoo_data_source import *
 from backtester.instrumentUpdates import *
 from backtester.constants import *
 from backtester.logger import *
-import os, shutil
 from datetime import datetime, time, timedelta
 from unittest.mock import Mock, MagicMock
 import pytest
-from initialize import Initialize
+from initializeds import Initialize
 
 @pytest.fixture
 def mock_stockinstrumentupdates():

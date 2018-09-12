@@ -1,12 +1,13 @@
+import os,sys,shutil
+sys.path.append(os.path.abspath('..'))
 from backtester.dataSource.data_source import DataSource
 from backtester.dataSource.csv_data_source import *
 from backtester.logger import *
-import os,sys,shutil
 import pandas as pd
 from datetime import datetime, time, timedelta
 from unittest.mock import Mock, MagicMock
 import pytest
-from initialize import Initialize
+from initializeds import Initialize
 
 def test_datasource():
         initialize=Initialize()
@@ -39,7 +40,6 @@ def test_datasource():
                 assert DataSource.getBookDataFeatures(datasource) == None
                 resultemitInstrumentUpdates=DataSource.emitInstrumentUpdates(datasource)
                 assert DataSource.emitAllInstrumentUpdates(datasource)==None
-
                 resulttimeUpdatesforgetGrouped,resultgroupedInstrumentUpdatesforgetGrouped=DataSource.getGroupedInstrumentUpdates(csvdatasource1)
                 resulttimeUpdatesforgetAll,resultgroupedInstrumentUpdatesforgetAll=DataSource.getAllInstrumentUpdates(csvdatasource1)
                 assert resulttimeUpdatesforgetGrouped==results["resulttimeUpdatesforgetGrouped"]

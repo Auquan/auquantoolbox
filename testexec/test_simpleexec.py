@@ -1,3 +1,5 @@
+import os,sys,shutil
+sys.path.append(os.path.abspath('..'))
 from backtester.executionSystem.base_execution_system import *
 from backtester.executionSystem.simple_execution_system import SimpleExecutionSystem
 from backtester.instruments_manager import *
@@ -6,7 +8,7 @@ from backtester.instruments.instrument import *
 from unittest.mock import Mock, MagicMock
 import pandas as pd
 import pytest
-from initialize import Initialize
+from initializeexec import Initialize
 
 #mocking InstrumentManager
 @pytest.fixture

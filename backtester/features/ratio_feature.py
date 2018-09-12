@@ -12,6 +12,9 @@ class RatioMarketFeature(Feature):
         instrumentLookbackData = instrumentManager.getLookbackInstrumentFeatures()
         feature1 = instrumentLookbackData.getFeatureDf(featureParams['featureName1']).iloc[-1]
         feature2 = instrumentLookbackData.getFeatureDf(featureParams['featureName2']).iloc[-1]
+        priceDict = instrumentLookbackData.getFeatureDf(featureParams['price'])
+        import pdb; pdb.set_trace()
+        print (priceDict)
 
         toRtn = feature1 / feature2
         toRtn[toRtn == np.Inf] = 0

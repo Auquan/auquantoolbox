@@ -1,14 +1,15 @@
+import os,sys,shutil
+sys.path.append(os.path.abspath('..'))
 from backtester.dataSource.logfile_data_source import *
 from backtester.instrumentUpdates import *
 from backtester.logger import *
-import os,sys,shutil
 from datetime import datetime, time, timedelta
 import time
 import multiprocessing
 from unittest.mock import Mock, MagicMock
 import pytest
 import signal
-from initialize import Initialize
+from initializeds import Initialize
 import os
 
 def test_logfileds():
