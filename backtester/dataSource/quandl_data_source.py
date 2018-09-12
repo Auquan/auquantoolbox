@@ -12,6 +12,7 @@ except ImportError:
     from urllib.request import urlopen
     import urllib.error as ue
 import pandas as pd
+import numpy as np
 import time
 
 def is_number(s):
@@ -94,7 +95,11 @@ class QuandlDataSource(DataSource):
                                                                             index=timeUpdates)
                     self.__bookDataByFeature[featureKey].set_value(timeOfUpdate, instrumentUpdate.getInstrumentId(), bookData[featureKey])
         for featureKey in self.__bookDataByFeature:
+            self.__bookDataByFeature[featureKey].replace(np.Inf, np.nan, inplace = True)
+            self.__bookDataByFeature[featureKey].replace(-np.Inf, np.nan, inplace = True)
             self.__bookDataByFeature[featureKey].fillna(method='pad', inplace=True)
+            self.__bookDataByFeature[featureKey].fillna(0, inplace=True)
+
 
     def getInstrumentUpdateFromRow(self, instrumentId, row):
         bookData = row

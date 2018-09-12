@@ -7,6 +7,7 @@ from backtester.logger import *
 from backtester.dataSource.data_source import DataSource
 import csv
 import pandas as pd
+import numpy as np
 import os
 import os.path
 from backtester.dataSource.data_source_utils import downloadFileFromYahoo
@@ -108,7 +109,7 @@ class InstrumentsFromFile():
 
 
 class YahooStockDataSource(DataSource):
-    def __init__(self, cachedFolderName, dataSetId, instrumentIds, startDateStr, endDateStr, event='history', adjustPrice=False, downloadId=".NS", liveUpdates=True, pad=True):
+    def __init__(self, cachedFolderName, dataSetId, instrumentIds, startDateStr, endDateStr, event='history', adjustPrice=False, downloadId=".SN", liveUpdates=True, pad=True):
         super(YahooStockDataSource, self).__init__(cachedFolderName, dataSetId, instrumentIds, startDateStr, endDateStr)
         self.__dateAppend = "_%sto%s"%(parser.parse(startDateStr).strftime('%Y-%m-%d'),parser.parse(endDateStr).strftime('%Y-%m-%d'))
         self.__downloadId = downloadId
@@ -128,6 +129,9 @@ class YahooStockDataSource(DataSource):
 
     def getFileName(self, instrumentId):
         return self._cachedFolderName + self._dataSetId + '/' + instrumentId + '%s.csv'%self.__dateAppend
+
+    def getFileName1(self, id, instrumentId):
+        return self._cachedFolderName+id + '/' + instrumentId+'%s.csv'%self.__dateAppend
 
     def downloadAndAdjustData(self, instrumentId, fileName):
         if not os.path.isfile(fileName):
@@ -159,7 +163,10 @@ class YahooStockDataSource(DataSource):
                                                                             index=timeUpdates)
                     self.__bookDataByFeature[featureKey].set_value(timeOfUpdate, instrumentUpdate.getInstrumentId(), bookData[featureKey])
         for featureKey in self.__bookDataByFeature:
+            self.__bookDataByFeature[featureKey].replace(np.Inf, np.nan, inplace = True)
+            self.__bookDataByFeature[featureKey].replace(-np.Inf, np.nan, inplace = True)
             self.__bookDataByFeature[featureKey].fillna(method='pad', inplace=True)
+            self.__bookDataByFeature[featureKey].fillna(0, inplace=True)
 
     def getInstrumentUpdateFromRow(self, instrumentId, row):
         bookData =  {'open': float(row['Open']),
@@ -183,13 +190,16 @@ class YahooStockDataSource(DataSource):
         return self._allTimes[-1]
 
     def adjustPriceForSplitAndDiv(self, instrumentId, fileName):
-        multiplier = data_source_utils.getMultipliers(self,instrumentId,fileName,self.__downloadId)
-        temp['close'] = temp['close'] * multiplier[0] * multiplier[1]
-        temp['open'] = temp['open'] * multiplier[0] * multiplier[1]
-        temp['high'] = temp['high'] * multiplier[0] * multiplier[1]
-        temp['low'] = temp['low'] * multiplier[0] * multiplier[1]
+        try:
+            multiplier, temp = data_source_utils.getMultipliers(self,instrumentId,fileName,self.__downloadId)
+        except:
+            return True
+        temp['Close'] = temp['Close'] * multiplier[0] * multiplier[1]
+        temp['Open'] = temp['Open'] * multiplier[0] * multiplier[1]
+        temp['High'] = temp['High'] * multiplier[0] * multiplier[1]
+        temp['Low'] = temp['Low'] * multiplier[0] * multiplier[1]
 
-        del temp['dividends']
+        del temp['Dividends']
         temp.to_csv(fileName)
 
 

@@ -64,6 +64,9 @@ class FeaturesDataSource(DataSource):
     def getFileName(self, instrumentId):
         return os.path.join(self._cachedFolderName, self._dataSetId, self._featureFolderName, instrumentId + '.csv')
 
+    def getClosingTime(self):
+        return self._allTimes[-1]
+
     def ensureAllInstrumentsFile(self):
         stockDataFileName = os.path.join(self._cachedFolderName, self._dataSetId, self._featureFolderName, 'stock_data.json')
         if os.path.isfile(stockDataFileName):

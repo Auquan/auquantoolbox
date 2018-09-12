@@ -12,7 +12,8 @@ class PairExecutionSystem(SimpleExecutionSystem):
                                                   longLimit=longLimit,
                                                   shortLimit=shortLimit,
                                                   capitalUsageLimit=pairCapitalUsageLimit,
-                                                  lotSize=lotSize,
+                                                  enterlotSize = lotSize,
+                                                  exitlotSize = lotSize,
                                                   price = price)
 
     def getExecutions(self, time, instrumentsManager, capital):
