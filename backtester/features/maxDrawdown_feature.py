@@ -22,7 +22,7 @@ class MaxDrawdownFeature(Feature):
     def computeForMarket(cls, updateNum, time, featureParams, featureKey, currentMarketFeatures, instrumentManager):
         portfolioValueKey = 'portfolio_value'
         lookbackMarketDataDf = instrumentManager.getDataDf()
-        
+
         if len(lookbackMarketDataDf) < 1 or instrumentManager is None:
             # First Iteration
             return 0
@@ -42,6 +42,4 @@ class MaxDrawdownFeature(Feature):
 
                 return {'maxPortfolioValue': maxPortfolioValue, 'maxDrawdown': maxDrawdown}
         except KeyError:
-                raise KeyError("ASDASDAD")
-
-        #
+                raise KeyError("KeyError")

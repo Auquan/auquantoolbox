@@ -28,8 +28,8 @@ class VarianceFeature(Feature):
 
         sqSum = float(prevCount) * varDataDf.iloc[-1] #8.0
 
-        prevAvgPnl = pnlDataDf.iloc[-2] / float(prevCount) #0.48
-        newAvgPnl = pnlDataDf.iloc[-1] / float(updateNum) #4.53
+        prevAvgPnl = pnlDataDf.iloc[-2] / float(prevCount)
+        newAvgPnl = pnlDataDf.iloc[-1] / float(updateNum)
         newSqSum = sqSum + prevCount * (prevAvgPnl**2 - newAvgPnl**2) \
             + (pnlDataDf.iloc[-2] - pnlDataDf.iloc[-1] - newAvgPnl)**2
 
@@ -65,4 +65,4 @@ class VarianceFeature(Feature):
         newSqSum = sqSum + prevCount * (prevAvgPnl**2 - newAvgPnl**2)\
             + (pnlDict.iloc[-2] - pnlDict.iloc[-1] - newAvgPnl)**2
 
-        return newSqSum / float(prevCount + 1)    
+        return newSqSum / float(prevCount + 1)
