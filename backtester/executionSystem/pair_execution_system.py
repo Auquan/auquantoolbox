@@ -22,6 +22,5 @@ class PairExecutionSystem(SimpleExecutionSystem):
         currentPredictions = pd.DataFrame(data=[currentPrediction], index=[time]).iloc[-1]
         executions = self.exitPosition(time, instrumentsManager, currentPredictions)
         executions += self.enterPosition(time, instrumentsManager, currentPredictions, capital)
-        
         # executions is a series with stocknames as index and positions to execute as column (-10 means sell 10)
         return self.getInstrumentExecutionsFromExecutions(time, executions)

@@ -33,11 +33,9 @@ class DataSource(object):
 
     # returns a list of all instrument identifiers
     def getAllInstrumentIds(self):
-        print ("``````````````````````````")
         logError("No instrument provided")
         raise NotImplementedError
-        print ("`````````````````````````")
-
+        
     # returns a list of instrument identifiers
     def getInstrumentIds(self):
         return self._instrumentIds

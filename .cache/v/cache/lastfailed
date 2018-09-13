@@ -1,1 +1,3 @@
-{}
+{
+  "tests/testds/test_nseds.py::test_logfileds": true
+}
