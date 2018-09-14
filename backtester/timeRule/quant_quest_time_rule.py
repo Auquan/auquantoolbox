@@ -22,7 +22,7 @@ class QuantQuestTimeRule(TimeRule):
             os.mkdir(cachedFolderName + '/' + dataSetId)
 
     def getFileName(self):
-        return self.__cachedFolderName + '/' + self.__dataSetId + '/date_list.txt'
+        return self.__cachedFolderName + self.__dataSetId + '/date_list.txt'
 
     def downloadFile(self, dataSetId, downloadLocation):
         url = 'https://raw.githubusercontent.com/Auquan/auquan-historical-data/master/qq2Data/%s/date_list.txt' % (
