@@ -22,7 +22,7 @@ class LogfileDataSource(DataSource):
         super(LogfileDataSource, self).__init__(folderName, self.dataSetId, self.instrumentIds, startDateStr, endDateStr)
         if not liveUpdates:
             self.processAllInstrumentUpdates()
-            #self.filterUpdatesByDates()
+            self.filterUpdatesByDates()
 
     '''
     Assume line in processLine is a complete line.

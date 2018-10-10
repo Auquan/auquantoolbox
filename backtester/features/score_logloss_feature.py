@@ -17,14 +17,9 @@ class ScoreLogLossFeature(Feature):
             predictionKey = featureParams['predictionKey']
         if 'target' in featureParams:
             target = featureParams['target']
-        #try:
-            #pass
         predictionDf = instrumentLookbackData.getFeatureDf(predictionKey)
         featureDf = instrumentLookbackData.getFeatureDf(featureKey)
         targetDf = instrumentLookbackData.getFeatureDf(target)
-        #except KeyError:
-            #logError("The featureParams keys are wrong")
-            #return
         predictionDf = predictionDf.replace([np.nan, np.inf, -np.inf], 0)
         featureDf = featureDf.replace([np.nan, np.inf, -np.inf], 0)
         targetDf = targetDf.replace([np.nan, np.inf, -np.inf], 0)
