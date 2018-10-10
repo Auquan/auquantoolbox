@@ -13,7 +13,7 @@ class DataSource(object):
             self._instrumentIds = instrumentIds
         else:
             self._instrumentIds = self.getAllInstrumentIds()
-	
+
         if startDateStr and endDateStr:
             # # TODO: write method to also parse date string in different formats
             self._startDate = datetime.strptime(startDateStr, "%Y/%m/%d")
@@ -33,9 +33,9 @@ class DataSource(object):
 
     # returns a list of all instrument identifiers
     def getAllInstrumentIds(self):
-        logError("No instrument provided")
+        logError("No instrumentIds provided")
         raise NotImplementedError
-        
+
     # returns a list of instrument identifiers
     def getInstrumentIds(self):
         return self._instrumentIds
@@ -102,7 +102,7 @@ class DataSource(object):
                 del self._bookDataByInstrument[instrumentId]
                 self._bookDataByInstrument[instrumentId] = df
                 self._bookDataByInstrument[instrumentId].fillna(method='ffill', inplace=True)
-                self._bookDataByInstrument[instrumentId].fillna(0.0, inplace=True)   
+                self._bookDataByInstrument[instrumentId].fillna(0.0, inplace=True)
 
     # accretes all instrument updates using emitInstrumentUpdates method
     def processAllInstrumentUpdates(self, pad=True):
@@ -112,12 +112,14 @@ class DataSource(object):
                 instrumentId = instrumentUpdate.getInstrumentId()
                 for col in instrumentUpdate.getBookData():
                     self._bookDataByInstrument[instrumentId].at[timeOfUpdate, col] = instrumentUpdate.getBookData()[col]
+
         for instrumentId in self._bookDataByInstrument:
             if pad:
                 self._bookDataByInstrument[instrumentId].fillna(method='ffill', inplace=True)
                 self._bookDataByInstrument[instrumentId].fillna(0.0, inplace=True)
             else:
                 self._bookDataByInstrument[instrumentId].dropna(inplace=True)
+
 
     # selects only those instrument updates which lie within dateRange
     def filterUpdatesByDates(self, dateRange=None):

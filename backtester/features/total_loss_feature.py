@@ -21,12 +21,9 @@ class TotalLossFeature(Feature):
         else:
             totalLoss = prevData.iloc[-1]
             prevPnl = pnlData.iloc[-2]
-
-        if prevData.empty or pnlData.empty:
-        		return totalLoss
-
-        pnl = pnlData.iloc[-1] - prevPnl
-        totalLoss[pnl < 0] = totalLoss + np.abs(pnl)
+        if len(pnlData)>=1:
+            pnl = pnlData.iloc[-1] - prevPnl
+            totalLoss[pnl < 0] = totalLoss + np.abs(pnl)
         return totalLoss
 
     @classmethod
@@ -46,8 +43,8 @@ class TotalLossFeature(Feature):
             prevPnl = lookbackDataDf[pnlKey].iloc[-2]
 
         totalLoss = prevData
-        pnl = lookbackDataDf[pnlKey].iloc[-1] - prevPnl
-
-        if (pnl < 0):
-            totalLoss += np.abs(pnl)
+        if len(lookbackDataDf[pnlKey])>=1:
+            pnl = lookbackDataDf[pnlKey].iloc[-1] - prevPnl
+            if (pnl < 0):
+                totalLoss += np.abs(pnl)
         return totalLoss

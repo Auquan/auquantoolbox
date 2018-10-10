@@ -18,7 +18,7 @@ class CrossSectionMomentumFeature(Feature):
             instrument = allInstruments[instrumentId]
             data[instrumentId] = instrument.getDataDf()[featureParams['featureName']]
         df = pd.DataFrame(data)
-        df=df.replace([np.nan, np.inf, -np.inf], 0)
+        df = df.replace([np.nan, np.inf, -np.inf], 0)
         R = (df / df.shift(featureParams['period']))
         R = R.replace([np.nan, np.inf, -np.inf], 0)
         ranks = (R.T - R.T.mean()).T.mean()

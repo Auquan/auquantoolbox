@@ -1,5 +1,5 @@
 from backtester.features.feature import Feature
-
+from backtester.logger import *
 
 class PortfolioValueFeature(Feature):
 
@@ -8,5 +8,7 @@ class PortfolioValueFeature(Feature):
     '''
     @classmethod
     def computeForMarket(cls, updateNum, time, featureParams, featureKey, currentMarketFeatures, instrumentManager):
-        return featureParams['initial_capital'] + currentMarketFeatures[featureParams['pnl']]
-        
+        try:
+            return featureParams['initial_capital'] + currentMarketFeatures[featureParams['pnl']]
+        except KeyError:
+            logError('currentMarketFeatures does not contain pnl Key')

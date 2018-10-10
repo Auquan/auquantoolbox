@@ -241,9 +241,9 @@ class NSEStockDataSource(DataSource):
 
     def getFileName(self, instrumentId):
         return self._cachedFolderName + self._dataSetId + '/' + instrumentId + '%s.csv'%self.__dateAppend
-        
+
     def getFileName1(self, dataId, instrumentId):
-        return self._cachedFolderName + dataId + '/' + instrumentId + '%s.csv'%self.__dateAppend       
+        return self._cachedFolderName + dataId + '/' + instrumentId + '%s.csv'%self.__dateAppend
 
     def processGroupedInstrumentUpdates(self):
         timeUpdates = self._allTimes
@@ -286,13 +286,17 @@ class NSEStockDataSource(DataSource):
         return self.__bookDataByFeature
 
     def getClosingTime(self):
-        return self._allTimes[-1]
+        try:
+            return self._allTimes[-1]
+        except IndexError:
+            logError("The DataFrame is empty")
 
     def adjustPriceForSplitAndDiv(self, instrumentId, fileName):
         try:
             multiplier,temp = data_source_utils.getMultipliers(self,instrumentId,fileName,self.__downloadId)
         except:
-            return True
+            logError("DataFrames are empty")
+            return
         temp['Close'] = temp['Close'] * multiplier[0] * multiplier[1]
         temp['Open'] = temp['Open'] * multiplier[0] * multiplier[1]
         temp['High'] = temp['High'] * multiplier[0] * multiplier[1]

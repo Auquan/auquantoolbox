@@ -1,4 +1,5 @@
 from backtester.features.feature import Feature
+from backtester.logger import *
 
 
 class MaxDrawdownFeature(Feature):
@@ -12,8 +13,6 @@ class MaxDrawdownFeature(Feature):
     @classmethod
     def computeForInstrument(cls, featureParams, featureKey, currentFeatures, instrument, instrumentManager):
         raise NotImplementedError
-
-        return None
 
     '''
     Computing for Market. By default defers to computeForLookbackData
@@ -32,14 +31,20 @@ class MaxDrawdownFeature(Feature):
         portfolioValueDict = lookbackMarketDataDf[portfolioValueKey]
         if len(portfolioValueDict) <= 1:
             return {'maxPortfolioValue': 0, 'maxDrawdown': 0}
-        drawdownDict = lookbackMarketDataDf[featureKey].iloc[-2]
+
         try:
-                maxPortfolioValue = portfolioValueDict.iloc[-1] if drawdownDict['maxPortfolioValue'] < portfolioValueDict.iloc[-1] \
-                    else drawdownDict['maxPortfolioValue']
+            drawdownDict = lookbackMarketDataDf[featureKey].iloc[-2]
+        except IndexError:
+            logError("drawdownDict does not have 2 elements")
+            return {'maxPortfolioValue': 0, 'maxDrawdown': 0}
 
-                maxDrawdown = maxPortfolioValue - portfolioValueDict.iloc[-1] if drawdownDict['maxDrawdown'] < maxPortfolioValue - portfolioValueDict.iloc[-1] \
-                    else drawdownDict['maxDrawdown']
-
-                return {'maxPortfolioValue': maxPortfolioValue, 'maxDrawdown': maxDrawdown}
+        try:
+            maxPortfolioValue = portfolioValueDict.iloc[-1] if drawdownDict['maxPortfolioValue'] < portfolioValueDict.iloc[-1] \
+                else drawdownDict['maxPortfolioValue']
+            maxDrawdown = maxPortfolioValue - portfolioValueDict.iloc[-1] if drawdownDict['maxDrawdown'] < maxPortfolioValue - portfolioValueDict.iloc[-1] \
+                else drawdownDict['maxDrawdown']
         except KeyError:
-                raise KeyError("KeyError")
+            logError("Key is not present")
+            return {'maxPortfolioValue': 0, 'maxDrawdown': 0}
+
+        return {'maxPortfolioValue': maxPortfolioValue, 'maxDrawdown': maxDrawdown}

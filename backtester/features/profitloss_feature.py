@@ -1,4 +1,5 @@
 from backtester.features.feature import Feature
+from backtester.logger import *
 import pandas as pd
 import numpy as np
 
@@ -10,9 +11,9 @@ class ProfitLossFeature(Feature):
     @classmethod
     def computeForInstrument(cls, updateNum, time, featureParams, featureKey, instrumentManager):
         instrumentLookbackData = instrumentManager.getLookbackInstrumentFeatures()
-        priceDict = instrumentLookbackData.getFeatureDf(featureParams['price'])
-        priceDict = priceDict.replace([np.nan, np.inf, -np.inf], 0)
         try:
+            priceDict = instrumentLookbackData.getFeatureDf(featureParams['price'])
+            priceDict = priceDict.replace([np.nan, np.inf, -np.inf], 0)
             zeroSeries = priceDict.iloc[-1] * 0
             pnlDict = instrumentLookbackData.getFeatureDf(featureKey)
             pnlDict = pnlDict.replace([np.nan, np.inf, -np.inf], 0)
@@ -32,7 +33,9 @@ class ProfitLossFeature(Feature):
             cumulativePnl += pnl
             return cumulativePnl
         except IndexError:
-        		raise IndexError("Dataframe is empty")
+        	logError("Dataframe is empty")
+        except KeyError:
+            logError("featureParams keys are wrong")
     '''
     Computing for Market. By default defers to computeForLookbackData
     '''
@@ -44,4 +47,7 @@ class ProfitLossFeature(Feature):
             pnlKey = featureParams['instrument_pnl_feature']
         if len(pnlDict) < 1:
             return 0
-        return instrumentManager.getLookbackInstrumentFeatures().getFeatureDf(pnlKey).iloc[-1].sum()
+        try:
+            return instrumentManager.getLookbackInstrumentFeatures().getFeatureDf(pnlKey).iloc[-1].sum()
+        except IndexError:
+            logError("Dataframe is empty")

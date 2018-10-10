@@ -22,11 +22,9 @@ class TotalProfitFeature(Feature):
             totalProfit = prevData.iloc[-1]
             prevPnl = pnlData.iloc[-2]
 
-        if prevData.empty or pnlData.empty:
-        		return totalProfit
-
-        pnl = pnlData.iloc[-1] - prevPnl
-        totalProfit[pnl > 0] = totalProfit + pnl
+        if len(pnlData)>=1:
+            pnl = pnlData.iloc[-1] - prevPnl
+            totalProfit[pnl > 0] = totalProfit + pnl
         return totalProfit
 
 
@@ -47,8 +45,9 @@ class TotalProfitFeature(Feature):
             prevPnl = lookbackDataDf[pnlKey].iloc[-2]
 
         totalProfit = prevData
-        pnl = lookbackDataDf[pnlKey].iloc[-1] - prevPnl
+        if len(lookbackDataDf[pnlKey])>=1:
+            pnl = lookbackDataDf[pnlKey].iloc[-1] - prevPnl
 
-        if (pnl > 0):
-            totalProfit += pnl
+            if (pnl > 0):
+                totalProfit += pnl
         return totalProfit

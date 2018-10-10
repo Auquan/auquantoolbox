@@ -6,7 +6,6 @@ class ScoreRankFeature(Feature):
     @classmethod
     def computeForInstrument(cls, featureParams, featureKey, currentFeatures, instrument, instrumentManager):
         raise NotImplementedError
-        return None
 
     '''
     Computing for Market. By default defers to computeForLookbackData
@@ -19,24 +18,27 @@ class ScoreRankFeature(Feature):
         predictionKey = 'prediction'
         priceKey = 'close'
         if 'predictionKey' in featureParams:
-                predictionKey = featureParams['predictionKey']
+            predictionKey = featureParams['predictionKey']
         if 'price' in featureParams:
-                priceKey = featureParams['price']
+            priceKey = featureParams['price']
         if len(scoreDict) < 1:
-                return 0.0
+            return 0.0
         cumulativeScore = scoreDict.values[-1]
         allInstruments = instrumentManager.getAllInstrumentsByInstrumentId()
         returns = pd.Series(0.0, index = allInstruments.keys())
         for instrumentId in allInstruments:
-                instrument = allInstruments[instrumentId]
-                lookbackDataDf = instrument.getDataDf()
-                lookbackDataDf = lookbackDataDf.replace([np.nan, np.inf, -np.inf], 0)
-                if len(lookbackDataDf[priceKey]) < 2:
-                        return 0.0
-                returns[instrumentId] = lookbackDataDf[priceKey].iloc[-1]/lookbackDataDf[priceKey].iloc[-2]
+            instrument = allInstruments[instrumentId]
+            lookbackDataDf = instrument.getDataDf()
+            lookbackDataDf = lookbackDataDf.replace([np.nan, np.inf, -np.inf], 0)
+            if len(lookbackDataDf[priceKey]) < 2:
+                return 0.0
+            returns[instrumentId] = lookbackDataDf[priceKey].iloc[-1]/lookbackDataDf[priceKey].iloc[-2]
         returns.dropna(inplace=True)
         rank = returns.rank(ascending=False)
         p = instrumentManager.getDataDf()[predictionKey].iloc[-1]
         score = ((rank - p ) * (rank - rank.mean())).abs().sum()
-        cumulativeScore -= score/len(allInstruments)
+        if len(allInstruments)==0:
+            cumulativeScore -= score
+        else:
+            cumulativeScore -= score/len(allInstruments)
         return score

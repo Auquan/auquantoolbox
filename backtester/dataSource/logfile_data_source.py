@@ -10,7 +10,7 @@ class LogfileDataSource(DataSource):
         self.file = open(fileName, "r")
         self.file.seek(0, 2)
         self.unfinishedLine = ''
-        # TODO: Fix the super call
+        # TODO: Fix the 'super' call
         '''
         Temporarily fixed the super call for liveUpdates=False
         '''
@@ -22,7 +22,7 @@ class LogfileDataSource(DataSource):
         super(LogfileDataSource, self).__init__(folderName, self.dataSetId, self.instrumentIds, startDateStr, endDateStr)
         if not liveUpdates:
             self.processAllInstrumentUpdates()
-            self.filterUpdatesByDates()
+            #self.filterUpdatesByDates()
 
     '''
     Assume line in processLine is a complete line.
@@ -34,7 +34,7 @@ class LogfileDataSource(DataSource):
     '''
     Will use child class's processLine
     '''
-    # TODO: 
+    # TODO:
     def processLine(self, line):
         lineItems = line.split()
         inst = FutureInstrumentUpdate(futureInstrumentId='AAG',
@@ -57,4 +57,3 @@ class LogfileDataSource(DataSource):
                         yield(instrumentUpdate)
             else:
                 time.sleep(0.1)
-

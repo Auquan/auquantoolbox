@@ -21,12 +21,11 @@ class SimpleExecutionSystem(BaseExecutionSystem):
         instrumentLookbackData = instrumentsManager.getLookbackInstrumentFeatures()
         try:
             price = instrumentLookbackData.getFeatureDf(self.priceFeature).iloc[-1]
-            price = price.replace([np.nan, np.inf, -np.inf], 0)
             return price
         except KeyError:
                 logError('You have specified Dollar Limit but Price Feature Key %s does not exist'%self.priceFeature)
         except IndexError:
-        			 logError('The DataFrame is empty')
+        		logError('The DataFrame is empty')
 
 
     def getLongLimit(self, instrumentIds, price):
@@ -86,7 +85,7 @@ class SimpleExecutionSystem(BaseExecutionSystem):
             return df
         else:
             try:
-                return np.floor(df / price)
+                return np.floor(df / price).replace([np.nan, np.inf, -np.inf], 0.0)
             except KeyError:
                 logError('You have specified Dollar Limit but Price Feature Key does not exist')
 
@@ -104,11 +103,13 @@ class SimpleExecutionSystem(BaseExecutionSystem):
 
     def getExecutions(self, time, instrumentsManager, capital):
         instrumentLookbackData = instrumentsManager.getLookbackInstrumentFeatures()
-        currentPredictions = instrumentLookbackData.getFeatureDf('prediction').iloc[-1]
-        executions = self.exitPosition(time, instrumentsManager, currentPredictions)
-        executions += self.enterPosition(time, instrumentsManager, currentPredictions, capital)
-        
-        return self.getInstrumentExecutionsFromExecutions(time, executions)
+        try:
+            currentPredictions = instrumentLookbackData.getFeatureDf('prediction').iloc[-1]
+            executions = self.exitPosition(time, instrumentsManager, currentPredictions)
+            executions += self.enterPosition(time, instrumentsManager, currentPredictions, capital)
+            return self.getInstrumentExecutionsFromExecutions(time, executions)
+        except IndexError:
+            logError("The DataFrame is empty")
 
     def getExecutionsAtClose(self, time, instrumentsManager):
         instrumentExecutions = []
@@ -125,34 +126,43 @@ class SimpleExecutionSystem(BaseExecutionSystem):
         return instrumentExecutions
 
     def exitPosition(self, time, instrumentsManager, currentPredictions, closeAllPositions=False):
-
         instrumentLookbackData = instrumentsManager.getLookbackInstrumentFeatures()
-        positionData = instrumentLookbackData.getFeatureDf('position')
-        position = positionData.iloc[-1]
-        price = self.getPriceSeries(instrumentsManager)
-        executions = pd.Series([0] * len(positionData.columns), index=positionData.columns)
-        
-        if closeAllPositions:
-            executions = -position
+        try:
+            positionData = instrumentLookbackData.getFeatureDf('position')
+            position = positionData.iloc[-1]
+            price = self.getPriceSeries(instrumentsManager)
+            executions = pd.Series([0] * len(positionData.columns), index=positionData.columns)
+
+            if closeAllPositions:
+                executions = -position
+                return executions
+            executions[self.exitCondition(currentPredictions, instrumentsManager)] = -np.sign(position)*\
+                                    np.minimum(self.getExitLotSize(positionData.columns, price) , np.abs(position))
+
+            executions[self.hackCondition(currentPredictions, instrumentsManager)] = -np.sign(position)*\
+                                    np.minimum(self.getExitLotSize(positionData.columns, price) , np.abs(position))
             return executions
-        executions[self.exitCondition(currentPredictions, instrumentsManager)] = -np.sign(position)*\
-                                np.minimum(self.getExitLotSize(positionData.columns, price) , np.abs(position))
-        
-        executions[self.hackCondition(currentPredictions, instrumentsManager)] = -np.sign(position)*\
-                                np.minimum(self.getExitLotSize(positionData.columns, price) , np.abs(position))
-        return executions
+        except IndexError:
+            logError("The DataFrame is empty")
+        except pd.core.indexing.IndexingError:
+            logError("The currentPredictions Series is empty")
 
     def enterPosition(self, time, instrumentsManager, currentPredictions, capital):
         instrumentLookbackData = instrumentsManager.getLookbackInstrumentFeatures()
-        positionData = instrumentLookbackData.getFeatureDf('position')
-        position = positionData.iloc[-1]
-        price = self.getPriceSeries(instrumentsManager)
-        executions = pd.Series([0] * len(positionData.columns), index=positionData.columns)
-        executions[self.enterCondition(currentPredictions, instrumentsManager)] = \
-            self.getEnterLotSize(positionData.columns, price) * self.getBuySell(currentPredictions, instrumentsManager)
-        # No executions if at position limit
-        executions[self.atPositionLimit(capital, positionData, price)] = 0
-        return executions
+        try:
+            positionData = instrumentLookbackData.getFeatureDf('position')
+            position = positionData.iloc[-1]
+            price = self.getPriceSeries(instrumentsManager)
+            executions = pd.Series([0] * len(positionData.columns), index=positionData.columns)
+            executions[self.enterCondition(currentPredictions, instrumentsManager)] = \
+                self.getEnterLotSize(positionData.columns, price) * self.getBuySell(currentPredictions, instrumentsManager)
+            # No executions if at position limit
+            executions[self.atPositionLimit(capital, positionData, price)] = 0
+            return executions
+        except IndexError:
+            logError("The DataFrame is empty")
+        except pd.core.indexing.IndexingError:
+            logError("The currentPredictions Series is empty")
 
     def getBuySell(self, currentPredictions, instrumentsManager):
         return np.sign(currentPredictions - 0.5)
@@ -161,17 +171,18 @@ class SimpleExecutionSystem(BaseExecutionSystem):
         return (currentPredictions - 0.5).abs() > (self.enter_threshold - 0.5)
 
     def atPositionLimit(self, capital, positionData, price):
-
-        if capital <= self.capitalUsageLimit:
-            logWarn('Not Enough Capital')
-            return pd.Series(True, index=positionData.columns)
-        position = positionData.iloc[-1]
-        # TODO: Cant do this if position and getLongLimit indexes dont match
-        return (position >= self.getLongLimit(positionData.columns, price)) | (position <= -self.getShortLimit(positionData.columns, price))
+        try:
+            if capital <= self.capitalUsageLimit:
+                logWarn('Not Enough Capital')
+                return pd.Series(True, index=positionData.columns)
+            position = positionData.iloc[-1]
+            # TODO: Cant do this if position and getLongLimit indexes dont match
+            return (position >= self.getLongLimit(positionData.columns, price)) | (position <= -self.getShortLimit(positionData.columns, price))
+        except IndexError:
+            logError("The DataFrame is empty")
 
     def exitCondition(self, currentPredictions, instrumentsManager):
         return (currentPredictions - 0.5).abs() < (self.exit_threshold - 0.5)
 
     def hackCondition(self, currentPredictions, instrumentsManager):
         return pd.Series(False, index=currentPredictions.index)
-

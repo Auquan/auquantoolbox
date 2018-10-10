@@ -54,7 +54,6 @@ class QuantQuestTimeRule(TimeRule):
                 start = dateOfUpdate + timedelta(minutes=17, hours=9)
                 end = dateOfUpdate + timedelta(minutes=29, hours=15)
                 current = start
-                print (current)
                 while (current <= end):
                     yield current
                     current += timedelta(minutes=1)

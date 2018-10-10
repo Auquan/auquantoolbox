@@ -1,4 +1,5 @@
 from backtester.features.feature import Feature
+from backtester.logger import *
 import numpy as np
 import pandas as pd
 
@@ -30,10 +31,12 @@ class ScoreFairValueFeature(Feature):
             temp = (prevCount) * (prevFeatureData**2)
             sqError = (currentPrediction - priceDf.iloc[-1])**2
             temp = (temp + sqError)
+            if updateNum==0:
+                return prevFeatureData
             temp = temp / updateNum
             return np.sqrt(temp)
         except IndexError:
-            raise IndexError('Empty DataFrame')
+            logError('Empty DataFrame')
 
     '''
     Computing for Market. By default defers to computeForLookbackData
@@ -50,7 +53,13 @@ class ScoreFairValueFeature(Feature):
             return 0
         cumulativeScore = scoreDict.values[-2]
         instrumentLookbackData = instrumentManager.getLookbackInstrumentFeatures()
-        score = instrumentLookbackData.getFeatureDf(scoreKey).iloc[-1].sum()
-        allInstruments = instrumentManager.getAllInstrumentsByInstrumentId()
-        cumulativeScore += score / len(allInstruments)
-        return score
+        try:
+            score = instrumentLookbackData.getFeatureDf(scoreKey).iloc[-1].sum()
+            allInstruments = instrumentManager.getAllInstrumentsByInstrumentId()
+            if len(allInstruments)>0:
+                cumulativeScore += score / len(allInstruments)
+            else:
+                cumulativeScore += score
+            return score
+        except IndexError:
+            logError("scoreKey DataFrame is empty")

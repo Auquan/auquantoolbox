@@ -1,6 +1,7 @@
 from backtester.features.feature import Feature
 import numpy as np
 import math
+from backtester.logger import *
 
 class CapitalFeature(Feature):
 
@@ -34,8 +35,7 @@ class CapitalFeature(Feature):
                      + currentFees
                  return changeInCapital
         except IndexError:
-                raise IndexError('Empty DataFrame')
-
+                logError('Empty DataFrame')
 
 
     '''
@@ -54,4 +54,3 @@ class CapitalFeature(Feature):
         if np.isnan(changeInCapital) or np.isinf(changeInCapital):
                 changeInCapital=0.0
         return float(capital) - float(changeInCapital)
-        

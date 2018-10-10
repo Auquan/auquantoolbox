@@ -26,9 +26,8 @@ class FeesFeature(Feature):
                 fees = fees * currentPrice
             return fees
         except IndexError:
-            raise IndexError('Empty DataFrame')
+            logError('Empty DataFrame')
 
     @classmethod
     def computeForMarket(cls, updateNum, time, featureParams, featureKey, currentMarketFeatures, instrumentManager):
         raise NotImplementedError
-        return None

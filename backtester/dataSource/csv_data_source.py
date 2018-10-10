@@ -116,4 +116,3 @@ class CsvDataSource(DataSource):
         if self._bookDataFeatureKeys is None:
             self._bookDataFeatureKeys = bookData.keys()  # just setting to the first one we encounter
         return inst
-        

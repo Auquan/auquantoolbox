@@ -8,6 +8,7 @@ import requests
 import re
 from time import mktime as mktime
 from itertools import groupby
+import numpy as np
 
 
 def getCookieForYahoo(instrumentId):
@@ -37,10 +38,12 @@ def downloadFileFromYahoo(startDate, endDate, instrumentId, fileName, event='his
     end = int(mktime(endDate.timetuple()))
     url = 'https://query1.finance.yahoo.com/v7/finance/download/%s?period1=%s&period2=%s&interval=1d&events=%s&crumb=%s' % (instrumentId, start, end, event, crumb)
     data = requests.get(url, cookies={'B': cookie})
-    with open(fileName, 'wb') as f:
-        f.write(data.content)
-        return True
-    return False
+    if data.status_code==200:
+        with open(fileName, 'wb') as f:
+            f.write(data.content)
+            return True
+    else:
+        return False
 
 '''
 Takes list of instruments.
@@ -84,11 +87,13 @@ def getMultipliers(self,instrumentId, fileName, downloadId):
             return None
         temp = pd.concat([div, prices], axis=1).fillna(0)
         interim = (temp['Close'] - temp['Dividends']) / temp['Close']
+        interim=interim.replace([np.inf, -np.inf], np.nan)
         interim=interim.fillna(method='pad').fillna(1)
         multiplier1 = interim.sort_index(ascending=False).cumprod().sort_index(ascending=True)
         temp2 = split['Stock Splits'].str.split('/', expand=True)
         if len(temp2.index) > 0:
             temp_mult = pd.to_numeric(temp2[1]) / pd.to_numeric(temp2[0])
+            temp_mult=temp_mult.replace([np.inf, -np.inf], np.nan)
             temp_mult=temp_mult.fillna(method='pad').fillna(1)
             multiplier2 = temp_mult.sort_index(ascending=False).cumprod().sort_index(ascending=True)
         else:
@@ -96,4 +101,3 @@ def getMultipliers(self,instrumentId, fileName, downloadId):
         multiplier = pd.concat([multiplier1, multiplier2], axis=1).fillna(method='bfill').fillna(1)
         multiplier[1] = multiplier[1].shift(-1).fillna(1)
         return multiplier,temp
-

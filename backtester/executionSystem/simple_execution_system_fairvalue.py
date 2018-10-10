@@ -17,23 +17,33 @@ class SimpleExecutionSystemWithFairValue(SimpleExecutionSystem):
         instrumentLookbackData = instrumentsManager.getLookbackInstrumentFeatures()
         try:
             currentPrice = instrumentLookbackData.getFeatureDf(self.priceFeature).iloc[-1]
+            currentDeviationFromPrediction = currentPredictions.transpose() / currentPrice
+            return currentDeviationFromPrediction
         except KeyError:
             logError('You have specified FairValue Execution Type but Price Feature Key does not exist')
-
-        currentDeviationFromPrediction = currentPredictions.transpose() / currentPrice
-        return currentDeviationFromPrediction
+        except IndexError:
+            logError('The Price Feature DataFrame is empty')
 
     def getBuySell(self, currentPredictions, instrumentsManager):
-        currentDeviationFromPrediction = self.getDeviationFromPrediction(currentPredictions, instrumentsManager)
-        return -np.sign(currentDeviationFromPrediction)
+        try:
+            currentDeviationFromPrediction = self.getDeviationFromPrediction(currentPredictions, instrumentsManager)
+            return -np.sign(currentDeviationFromPrediction)
+        except TypeError:
+            logError("The Operation cannot be performed")
 
     def enterCondition(self, currentPredictions, instrumentsManager):
-        currentDeviationFromPrediction = self.getDeviationFromPrediction(currentPredictions, instrumentsManager)
-        return np.abs(currentDeviationFromPrediction) > (self.enter_threshold)
+        try:
+            currentDeviationFromPrediction = self.getDeviationFromPrediction(currentPredictions, instrumentsManager)
+            return np.abs(currentDeviationFromPrediction) > (self.enter_threshold)
+        except TypeError:
+            logError("The Operation cannot be performed")
 
     def exitCondition(self, currentPredictions, instrumentsManager):
-        currentDeviationFromPrediction = self.getDeviationFromPrediction(currentPredictions, instrumentsManager)
-        return np.abs(currentDeviationFromPrediction) < (self.exit_threshold)
+        try:
+            currentDeviationFromPrediction = self.getDeviationFromPrediction(currentPredictions, instrumentsManager)
+            return np.abs(currentDeviationFromPrediction) < (self.exit_threshold)
+        except TypeError:
+            logError("The Operation cannot be performed")
 
     def hackCondition(self, currentPredictions, instrumentsManager):
         return pd.Series(False, index=currentPredictions.index)

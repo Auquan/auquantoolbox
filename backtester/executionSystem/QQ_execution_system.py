@@ -21,27 +21,45 @@ class QQExecutionSystem(SimpleExecutionSystemWithFairValue):
         instrumentLookbackData = instrumentsManager.getLookbackInstrumentFeatures()
         try:
             currentPrice = instrumentLookbackData.getFeatureDf(self.priceFeature).iloc[-1]
+            currentDeviationFromPrediction = currentPrice.transpose() - currentPredictions
+            return currentDeviationFromPrediction
         except KeyError:
             logError('You have specified FairValue Execution Type but Price Feature Key does not exist')
-
-        currentDeviationFromPrediction = currentPrice.transpose() - currentPredictions
-        return currentDeviationFromPrediction
+        except IndexError:
+            logError('The Price Feature DataFrame is empty')
 
     def getBuySell(self, currentPredictions, instrumentsManager):
-        currentDeviationFromPrediction = self.getDeviationFromPrediction(currentPredictions, instrumentsManager)
-        return -np.sign(currentDeviationFromPrediction)
+        try:
+            currentDeviationFromPrediction = self.getDeviationFromPrediction(currentPredictions, instrumentsManager)
+            return -np.sign(currentDeviationFromPrediction)
+        except TypeError:
+            logError("The Operation cannot be performed")
 
     def enterCondition(self, currentPredictions, instrumentsManager):
-        currentDeviationFromPrediction = self.getDeviationFromPrediction(currentPredictions, instrumentsManager)
-        return np.abs(currentDeviationFromPrediction) - 2 * self.fees > (self.enter_threshold) *\
-            np.abs(instrumentsManager.getLookbackInstrumentFeatures().getFeatureDf(self.thresholdParam).iloc[-1])
+        try:
+            currentDeviationFromPrediction = self.getDeviationFromPrediction(currentPredictions, instrumentsManager)
+            return np.abs(currentDeviationFromPrediction) - 2 * self.fees > (self.enter_threshold) *\
+                np.abs(instrumentsManager.getLookbackInstrumentFeatures().getFeatureDf(self.thresholdParam).iloc[-1])
+        except TypeError:
+            logError("The Operation cannot be performed")
+        except KeyError:
+            logError('The given Feature Key does not exist')
+        except IndexError:
+            logError("The DataFrame is empty")
 
     def exitCondition(self, currentPredictions, instrumentsManager):
-        currentDeviationFromPrediction = self.getDeviationFromPrediction(currentPredictions, instrumentsManager)
-        instrumentLookbackData = instrumentsManager.getLookbackInstrumentFeatures()
-        position = instrumentLookbackData.getFeatureDf('position').iloc[-1]
-        return -np.sign(position) * (currentDeviationFromPrediction) < (self.exit_threshold) *\
-            np.abs(instrumentLookbackData.getFeatureDf(self.thresholdParam).iloc[-1])
+        try:
+            currentDeviationFromPrediction = self.getDeviationFromPrediction(currentPredictions, instrumentsManager)
+            instrumentLookbackData = instrumentsManager.getLookbackInstrumentFeatures()
+            position = instrumentLookbackData.getFeatureDf('position').iloc[-1]
+            return -np.sign(position) * (currentDeviationFromPrediction) < (self.exit_threshold) *\
+                np.abs(instrumentLookbackData.getFeatureDf(self.thresholdParam).iloc[-1])
+        except TypeError:
+            logError("The Operation cannot be performed")
+        except KeyError:
+            logError('The given Feature Key does not exist')
+        except IndexError:
+            logError("The DataFrame is empty")
 
     # def getExecutions(self, time, instrumentsManager, capital):
     #   # TODO:

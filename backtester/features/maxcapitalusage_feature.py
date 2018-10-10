@@ -1,4 +1,5 @@
 from backtester.features.feature import Feature
+from backtester.logger import *
 import numpy as np
 
 
@@ -26,9 +27,15 @@ class MaxCapitalUsageFeature(Feature):
             capitalKey = featureParams['capitalKey']
         if len(capitalUsageDict) <= 1:
             return 0
-        capitalDict = instrumentManager.getDataDf()[capitalKey]
-        capitalDict = capitalDict.replace([np.nan, np.inf, -np.inf], 0)
-        capital = capitalDict.values[-2]
-        capitalUsed = featureParams['initial_capital'] - capital
-        maxUsage = capitalUsed if capitalUsed > capitalUsageDict.values[-2] else capitalUsageDict.values[-2]
-        return maxUsage
+        try:
+            capitalDict = instrumentManager.getDataDf()[capitalKey]
+            capitalDict = capitalDict.replace([np.nan, np.inf, -np.inf], 0)
+            capital = capitalDict.values[-2]
+            capitalUsed = featureParams['initial_capital'] - capital
+            maxUsage = capitalUsed if capitalUsed > capitalUsageDict.values[-2] else capitalUsageDict.values[-2]
+            return maxUsage
+        except IndexError:
+            logError("DataFrame has just one element")
+        except KeyError:
+            logError("The capitalKey is wrong")
+        return 0
