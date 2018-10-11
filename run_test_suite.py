@@ -9,7 +9,7 @@ try:
     from unittest.mock import Mock, MagicMock
 # installing mock
 except:
-    pip install mock
+    os.system('pip install mock')
 
 if __name__ == "__main__":
 # uninstalling auquantoolbox
