@@ -17,7 +17,10 @@ if __name__ == "__main__":
                 current_path=os.getcwd()+'/tester/'+sys.argv[2]+'_tester'
                 os.chdir(current_path)
                 list_of_file_folders=os.listdir(os.getcwd())
-                list_of_file_folders.remove("__pycache__")
+                try:
+                    list_of_file_folders.remove("__pycache__")
+                except:
+                    pass
                 for ele in list_of_file_folders:
                     os.chdir(current_path+"/"+ele)
                     os.system("py.test")
@@ -32,7 +35,7 @@ if __name__ == "__main__":
                 for root, dirs, files in os.walk(os.getcwd()):
                     if ('test_' + sys.argv[2]) in files:
                         os.chdir(root)
-                        os.system("py.test -s" + ('test_'+sys.argv[2]))
+                        os.system("py.test -s " + ('test_'+sys.argv[2]))
                         flag=1
                 if flag==0:
                     raise IndexError
@@ -50,7 +53,10 @@ if __name__ == "__main__":
         current_path=os.getcwd()
         for i in list_of_folders:
             list_of_file_folders=os.listdir(current_path+"/tester/"+i)
-            list_of_file_folders.remove("__pycache__")
+            try:
+                list_of_file_folders.remove("__pycache__")
+            except:
+                pass
             for ele in list_of_file_folders:
                 os.chdir(current_path+'/tester/'+i+"/"+ele)
                 os.system("py.test")
