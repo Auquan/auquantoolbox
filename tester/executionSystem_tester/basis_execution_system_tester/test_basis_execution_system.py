@@ -1,6 +1,9 @@
 import os,sys,time,pytest, pandas as pd, numpy as np
 from datetime import datetime, time, timedelta
-from unittest.mock import Mock, MagicMock
+try:
+    from unittest.mock import Mock, MagicMock
+except ImportError:
+    from mock import Mock,MagicMock
 sys.path.append(os.path.abspath('../../..'))
 from backtester.executionSystem.basis_execution_system import BasisExecutionSystem
 from backtester.instruments_manager import *

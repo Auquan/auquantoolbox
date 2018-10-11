@@ -1,5 +1,8 @@
 import os,sys,shutil,pytest
-from unittest.mock import Mock, MagicMock
+try:
+    from unittest.mock import Mock, MagicMock
+except ImportError:
+    from mock import Mock,MagicMock
 from datetime import datetime, time, timedelta
 sys.path.append(os.path.abspath('../../..'))
 from backtester.dataSource.logfile_data_source import *

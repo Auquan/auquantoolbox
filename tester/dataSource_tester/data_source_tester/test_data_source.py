@@ -1,6 +1,9 @@
 import os,sys,shutil,pytest,pandas as pd
 from datetime import datetime, time, timedelta
-from unittest.mock import Mock, MagicMock
+try:
+    from unittest.mock import Mock, MagicMock
+except ImportError:
+    from mock import Mock,MagicMock
 sys.path.append(os.path.abspath('../../..'))
 from backtester.dataSource.data_source import DataSource
 from backtester.dataSource.csv_data_source import *

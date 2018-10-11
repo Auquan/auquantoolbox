@@ -1,9 +1,12 @@
 import os,sys,shutil,pandas as pd,pytest,numpy as np
+try:
+    from unittest.mock import Mock, MagicMock
+except ImportError:
+    from mock import Mock,MagicMock
 sys.path.append(os.path.abspath('../../..'))
 from backtester.features.count_profit_feature import CountProfitFeature
 from backtester.instruments_manager import *
 from backtester.instruments_lookback_data import *
-from unittest.mock import Mock, MagicMock
 from data_count_profit_feature import *
 
 @pytest.fixture

@@ -1,5 +1,8 @@
 import os,sys,shutil,pandas as pd,pytest,numpy as np
-from unittest.mock import Mock, MagicMock
+try:
+    from unittest.mock import Mock, MagicMock
+except ImportError:
+    from mock import Mock,MagicMock
 sys.path.append(os.path.abspath('../../..'))
 from backtester.features.maxDrawdown_feature import MaxDrawdownFeature
 from backtester.instruments_manager import *

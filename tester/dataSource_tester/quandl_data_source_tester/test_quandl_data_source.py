@@ -1,7 +1,10 @@
 import os,sys,shutil,pytest,pandas as pd,numpy as np
 from datetime import datetime, time, timedelta
 from collections import OrderedDict
-from unittest.mock import Mock, MagicMock
+try:
+    from unittest.mock import Mock, MagicMock
+except ImportError:
+    from mock import Mock,MagicMock
 sys.path.append(os.path.abspath('../../..'))
 from backtester.dataSource.quandl_data_source import *
 from backtester.instrumentUpdates import *

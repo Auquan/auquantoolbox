@@ -1,6 +1,9 @@
 import os,sys,shutil,pandas as pd,pytest,numpy as np
 from collections import OrderedDict
-from unittest.mock import Mock, MagicMock
+try:
+    from unittest.mock import Mock, MagicMock
+except ImportError:
+    from mock import Mock,MagicMock
 sys.path.append(os.path.abspath('../../..'))
 from backtester.features.crossSectionMomentum_feature import CrossSectionMomentumFeature
 from backtester.instruments_manager import *

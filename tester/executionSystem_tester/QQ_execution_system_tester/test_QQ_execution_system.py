@@ -1,5 +1,8 @@
 import os,sys,pytest,pandas as pd,numpy as np
-from unittest.mock import Mock, MagicMock
+try:
+    from unittest.mock import Mock, MagicMock
+except ImportError:
+    from mock import Mock,MagicMock
 from collections import OrderedDict
 sys.path.append(os.path.abspath('../../..'))
 from backtester.executionSystem.QQ_execution_system import QQExecutionSystem

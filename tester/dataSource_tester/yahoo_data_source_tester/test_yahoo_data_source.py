@@ -1,6 +1,9 @@
 import os,sys,shutil,numpy as np,pandas as pd,pytest
 from datetime import datetime, time, timedelta
-from unittest.mock import Mock, MagicMock
+try:
+    from unittest.mock import Mock, MagicMock
+except ImportError:
+    from mock import Mock,MagicMock
 from collections import OrderedDict
 sys.path.append(os.path.abspath('../../..'))
 from backtester.dataSource.yahoo_data_source import *

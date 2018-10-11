@@ -1,7 +1,18 @@
-import pytest
 import os, sys
+try:
+    import pytest
+# installing pytest
+except:
+    os.system('pip install -U pytest')
+    import pytest
+try:
+    from unittest.mock import Mock, MagicMock
+# installing mock
+except:
+    pip install mock
 
 if __name__ == "__main__":
+# uninstalling auquantoolbox
     print ('\33[33m')
     print ("***************************************")
     print ("******* UNINSTALLING THE TOOLBOX ******")
@@ -12,6 +23,7 @@ if __name__ == "__main__":
 #**********************************************************************************************
 
     try:
+######## for testing a branch of toolbox
         if sys.argv[1] == '-b':
             try:
                 current_path=os.getcwd()+'/tester/'+sys.argv[2]+'_tester'
@@ -29,6 +41,7 @@ if __name__ == "__main__":
                 print ("Specify the Folder correctly to test")
                 print ("Try something like:  python run_test_suite.py -b timeRule  \n")
 
+######## for testing a specific file in the toolbox
         elif sys.argv[1] == '-f':
             try:
                 flag=0
@@ -48,6 +61,7 @@ if __name__ == "__main__":
             print ('\33[91m'+"ERROR:\n"+'\033[0m')
             print ("Try -b for branch testing or -f for file testing")
 
+#### for testing everyfile in the toolbox
     except:
         list_of_folders=os.listdir(os.getcwd()+"/tester/")
         current_path=os.getcwd()
@@ -62,6 +76,7 @@ if __name__ == "__main__":
                 os.system("py.test")
 
 #**********************************************************************************************
+# installing auquantoolbox
     print ("\n")
     print ('\33[33m')
     print ("***************************************")

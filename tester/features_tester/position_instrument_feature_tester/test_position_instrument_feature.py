@@ -1,5 +1,8 @@
 import os,sys,shutil,pytest,numpy as np
-from unittest.mock import Mock, MagicMock
+try:
+    from unittest.mock import Mock, MagicMock
+except ImportError:
+    from mock import Mock,MagicMock
 sys.path.append(os.path.abspath('../../..'))
 from backtester.features.position_instrument_feature import PositionInstrumentFeature
 from backtester.instruments_manager import *
