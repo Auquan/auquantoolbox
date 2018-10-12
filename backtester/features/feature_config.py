@@ -41,9 +41,15 @@ from backtester.features.total_profit_feature import TotalProfitFeature
 from backtester.features.total_loss_feature import TotalLossFeature
 from backtester.features.count_profit_feature import CountProfitFeature
 from backtester.features.count_loss_feature import CountLossFeature
+from backtester.features.aroon_oscillator_feature import AroonOscillatorFeature
+from backtester.features.aroondown_feature import AroonDownFeature
+from backtester.features.aroonup_feature import AroonUpFeature
 
 featureIdToFeatureCls = {'argmax': ArgMaxFeature,
                          'argmin': ArgMinFeature,
+                         'aroon_oscillation' : AroonOscillatorFeature,
+                         'aroon_up' : AroonUpFeature,
+                         'aroon_down' : AroonDownFeature,
                          'bollinger_bands': BollingerBandsFeature,
                          'bollinger_bands_lower': BollingerBandsLowerFeature,
                          'bollinger_bands_upper': BollingerBandsUpperFeature,
