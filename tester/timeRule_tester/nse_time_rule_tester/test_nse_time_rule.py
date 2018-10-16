@@ -1,5 +1,5 @@
 import os,sys,shutil,pytest
-sys.path.append(os.path.abspath('../../..'))
+sys.path.append(os.path.abspath(''))
 from backtester.timeRule.nse_time_rule import NSETimeRule
 from data_nse_time_rule import *
 def test_nse_time_rule():

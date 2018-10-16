@@ -4,7 +4,7 @@ try:
 except ImportError:
     from mock import Mock,MagicMock
 from collections import OrderedDict
-sys.path.append(os.path.abspath('../../..'))
+sys.path.append(os.path.abspath(''))
 from backtester.executionSystem.QQ_execution_system import QQExecutionSystem
 from backtester.instruments_manager import *
 from backtester.instruments_lookback_data import *

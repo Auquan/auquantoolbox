@@ -1,5 +1,5 @@
 import os,sys,shutil,pytest
-sys.path.append(os.path.abspath('../../..'))
+sys.path.append(os.path.abspath(''))
 from backtester.timeRule.custom_time_rule import CustomTimeRule
 from data_custom_time_rule import *
 def test_custom_time_rule():

@@ -1,5 +1,5 @@
 import os,sys,shutil,pytest
-sys.path.append(os.path.abspath('../../..'))
+sys.path.append(os.path.abspath(''))
 from backtester.timeRule.quant_quest_time_rule import QuantQuestTimeRule
 from data_quant_quest_time_rule import *
 try:

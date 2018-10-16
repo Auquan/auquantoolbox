@@ -4,7 +4,7 @@ try:
 except ImportError:
     from mock import Mock,MagicMock
 from datetime import datetime, time, timedelta
-sys.path.append(os.path.abspath('../../..'))
+sys.path.append(os.path.abspath(''))
 from backtester.dataSource.logfile_data_source import *
 from backtester.instrumentUpdates import *
 from backtester.logger import *

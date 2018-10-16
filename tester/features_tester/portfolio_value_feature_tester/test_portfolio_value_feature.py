@@ -3,7 +3,7 @@ try:
     from unittest.mock import Mock, MagicMock
 except ImportError:
     from mock import Mock,MagicMock
-sys.path.append(os.path.abspath('../../..'))
+sys.path.append(os.path.abspath(''))
 from backtester.features.portfolio_value_feature import PortfolioValueFeature
 from backtester.instruments.instrument import Instrument
 from backtester.instruments_manager import *

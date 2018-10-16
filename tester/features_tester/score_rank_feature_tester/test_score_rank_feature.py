@@ -4,7 +4,7 @@ try:
 except ImportError:
     from mock import Mock,MagicMock
 from collections import OrderedDict
-sys.path.append(os.path.abspath('../../..'))
+sys.path.append(os.path.abspath(''))
 from backtester.features.score_rank_feature import ScoreRankFeature
 from backtester.instruments_manager import *
 from backtester.instruments_lookback_data import *

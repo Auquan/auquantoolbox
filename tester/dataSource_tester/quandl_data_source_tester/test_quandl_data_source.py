@@ -5,7 +5,7 @@ try:
     from unittest.mock import Mock, MagicMock
 except ImportError:
     from mock import Mock,MagicMock
-sys.path.append(os.path.abspath('../../..'))
+sys.path.append(os.path.abspath(''))
 from backtester.dataSource.quandl_data_source import *
 from backtester.instrumentUpdates import *
 from data_quandl_data_source import *

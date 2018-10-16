@@ -3,7 +3,7 @@ try:
     from unittest.mock import Mock, MagicMock
 except ImportError:
     from mock import Mock,MagicMock
-sys.path.append(os.path.abspath('../../..'))
+sys.path.append(os.path.abspath(''))
 from backtester.timeRule.us_time_rule import USTimeRule
 from data_us_time_rule import *
 def test_us_time_rule():

@@ -5,7 +5,7 @@ try:
 except ImportError:
     from mock import Mock,MagicMock
 from collections import OrderedDict
-sys.path.append(os.path.abspath('../../..'))
+sys.path.append(os.path.abspath(''))
 from backtester.dataSource.yahoo_data_source import *
 from backtester.instrumentUpdates import *
 from backtester.logger import *
