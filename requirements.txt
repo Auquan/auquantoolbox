@@ -1,0 +1,9 @@
+bs4
+requests
+numpy
+pandas
+scipy
+pytest
+lxml
+scikit-learn
+plotly
