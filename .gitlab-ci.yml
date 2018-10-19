@@ -2,7 +2,7 @@ image: python:latest
 
 test:
   script:
-  - apt-get update -qy
-  - apt-get install -y python-dev python-pip
-  - pip install -r requirements.txt
-  - pytest -x -v
+  - apt-get update -qy ## updates the packages
+  - apt-get install -y python-dev python-pip ## installs python headers and pip
+  - pip install -r requirements.txt ## installs dependencies
+  - pytest -x -v ## runs all the tests
