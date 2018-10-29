@@ -1,6 +1,6 @@
 import sys
 import os,csv
-sys.path.append(r'''C:\Users\agarw_000\Desktop\tej\auquantoolbox''')
+sys.path.append(os.getcwd())
 from backtester.executionSystem.base_execution_system import BaseExecutionSystem, InstrumentExection
 from backtester.logger import *
 import numpy as np

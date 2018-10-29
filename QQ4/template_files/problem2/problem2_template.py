@@ -1,5 +1,6 @@
 import sys
-sys.path.append(r'''C:\Users\agarw_000\Desktop\tej\auquantoolbox''')
+import os
+sys.path.append(os.getcwd())
 from backtester.trading_system_parameters import TradingSystemParameters
 from backtester.features.feature import Feature
 from datetime import datetime, timedelta

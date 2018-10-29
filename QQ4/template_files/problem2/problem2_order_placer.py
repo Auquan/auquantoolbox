@@ -1,5 +1,6 @@
 import sys
-sys.path.append(r'''C:\Users\agarw_000\Desktop\tej\auquantoolbox''')
+import os
+sys.path.append(os.getcwd())
 from backtester.orderPlacer.base_order_placer import BaseOrderPlacer, PlacedOrder
 from backtester.constants import *
 import numpy as np
