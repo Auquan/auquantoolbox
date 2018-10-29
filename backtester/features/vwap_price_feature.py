@@ -1,5 +1,4 @@
-from backtester.features.feature import Feature
-import numpy as np
+from backtester.features.feature import *
 
 
 class VwapPriceInstrumentFeature(Feature):
@@ -10,16 +9,15 @@ class VwapPriceInstrumentFeature(Feature):
     @classmethod
     def computeForInstrument(cls, updateNum, time, featureParams, featureKey, instrumentManager):
         instrumentLookbackData = instrumentManager.getLookbackInstrumentFeatures()
-        askVolume = instrumentLookbackData.getFeatureDf(featureParams['askVolume']).iloc[-1]
-        bidVolume = instrumentLookbackData.getFeatureDf(featureParams['bidVolume']).iloc[-1]
-        askPrice = instrumentLookbackData.getFeatureDf(featureParams['askPrice']).iloc[-1]
-        bidPrice = instrumentLookbackData.getFeatureDf(featureParams['bidPrice']).iloc[-1]
-
+        askVolume = instrumentLookbackData.getFeatureDf(featureParams['askVolume'])
+        bidVolume = instrumentLookbackData.getFeatureDf(featureParams['bidVolume'])
+        askPrice = instrumentLookbackData.getFeatureDf(featureParams['askPrice'])
+        bidPrice = instrumentLookbackData.getFeatureDf(featureParams['bidPrice'])
+        checkVwapData(askVolume, bidVolume, askPrice, bidPrice)
         totalVolume = (askVolume + bidVolume)
         vwap = ((askPrice * askVolume) + (bidPrice * bidVolume)) / totalVolume
-
-        vwap[vwap == np.Inf] = 0
-        return vwap
+        cClean(vwap)
+        return vwap.iloc[-1]
 
     '''
     Computing for Market. By default defers to computeForLookbackData

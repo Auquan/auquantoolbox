@@ -1,6 +1,5 @@
-from backtester.features.feature import Feature
+from backtester.features.feature import *
 import pandas as pd
-
 
 class DelayFeature(Feature):
 
@@ -10,17 +9,25 @@ class DelayFeature(Feature):
     @classmethod
     def computeForInstrument(cls, updateNum, time, featureParams, featureKey, instrumentManager):
         instrumentLookbackData = instrumentManager.getLookbackInstrumentFeatures()
-        dataDf = instrumentLookbackData.getFeatureDf(featureParams['featureName'])
-        if len(dataDf.index) < featureParams['period']:
+        data = instrumentLookbackData.getFeatureDf(featureParams['featureName'])
+        checkData(data)
+        checkPeriod(featureParams)
+        if len(data.index) < featureParams['period']-1:
             instrumentDict = instrumentManager.getAllInstrumentsByInstrumentId()
             zeroSeries = pd.Series([0] * len(instrumentDict), index=instrumentDict.keys())
             return zeroSeries
-        return dataDf.iloc[-featureParams['period']]
+        delay = data.iloc[-featureParams['period']-1]
+        cClean(delay)
+        return delay
 
     @classmethod
     def computeForMarket(cls, updateNum, time, featureParams, featureKey, currentMarketFeatures, instrumentManager):
         lookbackDataDf = instrumentManager.getDataDf()
         data = lookbackDataDf[featureParams['featureName']]
-        if len(data.index) < featureParams['period']:
+        checkData(data)
+        checkPeriod(featureParams)
+        if len(data.index) < featureParams['period']-1:
             return 0
-        return data[-featureParams['period']]
+        delay = data.iloc[-featureParams['period']-1]
+        fClean(delay)
+        return delay

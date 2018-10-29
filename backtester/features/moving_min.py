@@ -1,16 +1,23 @@
-from backtester.features.feature import Feature
-
+from backtester.features.feature import *
+import numpy as np
 
 class MovingMinimumFeature(Feature):
 
     @classmethod
     def computeForInstrument(cls, updateNum, time, featureParams, featureKey, instrumentManager):
         instrumentLookbackData = instrumentManager.getLookbackInstrumentFeatures()
-        dataDf = instrumentLookbackData.getFeatureDf(featureParams['featureName'])
-        return dataDf[-featureParams['period']:].min()
-
+        data = instrumentLookbackData.getFeatureDf(featureParams['featureName'])
+        checkData(data)
+        checkPeriod(featureParams)
+        cClean(data)
+        movingMin = data[-featureParams['period']:].min()
+        return movingMin
     @classmethod
     def computeForMarket(cls, updateNum, time, featureParams, featureKey, currentMarketFeatures, instrumentManager):
         lookbackDataDf = instrumentManager.getDataDf()
         data = lookbackDataDf[featureParams['featureName']]
-        return data[-featureParams['period']:].min()
+        checkData(data)
+        checkPeriod(featureParams)
+        cClean(data)
+        movingMin = data[-featureParams['period']:].min()
+        return movingMin

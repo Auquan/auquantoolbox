@@ -1,24 +1,23 @@
 from backtester.features.feature import *
-import numpy as np
 
-class MovingMaximumFeature(Feature):
 
+class SignFeature(Feature):
+
+    '''
+    Computing for Instrument.
+    '''
     @classmethod
     def computeForInstrument(cls, updateNum, time, featureParams, featureKey, instrumentManager):
         instrumentLookbackData = instrumentManager.getLookbackInstrumentFeatures()
         data = instrumentLookbackData.getFeatureDf(featureParams['featureName'])
         checkData(data)
-        checkPeriod(featureParams)
-        cClean(data)
-        movingMax = data[-featureParams['period']:].max()
-        return movingMax
+        pClean(data)
+        return np.sign(data.iloc[-1])
 
     @classmethod
     def computeForMarket(cls, updateNum, time, featureParams, featureKey, currentMarketFeatures, instrumentManager):
         lookbackDataDf = instrumentManager.getDataDf()
         data = lookbackDataDf[featureParams['featureName']]
         checkData(data)
-        checkPeriod(featureParams)
-        cClean(data)
-        movingMax = data[-featureParams['period']:].max()
-        return movingMax
+        pClean(data)
+        return np.sign(data.iloc[-1])

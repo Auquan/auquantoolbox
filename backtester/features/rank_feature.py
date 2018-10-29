@@ -1,16 +1,24 @@
-from backtester.features.feature import Feature
-
+from backtester.features.feature import *
+import pandas as pd
 
 class RankFeature(Feature):
 
     @classmethod
     def computeForInstrument(cls, updateNum, time, featureParams, featureKey, instrumentManager):
         instrumentLookbackData = instrumentManager.getLookbackInstrumentFeatures()
-        dataDf = instrumentLookbackData.getFeatureDf(featureParams['featureName'])
-        return dataDf[-featureParams['period']:].rank(pct=False).iloc[-1]
+        data = instrumentLookbackData.getFeatureDf(featureParams['featureName'])
+        checkData(data)
+        checkPeriod(featureParams)
+        cClean(data)
+        rank = data[-featureParams['period']:].rank(pct=True).iloc[-1]
+        return rank
 
     @classmethod
     def computeForMarket(cls, updateNum, time, featureParams, featureKey, currentMarketFeatures, instrumentManager):
         lookbackDataDf = instrumentManager.getDataDf()
         data = lookbackDataDf[featureParams['featureName']]
-        return data[-featureParams['period']:].rank(pct=False).iloc[-1]
+        checkData(data)
+        checkPeriod(featureParams)
+        cClean(data)
+        rank = data[-featureParams['period']:].rank(pct=True).iloc[-1]
+        return rank
