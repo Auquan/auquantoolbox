@@ -149,7 +149,8 @@ class TradingSystem:
         return resultDict
 
     def startTrading(self, onlyAnalyze=False, shouldPlot=True, makeInstrumentCsvs=True,createResultDict=False):
-        self.stateWriter = StateWriter('runLogs', datetime.strftime(datetime.now(), '%Y%m%d_%H%M%S'), not makeInstrumentCsvs)
+        p = self.executionSystem.getLogFileName()
+        self.stateWriter = StateWriter('runLogs', p , not makeInstrumentCsvs)
         # TODO: Figure out a good way to handle order parsers with live data later on.
         groupedInstrumentUpdates = self.dataParser.emitInstrumentUpdates()
         timeGetter = self.tsParams.getTimeRuleForUpdates().emitTimeToTrade()
