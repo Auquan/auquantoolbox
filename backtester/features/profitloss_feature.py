@@ -27,11 +27,14 @@ class ProfitLossFeature(Feature):
             previousPrice = priceDict.iloc[-2] if (len(priceDict.index) > 1) else zeroSeries
             currentPrice = priceDict.iloc[-1]
             changeInPosition = currentPosition - previousPosition
-            tradePrice = pd.Series([instrumentManager.getInstrument(x).getLastTradePrice() for x in priceDict.columns], index=priceDict.columns)
-            tradeLoss = pd.Series([instrumentManager.getInstrument(x).getLastTradeLoss() for x in priceDict.columns], index=priceDict.columns)
-            pnl = (previousPosition * (currentPrice - previousPrice)) + (changeInPosition * (currentPrice - tradePrice)) - fees - tradeLoss
-            cumulativePnl += pnl
-            return cumulativePnl
+            try:
+                tradePrice = pd.Series([instrumentManager.getInstrument(x).getLastTradePrice() for x in priceDict.columns], index=priceDict.columns)
+                tradeLoss = pd.Series([instrumentManager.getInstrument(x).getLastTradeLoss() for x in priceDict.columns], index=priceDict.columns)
+                pnl = (previousPosition * (currentPrice - previousPrice)) + (changeInPosition * (currentPrice - tradePrice)) - fees - tradeLoss
+                cumulativePnl += pnl
+                return cumulativePnl
+            except AttributeError:
+                logError("getInstrument function is returning a None Type")
         except IndexError:
         	logError("Dataframe is empty")
         except KeyError:
