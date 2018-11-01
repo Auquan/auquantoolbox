@@ -5,11 +5,14 @@ import sys
 
 class StateWriter:
 
-    def __init__(self, parentFolderName, runName, onlyMarket=False):
+    def __init__(self, parentFolderName, runName, onlyMarket=False , logFileName=''):
         self.__runName = runName
         if not os.path.exists(parentFolderName):
             os.mkdir(parentFolderName, 0o755)
-        self.__folderName = parentFolderName + '/' + 'runLog_' + runName
+        if logFileName=='':
+            self.__folderName = parentFolderName + '/' + 'runLog_' + runName
+        else:
+            self.__folderName = parentFolderName + '/' + 'runLog_' + logFileName
         if not os.path.exists(self.__folderName):
             os.mkdir(self.__folderName, 0o755)
         self.__openFiles = []
