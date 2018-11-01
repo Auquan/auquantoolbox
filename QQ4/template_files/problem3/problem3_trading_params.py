@@ -1,20 +1,15 @@
-import sys
-import os
-sys.path.append(os.getcwd())
 from backtester.trading_system_parameters import TradingSystemParameters
 from backtester.features.feature import Feature
 from datetime import timedelta
 from backtester.dataSource.csv_data_source import CsvDataSource
 from backtester.timeRule.nse_time_rule import NSETimeRule
-from problem3_execution_system import SimpleExecutionSystem
+from backtester.executionSystem.simple_execution_system import SimpleExecutionSystem
 from backtester.orderPlacer.backtesting_order_placer import BacktestingOrderPlacer
 from backtester.trading_system import TradingSystem
 from backtester.version import updateCheck
 from backtester.constants import *
 import pandas as pd
 import numpy as np
-from datetime import datetime
-
 
 SYMBOLS_IN_BASKET = 10
 
@@ -30,10 +25,10 @@ class MyTradingParams(TradingSystemParameters):
         self.__additionalMarketFeatureConfigDicts = []
         self.__fees = {'brokerage': 0.0001,'spread': 0.05}
         self.__startDate = '2010/06/02'
-        self.__endDate = '2010/09/02'
+        self.__endDate = '2011/07/30'
         super(MyTradingParams, self).__init__()
         self.__dataSetId = 'QQ3DataDownSampled'
-        self.__instrumentIds = ['SIZ', 'MLQ','DFY', 'OAX']
+        self.__instrumentIds = []
 
 
     '''
@@ -161,8 +156,7 @@ class MyTradingParams(TradingSystemParameters):
     '''
 
     def getExecutionSystem(self):
-        return SimpleExecutionSystem(logFileName = datetime.strftime(datetime.now(), '%Y%m%d_%H%M%S'),
-                                    enter_threshold=0.99,
+        return SimpleExecutionSystem(enter_threshold=0.99,
                                     exit_threshold=0.55,
                                     longLimit=10000,
                                     shortLimit=10000,
@@ -328,7 +322,7 @@ class ScoreCalculator(Feature):
             scoreDict = instrumentLookbackData.getFeatureDf(featureKey)
             oldscore = scoreDict.iloc[-1]
             newscore = ranks2.corr(ranks)
-
+            
             score = (oldscore*(updateNum-1)+newscore)/(updateNum)
         return score
 

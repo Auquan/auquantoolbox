@@ -1,5 +1,3 @@
-import sys
-sys.path.append(r'''C:\Users\agarw_000\Desktop\tej\auquantoolbox''')
 from backtester.executionSystem.base_execution_system import BaseExecutionSystem, InstrumentExection
 from backtester.executionSystem.simple_execution_system import SimpleExecutionSystem
 from backtester.logger import *
@@ -58,8 +56,8 @@ class Problem2ExecutionSystem(SimpleExecutionSystem):
         executions['position'] = position
         executions['price'] = (bidPriceSeries + askPriceSeries)/2
         executions['spread'] = (askPriceSeries - bidPriceSeries)
-        #print('*********************** EXECUTIONS ***********************')
-        #print(executions)
+        print('*********************** EXECUTIONS ***********************')
+        print(executions)
 
         # executions is a df with stocknames as index and positions to execute and price as column (-10 means sell 10)
         # No executions if at position limit

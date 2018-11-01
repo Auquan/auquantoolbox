@@ -1,6 +1,3 @@
-import sys
-import os
-sys.path.append(os.getcwd())
 from backtester.trading_system_parameters import TradingSystemParameters
 from backtester.features.feature import Feature
 from datetime import timedelta
@@ -28,7 +25,7 @@ class MyTradingFunctions():
     def __init__(self):  #Put any global variables here
         self.count = 0
         self.params = {}
-        self.lookback = 20
+        self.lookback = 720
 
 
     ####################################
@@ -170,11 +167,14 @@ class MyCustomFeatureClassName(Feature):
 
 
 if __name__ == "__main__":
-
-    tf = MyTradingFunctions()
-    tsParams = MyTradingParams(tf)
-    tradingSystem = TradingSystem(tsParams)
-# Set onlyAnalyze to True to quickly generate csv files with all the features
-# Set onlyAnalyze to False to run a full backtest
-# Set makeInstrumentCsvs to False to not make instrument specific csvs in runLogs. This improves the performance BY A LOT
-    tradingSystem.startTrading(onlyAnalyze=False, shouldPlot=True, makeInstrumentCsvs=True)
+    if updateCheck():
+        print('Your version of the auquan toolbox package is old. Please update by running the following command:')
+        print('pip install -U auquan_toolbox')
+    else:
+        tf = MyTradingFunctions()
+        tsParams = MyTradingParams(tf)
+        tradingSystem = TradingSystem(tsParams)
+    # Set onlyAnalyze to True to quickly generate csv files with all the features
+    # Set onlyAnalyze to False to run a full backtest
+    # Set makeInstrumentCsvs to False to not make instrument specific csvs in runLogs. This improves the performance BY A LOT
+        tradingSystem.startTrading(onlyAnalyze=False, shouldPlot=True, makeInstrumentCsvs=True)

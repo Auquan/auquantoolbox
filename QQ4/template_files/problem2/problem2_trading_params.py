@@ -1,6 +1,3 @@
-import sys
-import os
-sys.path.append(os.getcwd())
 from backtester.trading_system_parameters import TradingSystemParameters
 from backtester.features.feature import Feature
 from datetime import timedelta
@@ -35,7 +32,7 @@ class MyTradingParams(TradingSystemParameters):
         self.__additionalMarketFeatureConfigDicts = []
         self.__fees = {'brokerage': 0.0,'spread': 0.0}
         self.__startDate = '2012/02/07'
-        self.__endDate =  '2012/02/08'
+        self.__endDate =  '2012/02/27'
         super(MyTradingParams, self).__init__()
 
 
@@ -238,8 +235,8 @@ class TotalTrades(Feature):
             position = instrumentManager.getLookbackInstrumentFeatures().getFeatureDf('position')
             totalTrades = instrumentManager.getLookbackInstrumentFeatures().getFeatureDf(featureKey).iloc[-1]
             totalTrades[position.iloc[-1]!=position.iloc[-2]] = totalTrades+1
-            #print('*********************** TOTAL TRADES *************************')
-            #print(totalTrades)
+            print('*********************** TOTAL TRADES *************************')
+            print(totalTrades)
             return totalTrades
         else:
             return pd.Series(0, index = instrumentManager.getAllInstrumentsByInstrumentId())

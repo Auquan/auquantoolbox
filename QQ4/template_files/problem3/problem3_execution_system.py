@@ -1,72 +1,11 @@
-import sys
-import os,csv
-sys.path.append(os.getcwd())
 from backtester.executionSystem.base_execution_system import BaseExecutionSystem, InstrumentExection
 from backtester.logger import *
 import numpy as np
 import pandas as pd
-from datetime import datetime
-
-
-
-
-class StateExecutionWriter:
-
-    def __init__(self, parentFolderName, runName):
-        self.__runName = runName
-        if not os.path.exists(parentFolderName):
-            os.mkdir(parentFolderName, 0o755)
-        self.__folderName = parentFolderName + '/' + 'runLog_' + runName
-        if not os.path.exists(self.__folderName):
-            os.mkdir(self.__folderName, 0o755)
-        self.__openFiles = []
-        self.__executionsFilename = None
-        self.__executionsWriter = None
-
-    def getExecutionsFilename(self):
-        return self.__executionsFilename
-
-    def getFolderName(self):
-        return self.__folderName
-
-    def closeStateWriter(self):
-        for file in self.__openFiles:
-            file.close()
-
-    def writeColumns(self, writer, df):
-        featureKeys = list(df.columns)
-        toSaveColumns = ['time'] + featureKeys
-        writer.writerow(toSaveColumns)
-
-    def writeLastFeatures(self, time, writer, df):
-        if len(df) == 0:
-            return
-        lastFeatures = df.iloc[-1]
-        timeOfUpdate = time
-        featureValues = lastFeatures.values
-        toSaveRow = [timeOfUpdate] + list(featureValues)
-        writer.writerow(toSaveRow)
-
-
-    def writeCurrentState(self, time, executions):
-        if self.__executionsWriter is None:
-            self.__executionsFilename = self.__folderName + '/executions.csv'
-            if sys.version_info >= (3,):
-                executionsFile = open(self.__executionsFilename, 'w', encoding='utf8', newline='')
-            else:
-                executionsFile = open(self.__executionsFilename, 'wb')
-            self.__openFiles.append(executionsFile)
-            self.__executionsWriter = csv.writer(executionsFile)
-            self.writeColumns(self.__executionsWriter, executions)
-        self.writeLastFeatures(time, self.__executionsWriter, executions)
-
-
-
-
 
 
 class SimpleExecutionSystem(BaseExecutionSystem):
-    def __init__(self, logFileName, enter_threshold=0.7, exit_threshold=0.55, longLimit=10,
+    def __init__(self, enter_threshold=0.7, exit_threshold=0.55, longLimit=10,
                  shortLimit=10, capitalUsageLimit=0, enterlotSize=1, exitlotSize = 1, limitType='L', price='close'):
         self.enter_threshold = enter_threshold
         self.exit_threshold = exit_threshold
@@ -78,11 +17,6 @@ class SimpleExecutionSystem(BaseExecutionSystem):
         self.limitType = limitType
         self.priceFeature = price
         self.iterCount = 1
-        self.logFileName = logFileName
-        self.state_writer = StateExecutionWriter('runLogs', logFileName)
-
-    def getLogFileName(self):
-        return self.logFileName
 
     def getPriceSeries(self, instrumentsManager):
         instrumentLookbackData = instrumentsManager.getLookbackInstrumentFeatures()
@@ -165,10 +99,9 @@ class SimpleExecutionSystem(BaseExecutionSystem):
         executions = self.exitPosition(time, instrumentsManager, currentPredictions)
         executions += self.enterPosition(time, instrumentsManager, currentPredictions, capital)
         # executions is a series with stocknames as index and positions to execute as column (-10 means sell 10)
-        self.state_writer.writeCurrentState(time, (executions.to_frame()).transpose())
         return self.getInstrumentExecutionsFromExecutions(time, executions)
 
-    def getExecutionsAtClose(self, time, instrumentsManager,logFileName):
+    def getExecutionsAtClose(self, time, instrumentsManager):
         instrumentExecutions = []
         instruments = instrumentsManager.getAllInstrumentsByInstrumentId().values()
         for instrument in instruments:
