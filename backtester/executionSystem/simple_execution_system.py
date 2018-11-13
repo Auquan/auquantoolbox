@@ -2,10 +2,11 @@ from backtester.executionSystem.base_execution_system import BaseExecutionSystem
 from backtester.logger import *
 import numpy as np
 import pandas as pd
+from datetime import datetime
 
 
 class SimpleExecutionSystem(BaseExecutionSystem):
-    def __init__(self, enter_threshold=0.7, exit_threshold=0.55, longLimit=10,
+    def __init__(self, logFileName = datetime.strftime(datetime.now(), '%Y%m%d_%H%M%S'), enter_threshold=0.7, exit_threshold=0.55, longLimit=10,
                  shortLimit=10, capitalUsageLimit=0, enterlotSize=1, exitlotSize = 1, limitType='L', price='close'):
         self.enter_threshold = enter_threshold
         self.exit_threshold = exit_threshold
@@ -16,6 +17,10 @@ class SimpleExecutionSystem(BaseExecutionSystem):
         self.exitlotSize = exitlotSize
         self.limitType = limitType
         self.priceFeature = price
+        self.logFileName = logFileName
+
+    def getLogFileName(self):
+        return self.logFileName
 
     def getPriceSeries(self, instrumentsManager):
         instrumentLookbackData = instrumentsManager.getLookbackInstrumentFeatures()

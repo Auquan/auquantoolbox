@@ -5,19 +5,18 @@ import sys
 
 class StateWriter:
 
-    def __init__(self, parentFolderName, runName, onlyMarket=False , logFileName=''):
+    def __init__(self, parentFolderName, runName, onlyMarket=False):
         self.__runName = runName
         if not os.path.exists(parentFolderName):
             os.mkdir(parentFolderName, 0o755)
-        if logFileName=='':
-            self.__folderName = parentFolderName + '/' + 'runLog_' + runName
-        else:
-            self.__folderName = parentFolderName + '/' + 'runLog_' + logFileName
+        self.__folderName = parentFolderName + '/' + 'runLog_' + runName
         if not os.path.exists(self.__folderName):
             os.mkdir(self.__folderName, 0o755)
         self.__openFiles = []
         self.__marketFeaturesFilename = None
         self.__marketFeaturesWriter = None
+        self.__predictionFeaturesFilename = None
+        self.__predictionFeaturesWriter = None
         self.__instrumentIdToWriters = {}
         self.__onlyMarket = onlyMarket
 
@@ -36,6 +35,10 @@ class StateWriter:
         toSaveColumns = ['time'] + featureKeys
         writer.writerow(toSaveColumns)
 
+    def writePredictionColumns(self, writer, list):
+        toSaveColumns = ['time'] + list
+        writer.writerow(toSaveColumns)
+
     def writeLastFeatures(self, writer, df):
         if len(df) == 0:
             return
@@ -46,13 +49,13 @@ class StateWriter:
         writer.writerow(toSaveRow)
 
     def writeInstrumentColumns(self, writer, instrumentId, instrumentLookbackData):
-        featureKeys = instrumentLookbackData.getAllFeatures()
+        featureKeys = instrumentLookbackData.getInstrumentFeatures()
         toSaveColumns = ['time'] + featureKeys
         writer.writerow(toSaveColumns)
 
     def writeLastInstrumentFeatures(self, time, writer, instrumentId, instrumentLookbackData):
         toSaveRow = [time]
-        for featureKey in instrumentLookbackData.getAllFeatures():
+        for featureKey in instrumentLookbackData.getInstrumentFeatures():
             featureDataDf = instrumentLookbackData.getFeatureDf(featureKey)
             lastInstrumentFeature = featureDataDf[instrumentId].iloc[-1]
             toSaveRow.append(lastInstrumentFeature)
@@ -70,10 +73,27 @@ class StateWriter:
             self.__marketFeaturesWriter = csv.writer(marketFeaturesFile)
             self.writeColumns(self.__marketFeaturesWriter, marketFeaturesDf)
         self.writeLastFeatures(self.__marketFeaturesWriter, marketFeaturesDf)
+
+        instrumentsDict = instrumentManager.getAllInstrumentsByInstrumentId()
+        b = []
+        for instrumentId in instrumentsDict:
+            b.append(instrumentId)
+
+        if self.__predictionFeaturesWriter is None:
+            self.__predictionFeaturesFilename = self.__folderName + '/predictions.csv'
+            if sys.version_info >= (3,):
+                predictionFeaturesFile = open(self.__predictionFeaturesFilename, 'w', encoding='utf8', newline='')
+            else:
+                predictionFeaturesFile = open(self.__predictionFeaturesFilename, 'wb')
+            self.__openFiles.append(predictionFeaturesFile)
+            self.__predictionFeaturesWriter = csv.writer(predictionFeaturesFile)
+            self.writePredictionColumns(self.__predictionFeaturesWriter, b)
+
         if self.__onlyMarket:
             return
-        instrumentsDict = instrumentManager.getAllInstrumentsByInstrumentId()
+
         instrumentLookbackData = instrumentManager.getLookbackInstrumentFeatures()
+        toSavePredictionRow = [time]
         for instrumentId in instrumentsDict:
             if instrumentId not in self.__instrumentIdToWriters:
                 instrumentFeaturesFilename = self.__folderName + '/' + instrumentId + '_features.csv'
@@ -86,3 +106,7 @@ class StateWriter:
                 self.writeInstrumentColumns(self.__instrumentIdToWriters[instrumentId], instrumentId, instrumentLookbackData)
             instrumentFeaturesWriter = self.__instrumentIdToWriters[instrumentId]
             self.writeLastInstrumentFeatures(time, instrumentFeaturesWriter, instrumentId, instrumentLookbackData)
+            featureDataDf = instrumentLookbackData.getFeatureDf('prediction')
+            lastPrediction = featureDataDf[instrumentId].iloc[-1]
+            toSavePredictionRow.append(lastPrediction)
+        self.__predictionFeaturesWriter.writerow(toSavePredictionRow)

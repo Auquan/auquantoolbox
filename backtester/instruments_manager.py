@@ -107,9 +107,13 @@ class InstrumentManager:
         instrumentFeatureConfigs = tsParams.getFeatureConfigsForInstrumentType(INSTRUMENT_TYPE_STOCK)
         compulsoryInstrumentFeatureKeys = map(lambda x: x.getFeatureKey(), self.__compulsoryInstrumentFeatureConfigs)
         instrumentFeatureKeys = map(lambda x: x.getFeatureKey(), instrumentFeatureConfigs)
+        instrumentFeatures = [instrumentFeatureConfig.getFeatureKey() for instrumentFeatureConfig in instrumentFeatureConfigs]
+        compulsoryInstrumentFeatures = [instrumentFeatureConfig.getFeatureKey() for instrumentFeatureConfig in self.__compulsoryInstrumentFeatureConfigs]
+        logList = list(set(instrumentFeatures) | set(compulsoryInstrumentFeatures))
         featureKeys = list(chain(self.__bookDataFeatures, instrumentFeatureKeys, compulsoryInstrumentFeatureKeys))
         self.__lookbackInstrumentFeatures = InstrumentsLookbackData(size=tsParams.getLookbackSize(),
                                                                     features=featureKeys,
+                                                                    instrumentFeatures = logList,
                                                                     instrumentIds=instrumentIds,
                                                                     frequencyGetter=frequencyGetter,
                                                                     initializer=initializer)

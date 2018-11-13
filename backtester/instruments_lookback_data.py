@@ -2,9 +2,10 @@ from backtester.lookback_data import LookbackDataEfficient
 
 
 class InstrumentsLookbackData:
-    def __init__(self, size, features, instrumentIds, frequencyGetter, initializer=None):
+    def __init__(self, size, features, instrumentFeatures, instrumentIds, frequencyGetter, initializer=None):
         self.__size = size
         self.__features = features
+        self.__instrumentFeatures = instrumentFeatures
         self.__instrumentIds = instrumentIds
         self.__data = {}
         for feature in self.__features:
@@ -25,3 +26,6 @@ class InstrumentsLookbackData:
 
     def getAllFeatures(self):
         return self.__features
+
+    def getInstrumentFeatures(self):
+        return self.__instrumentFeatures
