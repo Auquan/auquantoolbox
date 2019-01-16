@@ -5,14 +5,14 @@ from pandas.tseries.offsets import CustomBusinessHour
 from pandas.tseries.offsets import CustomBusinessDay
 
 class CustomTimeRule(TimeRule):
-    def __init__(self, startDate, endDate, startTime='9:00', endTime='16:00', holidays = [], weekmask = 'Mon Tue Wed Thu Fri', calendar = None, frequency='H', sample='1'):
+    def __init__(self, startDate, endDate, startTime='9:00', endTime='16:00', holidays = [], weekmask = 'Mon Tue Wed Thu Fri', calendar = None, frequency='H', sample='1', timeFormatString='%H:%M'):
         self.__startDate = startDate
         self.__endDate = endDate
         self.__sample = sample
 
-        acceptable_freq = ['D', 'M', 'H', 'S']
+        acceptable_freq = ['D', 'M', 'H', 'S', 'm']
         if frequency not in acceptable_freq:
-            raise ValueError('Frequency Value Not acceptable. Specify D, M, H, S')
+            raise ValueError('Frequency Value Not acceptable. Specify D(day), M(minute), H(hour), S(second), m(month)')
         self.__frequency = frequency
 
         start = datetime.strptime(startTime, '%H:%M')
@@ -53,6 +53,9 @@ class CustomTimeRule(TimeRule):
                 datetime_index = datetime_index.append(pd.date_range(start=day+timedelta(minutes=self.startMinuteDelta), end=day+timedelta(minutes=self.endMinuteDelta), freq= self.__sample + ' s'))
         return datetime_index
 
+    def createMonthSeries(self):
+        return pd.date_range(start, end, freq= self.__sample + 'M')
+
     def emitTimeToTrade(self):
         time_range = None
         if(self.__frequency == 'D'):
@@ -63,6 +66,8 @@ class CustomTimeRule(TimeRule):
             time_range = self.createBusinessMinSeries()
         elif(self.__frequency == 'S'):
             time_range = self.createBusinessSecSeries()
+        elif(self.__frequency == 'm'):
+            time_range = self.createMonthSeries()
 
         for timestamp in time_range:
             yield timestamp
