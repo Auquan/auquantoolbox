@@ -83,6 +83,7 @@ class DataSource(object):
             fileName = self.getFileName(instrumentId)
             if not self.downloadAndAdjustData(instrumentId, fileName):
                 continue
+            ### TODO: Assumes file is a csv, this is should not be in base class but ds type specific
             allInstrumentUpdates[instrumentId] = pd.read_csv(fileName, index_col=0, parse_dates=True, dtype=float)
             timeUpdates = allInstrumentUpdates[instrumentId].index.union(timeUpdates)
             allInstrumentUpdates[instrumentId].dropna(inplace=True)
@@ -91,6 +92,7 @@ class DataSource(object):
         return timeUpdates, allInstrumentUpdates
 
     # set same timestamps in all instrument data and then pad
+    ## TODO: Change thisto supply a df
     def padInstrumentUpdates(self):
         timeUpdates = pd.Series(self._allTimes)
         for instrumentId in self._instrumentIds:

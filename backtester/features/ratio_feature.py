@@ -10,11 +10,14 @@ class RatioMarketFeature(Feature):
     @classmethod
     def computeForInstrument(cls, updateNum, time, featureParams, featureKey, instrumentManager):
         instrumentLookbackData = instrumentManager.getLookbackInstrumentFeatures()
-        feature1 = instrumentLookbackData.getFeatureDf(featureParams['featureName1']).iloc[-1]
-        feature2 = instrumentLookbackData.getFeatureDf(featureParams['featureName2']).iloc[-1]
+        if len(instrumentLookbackData.getFeatureDf(featureParams['featureName1']))>0:
+            feature1 = instrumentLookbackData.getFeatureDf(featureParams['featureName1']).iloc[-1]
+            feature2 = instrumentLookbackData.getFeatureDf(featureParams['featureName2']).iloc[-1]
 
-        toRtn = feature1 / feature2
-        toRtn[toRtn == np.Inf] = 0
+            toRtn = feature1 / feature2
+            toRtn[toRtn == np.Inf] = 0
+        else:
+            toRtn=0    
         return toRtn
 
     '''
