@@ -2,6 +2,7 @@ import pandas as pd
 import os, csv
 from datetime import datetime
 from backtester.dataSource.data_source_utils import groupAndSortByTimeUpdates
+from backtester.instrumentUpdates.instrument_data import InstrumentData
 
 class DataSource(object):
     def __init__(self, cachedFolderName, dataSetId, instrumentIds, startDateStr, endDateStr):
@@ -84,25 +85,25 @@ class DataSource(object):
             if not self.downloadAndAdjustData(instrumentId, fileName):
                 continue
             ### TODO: Assumes file is a csv, this is should not be in base class but ds type specific
-            allInstrumentUpdates[instrumentId] = pd.read_csv(fileName, index_col=0, parse_dates=True, dtype=float)
-            timeUpdates = allInstrumentUpdates[instrumentId].index.union(timeUpdates)
-            allInstrumentUpdates[instrumentId].dropna(inplace=True)
+            allInstrumentUpdates[instrumentId] = InstrumentData(instrumentId, instrumentId, fileName, chunkSize=None)
+            timeUpdates = allInstrumentUpdates[instrumentId].getAllTimestamps().union(timeUpdates)
             # NOTE: Assuming data is sorted by timeUpdates and all instruments have same columns
+            if self._bookDataFeatureKeys is None:
+                self._bookDataFeatureKeys = allInstrumentUpdates[instrumentId].getBookDataFeatures()
         timeUpdates = list(timeUpdates)
         return timeUpdates, allInstrumentUpdates
 
     # set same timestamps in all instrument data and then pad
     ## TODO: Change thisto supply a df
     def padInstrumentUpdates(self):
-        timeUpdates = pd.Series(self._allTimes)
         for instrumentId in self._instrumentIds:
-            if not timeUpdates.isin(self._bookDataByInstrument[instrumentId].index).all():
-                df = pd.DataFrame(index=self._allTimes, columns=self._bookDataByInstrument[instrumentId].columns)
-                df.at[self._bookDataByInstrument[instrumentId].index] = self._bookDataByInstrument[instrumentId].copy()
-                del self._bookDataByInstrument[instrumentId]
-                self._bookDataByInstrument[instrumentId] = df
-                self._bookDataByInstrument[instrumentId].fillna(method='ffill', inplace=True)
-                self._bookDataByInstrument[instrumentId].fillna(0.0, inplace=True)
+            self._bookDataByInstrument[instrumentId].padInstrumentData(self._allTimes)
+
+    # selects only those instrument updates which lie within dateRange
+    def filterUpdatesByDates(self, dateRange=None):
+        dateRange = dateRange if dateRange else (self._startDate.strftime("%Y%m%d"), self._endDateStr.strftime("%Y%m%d"))
+        for instrumentId in self._instrumentIds:
+            self._bookDataByInstrument[instrumentId].filterDataByDates(dateRange)
 
     # accretes all instrument updates using emitInstrumentUpdates method
     def processAllInstrumentUpdates(self, pad=True):
@@ -118,18 +119,9 @@ class DataSource(object):
                 self._bookDataByInstrument[instrumentId].fillna(0.0, inplace=True)
             else:
                 self._bookDataByInstrument[instrumentId].dropna(inplace=True)
-
-    # selects only those instrument updates which lie within dateRange
-    def filterUpdatesByDates(self, dateRange=None):
-        dateRange = dateRange if dateRange else (self._startDate.strftime("%Y%m%d"), self._endDateStr.strftime("%Y%m%d"))
-        for instrumentId in self._instrumentIds:
-            if type(dateRange) is list and self._bookDataByInstrument[instrumentId] is not None:
-                frames = []
-                for dr in dateRange:
-                    frames.append(self._bookDataByInstrument[instrumentId][dr[0]:dr[1]])
-                self._bookDataByInstrument[instrumentId] = pd.concat(frames)
-            elif self._bookDataByInstrument[instrumentId] is not None:
-                self._bookDataByInstrument[instrumentId] = self._bookDataByInstrument[instrumentId][dateRange[0]:dateRange[1]]
+            instrumentData = InstrumentData(instrumentId, instrumentId)
+            instrumentData.setBookData(self._bookDataByInstrument[instrumentId])
+            self._bookDataByInstrument[instrumentId] = instrumentData
 
     def setStartDate(self, startDateStr):
         self._startDate = datetime.strptime(startDateStr, "%Y/%m/%d")

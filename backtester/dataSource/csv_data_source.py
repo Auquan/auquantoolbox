@@ -32,7 +32,6 @@ class CsvDataSource(DataSource):
             self._allTimes, self._groupedInstrumentUpdates = self.getGroupedInstrumentUpdates()
         else:
             self._allTimes, self._bookDataByInstrument = self.getAllInstrumentUpdates()
-            self._bookDataFeatureKeys = list(self._bookDataByInstrument[self._instrumentIds[0]].columns)
             if pad:
                 self.padInstrumentUpdates()
             if (startDateStr is not None) and (endDateStr is not None):

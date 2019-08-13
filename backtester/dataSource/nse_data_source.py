@@ -141,7 +141,6 @@ class NSEStockDataSource(DataSource):
             self._bookDataFeatureKeys = self.__bookDataByFeature.keys()
         else:
             self._allTimes, self._bookDataByInstrument = self.getAllInstrumentUpdates()
-            self._bookDataFeatureKeys = list(self._bookDataByInstrument[self._instrumentIds[0]].columns)
             if pad:
                 self.padInstrumentUpdates()
             self.filterUpdatesByDates([(startDateStr, endDateStr)])
