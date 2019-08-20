@@ -14,6 +14,7 @@ from backtester.process_result import processResult
 from backtester.metrics.metrics import Metrics
 from backtester.plotter import generateGraph
 
+from tensorboardX import SummaryWriter
 
 class TradingSystem:
     '''
@@ -41,6 +42,8 @@ class TradingSystem:
         self.portfolioValue = self.tsParams.getStartingCapital()
         self.capital = self.tsParams.getStartingCapital()
         self.initializer = None
+        self.tensorboard_writer = None
+
         initializerFile = self.tsParams.getInitializer()
         if initializerFile is not None:
             with open(initializerFile, 'rb') as oldFile:
@@ -79,7 +82,7 @@ class TradingSystem:
         tradeLoss = placedOrder.getTradeLoss()
         placedInstrument.updatePositionAtPrice(changeInPosition, tradePrice, tradeLoss)
 
-    def updateFeaturesAndExecute(self, timeOfUpdate, isClose, onlyAnalyze=False):
+    def updateFeaturesAndExecute(self, timeOfUpdate, isClose, onlyAnalyze=False, global_step=0):
         print(timeOfUpdate)
         self.totalUpdates = self.totalUpdates + 1
         self.updateFeatures(timeOfUpdate)
@@ -90,6 +93,8 @@ class TradingSystem:
                 self.orderPlacer.placeOrders(timeOfUpdate, instrumentsToExecute, self.instrumentManager)
             self.portfolioValue = self.instrumentManager.getDataDf()['portfolio_value'][-1]  # TODO: find a better way to get this value
             self.capital = self.instrumentManager.getDataDf()['capital'][-1]  # TODO: find a better way to get this value
+            # Log in tensorboard
+            self.log_tensorboard(global_step)
             end = time.time()
             diffms = (end - start) * 1000
             self.timeExecution = self.timeExecution + diffms
@@ -117,7 +122,31 @@ class TradingSystem:
 
     def saveCurrentState(self, timeOfUpdate):
         self.stateWriter.writeCurrentState(timeOfUpdate, self.instrumentManager)
+    
+    def log_tensorboard(self, global_step):
+        instrumentIds = self.instrumentManager.getAllInstrumentsByInstrumentId()
+        marketFeaturesDf = self.instrumentManager.getDataDf()
+        instrumentLookbackData = self.instrumentManager.getLookbackInstrumentFeatures()
 
+        metrics = Metrics(marketFeaturesDf=None)
+        startingCapital = self.tsParams.getStartingCapital()
+        market_stats = metrics.calculateMarketMetricsRealtime(marketFeaturesDf, startingCapital)
+        instrument_stats = metrics.calculateInstrumentFeatureMetricsRealtime(instrumentIds, instrumentLookbackData, startingCapital)
+
+        portfolio_value = marketFeaturesDf['portfolio_value'][-1]  # TODO: find a better way to get this value
+        capital = marketFeaturesDf['capital'][-1]  # TODO: find a better way to get this value
+        score = marketFeaturesDf['score'][-1]
+        self.tensorboard_writer.add_scalars('capital_and_portfolio', {'capital': capital, 'portfolio_value': portfolio_value}, global_step)
+        self.tensorboard_writer.add_scalar('score', score, global_step)
+
+        for scalar in market_stats.keys():
+            val = market_stats[scalar]
+            # self.writer.add_scalars('marketFeature'+scalar, market_stats[scalar], global_step)
+            self.tensorboard_writer.add_scalars('market_features', {scalar: val}, global_step)
+
+        for scalar in instrument_stats.keys():
+            self.tensorboard_writer.add_scalars(scalar, instrument_stats[scalar], global_step)
+            
     def getFinalMetrics(self, dateBounds, shouldPlotFeatures=True, createResultDict=False):
         allInstruments = self.instrumentManager.getAllInstrumentsByInstrumentId()
         resultDict = {}
@@ -150,6 +179,7 @@ class TradingSystem:
 
     def startTrading(self, onlyAnalyze=False, shouldPlot=True, makeInstrumentCsvs=True,createResultDict=False, logFileName=''):
         self.stateWriter = StateWriter('runLogs', datetime.strftime(datetime.now(), '%Y%m%d_%H%M%S'), not makeInstrumentCsvs, logFileName)
+        self.tensorboard_writer = SummaryWriter(logdir='tb_logs\\'+datetime.strftime(datetime.now(), '%Y%m%d_%H%M%S'))
         # TODO: Figure out a good way to handle order parsers with live data later on.
         groupedInstrumentUpdates = self.dataParser.emitInstrumentUpdates()
         timeGetter = self.tsParams.getTimeRuleForUpdates().emitTimeToTrade()
@@ -157,6 +187,7 @@ class TradingSystem:
         self.startDate = timeOfNextFeatureUpdate
         timeOfUpdate, instrumentUpdates = next(groupedInstrumentUpdates)
         isClose = False
+        global_step = 0
         while True:
             if (timeOfUpdate <= timeOfNextFeatureUpdate):
                 self.processInstrumentUpdates(timeOfUpdate, instrumentUpdates, onlyAnalyze)
@@ -164,19 +195,21 @@ class TradingSystem:
                     timeOfUpdate, instrumentUpdates = next(groupedInstrumentUpdates)
                 except StopIteration:
                     isClose = True
-                    self.updateFeaturesAndExecute(timeOfNextFeatureUpdate, isClose, onlyAnalyze)
+                    self.updateFeaturesAndExecute(timeOfNextFeatureUpdate, isClose, onlyAnalyze, global_step=global_step)
             else:
                 currentTimeUpdate = timeOfNextFeatureUpdate
                 try:
                     timeOfNextFeatureUpdate = next(timeGetter)
                 except StopIteration:
                     isClose = True
-                self.updateFeaturesAndExecute(currentTimeUpdate, isClose, onlyAnalyze)
+                self.updateFeaturesAndExecute(currentTimeUpdate, isClose, onlyAnalyze, global_step=global_step)
+
             if not onlyAnalyze and self.portfolioValue < 0:
                 logError('Trading will STOP - OUT OF MONEY!!!!')
                 break
             if isClose:
                 break
+            global_step += 1
 
         self.orderPlacer.cleanup()
         self.dataParser.cleanup()
