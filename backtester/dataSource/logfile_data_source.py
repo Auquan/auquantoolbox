@@ -1,5 +1,7 @@
 import time
 from backtester.dataSource.data_source import DataSource
+from backtester.instrumentUpdates import FutureInstrumentUpdate
+from datetime import datetime
 
 
 class LogfileDataSource(DataSource):
@@ -18,6 +20,21 @@ class LogfileDataSource(DataSource):
     '''
     def processLineIntoInstrumentUpdate(self, line):
         return line
+
+    '''
+    Will use child class's processLine
+    '''
+    # TODO:
+    def processLine(self, line):
+        lineItems = line.split()
+        inst = FutureInstrumentUpdate(futureInstrumentId='AAG',
+                                      tradeSymbol=None,
+                                      timeOfUpdate=None,
+                                      bookData=None,
+                                      expiryTime=datetime.strptime("2/1/2018","%m/%d/%Y"),
+                                      underlyingInstrumentId='NA')
+        return inst
+
 
     def emitInstrumentUpdates(self):
         while True:

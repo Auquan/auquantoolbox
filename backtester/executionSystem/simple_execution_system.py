@@ -28,8 +28,13 @@ class SimpleExecutionSystem(BaseExecutionSystem):
 
 
     def getLongLimit(self, instrumentIds, price):
+        print(self.longLimit)
         if isinstance(self.longLimit, pd.DataFrame):
-            return self.convertLimit(self.longLimit, price)
+            if self.longLimit.shape[0]==1:
+                longLimitSeries = self.longLimit.iloc[-1]
+            if self.longLimit.shape[1]==1:
+                longLimitSeries = self.longLimit.T.iloc[-1]
+            return self.convertLimit(longLimitSeries, price)
         if isinstance(self.longLimit, dict):
             longLimitDf = pd.Series(self.longLimit)
             return self.convertLimit(longLimitDf, price)
@@ -38,7 +43,11 @@ class SimpleExecutionSystem(BaseExecutionSystem):
 
     def getShortLimit(self, instrumentIds, price):
         if isinstance(self.shortLimit, pd.DataFrame):
-            return self.convertLimit(self.shortLimit, price)
+            if self.shortLimit.shape[0]==1:
+                shortLimitSeries = self.shortLimit.iloc[-1]
+            if self.shortLimit.shape[1]==1:
+                shortLimitSeries = self.shortLimit.T.iloc[-1]
+            return self.convertLimit(shortLimitSeries, price)
         if isinstance(self.shortLimit, dict):
             shortLimitDf = pd.Series(self.shortLimit)
             return self.convertLimit(shortLimitDf, price)
@@ -47,21 +56,31 @@ class SimpleExecutionSystem(BaseExecutionSystem):
 
     def getEnterLotSize(self, instrumentIds, price):
         if isinstance(self.enterlotSize, pd.DataFrame):
-            return self.convertLimit(self.lotSize, price)
+            if self.enterlotSize.shape[0]==1:
+                enterlotSeries = self.enterlotSize.iloc[-1]
+            if self.enterlotSize.shape[1]==1:
+                enterlotSeries = self.enterlotSize.T.iloc[-1]
+            return self.convertLimit(enterlotSeries, price)
         if isinstance(self.enterlotSize, dict):
             lotSizeDf = pd.Series(self.enterlotSize)
             return self.convertLimit(lotSizeDf, price)
         else:
             return self.convertLimit(pd.Series(self.enterlotSize, index=instrumentIds), price)
 
+
     def getExitLotSize(self, instrumentIds, price):
         if isinstance(self.exitlotSize, pd.DataFrame):
-            return self.convertLimit(self.lotSize, price)
+            if self.exitlotSize.shape[0]==1:
+                exitlotSeries = self.exitlotSize.iloc[-1]
+            if self.exitlotSize.shape[1]==1:
+                exitlotSeries = self.exitlotSize.T.iloc[-1]
+            return self.convertLimit(exitlotSeries, price)
         if isinstance(self.exitlotSize, dict):
             lotSizeDf = pd.Series(self.exitlotSize)
             return self.convertLimit(lotSizeDf, price)
         else:
             return self.convertLimit(pd.Series(self.exitlotSize, index=instrumentIds), price)
+
 
     def convertLimit(self, df, price):
         if self.limitType == 'L':
@@ -71,6 +90,7 @@ class SimpleExecutionSystem(BaseExecutionSystem):
                 return np.floor(df / price)
             except KeyError:
                 logError('You have specified Dollar Limit but Price Feature Key does not exist')
+                raise ValueError('You have specified Dollar Limit but Price Feature Key does not exist')
 
     def getInstrumentExecutionsFromExecutions(self, time, executions):
         instrumentExecutions = []

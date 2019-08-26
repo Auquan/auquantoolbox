@@ -3,6 +3,7 @@ import os, csv
 from datetime import datetime
 from backtester.dataSource.data_source_utils import groupAndSortByTimeUpdates
 from backtester.instrumentUpdates.instrument_data import InstrumentData
+from backtester.logger import logError
 
 class DataSource(object):
     def __init__(self, cachedFolderName, dataSetId, instrumentIds, startDateStr, endDateStr):
@@ -33,7 +34,6 @@ class DataSource(object):
 
     # returns a list of all instrument identifiers
     def getAllInstrumentIds(self):
-        logError("No instrument provided")
         raise NotImplementedError
 
     # returns a list of instrument identifiers
@@ -50,6 +50,7 @@ class DataSource(object):
     def emitInstrumentUpdates(self):
         if self._groupedInstrumentUpdates is None:
             logError("groupedInstrumentUpdates has not been computed")
+            return []
         for timeOfUpdate, instrumentUpdates in self._groupedInstrumentUpdates:
             yield([timeOfUpdate, instrumentUpdates])
 

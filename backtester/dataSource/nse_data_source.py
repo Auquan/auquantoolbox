@@ -9,7 +9,7 @@ import pandas as pd
 import csv
 from bs4 import BeautifulSoup
 try:
-    import urllib.request as urllib2
+    import urllib.request as urllib2r
     from urllib.request import urlopen
     import urllib.error as urllib2
     from urllib.parse import quote
@@ -156,7 +156,7 @@ class NSEStockDataSource(DataSource):
                'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3'}
         if isxml:
             hdr['X-Requested-With'] = 'XMLHttpRequest'
-        req = urllib2.Request(url, headers=hdr)
+        req = urllib2r.Request(url, headers=hdr)
         try:
             page = urlopen(req)
             content = page.read().decode('utf8')
@@ -204,12 +204,13 @@ class NSEStockDataSource(DataSource):
         for row in dataRows[1:-1]:
             rows.append([x.replace('"', '').strip() for x in row.split(",")[2:]])
         if not os.path.isfile(outputCsvFile):
-            f = open(outputCsvFile, 'wb')
+            f = open(outputCsvFile, 'w', newline='')
+            print('file', f)
             writer = csv.writer(f)
             writer.writerow(headers)
             f.close()
-
-        with open(outputCsvFile, 'ab') as f:
+            
+        with open(outputCsvFile, 'a', newline='') as f:
             writer = csv.writer(f)
             writer.writerows(row for row in rows if row)
             f.close()
@@ -240,6 +241,10 @@ class NSEStockDataSource(DataSource):
 
     def getFileName(self, instrumentId):
         return self._cachedFolderName + self._dataSetId + '/' + instrumentId + '%s.csv'%self.__dateAppend
+
+    def getFileName1(self, dataId, instrumentId):
+        return self._cachedFolderName + dataId + '/' + instrumentId + '%s.csv'%self.__dateAppend
+
 
     def processGroupedInstrumentUpdates(self):
         timeUpdates = self._allTimes
@@ -282,10 +287,20 @@ class NSEStockDataSource(DataSource):
         return self.__bookDataByFeature
 
     def getClosingTime(self):
-        return self._allTimes[-1]
+        # return self._allTimes[-1]
+        try:
+            return self._allTimes[-1]
+        except IndexError:
+            logError("The DataFrame is empty")
+
 
     def adjustPriceForSplitAndDiv(self, instrumentId, fileName):
-        multiplier = data_source_utils.getMultipliers(self,instrumentId,fileName,self.__downloadId)
+        # multiplier = data_source_utils.getMultipliers(self,instrumentId,fileName,self.__downloadId)
+        try:
+            multiplier,temp = data_source_utils.getMultipliers(self,instrumentId,fileName,self.__downloadId)
+        except:
+            logError("DataFrames are empty")
+            return
         temp['Close'] = temp['Close'] * multiplier[0] * multiplier[1]
         temp['Open'] = temp['Open'] * multiplier[0] * multiplier[1]
         temp['High'] = temp['High'] * multiplier[0] * multiplier[1]

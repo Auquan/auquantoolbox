@@ -115,6 +115,14 @@ class AuquanDataSource(DataSource):
         self.folderName = folderName
         self.instrumentIdsByType = instrumentIdsByType
         self.currentDate = self.startDate
+
+        self.instrumentIds=[]
+        self.dataSetId='Auquan'
+        for instrumentType in instrumentIdsByType:
+            for i in instrumentIdsByType[instrumentType]:
+                self.instrumentIds.append(i)
+        super(AuquanDataSource, self).__init__(folderName, self.dataSetId, self.instrumentIds, startDateStr, endDateStr)
+
         if not liveUpdates:
             self.processAllInstrumentUpdates()
             self.filterUpdatesByDates([(startDateStr, endDateStr)])

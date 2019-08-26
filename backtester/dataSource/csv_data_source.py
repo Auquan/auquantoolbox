@@ -50,7 +50,13 @@ class CsvDataSource(DataSource):
         else:
             url = '%s/stock_list.txt' % (self._downloadUrl)
         print(url)
-        response = urlopen(url)
+        
+        try:
+            response = urlopen(url)
+        except Exception as e:
+            logError( str(e) )
+            return False
+        
         status = response.getcode()
         if status == 200:
             print('Downloading list of stocks to file: %s' % (stockListFileName))
@@ -80,7 +86,12 @@ class CsvDataSource(DataSource):
         else:
             url = '%s/%s.csv' % (self._downloadUrl, instrumentId)
 
-        response = urlopen(url)
+        try:
+            response = urlopen(url)
+        except Exception as e:
+            logError( str(e) )
+            return False
+
         status = response.getcode()
         if status == 200:
             print('Downloading %s data to file: %s' % (instrumentId, downloadLocation))

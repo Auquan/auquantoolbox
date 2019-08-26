@@ -1,4 +1,5 @@
 from backtester.timeRule.time_rule import TimeRule
+from backtester.logger import logError
 from datetime import datetime, timedelta
 import os
 try:
@@ -25,7 +26,11 @@ class QuantQuestTimeRule(TimeRule):
     def downloadFile(self, dataSetId, downloadLocation):
         url = 'https://raw.githubusercontent.com/Auquan/auquan-historical-data/master/qq2Data/%s/date_list.txt' % (
             dataSetId)
-        response = urlopen(url)
+        try:
+            response = urlopen(url)
+        except Exception as e:
+            logError( str(e) )
+            return False
         status = response.getcode()
         if status == 200:
             print('Downloading date list to file: %s' % (downloadLocation))

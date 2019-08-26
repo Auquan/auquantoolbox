@@ -39,9 +39,11 @@ class CapitalFeature(Feature):
     def computeForMarket(cls, updateNum, time, featureParams, featureKey, currentMarketFeatures, instrumentManager):
         changeInCapital = 0
         capitalDict = instrumentManager.getDataDf()[featureKey]
+        print(capitalDict)
         if len(capitalDict) <= 1:
             return featureParams['initial_capital']
         capital = capitalDict.values[-2]
         instrumentLookbackData = instrumentManager.getLookbackInstrumentFeatures()
         changeInCapital = instrumentLookbackData.getFeatureDf(featureKey).iloc[-1].sum()
+        print(capital, changeInCapital)
         return float(capital) - float(changeInCapital)
