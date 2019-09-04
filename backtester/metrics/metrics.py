@@ -9,6 +9,8 @@ class Metrics():
 	def __init__(self, marketFeaturesDf):
 		self.__marketFeaturesDf = marketFeaturesDf
 		self.__stats = {}
+		self.market_metrics_realtime = set(['pnl', 'roc', 'max_drawdown', 'pl_ratio', 'accuracy'])
+		self.instrument_metrics_realtime = set(['pnl', 'pl_ratio', 'accuracy', 'score', 'normalized_score'])
 
 	def getMarketMetricsString(self):
 		# TODO add the snippet back once benchmark is fixed.
@@ -57,18 +59,47 @@ class Metrics():
 		return series.groupby(partial(self.round, freq=period))
 		# series.resample(period)
 
-	def calculateMarketMetricsRealtime(self, marketFeaturesDf, startingCapital):
+	def calculateMarketMetricsRealtime(self, marketFeaturesDf, startingCapital, metrics_to_show=None):
+		
+		if metrics_to_show is None:
+			metrics_to_show = self.market_metrics_realtime
+		else:
+			metrics_to_show = list( self.market_metrics_realtime.intersection( set(metrics_to_show) ) )
+
+		diff = set(metrics_to_show) - self.market_metrics_realtime
+		if len( diff ) > 0:
+			print('Some of the metrics you asked for are not available!!')
+			print('Available metrics: %s'%self.market_metrics_realtime)
+			print('Following are not available: %s'%diff)
+		
 		stats = {}
 		df = marketFeaturesDf
 		total_return = df['pnl'].iloc[- 1] / float(startingCapital)
-		stats['pnl'] = total_return
-		stats['roc'] = self.roc(df['pnl'].iloc[- 1], df['capitalUsage'].iloc[-1])
-		stats['max_drawdown'] = self.max_drawdown(df['maxDrawdown'].iloc[-1], startingCapital)
-		stats['pl_ratio'] = self.profit_factor(df['total_profit'].iloc[-1], df['total_loss'].iloc[-1])
-		stats['accuracy'] = self.accuracy(df['count_profit'].iloc[-1], df['count_loss'].iloc[-1])
+		if 'pnl' in metrics_to_show:
+			stats['pnl'] = total_return
+		if 'roc' in metrics_to_show:
+			stats['roc'] = self.roc(df['pnl'].iloc[- 1], df['capitalUsage'].iloc[-1])
+		if 'max_drawdown' in metrics_to_show:
+			stats['max_drawdown'] = self.max_drawdown(df['maxDrawdown'].iloc[-1], startingCapital)
+		if 'pl_ratio' in metrics_to_show:
+			stats['pl_ratio'] = self.profit_factor(df['total_profit'].iloc[-1], df['total_loss'].iloc[-1])
+		if 'accuracy' in metrics_to_show:
+			stats['accuracy'] = self.accuracy(df['count_profit'].iloc[-1], df['count_loss'].iloc[-1])
 		return stats
 
-	def calculateInstrumentFeatureMetricsRealtime(self, instrumentIds, instrumentLookbackData, startingCapital):
+	def calculateInstrumentFeatureMetricsRealtime(self, instrumentIds, instrumentLookbackData, startingCapital, metrics_to_show=None):
+		
+		if metrics_to_show is None:
+			metrics_to_show = self.instrument_metrics_realtime
+		else:
+			metrics_to_show = list( self.instrument_metrics_realtime.intersection( set(metrics_to_show) ) )
+
+		diff = set(metrics_to_show) - self.instrument_metrics_realtime
+		if len( diff ) > 0:
+			print('Some of the metrics you asked for are not available!!')
+			print('Available metrics: %s'%self.instrument_metrics_realtime)
+			print('Following are not available: %s'%diff)
+
 		stats = {}
 		pnl = instrumentLookbackData.getFeatureDf('pnl').iloc[-1]
 		total_profit = instrumentLookbackData.getFeatureDf('total_profit').iloc[-1]
@@ -77,22 +108,24 @@ class Metrics():
 		count_loss = instrumentLookbackData.getFeatureDf('count_loss').iloc[-1]
 		totalReturn = pnl / float(startingCapital)
 		
-		stats['pnl'] = {}
-		stats['pl_ratio'] = {}
-		stats['accuracy'] = {}
-		stats['score'] = {}
-		stats['normalized_score'] = {}
+		for metric in metrics_to_show:
+			stats[metric] = {}
 			
 		for instrumentId in instrumentIds:
-			stats['pnl'][instrumentId] = totalReturn.loc[instrumentId]
-			stats['pl_ratio'][instrumentId] = self.profit_factor(total_profit.loc[instrumentId], total_loss.loc[instrumentId])
-			stats['accuracy'][instrumentId] = self.accuracy(count_profit.loc[instrumentId], count_loss.loc[instrumentId])
+			if 'pnl' in metrics_to_show:
+				stats['pnl'][instrumentId] = totalReturn.loc[instrumentId]
+			if 'pl_ratio' in metrics_to_show:
+				stats['pl_ratio'][instrumentId] = self.profit_factor(total_profit.loc[instrumentId], total_loss.loc[instrumentId])
+			if 'accuracy' in metrics_to_show:
+				stats['accuracy'][instrumentId] = self.accuracy(count_profit.loc[instrumentId], count_loss.loc[instrumentId])
 			try:
-				score = instrumentLookbackData.getFeatureDf('score').iloc[-1]
-				stats['score'][instrumentId] = score.loc[instrumentId]
+				if 'score' in metrics_to_show:
+					score = instrumentLookbackData.getFeatureDf('score').iloc[-1]
+					stats['score'][instrumentId] = score.loc[instrumentId]
 				try:
-					benchmarkScore = instrumentLookbackData.getFeatureDf('benchmark_score').iloc[-1]
-					stats['normalized_score'][instrumentId] = 1000 * score.loc[instrumentId] / benchmarkScore.loc[instrumentId]
+					if 'normalized_score' in metrics_to_show:
+						benchmarkScore = instrumentLookbackData.getFeatureDf('benchmark_score').iloc[-1]
+						stats['normalized_score'][instrumentId] = 1000 * score.loc[instrumentId] / benchmarkScore.loc[instrumentId]
 				except KeyError:
 					pass
 			except KeyError:

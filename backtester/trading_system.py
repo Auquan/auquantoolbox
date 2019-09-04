@@ -10,11 +10,8 @@ from backtester.logger import *
 from backtester.instruments_manager import InstrumentManager
 from datetime import datetime
 from backtester.state_writer import StateWriter
-from backtester.process_result import processResult
-from backtester.metrics.metrics import Metrics
-from backtester.plotter import generateGraph
 
-from tensorboardX import SummaryWriter
+from backtester.metrics.metrics_logger import MetricsLogger
 
 class TradingSystem:
     '''
@@ -35,21 +32,21 @@ class TradingSystem:
         self.dataParser = None
         self.executionSystem = None
         self.orderPlacer = None
-        self.stateWriter = None
         self.dataParser = self.tsParams.getDataParser()
         self.executionSystem = self.tsParams.getExecutionSystem()
         self.orderPlacer = self.tsParams.getOrderPlacer()
         self.portfolioValue = self.tsParams.getStartingCapital()
         self.capital = self.tsParams.getStartingCapital()
         self.initializer = None
-        self.tensorboard_writer = None
-
         initializerFile = self.tsParams.getInitializer()
         if initializerFile is not None:
             with open(initializerFile, 'rb') as oldFile:
                 self.initializer = cPickle.load(oldFile)
         self.instrumentManager = InstrumentManager(self.tsParams, self.dataParser.getBookDataFeatures(), self.dataParser.getInstrumentIds(),
                                                    self.tsParams.getTimeRuleForUpdates(), self.initializer)
+
+        self.metricsLogger = MetricsLogger(self.tsParams.getMetricsToLogRealtime(), self.instrumentManager, self.tsParams.getPriceFeatureKey(), self.tsParams.getStartingCapital())
+
 
     def processInstrumentUpdates(self, timeOfUpdate, instrumentUpdates, onlyAnalyze=False, isClose=False):
         # Process instrument updates first
@@ -94,13 +91,13 @@ class TradingSystem:
             self.portfolioValue = self.instrumentManager.getDataDf()['portfolio_value'][-1]  # TODO: find a better way to get this value
             self.capital = self.instrumentManager.getDataDf()['capital'][-1]  # TODO: find a better way to get this value
             # Log in tensorboard
-            self.log_tensorboard(global_step)
+            self.metricsLogger.log_tensorboard(global_step)
             end = time.time()
             diffms = (end - start) * 1000
             self.timeExecution = self.timeExecution + diffms
             logPerf('Update Execution System: %d, Time: %.2f, Average: %.2f' % (self.totalUpdates, diffms, self.timeExecution / (self.totalUpdates)))
         start = time.time()
-        self.saveCurrentState(timeOfUpdate)
+        self.metricsLogger.saveCurrentState(timeOfUpdate)
         end = time.time()
         diffms = (end - start) * 1000
         self.timeSavingState = self.timeSavingState + diffms
@@ -120,66 +117,8 @@ class TradingSystem:
     def getInstrumentsToExecute(self, time):
         return self.executionSystem.getExecutions(time, self.instrumentManager, self.capital)
 
-    def saveCurrentState(self, timeOfUpdate):
-        self.stateWriter.writeCurrentState(timeOfUpdate, self.instrumentManager)
-    
-    def log_tensorboard(self, global_step):
-        instrumentIds = self.instrumentManager.getAllInstrumentsByInstrumentId()
-        marketFeaturesDf = self.instrumentManager.getDataDf()
-        instrumentLookbackData = self.instrumentManager.getLookbackInstrumentFeatures()
-
-        metrics = Metrics(marketFeaturesDf=None)
-        startingCapital = self.tsParams.getStartingCapital()
-        market_stats = metrics.calculateMarketMetricsRealtime(marketFeaturesDf, startingCapital)
-        instrument_stats = metrics.calculateInstrumentFeatureMetricsRealtime(instrumentIds, instrumentLookbackData, startingCapital)
-
-        portfolio_value = marketFeaturesDf['portfolio_value'][-1]  # TODO: find a better way to get this value
-        capital = marketFeaturesDf['capital'][-1]  # TODO: find a better way to get this value
-        score = marketFeaturesDf['score'][-1]
-        self.tensorboard_writer.add_scalars('capital_and_portfolio', {'capital': capital, 'portfolio_value': portfolio_value}, global_step)
-        self.tensorboard_writer.add_scalar('score', score, global_step)
-
-        for scalar in market_stats.keys():
-            val = market_stats[scalar]
-            # self.writer.add_scalars('marketFeature'+scalar, market_stats[scalar], global_step)
-            self.tensorboard_writer.add_scalars('market_features', {scalar: val}, global_step)
-
-        for scalar in instrument_stats.keys():
-            self.tensorboard_writer.add_scalars(scalar, instrument_stats[scalar], global_step)
-            
-    def getFinalMetrics(self, dateBounds, shouldPlotFeatures=True, createResultDict=False):
-        allInstruments = self.instrumentManager.getAllInstrumentsByInstrumentId()
-        resultDict = {}
-        resultDict['instrument_names'] = []
-        resultDict['instrument_stats'] = []
-        for instrumentId in allInstruments:
-            metrics = Metrics(marketFeaturesDf=None)
-            metrics.calculateInstrumentFeatureMetrics(instrumentId=instrumentId,
-                                                      priceFeature=self.tsParams.getPriceFeatureKey(),
-                                                      startingCapital=self.tsParams.getStartingCapital(),
-                                                      instrumentLookbackData=self.instrumentManager.getLookbackInstrumentFeatures())
-            stats = metrics.getMetrics()
-            metricString = metrics.getInstrumentMetricsString()
-            logInfo('%s: %s' % (instrumentId, metricString), True)
-            if createResultDict:
-                resultDict['instrument_names'] += [instrumentId]
-                resultDict['instrument_stats'] += [{'total_pnl': stats['Total Pnl(%)'], 'score': stats['Score']}]
-                if 'Normalized Score' in stats:
-                    resultDict['instrument_stats'][-1]['normalized_score'] = stats['Normalized Score']
-        metrics = Metrics(marketFeaturesDf=self.instrumentManager.getDataDf())
-        metrics.calculateMarketMetrics(None, self.tsParams.getPriceFeatureKey(), self.tsParams.getStartingCapital(), dateBounds)
-        stats = metrics.getMetrics()
-        metricString = metrics.getMarketMetricsString()
-        logInfo(metricString, True)
-        if createResultDict:
-            resultDict.update(processResult(stats, self.stateWriter.getFolderName(), self.stateWriter.getMarketFeaturesFilename()))
-        if shouldPlotFeatures:
-            generateGraph(self.instrumentManager.getDataDf(), self.stateWriter.getMarketFeaturesFilename(), metricString, None)
-        return resultDict
 
     def startTrading(self, onlyAnalyze=False, shouldPlot=True, makeInstrumentCsvs=True,createResultDict=False, logFileName=''):
-        self.stateWriter = StateWriter('runLogs', datetime.strftime(datetime.now(), '%Y%m%d_%H%M%S'), not makeInstrumentCsvs, logFileName)
-        self.tensorboard_writer = SummaryWriter(logdir='tb_logs\\'+datetime.strftime(datetime.now(), '%Y%m%d_%H%M%S'))
         # TODO: Figure out a good way to handle order parsers with live data later on.
         groupedInstrumentUpdates = self.dataParser.emitInstrumentUpdates()
         timeGetter = self.tsParams.getTimeRuleForUpdates().emitTimeToTrade()
@@ -213,10 +152,9 @@ class TradingSystem:
 
         self.orderPlacer.cleanup()
         self.dataParser.cleanup()
-        self.stateWriter.closeStateWriter()
         marketFeaturesDf = self.instrumentManager.getDataDf()
         instrumentLookbackData = self.instrumentManager.getLookbackInstrumentFeatures().getData()
         dataToStore = {'market':marketFeaturesDf, 'instrument':instrumentLookbackData}
         with open('savedData%s'%datetime.strftime(datetime.now(), '%Y%m%d'), 'wb') as myFile:
             cPickle.dump(dataToStore, myFile)
-        return self.getFinalMetrics([self.startDate, timeOfUpdate], shouldPlot, createResultDict)
+        return self.metricsLogger.get_final_metrics([self.startDate, timeOfUpdate])

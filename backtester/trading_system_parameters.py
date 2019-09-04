@@ -160,3 +160,10 @@ class TradingSystemParameters(object):
 
     def getInitializer(self):
         return None
+
+    def getMetricsToLogRealtime(self):
+        # Everything will be logged if left as is
+        return {
+            'market': None,
+            'instruments': None
+        }
