@@ -10,39 +10,46 @@ from backtester.version import updateCheck
 from backtester.constants import *
 from my_custom_feature import MyCustomFeature
 from backtester.timeRule.us_time_rule import USTimeRule
-
-start = '2017/01/01'
-end = '2017/06/30'
-assets = ['AAPL', 'MSFT']  # ,'FEDERALBNK', 'ICICIBANK', 'CANBK', 'SBIN', 'YESBANK', 'KOTAKBANK',
-#'BANKBARODA', 'HDFCBANK', 'AXISBANK', 'INDUSINDBK', 'NIFTYBEES']
-
+import pandas as pd
+import numpy as np
 
 class MyTradingParams(TradingSystemParameters):
-  '''
-  Returns an instance of class DataParser. Source of data for instruments
-  '''
+    '''
+    Returns an instance of class DataParser. Source of data for instruments
+    '''
 
-  def getDataParser(self):
-    instrumentIds = assets
-    startDateStr = start
-    endDateStr = end
-    return YahooStockDataSource(cachedFolderName='yahooData',
-                              dataSetId='',
-                              instrumentIds=instrumentIds,
-                              startDateStr=startDateStr,
-                              endDateStr=endDateStr)
+    def __init__(self):
+        super(MyTradingParams, self).__init__()
+        self.count = 0 
+        self.params = {}
+        self.start = '2017/01/01'
+        self.end = '2017/06/30'
+        self.instrumentIds = ['AAPL', 'MSFT']
+
+    '''
+    Returns an instance of class DataParser. Source of data for instruments
+    '''
+
+    def getDataParser(self):
+        return YahooStockDataSource(cachedFolderName='yahooData/',
+                                    dataSetId='AuquanTrainingTest',
+                                    instrumentIds=self.instrumentIds,
+                                    startDateStr=self.start,
+                                    endDateStr=self.end,
+                                    event='history')
 
 
     def getBenchmark(self):
         return 'SPY'
 
-  def getTimeRuleForUpdates(self):
-      return USTimeRule(cachedFolderName='yahooData/',
-                        dataSetId='',
-                        startDate = '2017/01/01',
-                        endDate = '2017/06/30')
+    def getTimeRuleForUpdates(self):
+        return USTimeRule(startDate = self.start,
+                        endDate = self.end,
+                        startTime='9:30',
+                        endTime='15:30',
+                        frequency='H', sample='1')
 
-  '''
+    '''
     This is a way to use any custom features you might have made.
     Returns a dictionary where
     key: featureId to access this feature (Make sure this doesnt conflict with any of the pre defined feature Ids)
@@ -81,37 +88,42 @@ class MyTradingParams(TradingSystemParameters):
     For each stock instrument, you will have features keyed by position, mv_avg_30, mv_avg_90
     '''
 
-  def getInstrumentFeatureConfigDicts(self):
-    # ADD RELEVANT FEATURES HERE
-    ma1Dict = {'featureKey': 'ma_90',
-               'featureId': 'moving_average',
-               'params': {'period': 90,
-                          'featureName': 'close'}}
-    ma2Dict = {'featureKey': 'ma_5',
-               'featureId': 'moving_average',
-               'params': {'period': 5,
-                          'featureName': 'close'}}
-    sdevDict = {'featureKey': 'sdev_90',
-                'featureId': 'moving_sdev',
-                'params': {'period': 90,
-                           'featureName': 'close'}}
-    momDict = {'featureKey': 'mom_90',
-               'featureId': 'momentum',
-               'params': {'period': 30,
-                          'featureName': 'close'}}
-    maRibbonDict = {'featureKey': 'ma_ribbon',
-                    'featureId': 'ma_ribbon',
-                    'params': {'startPeriod': 5,
-                               'endPeriod': 100,
-                               'numRibbons': 20,
-                               'featureName': 'close'}}
-    rsiDict = {'featureKey': 'rsi_30',
-               'featureId': 'rsi',
-               'params': {'period': 30,
-                          'featureName': 'close'}}
-    return {INSTRUMENT_TYPE_STOCK: [ma1Dict, ma2Dict, sdevDict, momDict, rsiDict]}
+    def getInstrumentFeatureConfigDicts(self):
 
-  '''
+        predictionDict = {'featureKey': 'prediction',
+                                'featureId': 'prediction',
+                                'params': {}}
+
+        # ADD RELEVANT FEATURES HERE
+        ma1Dict = {'featureKey': 'ma_90',
+                   'featureId': 'moving_average',
+                   'params': {'period': 90,
+                              'featureName': 'adjClose'}}
+        ma2Dict = {'featureKey': 'ma_5',
+                   'featureId': 'moving_average',
+                   'params': {'period': 5,
+                              'featureName': 'adjClose'}}
+        sdevDict = {'featureKey': 'sdev_90',
+                    'featureId': 'moving_sdev',
+                    'params': {'period': 90,
+                               'featureName': 'adjClose'}}
+        momDict = {'featureKey': 'mom_90',
+                   'featureId': 'momentum',
+                   'params': {'period': 30,
+                              'featureName': 'adjClose'}}
+        maRibbonDict = {'featureKey': 'ma_ribbon',
+                        'featureId': 'ma_ribbon',
+                        'params': {'startPeriod': 5,
+                                   'endPeriod': 100,
+                                   'numRibbons': 20,
+                                   'featureName': 'adjClose'}}
+        rsiDict = {'featureKey': 'rsi_30',
+                   'featureId': 'rsi',
+                   'params': {'period': 30,
+                              'featureName': 'adjClose'}}
+        return {INSTRUMENT_TYPE_STOCK: [predictionDict, ma1Dict, ma2Dict, sdevDict, momDict, rsiDict]}
+
+    '''
     Returns an array of market feature config dictionaries
         market feature config Dictionary has the following keys:
         featureId: a string representing the type of feature you want to use
@@ -185,7 +197,7 @@ class MyTradingParams(TradingSystemParameters):
                                  longLimit=10000,
                                  shortLimit=10000,
                                  capitalUsageLimit=0.10 * self.getStartingCapital(),
-                                 lotSize=1)
+                                 enterlotSize=1, exitlotSize=1)
 
     '''
     Returns the type of order placer we want to use. its an implementation of the class OrderPlacer.
@@ -207,7 +219,16 @@ class MyTradingParams(TradingSystemParameters):
 
 
     def getPriceFeatureKey(self):
-        return 'Adj Close'
+        return 'adjClose'
+
+
+    def getMetricsToLogRealtime(self):
+        # Everything will be logged if left as is
+        return {
+            'market': None,
+            'instruments': None
+        }
+
 
 
 class TrainingPredictionFeature(Feature):
@@ -248,7 +269,7 @@ class MyCustomFeature(Feature):
 
         # dataframe for a historical instrument feature (basis in this case). The index is the timestamps
         # atmost upto lookback data points. The columns of this dataframe are the stocks/instrumentIds.
-        lookbackInstrumentValue = lookbackInstrumentFeatures.getFeatureDf('Adj Close')
+        lookbackInstrumentValue = lookbackInstrumentFeatures.getFeatureDf('adjClose')
 
         # The last row of the previous dataframe gives the last calculated value for that feature (basis in this case)
         # This returns a series with stocks/instrumentIds as the index.
