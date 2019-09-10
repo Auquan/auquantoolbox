@@ -54,13 +54,13 @@ class MetricsLogger():
 			stats = metrics.getMetrics()
 			# metricString = metrics.getInstrumentMetricsString()
 			resultDict['instrument_names'] += [instrumentId]
-			resultDict['instrument_stats'] += [{'total_pnl': stats['Total Pnl(%)']}]
-			if 'Score' in stats:
-				resultDict['instrument_stats'][-1]['score'] = stats['Score']
-			if 'Normalized Score' in stats:
-				resultDict['instrument_stats'][-1]['normalized_score'] = stats['Normalized Score']
+			resultDict['instrument_stats'] += [{'pnl': stats['pnl']}]
+			if 'score' in stats:
+				resultDict['instrument_stats'][-1]['score'] = stats['score']
+			if 'normalized_score' in stats:
+				resultDict['instrument_stats'][-1]['normalized_score'] = stats['normalized_score']
 		metrics = Metrics(marketFeaturesDf=self.instrumentManager.getDataDf())
-		metrics.calculateMarketMetrics(None, self.priceFeatureKey, self.startingCapital, dateBounds)
+		metrics.calculateMarketMetrics(self.priceFeatureKey, self.startingCapital, dateBounds)
 		stats = metrics.getMetrics()
 		metricString = metrics.getMarketMetricsString()
 		generateGraph(self.instrumentManager.getDataDf(), self.stateWriter.getMarketFeaturesFilename(), metricString, None)
