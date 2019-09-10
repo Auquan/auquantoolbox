@@ -218,6 +218,16 @@ class MyTradingParams(TradingSystemParameters):
     def getOrderPlacer(self):
         return BacktestingOrderPlacer()
 
+    
+
+    def getMetricsToLogRealtime(self):
+        # Everything will be logged if left as is
+        return {
+            'market': None,
+            'instruments': None
+        }
+
+
     '''
     Returns the amount of lookback data you want for your calculations. The historical market features and instrument features are only
     stored upto this amount.
@@ -238,6 +248,7 @@ class TrainingPredictionFeature(Feature):
     def computeForInstrument(cls, updateNum, time, featureParams, featureKey, instrumentManager):
         t = MyTradingParams()
         return t.getPrediction(time, updateNum, instrumentManager)
+
 
 
 

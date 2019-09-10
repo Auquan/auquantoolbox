@@ -145,6 +145,21 @@ class TradingSystemParameters(object):
     def getLookbackSize(self):
         return 500
 
+    def getMetricsToLogRealtime(self):
+        '''
+        Function returning the names of metrics to log at every step and visualize them in tensorflow. For visualization:
+        1. Open a new terminal window and cd to the directory where trading params file is
+        2. Enter the command ‘tensorboard --logdir=tbLogs’
+        3. Open google chrome then enter http://localhost:6006/
+
+        Returns:
+            features_dict (dict): name of market and instrument features that'll be logged, by default everything is logged
+        '''
+        return {
+            'market': None,
+            'instruments': None
+        }
+
     #####################################################################
     ###      END OF OVERRIDING METHODS
     #####################################################################
@@ -160,3 +175,5 @@ class TradingSystemParameters(object):
 
     def getInitializer(self):
         return None
+
+    

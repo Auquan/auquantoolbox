@@ -10,10 +10,8 @@ from backtester.logger import *
 from backtester.instruments_manager import InstrumentManager
 from datetime import datetime
 from backtester.state_writer import StateWriter
-from backtester.process_result import processResult
-from backtester.metrics.metrics import Metrics
-from backtester.plotter import generateGraph
 
+from backtester.metrics.metrics_logger import MetricsLogger
 
 class TradingSystem:
     '''
@@ -34,7 +32,6 @@ class TradingSystem:
         self.dataParser = None
         self.executionSystem = None
         self.orderPlacer = None
-        self.stateWriter = None
         self.dataParser = self.tsParams.getDataParser()
         self.executionSystem = self.tsParams.getExecutionSystem()
         self.orderPlacer = self.tsParams.getOrderPlacer()
@@ -47,6 +44,9 @@ class TradingSystem:
                 self.initializer = cPickle.load(oldFile)
         self.instrumentManager = InstrumentManager(self.tsParams, self.dataParser.getBookDataFeatures(), self.dataParser.getInstrumentIds(),
                                                    self.tsParams.getTimeRuleForUpdates(), self.initializer)
+
+        self.metricsLogger = MetricsLogger(self.tsParams.getMetricsToLogRealtime(), self.instrumentManager, self.tsParams.getPriceFeatureKey(), self.tsParams.getStartingCapital())
+
 
     def processInstrumentUpdates(self, timeOfUpdate, instrumentUpdates, onlyAnalyze=False, isClose=False):
         # Process instrument updates first
@@ -79,7 +79,7 @@ class TradingSystem:
         tradeLoss = placedOrder.getTradeLoss()
         placedInstrument.updatePositionAtPrice(changeInPosition, tradePrice, tradeLoss)
 
-    def updateFeaturesAndExecute(self, timeOfUpdate, isClose, onlyAnalyze=False):
+    def updateFeaturesAndExecute(self, timeOfUpdate, isClose, onlyAnalyze=False, global_step=0):
         print(timeOfUpdate)
         self.totalUpdates = self.totalUpdates + 1
         self.updateFeatures(timeOfUpdate)
@@ -90,12 +90,14 @@ class TradingSystem:
                 self.orderPlacer.placeOrders(timeOfUpdate, instrumentsToExecute, self.instrumentManager)
             self.portfolioValue = self.instrumentManager.getDataDf()['portfolio_value'][-1]  # TODO: find a better way to get this value
             self.capital = self.instrumentManager.getDataDf()['capital'][-1]  # TODO: find a better way to get this value
+            # Log in tensorboard
+            self.metricsLogger.log_tensorboard(global_step)
             end = time.time()
             diffms = (end - start) * 1000
             self.timeExecution = self.timeExecution + diffms
             logPerf('Update Execution System: %d, Time: %.2f, Average: %.2f' % (self.totalUpdates, diffms, self.timeExecution / (self.totalUpdates)))
         start = time.time()
-        self.saveCurrentState(timeOfUpdate)
+        self.metricsLogger.saveCurrentState(timeOfUpdate)
         end = time.time()
         diffms = (end - start) * 1000
         self.timeSavingState = self.timeSavingState + diffms
@@ -115,41 +117,8 @@ class TradingSystem:
     def getInstrumentsToExecute(self, time):
         return self.executionSystem.getExecutions(time, self.instrumentManager, self.capital)
 
-    def saveCurrentState(self, timeOfUpdate):
-        self.stateWriter.writeCurrentState(timeOfUpdate, self.instrumentManager)
-
-    def getFinalMetrics(self, dateBounds, shouldPlotFeatures=True, createResultDict=False):
-        allInstruments = self.instrumentManager.getAllInstrumentsByInstrumentId()
-        resultDict = {}
-        resultDict['instrument_names'] = []
-        resultDict['instrument_stats'] = []
-        for instrumentId in allInstruments:
-            metrics = Metrics(marketFeaturesDf=None)
-            metrics.calculateInstrumentFeatureMetrics(instrumentId=instrumentId,
-                                                      priceFeature=self.tsParams.getPriceFeatureKey(),
-                                                      startingCapital=self.tsParams.getStartingCapital(),
-                                                      instrumentLookbackData=self.instrumentManager.getLookbackInstrumentFeatures())
-            stats = metrics.getMetrics()
-            metricString = metrics.getInstrumentMetricsString()
-            logInfo('%s: %s' % (instrumentId, metricString), True)
-            if createResultDict:
-                resultDict['instrument_names'] += [instrumentId]
-                resultDict['instrument_stats'] += [{'total_pnl': stats['Total Pnl(%)'], 'score': stats['Score']}]
-                if 'Normalized Score' in stats:
-                    resultDict['instrument_stats'][-1]['normalized_score'] = stats['Normalized Score']
-        metrics = Metrics(marketFeaturesDf=self.instrumentManager.getDataDf())
-        metrics.calculateMarketMetrics(None, self.tsParams.getPriceFeatureKey(), self.tsParams.getStartingCapital(), dateBounds)
-        stats = metrics.getMetrics()
-        metricString = metrics.getMarketMetricsString()
-        logInfo(metricString, True)
-        if createResultDict:
-            resultDict.update(processResult(stats, self.stateWriter.getFolderName(), self.stateWriter.getMarketFeaturesFilename()))
-        if shouldPlotFeatures:
-            generateGraph(self.instrumentManager.getDataDf(), self.stateWriter.getMarketFeaturesFilename(), metricString, None)
-        return resultDict
 
     def startTrading(self, onlyAnalyze=False, shouldPlot=True, makeInstrumentCsvs=True,createResultDict=False, logFileName=''):
-        self.stateWriter = StateWriter('runLogs', datetime.strftime(datetime.now(), '%Y%m%d_%H%M%S'), not makeInstrumentCsvs, logFileName)
         # TODO: Figure out a good way to handle order parsers with live data later on.
         groupedInstrumentUpdates = self.dataParser.emitInstrumentUpdates()
         timeGetter = self.tsParams.getTimeRuleForUpdates().emitTimeToTrade()
@@ -157,6 +126,7 @@ class TradingSystem:
         self.startDate = timeOfNextFeatureUpdate
         timeOfUpdate, instrumentUpdates = next(groupedInstrumentUpdates)
         isClose = False
+        global_step = 0
         while True:
             if (timeOfUpdate <= timeOfNextFeatureUpdate):
                 self.processInstrumentUpdates(timeOfUpdate, instrumentUpdates, onlyAnalyze)
@@ -164,26 +134,27 @@ class TradingSystem:
                     timeOfUpdate, instrumentUpdates = next(groupedInstrumentUpdates)
                 except StopIteration:
                     isClose = True
-                    self.updateFeaturesAndExecute(timeOfNextFeatureUpdate, isClose, onlyAnalyze)
+                    self.updateFeaturesAndExecute(timeOfNextFeatureUpdate, isClose, onlyAnalyze, global_step=global_step)
             else:
                 currentTimeUpdate = timeOfNextFeatureUpdate
                 try:
                     timeOfNextFeatureUpdate = next(timeGetter)
                 except StopIteration:
                     isClose = True
-                self.updateFeaturesAndExecute(currentTimeUpdate, isClose, onlyAnalyze)
+                self.updateFeaturesAndExecute(currentTimeUpdate, isClose, onlyAnalyze, global_step=global_step)
+
             if not onlyAnalyze and self.portfolioValue < 0:
                 logError('Trading will STOP - OUT OF MONEY!!!!')
                 break
             if isClose:
                 break
+            global_step += 1
 
         self.orderPlacer.cleanup()
         self.dataParser.cleanup()
-        self.stateWriter.closeStateWriter()
         marketFeaturesDf = self.instrumentManager.getDataDf()
         instrumentLookbackData = self.instrumentManager.getLookbackInstrumentFeatures().getData()
         dataToStore = {'market':marketFeaturesDf, 'instrument':instrumentLookbackData}
         with open('savedData%s'%datetime.strftime(datetime.now(), '%Y%m%d'), 'wb') as myFile:
             cPickle.dump(dataToStore, myFile)
-        return self.getFinalMetrics([self.startDate, timeOfUpdate], shouldPlot, createResultDict)
+        return self.metricsLogger.get_final_metrics([self.startDate, timeOfUpdate])
