@@ -157,4 +157,5 @@ class TradingSystem:
         dataToStore = {'market':marketFeaturesDf, 'instrument':instrumentLookbackData}
         with open('savedData%s'%datetime.strftime(datetime.now(), '%Y%m%d'), 'wb') as myFile:
             cPickle.dump(dataToStore, myFile)
+        self.metricsLogger.tensorboard_writer.close()
         return self.metricsLogger.get_final_metrics([self.startDate, timeOfUpdate])

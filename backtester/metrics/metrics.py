@@ -9,25 +9,29 @@ class Metrics():
 	def __init__(self, marketFeaturesDf):
 		self.__marketFeaturesDf = marketFeaturesDf
 		self.__stats = {}
-		self.market_metrics_realtime = set(['pnl', 'roc', 'max_drawdown', 'pl_ratio', 'accuracy'])
-		self.instrument_metrics_realtime = set(['pnl', 'pl_ratio', 'accuracy', 'score', 'normalized_score'])
 
 	def getMarketMetricsString(self):
 		# TODO add the snippet back once benchmark is fixed.
 		# + ' Benchmark: %0.2f%% ' % (100 * self.__stats['Base Return(%)']) \
-		str = \
-			' Total Pnl: %0.2f%% ' % (100 * self.__stats['pnl']) \
-			+ ' Max Drawdown: %0.2f%% ' % (100 * self.__stats['max_drawdown']) \
-			+ ' RoC: %0.2f%% ' % (100 * self.__stats['roc']) \
-			+ ' P/L Ratio: %0.2f ' % self.__stats['pl_ratio'] \
-			+ ' Trade Accuracy: %0.2f ' % self.__stats['accuracy']
-		if 'score' in self.__stats:
-			str = str + ' Score: %0.2f ' % self.__stats['score']
-		if self.__stats['trading_days'] > 252:
-			str = str \
-				+ ' Ann. Return: %0.2f%% ' % (100 * self.__stats['annual_return']) \
-				+ ' Ann. Vol: %0.2f%% ' % (100 * self.__stats['annual_vol']) \
-				+ ' Sharpe Ratio: %0.2f ' % self.__stats['sharpe_ratio']
+		
+		str = ''
+		for key, val in self.__stats.items():
+			str += \
+				' %s: %0.2f '%(key, val) 
+		# str = \
+		# 	' Total Pnl: %0.2f%% ' % (100 * self.__stats['pnl']) \
+		# 	+ ' Max Drawdown: %0.2f%% ' % (100 * self.__stats['maxDrawdown']) \
+		# 	+ ' RoC: %0.2f%% ' % (100 * self.__stats['roc']) \
+		# 	+ ' P/L Ratio: %0.2f ' % self.__stats['pl_ratio']
+		# if 'accuracy' in self.__stats.keys():
+		# 	str += ' Trade Accuracy: %0.2f ' % self.__stats['accuracy']
+		# if 'score' in self.__stats:
+		# 	str = str + ' Score: %0.2f ' % self.__stats['score']
+		# if self.__stats['trading_days'] > 252:
+		# 	str = str \
+		# 		+ ' Ann. Return: %0.2f%% ' % (100 * self.__stats['annual_return']) \
+		# 		+ ' Ann. Vol: %0.2f%% ' % (100 * self.__stats['annual_vol']) \
+		# 		+ ' Sharpe Ratio: %0.2f ' % self.__stats['sharpe_ratio']
 
 		return str
 
@@ -61,17 +65,20 @@ class Metrics():
 	
 	def getMarketStats(self, marketFeaturesDf, startingCapital, metrics_to_show=None, dateBounds=None, priceFeature=None):
 		df = marketFeaturesDf
+		if metrics_to_show is None:
+			metrics_to_show = df.columns
+
 		stats = {}
 		total_return = df['pnl'].iloc[- 1] / float(startingCapital)
-		if metrics_to_show is None or 'pnl' in metrics_to_show:
+		if 'pnl' in metrics_to_show:
 			stats['pnl'] = total_return
-		if metrics_to_show is None or 'roc' in metrics_to_show:
+		if 'roc' in metrics_to_show:
 			stats['roc'] = self.roc(df['pnl'].iloc[- 1], df['capitalUsage'].iloc[-1])
-		if metrics_to_show is None or 'max_drawdown' in metrics_to_show:
+		if 'max_drawdown' in metrics_to_show:
 			stats['max_drawdown'] = self.max_drawdown(df['maxDrawdown'].iloc[-1], startingCapital)
-		if metrics_to_show is None or 'pl_ratio' in metrics_to_show:
+		if 'pl_ratio' in metrics_to_show:
 			stats['pl_ratio'] = self.profit_factor(df['total_profit'].iloc[-1], df['total_loss'].iloc[-1])
-		if metrics_to_show is None or 'accuracy' in metrics_to_show:
+		if 'accuracy' in metrics_to_show:
 			stats['accuracy'] = self.accuracy(df['count_profit'].iloc[-1], df['count_loss'].iloc[-1])
 
 		if dateBounds is not None:
@@ -87,15 +94,28 @@ class Metrics():
 				stats['annual_vol'] = self.annual_vol(df['variance'].iloc[-1], startingCapital)
 				stats['sharpe_ratio'] = self.sharpe_ratio(stats['annual_return'], stats['annual_vol'])
 
-		# TODO change reference to score
 		if 'score' in df.columns:
 			stats['score'] = df['score'].iloc[-1]
+
+		metrics_set = set(metrics_to_show) - set(list(stats.keys()))
+		for metric in metrics_set:
+			try:
+				if metric == 'maxDrawdown':
+					stats['maxDrawdown'] = df[metric][-1]['maxDrawdown']
+					stats['maxPortfolioValue'] = df[metric][-1]['maxPortfolioValue']
+				else:
+					stats[metric] = df[metric][-1]
+			except Exception as e:
+				print('Could not log the metric: %s'%metric)
+				print(e)
+	
 		return stats
 
-		
-
-
 	def getInstrumentStats(self, instrumentLookbackData, startingCapital, instrumentIds, metrics_to_show = None):
+		
+		if metrics_to_show is None:
+			metrics_to_show = instrumentLookbackData.getAllFeatures()
+		
 		pnl = instrumentLookbackData.getFeatureDf('pnl').iloc[-1]
 		total_profit = instrumentLookbackData.getFeatureDf('total_profit').iloc[-1]
 		total_loss = instrumentLookbackData.getFeatureDf('total_loss').iloc[-1]
@@ -103,58 +123,58 @@ class Metrics():
 		count_loss = instrumentLookbackData.getFeatureDf('count_loss').iloc[-1]
 		totalReturn = pnl / float(startingCapital)
 		stats = {}
-			
-		if len(instrumentIds) == 1:
-			instrumentId = instrumentIds[0]
-			stats['pnl'] = totalReturn.loc[instrumentId]
-			stats['pl_ratio'] = self.profit_factor(total_profit.loc[instrumentId], total_loss.loc[instrumentId])
-			stats['accuracy'] = self.accuracy(count_profit.loc[instrumentId], count_loss.loc[instrumentId])
+
+		for instrumentId in instrumentIds:
+			if 'pnl' in metrics_to_show:
+				if 'pnl' not in stats.keys():
+					stats['pnl'] = {}
+				stats['pnl'][instrumentId] = totalReturn.loc[instrumentId]
+			if 'pl_ratio' in metrics_to_show:
+				if 'pl_ratio' not in stats.keys():
+					stats['pl_ratio'] = {}
+				stats['pl_ratio'][instrumentId] = self.profit_factor(total_profit.loc[instrumentId], total_loss.loc[instrumentId])
+			if 'accuracy' in metrics_to_show:
+				if 'accuracy' not in stats.keys():
+					stats['accuracy'] = {}
+				stats['accuracy'][instrumentId] = self.accuracy(count_profit.loc[instrumentId], count_loss.loc[instrumentId])
 			try:
-				score = instrumentLookbackData.getFeatureDf('score').iloc[-1]
-				stats['score'] = score.loc[instrumentId]
+				if 'score' in metrics_to_show:
+					if 'score' not in stats.keys():
+						stats['score'] = {}
+					score = instrumentLookbackData.getFeatureDf('score').iloc[-1]
+					stats['score'][instrumentId] = score.loc[instrumentId]
 				try:
-					benchmarkScore = instrumentLookbackData.getFeatureDf('benchmark_score').iloc[-1]
-					stats['normalized_score'] = 1000 * score.loc[instrumentId] / benchmarkScore.loc[instrumentId]
+					if 'normalized_score' in metrics_to_show:
+						if 'normalized_score' not in stats.keys():
+							stats['normalized_score'] = {}
+						benchmarkScore = instrumentLookbackData.getFeatureDf('benchmark_score').iloc[-1]
+						stats['normalized_score'][instrumentId] = 1000 * score.loc[instrumentId] / benchmarkScore.loc[instrumentId]
 				except KeyError:
 					pass
 			except KeyError:
 				pass
-		else:
-			for metric in metrics_to_show:
-				stats[metric] = {}
 
-			for instrumentId in instrumentIds:
-				if 'pnl' in metrics_to_show:
-					stats['pnl'][instrumentId] = totalReturn.loc[instrumentId]
-				if 'pl_ratio' in metrics_to_show:
-					stats['pl_ratio'][instrumentId] = self.profit_factor(total_profit.loc[instrumentId], total_loss.loc[instrumentId])
-				if 'accuracy' in metrics_to_show:
-					stats['accuracy'][instrumentId] = self.accuracy(count_profit.loc[instrumentId], count_loss.loc[instrumentId])
-				try:
-					if 'score' in metrics_to_show:
-						score = instrumentLookbackData.getFeatureDf('score').iloc[-1]
-						stats['score'][instrumentId] = score.loc[instrumentId]
-					try:
-						if 'normalized_score' in metrics_to_show:
-							benchmarkScore = instrumentLookbackData.getFeatureDf('benchmark_score').iloc[-1]
-							stats['normalized_score'][instrumentId] = 1000 * score.loc[instrumentId] / benchmarkScore.loc[instrumentId]
-					except KeyError:
-						pass
-				except KeyError:
-					pass
+		metrics_set = set(metrics_to_show) - set(list(stats.keys()))
+		for metric in metrics_set:
+			try:
+				stats[metric] = {}
+				for instrumentId in instrumentIds:
+					val = instrumentLookbackData.getFeatureDf(metric).iloc[-1]
+					stats[metric][instrumentId] = val.loc[instrumentId]
+			except Exception as e:
+				print('Could not log the metric: %s'%metric)
+				print(e)
+
 		return stats
 
 	def calculateMarketMetricsRealtime(self, marketFeaturesDf, startingCapital, metrics_to_show=None):
-		
 		if metrics_to_show is None:
-			metrics_to_show = self.market_metrics_realtime
-		else:
-			metrics_to_show = list( self.market_metrics_realtime.intersection( set(metrics_to_show) ) )
-
-		diff = set(metrics_to_show) - self.market_metrics_realtime
+			metrics_to_show = set(marketFeaturesDf.columns)
+		
+		diff = set(metrics_to_show) - set(marketFeaturesDf.columns)
 		if len( diff ) > 0:
-			print('Some of the metrics you asked for are not available!!')
-			print('Available metrics: %s'%self.market_metrics_realtime)
+			print('Some of the market metrics you asked for are not available!!')
+			print('Available metrics: %s'%marketFeaturesDf.columns)
 			print('Following are not available: %s'%diff)
 		
 		stats = self.getMarketStats(marketFeaturesDf, startingCapital, metrics_to_show=metrics_to_show)
@@ -167,14 +187,12 @@ class Metrics():
 	def calculateInstrumentFeatureMetricsRealtime(self, instrumentIds, instrumentLookbackData, startingCapital, metrics_to_show=None):
 		
 		if metrics_to_show is None:
-			metrics_to_show = self.instrument_metrics_realtime
-		else:
-			metrics_to_show = list( self.instrument_metrics_realtime.intersection( set(metrics_to_show) ) )
+			metrics_to_show = instrumentLookbackData.getAllFeatures()
 
-		diff = set(metrics_to_show) - self.instrument_metrics_realtime
+		diff = set(metrics_to_show) - set(instrumentLookbackData.getAllFeatures())
 		if len( diff ) > 0:
-			print('Some of the metrics you asked for are not available!!')
-			print('Available metrics: %s'%self.instrument_metrics_realtime)
+			print('Some of the instrument metrics you asked for are not available!!')
+			print('Available metrics: %s'%instrumentLookbackData.getAllFeatures())
 			print('Following are not available: %s'%diff)
 
 		stats = self.getInstrumentStats(instrumentLookbackData, startingCapital, instrumentIds, metrics_to_show)

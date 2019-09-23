@@ -41,11 +41,15 @@ class MetricsLogger():
 		
 
 	def get_final_metrics(self, dateBounds):
-		allInstruments = self.instrumentManager.getAllInstrumentsByInstrumentId()
+		instrumentLookbackData = self.instrumentManager.getLookbackInstrumentFeatures()
+		# TODO: Somehow the function to obtain all the instruments doesn't work always so obtaining ids from lookback data
+		# instrumentIds = list( self.instrumentManager.getAllInstrumentsByInstrumentId().keys() )
+		instrumentIds = instrumentLookbackData._InstrumentsLookbackData__instrumentIds
+		
 		resultDict = {}
 		resultDict['instrument_names'] = []
 		resultDict['instrument_stats'] = []
-		for instrumentId in allInstruments:
+		for instrumentId in instrumentIds:
 			metrics = Metrics(marketFeaturesDf=None)
 			metrics.calculateInstrumentFeatureMetrics(instrumentId=instrumentId,
 													  priceFeature=self.priceFeatureKey,
@@ -62,16 +66,23 @@ class MetricsLogger():
 		metrics = Metrics(marketFeaturesDf=self.instrumentManager.getDataDf())
 		metrics.calculateMarketMetrics(self.priceFeatureKey, self.startingCapital, dateBounds)
 		stats = metrics.getMetrics()
-		metricString = metrics.getMarketMetricsString()
-		generateGraph(self.instrumentManager.getDataDf(), self.stateWriter.getMarketFeaturesFilename(), metricString, None)
+		self.saveCurrentState(0)
+		self.stateWriter.closeStateWriter()
+		# Removed the next two lines as everything visual being shown in tensorboard now
+		# metricString = metrics.getMarketMetricsString()
+		# generateGraph(self.instrumentManager.getDataDf(), self.stateWriter.getMarketFeaturesFilename(), metricString, None)
 		return resultDict
 
 
 	def log_tensorboard(self, global_step):
-		instrumentIds = self.instrumentManager.getAllInstrumentsByInstrumentId()
+		
 		marketFeaturesDf = self.instrumentManager.getDataDf()
 		instrumentLookbackData = self.instrumentManager.getLookbackInstrumentFeatures()
 
+		# TODO: Somehow the function to obtain all the instruments doesn't work always so obtaining ids from lookback data
+		# instrumentIds = list( self.instrumentManager.getAllInstrumentsByInstrumentId().keys() )
+		instrumentIds = instrumentLookbackData._InstrumentsLookbackData__instrumentIds
+		
 		metrics = Metrics(marketFeaturesDf=None)
 		startingCapital = self.startingCapital
 		
