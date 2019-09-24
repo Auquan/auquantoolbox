@@ -41,10 +41,11 @@ class MetricsLogger():
 		
 
 	def get_final_metrics(self, dateBounds):
-		instrumentLookbackData = self.instrumentManager.getLookbackInstrumentFeatures()
+		# instrumentLookbackData = self.instrumentManager.getLookbackInstrumentFeatures()
 		# TODO: Somehow the function to obtain all the instruments doesn't work always so obtaining ids from lookback data
 		# instrumentIds = list( self.instrumentManager.getAllInstrumentsByInstrumentId().keys() )
-		instrumentIds = instrumentLookbackData._InstrumentsLookbackData__instrumentIds
+		# instrumentIds = instrumentLookbackData._InstrumentsLookbackData__instrumentIds
+		instrumentIds = self.instrumentManager.getAllInstrumentIds()
 		
 		resultDict = {}
 		resultDict['instrument_names'] = []
@@ -81,7 +82,8 @@ class MetricsLogger():
 
 		# TODO: Somehow the function to obtain all the instruments doesn't work always so obtaining ids from lookback data
 		# instrumentIds = list( self.instrumentManager.getAllInstrumentsByInstrumentId().keys() )
-		instrumentIds = instrumentLookbackData._InstrumentsLookbackData__instrumentIds
+		# instrumentIds = instrumentLookbackData._InstrumentsLookbackData__instrumentIds
+		instrumentIds = self.instrumentManager.getAllInstrumentIds()
 		
 		metrics = Metrics(marketFeaturesDf=None)
 		startingCapital = self.startingCapital

@@ -130,6 +130,9 @@ class InstrumentManager:
             return None
         return self.__instrumentsDict[instrumentId]
 
+    def getAllInstrumentIds(self):
+        return self.__lookbackInstrumentFeatures._InstrumentsLookbackData__instrumentIds
+
     def getAllInstrumentsByInstrumentId(self):
         return self.__instrumentsDict
 
