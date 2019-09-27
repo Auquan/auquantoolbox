@@ -67,6 +67,8 @@ class MetricsLogger():
 		metrics = Metrics(marketFeaturesDf=self.instrumentManager.getDataDf())
 		metrics.calculateMarketMetrics(self.priceFeatureKey, self.startingCapital, dateBounds)
 		stats = metrics.getMetrics()
+		for key, val in stats.items():
+			resultDict[key] = val
 		self.saveCurrentState(0)
 		self.stateWriter.closeStateWriter()
 		# Removed the next two lines as everything visual being shown in tensorboard now
