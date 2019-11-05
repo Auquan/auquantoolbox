@@ -3,6 +3,7 @@ import os, csv
 from datetime import datetime
 from backtester.dataSource.data_source_utils import groupAndSortByTimeUpdates
 from backtester.instrumentUpdates.instrument_data import InstrumentData
+from backtester.logger import *
 
 class DataSource(object):
     def __init__(self, cachedFolderName, dataSetId, instrumentIds, startDateStr, endDateStr):

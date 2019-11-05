@@ -20,12 +20,12 @@ class SimpleExecutionSystemWithFairValue(SimpleExecutionSystem):
         except KeyError:
             logError('You have specified FairValue Execution Type but Price Feature Key does not exist')
 
-        currentDeviationFromPrediction = currentPredictions.transpose() / currentPrice
+        currentDeviationFromPrediction = currentPredictions.transpose() - currentPrice
         return currentDeviationFromPrediction
 
     def getBuySell(self, currentPredictions, instrumentsManager):
         currentDeviationFromPrediction = self.getDeviationFromPrediction(currentPredictions, instrumentsManager)
-        return -np.sign(currentDeviationFromPrediction)
+        return np.sign(currentDeviationFromPrediction)
 
     def enterCondition(self, currentPredictions, instrumentsManager):
         currentDeviationFromPrediction = self.getDeviationFromPrediction(currentPredictions, instrumentsManager)
