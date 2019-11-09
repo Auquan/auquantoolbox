@@ -10,7 +10,9 @@ class CustomTimeRule(TimeRule):
         self.__endDate = endDate
         self.__sample = sample
 
-        acceptable_freq = ['D', 'M', 'H', 'S']
+        acceptable_freq = ['B', 'C', 'D', 'W', 'M', 'SM', 'BM', 'CBM', 'MS', 'SMS',
+                            'BMS', 'CBMS', 'Q', 'BQ', 'QS', 'BQS', 'A', 'Y', 'BA', 
+                            'BY', 'AS', 'YS', 'BAS', 'BYS', 'BH', 'H', 'T', 'S', 'L', 'U', 'N']
         if frequency not in acceptable_freq:
             raise ValueError('Frequency Value Not acceptable. Specify D, M, H, S')
         self.__frequency = frequency
@@ -63,6 +65,12 @@ class CustomTimeRule(TimeRule):
             time_range = self.createBusinessMinSeries()
         elif(self.__frequency == 'S'):
             time_range = self.createBusinessSecSeries()
+        else:
+            try: 
+                time_range = pd.date_range(start=self.__startDate, end=self.__endDate, freq= self.__frequency)
+            except ValueError as e:
+                print(e)
+
 
         for timestamp in time_range:
             yield timestamp

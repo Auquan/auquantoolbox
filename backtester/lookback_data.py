@@ -49,8 +49,8 @@ class LookbackDataEfficient:
     def getIndexList(self):
         return self.__indexList
 
-    def getData(self):
-        return self.__data
+    # def getData(self):
+    #     return self.__data
 
     def computeMaxSize(self, lookbackSize, lenIndexList):
         maxSize = lookbackSize * SIZE_FACTOR
@@ -65,6 +65,7 @@ class LookbackDataEfficient:
         return maxSize
 
     def addData(self, timeOfUpdate, data):
+        
         if (self.__endLookbackData == self.__maxSize):
             # make a new dataframe and copy
             newEndIndexList = self.__endIndexList - self.__lookbackSize + self.__maxSize
