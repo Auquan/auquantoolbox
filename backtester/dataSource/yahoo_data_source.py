@@ -156,7 +156,7 @@ class YahooStockDataSource(DataSource):
                     if featureKey not in self.__bookDataByFeature:
                         self.__bookDataByFeature[featureKey] = pd.DataFrame(columns=self._instrumentIds,
                                                                             index=timeUpdates)
-                    self.__bookDataByFeature[featureKey].set_value(timeOfUpdate, instrumentUpdate.getInstrumentId(), bookData[featureKey])
+                    self.__bookDataByFeature[featureKey].at[timeOfUpdate, instrumentUpdate.getInstrumentId()] = bookData[featureKey]
         for featureKey in self.__bookDataByFeature:
             self.__bookDataByFeature[featureKey].fillna(method='pad', inplace=True)
 
