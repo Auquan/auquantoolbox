@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="description" content="None">
+        
+        
+        <link rel="shortcut icon" href="img/favicon.ico">
+        <title>Auquantoolbox Documentation</title>
+        <link href="css/bootstrap.min.css" rel="stylesheet">
+        <link href="css/font-awesome.min.css" rel="stylesheet">
+        <link href="css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
+
+        <script src="js/jquery-1.10.2.min.js" defer></script>
+        <script src="js/bootstrap.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script> 
+    </head>
+
+    <body class="homepage">
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href=".">Auquantoolbox Documentation</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="navitem active">
+                                <a href="." class="nav-link">Home</a>
+                            </li>
+                            <li class="navitem">
+                                <a href="Introduction/" class="nav-link">Introduction</a>
+                            </li>
+                            <li class="navitem">
+                                <a href="prebuilt_feature_guide/" class="nav-link">Prebuilt Feature Guide</a>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a rel="prev" class="nav-link disabled">
+                                    <i class="fa fa-arrow-left"></i> Previous
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a rel="next" href="Introduction/" class="nav-link">
+                                    Next <i class="fa fa-arrow-right"></i>
+                                </a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-light navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-toggle="collapse" data-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-level="1"><a href="#demo-video" class="nav-link">Demo Video</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            
+            <li class="nav-item" data-level="1"><a href="#installation-guide" class="nav-link">Installation Guide</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            
+            <li class="nav-item" data-level="1"><a href="#how-does-the-toolbox-work" class="nav-link">How does the toolbox work?</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="2"><a href="#quick-setup" class="nav-link">Quick Setup</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#final-metrics" class="nav-link">Final Metrics</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#importing-a-trained-model" class="nav-link">Importing a trained model</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#under-the-hood-trading-system" class="nav-link">Under the Hood - Trading System</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+            
+            <li class="nav-item" data-level="1"><a href="#ml-training-system" class="nav-link">ML Training System</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<p><strong>Note</strong>: This the documentation for the current version toolbox released by Auquan. The old, stripped down version (installed as auquanToolbox, has been deprecated). <a href="https://links.auquan.com/auquantoolbox">You can see the current toolbox repository here</a> - if you face any bugs, please open an issue on the github repository or email us at: toolbox@auquan.com</p>
+<p><strong>Welcome to Auquan Toolbox</strong></p>
+<p><a href="http://www.auquan.com">Auquan</a> provides a backtesting toolbox to develop your trading algorithms. The toolbox is free and open source which you can use to create and backtest strategies.</p>
+<p><strong>Table of Contents</strong></p>
+<div class="toc">
+<ul>
+<li><a href="#demo-video">Demo Video</a></li>
+<li><a href="#installation-guide">Installation Guide</a></li>
+<li><a href="#how-does-the-toolbox-work">How does the toolbox work?</a><ul>
+<li><a href="#quick-setup">Quick Setup</a><ul>
+<li><a href="#getting-data-datasource">Getting Data - DataSource</a></li>
+<li><a href="#specifying-features-instrument-market-and-custom-features">Specifying Features - Instrument, Market and Custom Features</a></li>
+<li><a href="#prediction-function">Prediction Function</a></li>
+</ul>
+</li>
+<li><a href="#final-metrics">Final Metrics</a></li>
+<li><a href="#importing-a-trained-model">Importing a trained model</a></li>
+<li><a href="#under-the-hood-trading-system">Under the Hood - Trading System</a><ul>
+<li><a href="#datasource">DataSource</a></li>
+<li><a href="#benchmark">Benchmark</a></li>
+<li><a href="#starting-capital">Starting Capital</a></li>
+<li><a href="#frequency-of-feature-updates">Frequency Of Feature Updates</a></li>
+<li><a href="#pricefeaturekey">PriceFeatureKey</a></li>
+<li><a href="#lookback-size">Lookback Size</a></li>
+<li><a href="#instrument-features-market-features-and-custom-features">Instrument Features, Market Features and Custom Features</a></li>
+<li><a href="#prediction-function_1">Prediction Function</a></li>
+<li><a href="#executionsystem">ExecutionSystem</a></li>
+<li><a href="#orderplacer">OrderPlacer</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#ml-training-system">ML Training System</a><ul>
+<li><a href="#installation">Installation</a></li>
+<li><a href="#datasource_1">DataSource</a></li>
+<li><a href="#datasplit-ratio">DataSplit Ratio</a></li>
+<li><a href="#instrumentfeatureconfigdicts">InstrumentFeatureConfigDicts</a></li>
+<li><a href="#customfeatures">CustomFeatures</a></li>
+<li><a href="#target-variable">Target Variable</a></li>
+<li><a href="#featureselectionconfigdicts">FeatureSelectionConfigDicts</a></li>
+<li><a href="#featuretransformationconfigdicts">FeatureTransformationConfigDicts</a></li>
+<li><a href="#model-config-dicts">Model Config Dicts</a></li>
+<li><a href="#prediction-function_2">Prediction Function</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<h1 id="demo-video"><strong>Demo Video</strong></h1>
+<p>You can watch a <a href="(https://www.youtube.com/watch?v=YHdb8w3oRw0)">quick video demo</a> for the toolbox below</p>
+<p><a href="https://www.youtube.com/embed/YHdb8w3oRw0"><img alt="Alt text" src="https://i.ytimg.com/vi/IMtqDzZoiNk/hqdefault.jpg" /></a></p>
+<h1 id="installation-guide"><strong>Installation Guide</strong></h1>
+<ol>
+<li>
+<p>Install Python and dependent packages<br />
+Our toolbox is compatible with both Python 2.7( there are currently some issues with Python 3, we'll fix them shortly). The easiest way to install Python is through Anaconda since it will reliably install all the necessary dependencies. Download <a href="http://continuum.io/downloads">Anaconda</a> and follow the instructions on the <a href="http://docs.continuum.io/anaconda/install">installation page</a>.   Once you have Python, you can then install the toolbox.</p>
+</li>
+<li>
+<p>Get the Auquan Toolbox
+    There are multiple ways to install the toolbox for the competition.</p>
+<ul>
+<li><strong>Via pip</strong>: The easiest way and the most recommended way is via pip. Just run the following command: <code>pip install -U auquan_toolbox</code>. If we publish any updates to the toolbox, the same command <code>pip install -U auquan_toolbox</code> will also automatically get the new version of the toolbox. <strong>Note: Mac users</strong>, if you face any issues with installation, try using <code>pip install --user auquan_toolbox</code>  </li>
+<li>
+<p><strong>Via git</strong>: Clone/Download this repository.</p>
+<p>git clone https://{your_username}@bitbucket.org/auquan/auquantoolbox.git</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Download <a href="https://links.auquan.com/sampleParams">this sample file</a> and navigate to the place where you downloaded it (if you cloned the repo, the file is already present). Go inside that folder and run the following code to make sure everything is setup properly.</p>
+<pre><code>python my_trading_params.py
+</code></pre>
+</li>
+<li>
+<p>Use <em>my_trading_params.py</em> as a template which contains skeleton functions (with explanation) that need to be filled in to create your own trading strategy. Copy that template to another file and then start implementing the methods in that file. You can use <em>pair_trading_params.py</em> and <em>meanreversion_trading_params.py</em> as motivation.</p>
+</li>
+</ol>
+<h1 id="how-does-the-toolbox-work"><strong>How does the toolbox work?</strong></h1>
+<p>Any security you want to trade with the toolbox is called an <em>instrument</em>. Right now, the toolbox supports stock and future instruments. All the parameters for the toolbox are supplied in class <code>MyTradingParams()</code>.</p>
+<h2 id="quick-setup">Quick Setup</h2>
+<p>To get started quickly with the toolbox, you need to</p>
+<ol>
+<li>Get Historical Data</li>
+<li>Specify Features to be created from the Data</li>
+<li>Create a prediction function using above features to make your prediction for the market</li>
+</ol>
+<p>The toolbox can handle everything else for you. You can do the above by modifying the following functions:</p>
+<h3 id="getting-data-datasource">Getting Data - DataSource</h3>
+<p>Data Source parses data from external sources (csv, log file, html file etc) and loads and converts it into a toolbox compatible form. You need to specify the instrumentID's that you need data for and start and end date for data in in <code>getDataParser()</code> function.</p>
+<pre><code class="python">def getDataParser(self):
+        instrumentIds = ['IBM', 'AAPL', 'MSFT']
+        startDateStr = '2017/05/10'
+        endDateStr = '2017/06/09'
+        return YahooStockDataSource(cachedFolderName='yahooData',
+                                     instrumentIds=instrumentIds,
+                                     startDateStr=startDateStr,
+                                     endDateStr=endDateStr)
+</code></pre>
+
+<p>Current choices for datasource are:
+* <a href="https://links.auquan.com/yahooDataSource">YahooStockDataSource</a> - Stock data from Yahoo (daily data)
+* <a href="https://links.auquan.com/nseDataSource">NSEStockDataSource</a> - Stock data from NSE (daily data)
+* AuquanDataSource - Data from US stock database of 500 biggest stocks maintained by Auquan.</p>
+<h3 id="specifying-features-instrument-market-and-custom-features">Specifying Features - Instrument, Market and Custom Features</h3>
+<p>You can manipulate historical data by creating features. Features are called by specifying config dictionaries. You have to:</p>
+<ol>
+<li>
+<p>Create one config dictionary per feature.</p>
+<p><strong>Feature config Dictionary has the following keys:</strong></p>
+<blockquote>
+<p><em>featureId:</em> string representing the feature you want to use<br />
+<em>featureKey:</em> {optional} string representing key to access value of this feature. If not present, use featureId<br />
+<em>params:</em> {optional} A dictionary with which contains other parameters, if needed by the feature  </p>
+</blockquote>
+</li>
+<li>
+<p>Return an array of all feature config dictionaries as market features or instrument features. Specify the instrument features in function <code>getInstrumentFeatureConfigDicts()</code> and market features in function <code>getMarketFeatureConfigDicts()</code>. Instrument features are calculated per instrument (for example position, fees, moving average of instrument price). The toolbox auto-loops through all instruments to calculate features for you. Market features are calculated for whole trading system (for example portfolio value).</p>
+<p><strong>Example</strong>: If you want to use the moving_sum feature and calculate this for all instruments, your <em><code>getInstrumentFeatureConfigDicts()</code></em> function should be:</p>
+</li>
+</ol>
+<pre><code class="python">  def getInstrumentFeatureConfigDicts(self):
+        msDict = {'featureKey': 'ms_5',
+                'featureId': 'moving_sum',
+                'params': {'period': 5,
+                'featureName': 'basis'}}
+        return [msDict]
+</code></pre>
+
+<p>You can now use this feature by calling it's featureKey, 'ms_5'.    <br />
+Full list of features with featureId and params is available <a href="#">here</a>.</p>
+<p><strong><em>Custom Features - Optional</em></strong></p>
+<p>To use your own custom features, you need to create them separately. Follow the example of <a href="https://links.auquan.com/customFeature">this template</a>. Specifically, you'll have to:</p>
+<ul>
+<li>Create a new class for the feature and implement your logic. You can copy the template from <a href="https://links.auquan.com/customFeature">this file</a>.
+    Example: If you were implementing a new InstrumentFeature</li>
+</ul>
+<pre><code class="python">class MyCustomFeatureClassName(Feature):
+    @classmethod
+    def computeForInstrument(cls, featureParams, featureKey, currentFeatures, instrument, instrumentManager):
+        return 5
+</code></pre>
+
+<ul>
+<li>
+<p>Modify function <code>getCustomFeatures()</code> to return a dictionary with   </p>
+<blockquote>
+<p><em>key:</em> featureId to access this feature (Make sure this doesn't conflict with any of the pre defined feature Ids)<br />
+<em>value:</em> Your custom Class Name which computes this feature. The class should be an instance of Feature</p>
+</blockquote>
+<p>Eg. to use the feature we create above via featureId='my_custom_feature_identifier',  </p>
+</li>
+</ul>
+<pre><code class="python">def getCustomFeatures(self):
+        return {'my_custom_feature_identifier': MyCustomFeatureClassName}
+</code></pre>
+
+<ul>
+<li>Now you can create a dict for this feature in <code>getInstrumentFeatureConfigDicts()</code>. Dict format is:</li>
+</ul>
+<pre><code class="python">  customFeatureDict = {'featureKey': 'my_custom_feature_key',
+                         'featureId': 'my_custom_feature_identifier',
+                          'params': {'param1': 'value1'}}
+</code></pre>
+
+<p>Use this feature by calling it's featureKey, 'my_custom_feature_key'</p>
+<h3 id="prediction-function">Prediction Function</h3>
+<p>Combine all the features to create the desired prediction function. Fill the funtion <code>getPrediction()</code> to return the prediction for instrument you are trading.</p>
+<p>Here you can call your previously created features by referencing their featureId. For example, I can call my moving sum and custom feature as:</p>
+<pre><code class="python">def getPrediction(self, time, currentMarketFeatures, instrumentManager):
+
+        # holder for all the instrument features
+        lookbackInstrumentFeatures = instrumentManager.getLookbackInstrumentFeatures()
+
+        ms5Data = lookbackInstrumentFeatures.getFeatureDf('ms_5')
+        # dataframe for a historical instrument feature (ms_5 in this case).   
+        # The index is the timestamps of atmost lookback data points.
+        # The last row of this data frame would contain the features
+        # which are being calculated in this update cycle or for this time.
+        # The second to last row (if exists) would have the features for the previous
+        # time update.
+        # The columns of this dataframe are the stock symbols/instrumentIds.
+
+        ms5 = ms5Data.iloc[-1]
+
+        # This returns the value of the feature at the last time update
+        # Returns a series with index as all the instrumentIds.
+
+        customData = lookbackInstrumentFeatures.getFeatureDf('my_custom_feature_key')
+        custom = customData.iloc[-1]
+        predictions = ms5 / custom
+        return predictions
+</code></pre>
+
+<p>Predictions can be of many types. You can calculate(predict) the <em>FairValue</em> of a parameter, for example price. You can predict the probability that price will increase in the future. You can predict the ratio of price of two securities. You can predict the ranking of a basket of securities. Output of the prediction function is used by the toolbox to make further trading decisions via the <a href="#">execution system</a>. Choice of execution system depends on the type of prediction made.</p>
+<h2 id="final-metrics">Final Metrics</h2>
+<p>The system returns the following final metrics:</p>
+<ol>
+<li><em>Total PnL:</em> Total Profit(or Loss) from your strategy as a % of initial capital</li>
+<li><em>Annualized Return:</em> The yearly average % Profit(or Loss) from your trading strategy</li>
+<li><em>Annualized Volatility:</em> The standard deviation of daily returns of the model in a year. Volatility is used as a measure of risk, therefore higher vol implies riskier model.</li>
+<li><em>Sharpe Ratio:</em> The reward/risk ratio or risk adjusted returns of the strategy, calculated as Annualized Return/Annualized Volatility</li>
+<li><em>Sortino Ratio:</em> Returns adjusted for downside risk, calculated as Annualized Return/Annualized Volatility of Negative Returns</li>
+<li><em>Max Drawdown:</em> Largest drop in Pnl or maximum negative difference in total portfolio value. It is calculated as the maximum high to subsequent low difference before a new high is reached.</li>
+<li><em>Win/Loss, Average Profit/Loss:</em> Sum(or Avergae) of Profits from trades that results in profits/Sum(or Average) of losses from trades that results in losses</li>
+<li><em>% Profitability</em> = % of total trades that resulted in profits</li>
+<li><em>Return on Capital</em> = Total Profit(or Loss) from your strategy as a % of max capital used</li>
+</ol>
+<p>Other Metrics can be supported if needed.</p>
+<h2 id="importing-a-trained-model">Importing a trained model</h2>
+<p>If you would like to write your own custom datasource/execution system or you want to import a pre-trained ML model, you can do so in the manner below.
+Here we store a file <code>training_execution_system.py</code> on github. Then we specify the path to file, and the code downloads the file as <code>fileName</code> and imports the required class from it.</p>
+<pre><code class="python">
+import urllib
+
+path_to_file = 'https://raw.githubusercontent.com/Auquan/quant-quest-2/master/training_execution_system.py'
+fileName = 'training_execution_system.py'
+if not os.path.isfile(fileName):
+    urllib.urlretrieve (path_to_file, fileName)
+
+from training_execution_system import TrainingExecutionSystem
+
+</code></pre>
+
+<h2 id="under-the-hood-trading-system">Under the Hood - Trading System</h2>
+<p>This is the main system that runs your backtest. All the parameters for the trading system are supplied in class <code>MyTradingParams()</code></p>
+<p>Raw data (intraday tick data or end of day data) is read from the datasource for all instruments and sent to the trading system. At every such update of data, the trading system does the following things and then updates the state of that instrument in the system :  </p>
+<ul>
+<li>Checks whether it is time to update the features and execute. It updates features at a frequency determined by trading parameters.  </li>
+<li>If it is, it first loops over all instruments and updates the features for each instrument (specified by trading parameters). Each instrument stores its features, which can be later extracted out.  </li>
+<li>Then, the trading system computes all the market features (specified by trading parameters).
+  The system also stores such market features at every update features interval.
+  An example of market feature is 'prediction' which the user needs to provide - This feaure specifies our prediction probability that the specified instrument is a buy  </li>
+<li>Then the trading system looks at the prediction value and passes it to an execution system. This converts uses the prediction value (and current capital, risk limits etc) to decide what positions should he trading system take for various instruments.  </li>
+<li>Trade executions generated by Execution System are then passed into the orderPlacer, which tries to place these orders into the market.</li>
+</ul>
+<p>Trading System also keeps checking for confirmation of orders which are placed. It updates instrument positions for trades that are confirmed.</p>
+<p>For trading system to work, following need to be specified:</p>
+<h3 id="datasource">DataSource</h3>
+<p><a href="#">Read Above</a></p>
+<h3 id="benchmark">Benchmark</h3>
+<p>The market instrument to benchmark your strategy's perfromancy. Strategies that perform better than the benchmark are considered successful.
+<em>Make sure that you specify the benchmark instrumentID in list of instruments to get data for.</em></p>
+<h3 id="starting-capital">Starting Capital</h3>
+<p>The initial amount of money you're putting into your trading system. This is set to 1 million notional by default.</p>
+<h3 id="frequency-of-feature-updates">Frequency Of Feature Updates</h3>
+<p>Frequency of updates to features. Any updates within this frequncy to instruments do not trigger feature updates.
+Consequently any trading decisions that need to take place happen with the same frequency
+This is important when you are working with frequently updating data - for example intraday tick data</p>
+<h3 id="pricefeaturekey">PriceFeatureKey</h3>
+<p>You may have multiple measures of price for an instrument at the same time, for example open price, close price etc. Specify which price to use for pnl calculations. By default, this is set to <em>'close'</em> for daily calculations.</p>
+<h3 id="lookback-size">Lookback Size</h3>
+<p>How far back do you want the historical data for your calculations.
+The historical market features and instrument features are only stored upto this amount. The more data you request, the slower your system will be.</p>
+<h3 id="instrument-features-market-features-and-custom-features">Instrument Features, Market Features and Custom Features</h3>
+<p><a href="#">Read Above</a></p>
+<h3 id="prediction-function_1">Prediction Function</h3>
+<p><a href="#">Read Above</a></p>
+<h3 id="executionsystem">ExecutionSystem</h3>
+<p>Takes a prediction value and converts it into possible trades for each instrument. It takes into account current positions, risk limits, current capital and value of the prediction.</p>
+<p>All execution systems take the following arguments:</p>
+<ul>
+<li>'longLimit': Max long position. No buys if instrument position == longLimit, can be specified as dollar or lot size</li>
+<li>'shortLimit': Max short position. No sells if instrument position == shortLimit, can be specified as dollar or lot size</li>
+<li>'capitalUsageLimit': Minimum capital threshold, specified as % of initial capital. No trades if currentCapital/initialCapital &lt; capitalUsageLimit</li>
+<li>'lotSize': Size to trade per trade, can be specified as dollar or lot size</li>
+<li>'limitType': 'D' for dollar(monetary) limit, 'L' for lot size limit</li>
+<li>'price': Feature to use as price</li>
+</ul>
+<p>Right now we support following executions:</p>
+<table>
+<thead>
+<tr>
+<th align="center">System</th>
+<th>Description</th>
+<th>Parameters</th>
+<th>Snippet</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center"><em>SimpleExecutionSystem</em></td>
+<td>Simplest type, takes prediction in the form of probability that price will go up. Instruments with probability of price increasing above <em>enter_threshold</em> are bought and below <em>(1-enter_threshold)</em> are sold. Instrument positions with probability predictions values between <em>(1-exit_threshold)</em> and <em>exit_threshold</em> are closed</td>
+<td>'enter_threshold', 'exit_threshold', 'longLimit', 'shortLimit', 'capitalUsageLimit', 'lotSize', 'limitType', 'price'</td>
+<td></td>
+</tr>
+<tr>
+<td align="center"><em>SimpleExecutionSystemWithFairValue</em></td>
+<td>Takes prediction in the form of FairValue of price. Instruments with CurrentPrice - FairValue &gt; <em>enter_threshold_deviation</em> are sold and FairValue - CurrentPrice &gt; <em>enter_threshold_deviation</em> are bought. Instrument positions with abs(CurrentPrice - FairValue) &lt; <em>exit_threshold_deviation</em> are closed</td>
+<td>'enter_threshold_deviation', 'exit_threshold_deviation', 'longLimit', 'shortLimit', 'capitalUsageLimit', 'lotSize', 'limitType', 'price'</td>
+<td></td>
+</tr>
+<tr>
+<td align="center"><em>PairExecutionSystem</em>, <em>PairExecutionSystemWithFairValue</em></td>
+<td>Behaves the same as above two, except predictions are made on ratio of prices between two instruments(pair)</td>
+<td>'pair', 'pairRatio','enter_threshold_deviation', 'exit_threshold_deviation', 'longLimit', 'shortLimit', 'capitalUsageLimit', 'lotSize', 'limitType', 'price'</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h3 id="orderplacer">OrderPlacer</h3>
+<p>Execution System decided what trades you want to do, order placer actually makes those trades (place an order), and also reads confirmations of orders being placed.
+For Backtesting, you can just use the BacktestingOrderPlacer, which places the order and automatically trades at 'PriceFeatureKey' price at the same time.</p>
+<h1 id="ml-training-system"><strong>ML Training System</strong></h1>
+<p>To make creation and testing of ML models easy for you, we are providing you with a ML model creation suite. This is a beta feature, so please bear with us while we iron out the bugs!</p>
+<h3 id="installation">Installation</h3>
+<p>Get the toolbox by typing the following commands in your terminal:</p>
+<pre><code>pip uninstall auquan_toolbox
+pip install -U auquan_toolbox_beta --no-cache-dir
+</code></pre>
+
+<p>For ML Training system to work, following need to be specified:</p>
+<h3 id="datasource_1">DataSource</h3>
+<p>Similar to Trading System above.</p>
+<h3 id="datasplit-ratio">DataSplit Ratio</h3>
+<p>A list specifying the percentage of Training, Validation and Test Data. Eg [6,2,2]. The model is trained and validated on Training and Validation data respectively and then backtested for trading on Test Data.</p>
+<h3 id="instrumentfeatureconfigdicts">InstrumentFeatureConfigDicts</h3>
+<p>Similar to Trading System above.</p>
+<h3 id="customfeatures">CustomFeatures</h3>
+<p>Similar to Trading System above.</p>
+<h3 id="target-variable">Target Variable</h3>
+<p>The Variable you want to predict. This can be one or many variables. They can be specified as one of the features created above (with a shift) or loaded from a file as below:</p>
+<pre><code class="python">getTargetVariableConfigDicts(self):
+        Y = {'featureKey' : 'Y', #Use a feature loaded from datasource
+             'featureId' : '',
+             'params' : {}}
+        tv = {'featureKey' : 'direction_tv',  ##Create a target variable from a feature
+                  'featureId' : 'direction',
+                  'params' : {'period' : 5,
+                              'featureName' : 'ma_5',
+                              'shift' : 5}}
+        return {INSTRUMENT_TYPE_STOCK : [tv]}
+</code></pre>
+
+<h3 id="featureselectionconfigdicts">FeatureSelectionConfigDicts</h3>
+<p>Use this to specify the methods to be used for feature engineering. For example, you can choose to reduce the overall set of features by keeping only those features which display a certain minimum correlation to target Variable. Current Available methods are:</p>
+<pre><code class="python">def getFeatureSelectionConfigDicts(self):
+        corr = {'featureSelectionKey': 'corr',
+                'featureSelectionId' : 'pearson_correlation',
+                'params' : {'startPeriod' : 0,
+                            'endPeriod' : 60,
+                            'steps' : 10,
+                            'threshold' : 0.1,
+                            'topK' : 2}}
+
+        genericSelect = {'featureSelectionKey' : 'gus',
+                         'featureSelectionId' : 'generic_univariate_select',
+                         'params' : {'scoreFunction' : 'f_classif',
+                                     'mode' : 'k_best',
+                                     'modeParam' : 'all'}}
+
+        rfecvSelect = {'featureSelectionKey': 'rfecv',
+                       'featureSelectionId': 'rfecv_selection',
+                       'params' : {'estimator' : 'LinearRegression',
+                       'estimator_params' : {},
+                       'step' : 1,
+                       'cv' : None,
+                       'scoring' : None,
+                       'n_jobs' : 2}}
+
+        return {INSTRUMENT_TYPE_STOCK : [genericSelect]}
+</code></pre>
+
+<h3 id="featuretransformationconfigdicts">FeatureTransformationConfigDicts</h3>
+<p>The methods you want to use to normalize or transform features. Current available methods are:</p>
+<pre><code class="python">def getFeatureTransformationConfigDicts(self):
+        stdScaler = {'featureTransformKey': 'stdScaler',
+                     'featureTransformId' : 'standard_transform',
+                     'params' : {}}
+
+        minmaxScaler = {'featureTransformKey' : 'minmaxScaler',
+                        'featureTransformId' : 'minmax_transform',
+                        'params' : {'low' : -1,
+                                    'high' : 1}}
+        pcaScaler = {'featureTransformKey' : 'pcaScaler',
+                      'featureTransformId' : 'pca_transform',
+                      'params' : {'n_comp' : 6,
+                                  'copy' : True,
+                                  'whiten' : False,
+                                  'svd' : 'full',
+                                  'itr_power' : 'auto',
+                                  'random_state' : None}}
+        return {INSTRUMENT_TYPE_STOCK : [stdScaler]}
+</code></pre>
+
+<h3 id="model-config-dicts">Model Config Dicts</h3>
+<p>The ML models you want to train. Current available models are:</p>
+<pre><code class="python">def getModelConfigDicts(self):
+        regression_model = {'modelKey': 'linear_regression',
+                     'modelId' : 'linear_regression',
+                     'params' : {}}
+
+        mlp_regression_model = {'modelKey': 'mlp_regression',
+                     'modelId' : 'mlp_regression',
+                     'params' : {}}
+
+        classification_model = {'modelKey': 'logistic_regression',
+                     'modelId' : 'logistic_regression',
+                     'params' : {}}
+
+        mlp_classification_model = {'modelKey': 'mlp_classification',
+                     'modelId' : 'mlp_classification',
+                     'params' : {}}
+
+        svm_model = {'modelKey': 'svm_model',
+                     'modelId' : 'support_vector_machine',
+                     'params' : {}}
+        return {INSTRUMENT_TYPE_STOCK : [classification_model]}
+</code></pre>
+
+<h3 id="prediction-function_2">Prediction Function</h3>
+<p>You do not have to specify a prediction function. The toolbox automatically creates a prediction function using the features and trained model from above.</p></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>
+            var base_url = ".",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="js/base.js" defer></script>
+        <script src="search/main.js" defer></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+                <p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>
+
+<!--
+MkDocs version : 1.1.2
+Build Date UTC : 2020-07-30 15:35:56.446771+00:00
+-->
