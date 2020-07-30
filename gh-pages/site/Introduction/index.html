@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../img/favicon.ico">
+        <title>Introduction - Auquantoolbox Documentation</title>
+        <link href="../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
+
+        <script src="../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../js/bootstrap.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="..">Auquantoolbox Documentation</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="navitem">
+                                <a href=".." class="nav-link">Home</a>
+                            </li>
+                            <li class="navitem active">
+                                <a href="./" class="nav-link">Introduction</a>
+                            </li>
+                            <li class="navitem">
+                                <a href="../prebuilt_feature_guide/" class="nav-link">Prebuilt Feature Guide</a>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a rel="prev" href=".." class="nav-link">
+                                    <i class="fa fa-arrow-left"></i> Previous
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a rel="next" href="../prebuilt_feature_guide/" class="nav-link">
+                                    Next <i class="fa fa-arrow-right"></i>
+                                </a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-light navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-toggle="collapse" data-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-level="1"><a href="#quick-startup-guide" class="nav-link">Quick Startup Guide</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            
+            <li class="nav-item" data-level="1"><a href="#how-does-the-toolbox-work" class="nav-link">How does the toolbox work?</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="2"><a href="#trading-system" class="nav-link">Trading System</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#datasource" class="nav-link">DataSource</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#benchmark" class="nav-link">Benchmark</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#starting-capital" class="nav-link">Starting Capital</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#frequency-of-feature-updates" class="nav-link">Frequency Of Feature Updates</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#pricefeaturekey" class="nav-link">PriceFeatureKey</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#lookback-size" class="nav-link">Lookback Size</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#instrumentfeatures-market-features-and-custom-features" class="nav-link">InstrumentFeatures, Market Features and Custom Features</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#prediction-function" class="nav-link">Prediction Function</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#executionsystem" class="nav-link">ExecutionSystem</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#orderplacer" class="nav-link">OrderPlacer</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+            
+            <li class="nav-item" data-level="1"><a href="#available-feature-guide" class="nav-link">Available Feature Guide</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<p><strong>Welcome to Auquan Toolbox</strong></p>
+<p><a href="http://www.auquan.com">Auquan</a> provides a backtesting toolbox to develop your trading algorithms. The toolbox is free and open source which you can use to create and backtest strategies.</p>
+<p><strong>Table of Contents</strong></p>
+<div class="toc">
+<ul>
+<li><a href="#quick-startup-guide">Quick Startup Guide</a></li>
+<li><a href="#how-does-the-toolbox-work">How does the toolbox work?</a><ul>
+<li><a href="#trading-system">Trading System</a></li>
+<li><a href="#datasource">DataSource</a></li>
+<li><a href="#benchmark">Benchmark</a></li>
+<li><a href="#starting-capital">Starting Capital</a></li>
+<li><a href="#frequency-of-feature-updates">Frequency Of Feature Updates</a></li>
+<li><a href="#pricefeaturekey">PriceFeatureKey</a></li>
+<li><a href="#lookback-size">Lookback Size</a></li>
+<li><a href="#instrumentfeatures-market-features-and-custom-features">InstrumentFeatures, Market Features and Custom Features</a></li>
+<li><a href="#prediction-function">Prediction Function</a></li>
+<li><a href="#executionsystem">ExecutionSystem</a></li>
+<li><a href="#orderplacer">OrderPlacer</a></li>
+</ul>
+</li>
+<li><a href="#available-feature-guide">Available Feature Guide</a></li>
+</ul>
+</div>
+<h1 id="quick-startup-guide"><strong>Quick Startup Guide</strong></h1>
+<ol>
+<li>
+<p>Install Python and dependent packages<br />
+You need Python 2.7 (Python 3 will be supported later) to run this toolbox. For an easy installation process, we recommend Anaconda since it will reliably install all the necessary dependencies. Download <a href="http://continuum.io/downloads">Anaconda</a> and follow the instructions on the <a href="http://docs.continuum.io/anaconda/install">installation page</a>.<br />
+Once you have Python,install the following packages. Easiest way is via pip  </p>
+<ul>
+<li>numpy  </li>
+<li>pandas  </li>
+<li>pandas-datareader  </li>
+<li>plotly</li>
+</ul>
+</li>
+<li>
+<p>Clone/Download this repository.</p>
+<pre><code>git clone https://{your_username}@bitbucket.org/auquan/auquantoolbox.git
+</code></pre>
+</li>
+<li>
+<p>Navigate to the place where you downloaded the repo. Go inside that folder and run the following code to make sure everything is setup properly.</p>
+<pre><code>python my_trading_params.py
+</code></pre>
+</li>
+<li>
+<p>Use <em>my_trading_params.py</em> as a template which contains skeleton functions (with explanation) that need to be filled in to create your own trading strategy. Copy that template to another file and then start implementing the methods in that file. You can use <em>pair_trading_params.py</em> and <em>meanreversion_trading_params.py</em> as motivation.</p>
+</li>
+</ol>
+<h1 id="how-does-the-toolbox-work"><strong>How does the toolbox work?</strong></h1>
+<h2 id="trading-system">Trading System</h2>
+<p>The main system that runs your backtest. Raw data (intraday tick data or end of day data) for instruments are sent to the trading system.
+At every such update of data, the trading system does the following things and then updates the state of that instrument in the system :  </p>
+<ul>
+<li>Checks whether it is time to update the features and execute. It updates features at a frequency determined by trading parameters.  </li>
+<li>If it is, it first loops over all instruments and updates the features for each instrument (specified by trading parameters). Each instrument stores its features, which can be later extracted out.  </li>
+<li>Then, the trading system computes all the market features (specified by trading parameters).
+  The system also stores such market features at every update features interval.
+  An example of market feature is 'prediction' which the user needs to provide - This feaure specifies our prediction probability that the specified instrument is a buy  </li>
+<li>Then the trading system looks at the prediction value and passes it to an execution system. This converts uses the prediction value (and current capital, risk limits etc) to decide what positions should he trading system take for various instruments.  </li>
+<li>Trade executions generated by Execution System are then passed into the orderPlacer, which tries to place these orders into the market.</li>
+</ul>
+<p>Trading System also keeps checking for confirmation of orders which are placed. It updates instrument positions for trades that are confirmed.</p>
+<p>For trading system to work, following need to be specified:</p>
+<h2 id="datasource">DataSource</h2>
+<p>Emits instrument updates into the trading system. It converts any sort of data from external sources to Instrument Updates. We have a different instrument update for each type of instrument.
+You need to specify the instrumentID's that you need data for and start and end date for data.
+Current choices for datasource are:</p>
+<ul>
+<li>GoogleStockDataSource - Stock data from Google</li>
+<li>AuquanDataSource - Data from US stock database of 500 biggest stocks maintained by Auquan.</li>
+</ul>
+<h2 id="benchmark">Benchmark</h2>
+<p>The market instrument to benchmark your strategy's perfromancy. Strategies that perform better than the benchmark are considered successful.
+<em>Make sure that you specify the benchmark instrumentID in list of instruments to get data for.</em></p>
+<h2 id="starting-capital">Starting Capital</h2>
+<p>The initial amount of money you're putting into your trading system. This is set to 1 million notional by default.</p>
+<h2 id="frequency-of-feature-updates">Frequency Of Feature Updates</h2>
+<p>Frequency of updates to features. Any updates within this frequncy to instruments do not trigger feature updates.
+Consequently any trading decisions that need to take place happen with the same frequency
+This is important when you are working with frequently updating data - for example intraday tick data</p>
+<h2 id="pricefeaturekey">PriceFeatureKey</h2>
+<p>You may have multiple measures of price for an instrument at the same time, for example open price, close price etc. Specify which price to use for pnl calculations. By default, this is set to <em>'close'</em> for daily calculations.</p>
+<h2 id="lookback-size">Lookback Size</h2>
+<p>How far back do you want the historical data for your calculations.
+The historical market features and instrument features are only stored upto this amount. The more data you request, the slower your system will be.</p>
+<h2 id="instrumentfeatures-market-features-and-custom-features">InstrumentFeatures, Market Features and Custom Features</h2>
+<p>Features can be called by specifying config dictionaries. Create one dictionary per feature and return them in a dictionary as market features or instrument features.
+Instrument features are calculated per instrument (for example position, fees) and market features are calculated for whole trading system (for example portfolio value)</p>
+<p>Feature config Dictionary has the following keys:</p>
+<blockquote>
+<p><em>featureId:</em> a string representing the type of feature you want to use<br />
+<em>featureKey:</em> {optional} a string representing the key you will use to access the value of this feature<br />
+           If not present, will just use featureId<br />
+<em>params:</em> {optional} A dictionary with which contains other optional params if needed by the feature  </p>
+</blockquote>
+<p>Full list of features is available <a href="https://bitbucket.org/auquan/auquantoolbox/src/master/backtester/features/README.md">here</a>.</p>
+<p>To use your own custom features(you need to create them separately using this <a href="https://links.auquan.com/customFeature">template</a>, return a dictionary where</p>
+<blockquote>
+<p><em>key:</em> featureId to access this feature (Make sure this doesnt conflict with any of the pre defined feature Ids)<br />
+<em>value:</em> Your custom Class which computes this feature. The class should be an instance of Feature<br />
+Eg. if your custom class is MyCustomFeature, and you want to access this via featureId='my_custom_feature',<br />
+you will import that class, and return this function as {'my_custom_feature': MyCustomFeature}  </p>
+</blockquote>
+<h2 id="prediction-function">Prediction Function</h2>
+<p>Combine all the features to create a prediction function which should output the probability that a given instrument is a buy.
+An predicted value of 1 means instrument is a guaranteed buy, 0 means a guaranteed sell and 0.5 means it's trading at fair price (neither a buy or a sell)</p>
+<h2 id="executionsystem">ExecutionSystem</h2>
+<p>Takes a prediction value and converts it into possible trades for each instrument. It takes into account current positions, risk limits, current capital and value of the prediction.
+Instruments with probability predictions values above <em>enter_threshold</em> are bought and below <em>(1-enter_threshold)</em> are sold.
+Instrument positions with probability predictions values between <em>(1-exit_threshold)</em> and <em>exit_threshold</em> are closed
+Current choices are:</p>
+<ul>
+<li>Simple Execution System</li>
+<li>Pair Execution System</li>
+</ul>
+<h2 id="orderplacer">OrderPlacer</h2>
+<p>It helps place an order, and also read confirmations of orders being placed.
+For Backtesting, you can just use the BacktestingOrderPlacer, which places the order and automatically trades at 'PriceFeatureKey' price.</p>
+<h1 id="available-feature-guide"><strong>Available Feature Guide</strong></h1>
+<p>Features can be called by specifying config dictionaries. Create one dictionary per feature and return them in a dictionary as market features or instrument features.</p>
+<p>Feature config Dictionary has the following keys:</p>
+<blockquote>
+<p><em>featureId:</em> a string representing the type of feature you want to use<br />
+<em>featureKey:</em> {optional} a string representing the key you will use to access the value of this feature<br />
+           If not present, will just use featureId<br />
+<em>params:</em> {optional} A dictionary with which contains other optional params if needed by the feature</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th align="center">Feature ID</th>
+<th>Parameters</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center"><em>moving_average</em></td>
+<td>'featureName', 'period'</td>
+<td>calculate rolling average of <em>featureName</em> over <em>period</em></td>
+</tr>
+<tr>
+<td align="center"><em>moving_correlation</em></td>
+<td>'period', 'series1', 'series2'</td>
+<td>calculate rolling correlation of <em>series1</em> and <em>series2</em> over <em>period</em></td>
+</tr>
+<tr>
+<td align="center"><em>moving_max</em></td>
+<td>'featureName', 'period'</td>
+<td>calculate rolling max of <em>featureName</em> over <em>period</em></td>
+</tr>
+<tr>
+<td align="center"><em>moving_min</em></td>
+<td>'featureName', 'period'</td>
+<td>calculate rolling min of <em>featureName</em> over <em>period</em></td>
+</tr>
+<tr>
+<td align="center"><em>moving_sdev</em></td>
+<td>'featureName', 'period'</td>
+<td>calculate moving standard deviation of <em>featureName</em> over <em>period</em></td>
+</tr>
+<tr>
+<td align="center"><em>moving_sum</em></td>
+<td>'featureName', 'period'</td>
+<td>calculate moving sum of <em>featureName</em> over <em>period</em></td>
+</tr>
+<tr>
+<td align="center"><em>exponential_moving_average</em></td>
+<td>'featureName', 'period'</td>
+<td>calculate exp. weighted moving average of <em>featureName</em> with <em>period</em> as half life</td>
+</tr>
+<tr>
+<td align="center"><em>argmax</em></td>
+<td>'featureName', 'period'</td>
+<td>Returns the index where <em>featureName</em> is maximum over <em>period</em></td>
+</tr>
+<tr>
+<td align="center"><em>argmin</em></td>
+<td>'featureName', 'period'</td>
+<td>Returns the index where <em>featureName</em> is minimum over <em>period</em></td>
+</tr>
+<tr>
+<td align="center"><em>delay</em></td>
+<td>'featureName', 'period'</td>
+<td>Returns the value of <em>featureName</em> with a delay of <em>period</em></td>
+</tr>
+<tr>
+<td align="center"><em>difference</em></td>
+<td>'featureName', 'period'</td>
+<td>Returns the difference of <em>featureName</em> with it's value <em>period</em> before</td>
+</tr>
+<tr>
+<td align="center"><em>rank</em></td>
+<td>'featureName', 'period'</td>
+<td>Ranks last <em>period</em> values of <em>featureName</em> on a scale of 0 to 1</td>
+</tr>
+<tr>
+<td align="center"><em>scale</em></td>
+<td>'featureName', 'period', 'scale'</td>
+<td>Resale last <em>period</em> values of <em>featureName</em> on a scale of 0 to <em>scale</em></td>
+</tr>
+<tr>
+<td align="center"><em>ratio</em></td>
+<td>'featureName', 'instrumentId1', 'instrumentId2'</td>
+<td>ratio of feature values of instrumentID1 / instrumentID2</td>
+</tr>
+<tr>
+<td align="center"><em>momentum</em></td>
+<td>'featureName', 'period'</td>
+<td>calculate momentum in <em>featureName</em> over <em>period</em> as featureValue(now) -  featureValue(now - period)</td>
+</tr>
+<tr>
+<td align="center"><em>bollinger_bands</em></td>
+<td>'featureName', 'period'</td>
+<td>upper and lower bollinger bands as average(period) - sdev(period), average(period) + sdev(period)</td>
+</tr>
+<tr>
+<td align="center"><em>cross_sectional_momentum</em></td>
+<td>'featureName', 'period', 'instrumentIds'</td>
+<td>Returns Cross-Section Momentum of 'instrumentIds' in <em>featureName</em> over <em>period</em></td>
+</tr>
+<tr>
+<td align="center"><em>macd</em></td>
+<td>'featureName', 'period1', 'period2'</td>
+<td>moving average convergence divergence as average(period1) - average(period2)</td>
+</tr>
+<tr>
+<td align="center"><em>rsi</em></td>
+<td>'featureName', 'period'</td>
+<td>Relative Strength Index - ratio of average profits / average losses over period</td>
+</tr>
+<tr>
+<td align="center"><em>vwap</em></td>
+<td>-</td>
+<td>calculated from book data as <em>bid price x ask volume + ask price x bid volume / (ask volume + bid volume)</em></td>
+</tr>
+<tr>
+<td align="center"><strong><em>fees</em></strong></td>
+<td>-</td>
+<td>fees to trade, always calculated</td>
+</tr>
+<tr>
+<td align="center"><strong><em>position</em></strong></td>
+<td>-</td>
+<td>instrument position, always calculated</td>
+</tr>
+<tr>
+<td align="center"><strong><em>pnl</em></strong></td>
+<td>-</td>
+<td>Profit/Loss, always calculated</td>
+</tr>
+<tr>
+<td align="center"><strong><em>capital</em></strong></td>
+<td>-</td>
+<td>Spare capital not in use, always calculated</td>
+</tr>
+<tr>
+<td align="center"><strong><em>portfolio_value</em></strong></td>
+<td>-</td>
+<td>Total value of trading system, always calculated</td>
+</tr>
+</tbody>
+</table></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>
+            var base_url = "..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../js/base.js" defer></script>
+        <script src="../search/main.js" defer></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+                <p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>
