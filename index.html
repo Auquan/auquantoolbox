@@ -1,174 +1,770 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta name="description" content="None">
-        
-        
-        <link rel="shortcut icon" href="img/favicon.ico">
+
+
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Create a branded static site from a set of Markdown files to host the documentation of your Open Source or commercial project – customizable, searchable, mobile-friendly, 40+ languages">
+      
+      
+        <link rel="canonical" href="httos://toolbox.auquan.com/">
+      
+      
+        <meta name="author" content="Auquan">
+      
+      <link rel="shortcut icon" href="auquan.ico">
+      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-5.5.0">
+    
+    
+      
         <title>Auquantoolbox Documentation</title>
-        <link href="css/bootstrap.min.css" rel="stylesheet">
-        <link href="css/font-awesome.min.css" rel="stylesheet">
-        <link href="css/base.css" rel="stylesheet">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
-
-        <script src="js/jquery-1.10.2.min.js" defer></script>
-        <script src="js/bootstrap.min.js" defer></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
-        <script>hljs.initHighlightingOnLoad();</script> 
-    </head>
-
-    <body class="homepage">
-        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
-            <div class="container">
-                <a class="navbar-brand" href=".">Auquantoolbox Documentation</a>
-                <!-- Expander button -->
-                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-
-                <!-- Expanded navigation -->
-                <div id="navbar-collapse" class="navbar-collapse collapse">
-                        <!-- Main navigation -->
-                        <ul class="nav navbar-nav">
-                            <li class="navitem active">
-                                <a href="." class="nav-link">Home</a>
-                            </li>
-                            <li class="navitem">
-                                <a href="Introduction/" class="nav-link">Introduction</a>
-                            </li>
-                            <li class="navitem">
-                                <a href="prebuilt_feature_guide/" class="nav-link">Prebuilt Feature Guide</a>
-                            </li>
-                        </ul>
-
-                    <ul class="nav navbar-nav ml-auto">
-                        <li class="nav-item">
-                            <a href="#" class="nav-link" data-toggle="modal" data-target="#mkdocs_search_modal">
-                                <i class="fa fa-search"></i> Search
-                            </a>
-                        </li>
-                            <li class="nav-item">
-                                <a rel="prev" class="nav-link disabled">
-                                    <i class="fa fa-arrow-left"></i> Previous
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a rel="next" href="Introduction/" class="nav-link">
-                                    Next <i class="fa fa-arrow-right"></i>
-                                </a>
-                            </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-
-        <div class="container">
-            <div class="row">
-                    <div class="col-md-3"><div class="navbar-light navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
-    <div class="navbar-header">
-        <button type="button" class="navbar-toggler collapsed" data-toggle="collapse" data-target="#toc-collapse" title="Table of Contents">
-            <span class="fa fa-angle-down"></span>
-        </button>
+      
+    
+    
+      <link rel="stylesheet" href="assets/stylesheets/main.b5d04df8.min.css">
+      
+        <link rel="stylesheet" href="assets/stylesheets/palette.9ab2c1f8.min.css">
+      
+      
+        
+        
+        <meta name="theme-color" content="#3f51b5">
+      
+    
+    
+    
+      
+        <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Questrial:300,400,400i,700%7CRoboto+Mono&display=fallback">
+        <style>body,input{font-family:"Questrial",-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Roboto Mono",SFMono-Regular,Consolas,Menlo,monospace}</style>
+      
+    
+    
+    
+    
+      
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="orange">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#welcome-to-auquan-toolbox" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <header class="md-header" data-md-component="header">
+  <nav class="md-header-nav md-grid" aria-label="Header">
+    <a href="httos://toolbox.auquan.com" title="Auquantoolbox Documentation" class="md-header-nav__button md-logo" aria-label="Auquantoolbox Documentation">
+      
+  <img src="toolbox.png" alt="logo">
+
+    </a>
+    <label class="md-header-nav__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"/></svg>
+    </label>
+    <div class="md-header-nav__title" data-md-component="header-title">
+      
+        <div class="md-header-nav__ellipsis">
+          <span class="md-header-nav__topic md-ellipsis">
+            Auquantoolbox Documentation
+          </span>
+          <span class="md-header-nav__topic md-ellipsis">
+            
+              Home
+            
+          </span>
+        </div>
+      
+    </div>
+    
+      <label class="md-header-nav__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0116 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 019.5 16 6.5 6.5 0 013 9.5 6.5 6.5 0 019.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+      </label>
+      
+<div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" data-md-state="active">
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0116 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 019.5 16 6.5 6.5 0 013 9.5 6.5 6.5 0 019.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+      </label>
+      <button type="reset" class="md-search__icon md-icon" aria-label="Clear" data-md-component="search-reset" tabindex="-1">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+      </button>
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header-nav__source">
+        
+<a href="https://github.com/auquan/auquantoolbox" title="Go to repository" class="md-source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05L244 40.45a28.87 28.87 0 00-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 01-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 000 40.81l195.61 195.6a28.86 28.86 0 0040.8 0l194.69-194.69a28.86 28.86 0 000-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    auquan/auquantoolbox
+  </div>
+</a>
+      </div>
+    
+  </nav>
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+        
+      
+      
+        
+          
+
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-tabs__inner md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  <li class="md-tabs__item">
+    
+      <a href="." class="md-tabs__link md-tabs__link--active">
+        Home
+      </a>
+    
+  </li>
+
+      
+        
+  
+  
+    <li class="md-tabs__item">
+      
+        <a href="Introduction/" class="md-tabs__link">
+          Getting started
+        </a>
+      
+    </li>
+  
+
+      
+        
+  
+  
+    <li class="md-tabs__item">
+      
+        <a href="advanced/prebuilt_feature_guide/" class="md-tabs__link">
+          Advanced
+        </a>
+      
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              <div class="md-sidebar md-sidebar--primary" data-md-component="navigation">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="httos://toolbox.auquan.com" title="Auquantoolbox Documentation" class="md-nav__button md-logo" aria-label="Auquantoolbox Documentation">
+      
+  <img src="toolbox.png" alt="logo">
+
+    </a>
+    Auquantoolbox Documentation
+  </label>
+  
+    <div class="md-nav__source">
+      
+<a href="https://github.com/auquan/auquantoolbox" title="Go to repository" class="md-source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05L244 40.45a28.87 28.87 0 00-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 01-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 000 40.81l195.61 195.6a28.86 28.86 0 0040.8 0l194.69-194.69a28.86 28.86 0 000-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    auquan/auquantoolbox
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+
+
+  <li class="md-nav__item md-nav__item--active">
+    
+    <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+    
+      
+    
+    
+      <label class="md-nav__link md-nav__link--active" for="__toc">
+        Home
+        <span class="md-nav__icon md-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 9h14V7H3v2m0 4h14v-2H3v2m0 4h14v-2H3v2m16 0h2v-2h-2v2m0-10v2h2V7h-2m0 6h2v-2h-2v2z"/></svg>
+        </span>
+      </label>
+    
+    <a href="." title="Home" class="md-nav__link md-nav__link--active">
+      Home
+    </a>
+    
+      
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+      </span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#demo-video" class="md-nav__link">
+    Demo Video
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#installation-guide" class="md-nav__link">
+    Installation Guide
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-does-the-toolbox-work" class="md-nav__link">
+    How does the toolbox work?
+  </a>
+  
+    <nav class="md-nav" aria-label="How does the toolbox work?">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#quick-setup" class="md-nav__link">
+    Quick Setup
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#getting-data-datasource" class="md-nav__link">
+    Getting Data - DataSource
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#specifying-features-instrument-market-and-custom-features" class="md-nav__link">
+    Specifying Features - Instrument, Market and Custom Features
+  </a>
+  
+    <nav class="md-nav" aria-label="Specifying Features - Instrument, Market and Custom Features">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#custom-features-optional" class="md-nav__link">
+    Custom Features - Optional
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#prediction-function" class="md-nav__link">
+    Prediction Function
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#final-metrics" class="md-nav__link">
+    Final Metrics
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#importing-a-trained-model" class="md-nav__link">
+    Importing a trained model
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#under-the-hood" class="md-nav__link">
+    Under the Hood
+  </a>
+  
+    <nav class="md-nav" aria-label="Under the Hood">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#trading-system" class="md-nav__link">
+    Trading System
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#datasource" class="md-nav__link">
+    DataSource
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#benchmark" class="md-nav__link">
+    Benchmark
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#starting-capital" class="md-nav__link">
+    Starting Capital
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#frequency-of-feature-updates" class="md-nav__link">
+    Frequency Of Feature Updates
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pricefeaturekey" class="md-nav__link">
+    PriceFeatureKey
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lookback-size" class="md-nav__link">
+    Lookback Size
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#instrument-features-market-features-and-custom-features" class="md-nav__link">
+    Instrument Features, Market Features and Custom Features
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#prediction-function_1" class="md-nav__link">
+    Prediction Function
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#executionsystem" class="md-nav__link">
+    ExecutionSystem
+  </a>
+  
+    <nav class="md-nav" aria-label="ExecutionSystem">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#orderplacer" class="md-nav__link">
+    OrderPlacer
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+    
+  </li>
 
     
-    <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
-        <ul class="nav flex-column">
-            
-            <li class="nav-item" data-level="1"><a href="#demo-video" class="nav-link">Demo Video</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
-            
-            <li class="nav-item" data-level="1"><a href="#installation-guide" class="nav-link">Installation Guide</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
-            
-            <li class="nav-item" data-level="1"><a href="#how-does-the-toolbox-work" class="nav-link">How does the toolbox work?</a>
-              <ul class="nav flex-column">
-            <li class="nav-item" data-level="2"><a href="#quick-setup" class="nav-link">Quick Setup</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
-            <li class="nav-item" data-level="2"><a href="#final-metrics" class="nav-link">Final Metrics</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
-            <li class="nav-item" data-level="2"><a href="#importing-a-trained-model" class="nav-link">Importing a trained model</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
-            <li class="nav-item" data-level="2"><a href="#under-the-hood-trading-system" class="nav-link">Under the Hood - Trading System</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
-              </ul>
-            </li>
-            
-            <li class="nav-item" data-level="1"><a href="#ml-training-system" class="nav-link">ML Training System</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
-        </ul>
-    </div>
-</div></div>
-                    <div class="col-md-9" role="main">
+      
+      
+      
 
-<p><strong>Note</strong>: This the documentation for the current version toolbox released by Auquan. The old, stripped down version (installed as auquanToolbox, has been deprecated). <a href="https://links.auquan.com/auquantoolbox">You can see the current toolbox repository here</a> - if you face any bugs, please open an issue on the github repository or email us at: toolbox@auquan.com</p>
-<p><strong>Welcome to Auquan Toolbox</strong></p>
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-2" type="checkbox" id="nav-2">
+    
+    <label class="md-nav__link" for="nav-2">
+      Getting started
+      <span class="md-nav__icon md-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M8.59 16.58L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.42z"/></svg>
+      </span>
+    </label>
+    <nav class="md-nav" aria-label="Getting started" data-md-level="1">
+      <label class="md-nav__title" for="nav-2">
+        <span class="md-nav__icon md-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+        </span>
+        Getting started
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="Introduction/" title="Installation" class="md-nav__link">
+      Installation
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-3" type="checkbox" id="nav-3">
+    
+    <label class="md-nav__link" for="nav-3">
+      Advanced
+      <span class="md-nav__icon md-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M8.59 16.58L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.42z"/></svg>
+      </span>
+    </label>
+    <nav class="md-nav" aria-label="Advanced" data-md-level="1">
+      <label class="md-nav__title" for="nav-3">
+        <span class="md-nav__icon md-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+        </span>
+        Advanced
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="advanced/prebuilt_feature_guide/" title="Prebuilt Feature Guide" class="md-nav__link">
+      Prebuilt Feature Guide
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+      </span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#demo-video" class="md-nav__link">
+    Demo Video
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#installation-guide" class="md-nav__link">
+    Installation Guide
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-does-the-toolbox-work" class="md-nav__link">
+    How does the toolbox work?
+  </a>
+  
+    <nav class="md-nav" aria-label="How does the toolbox work?">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#quick-setup" class="md-nav__link">
+    Quick Setup
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#getting-data-datasource" class="md-nav__link">
+    Getting Data - DataSource
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#specifying-features-instrument-market-and-custom-features" class="md-nav__link">
+    Specifying Features - Instrument, Market and Custom Features
+  </a>
+  
+    <nav class="md-nav" aria-label="Specifying Features - Instrument, Market and Custom Features">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#custom-features-optional" class="md-nav__link">
+    Custom Features - Optional
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#prediction-function" class="md-nav__link">
+    Prediction Function
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#final-metrics" class="md-nav__link">
+    Final Metrics
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#importing-a-trained-model" class="md-nav__link">
+    Importing a trained model
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#under-the-hood" class="md-nav__link">
+    Under the Hood
+  </a>
+  
+    <nav class="md-nav" aria-label="Under the Hood">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#trading-system" class="md-nav__link">
+    Trading System
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#datasource" class="md-nav__link">
+    DataSource
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#benchmark" class="md-nav__link">
+    Benchmark
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#starting-capital" class="md-nav__link">
+    Starting Capital
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#frequency-of-feature-updates" class="md-nav__link">
+    Frequency Of Feature Updates
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pricefeaturekey" class="md-nav__link">
+    PriceFeatureKey
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lookback-size" class="md-nav__link">
+    Lookback Size
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#instrument-features-market-features-and-custom-features" class="md-nav__link">
+    Instrument Features, Market Features and Custom Features
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#prediction-function_1" class="md-nav__link">
+    Prediction Function
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#executionsystem" class="md-nav__link">
+    ExecutionSystem
+  </a>
+  
+    <nav class="md-nav" aria-label="ExecutionSystem">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#orderplacer" class="md-nav__link">
+    OrderPlacer
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content">
+            <article class="md-content__inner md-typeset">
+              
+                
+                
+                  
+                
+                
+                <p><strong>Note</strong>: This the documentation for the current version toolbox released by Auquan. The old, stripped down version (installed as auquanToolbox, has been deprecated). <a href="https://links.auquan.com/auquantoolbox">You can see the current toolbox repository here</a> - if you face any bugs, please open an issue on the github repository or email us at: toolbox@auquan.com</p>
+<h1 id="welcome-to-auquan-toolbox">Welcome to Auquan Toolbox<a class="headerlink" href="#welcome-to-auquan-toolbox" title="Permanent link">&para;</a></h1>
 <p><a href="http://www.auquan.com">Auquan</a> provides a backtesting toolbox to develop your trading algorithms. The toolbox is free and open source which you can use to create and backtest strategies.</p>
-<p><strong>Table of Contents</strong></p>
-<div class="toc">
-<ul>
-<li><a href="#demo-video">Demo Video</a></li>
-<li><a href="#installation-guide">Installation Guide</a></li>
-<li><a href="#how-does-the-toolbox-work">How does the toolbox work?</a><ul>
-<li><a href="#quick-setup">Quick Setup</a><ul>
-<li><a href="#getting-data-datasource">Getting Data - DataSource</a></li>
-<li><a href="#specifying-features-instrument-market-and-custom-features">Specifying Features - Instrument, Market and Custom Features</a></li>
-<li><a href="#prediction-function">Prediction Function</a></li>
-</ul>
-</li>
-<li><a href="#final-metrics">Final Metrics</a></li>
-<li><a href="#importing-a-trained-model">Importing a trained model</a></li>
-<li><a href="#under-the-hood-trading-system">Under the Hood - Trading System</a><ul>
-<li><a href="#datasource">DataSource</a></li>
-<li><a href="#benchmark">Benchmark</a></li>
-<li><a href="#starting-capital">Starting Capital</a></li>
-<li><a href="#frequency-of-feature-updates">Frequency Of Feature Updates</a></li>
-<li><a href="#pricefeaturekey">PriceFeatureKey</a></li>
-<li><a href="#lookback-size">Lookback Size</a></li>
-<li><a href="#instrument-features-market-features-and-custom-features">Instrument Features, Market Features and Custom Features</a></li>
-<li><a href="#prediction-function_1">Prediction Function</a></li>
-<li><a href="#executionsystem">ExecutionSystem</a></li>
-<li><a href="#orderplacer">OrderPlacer</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a href="#ml-training-system">ML Training System</a><ul>
-<li><a href="#installation">Installation</a></li>
-<li><a href="#datasource_1">DataSource</a></li>
-<li><a href="#datasplit-ratio">DataSplit Ratio</a></li>
-<li><a href="#instrumentfeatureconfigdicts">InstrumentFeatureConfigDicts</a></li>
-<li><a href="#customfeatures">CustomFeatures</a></li>
-<li><a href="#target-variable">Target Variable</a></li>
-<li><a href="#featureselectionconfigdicts">FeatureSelectionConfigDicts</a></li>
-<li><a href="#featuretransformationconfigdicts">FeatureTransformationConfigDicts</a></li>
-<li><a href="#model-config-dicts">Model Config Dicts</a></li>
-<li><a href="#prediction-function_2">Prediction Function</a></li>
-</ul>
-</li>
-</ul>
-</div>
-<h1 id="demo-video"><strong>Demo Video</strong></h1>
+<h2 id="demo-video">Demo Video<a class="headerlink" href="#demo-video" title="Permanent link">&para;</a></h2>
 <p>You can watch a <a href="(https://www.youtube.com/watch?v=YHdb8w3oRw0)">quick video demo</a> for the toolbox below</p>
 <p><a href="https://www.youtube.com/embed/YHdb8w3oRw0"><img alt="Alt text" src="https://i.ytimg.com/vi/IMtqDzZoiNk/hqdefault.jpg" /></a></p>
-<h1 id="installation-guide"><strong>Installation Guide</strong></h1>
+<h2 id="installation-guide">Installation Guide<a class="headerlink" href="#installation-guide" title="Permanent link">&para;</a></h2>
 <ol>
 <li>
 <p>Install Python and dependent packages<br />
@@ -187,16 +783,18 @@ Our toolbox is compatible with both Python 2.7( there are currently some issues 
 </li>
 <li>
 <p>Download <a href="https://links.auquan.com/sampleParams">this sample file</a> and navigate to the place where you downloaded it (if you cloned the repo, the file is already present). Go inside that folder and run the following code to make sure everything is setup properly.</p>
-<pre><code>python my_trading_params.py
-</code></pre>
+<div class="codehilite"><pre><span></span><code><span class="n">python</span> <span class="n">my_trading_params</span><span class="p">.</span><span class="n">py</span>
+</code></pre></div>
+
+
 </li>
 <li>
 <p>Use <em>my_trading_params.py</em> as a template which contains skeleton functions (with explanation) that need to be filled in to create your own trading strategy. Copy that template to another file and then start implementing the methods in that file. You can use <em>pair_trading_params.py</em> and <em>meanreversion_trading_params.py</em> as motivation.</p>
 </li>
 </ol>
-<h1 id="how-does-the-toolbox-work"><strong>How does the toolbox work?</strong></h1>
+<h2 id="how-does-the-toolbox-work">How does the toolbox work?<a class="headerlink" href="#how-does-the-toolbox-work" title="Permanent link">&para;</a></h2>
 <p>Any security you want to trade with the toolbox is called an <em>instrument</em>. Right now, the toolbox supports stock and future instruments. All the parameters for the toolbox are supplied in class <code>MyTradingParams()</code>.</p>
-<h2 id="quick-setup">Quick Setup</h2>
+<h3 id="quick-setup">Quick Setup<a class="headerlink" href="#quick-setup" title="Permanent link">&para;</a></h3>
 <p>To get started quickly with the toolbox, you need to</p>
 <ol>
 <li>Get Historical Data</li>
@@ -204,23 +802,24 @@ Our toolbox is compatible with both Python 2.7( there are currently some issues 
 <li>Create a prediction function using above features to make your prediction for the market</li>
 </ol>
 <p>The toolbox can handle everything else for you. You can do the above by modifying the following functions:</p>
-<h3 id="getting-data-datasource">Getting Data - DataSource</h3>
+<h3 id="getting-data-datasource">Getting Data - DataSource<a class="headerlink" href="#getting-data-datasource" title="Permanent link">&para;</a></h3>
 <p>Data Source parses data from external sources (csv, log file, html file etc) and loads and converts it into a toolbox compatible form. You need to specify the instrumentID's that you need data for and start and end date for data in in <code>getDataParser()</code> function.</p>
-<pre><code class="python">def getDataParser(self):
-        instrumentIds = ['IBM', 'AAPL', 'MSFT']
-        startDateStr = '2017/05/10'
-        endDateStr = '2017/06/09'
-        return YahooStockDataSource(cachedFolderName='yahooData',
-                                     instrumentIds=instrumentIds,
-                                     startDateStr=startDateStr,
-                                     endDateStr=endDateStr)
-</code></pre>
+<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">getDataParser</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">instrumentIds</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;IBM&#39;</span><span class="p">,</span> <span class="s1">&#39;AAPL&#39;</span><span class="p">,</span> <span class="s1">&#39;MSFT&#39;</span><span class="p">]</span>
+        <span class="n">startDateStr</span> <span class="o">=</span> <span class="s1">&#39;2017/05/10&#39;</span>
+        <span class="n">endDateStr</span> <span class="o">=</span> <span class="s1">&#39;2017/06/09&#39;</span>
+        <span class="k">return</span> <span class="n">YahooStockDataSource</span><span class="p">(</span><span class="n">cachedFolderName</span><span class="o">=</span><span class="s1">&#39;yahooData&#39;</span><span class="p">,</span>
+                                     <span class="n">instrumentIds</span><span class="o">=</span><span class="n">instrumentIds</span><span class="p">,</span>
+                                     <span class="n">startDateStr</span><span class="o">=</span><span class="n">startDateStr</span><span class="p">,</span>
+                                     <span class="n">endDateStr</span><span class="o">=</span><span class="n">endDateStr</span><span class="p">)</span>
+</code></pre></div>
+
 
 <p>Current choices for datasource are:
 * <a href="https://links.auquan.com/yahooDataSource">YahooStockDataSource</a> - Stock data from Yahoo (daily data)
 * <a href="https://links.auquan.com/nseDataSource">NSEStockDataSource</a> - Stock data from NSE (daily data)
 * AuquanDataSource - Data from US stock database of 500 biggest stocks maintained by Auquan.</p>
-<h3 id="specifying-features-instrument-market-and-custom-features">Specifying Features - Instrument, Market and Custom Features</h3>
+<h3 id="specifying-features-instrument-market-and-custom-features">Specifying Features - Instrument, Market and Custom Features<a class="headerlink" href="#specifying-features-instrument-market-and-custom-features" title="Permanent link">&para;</a></h3>
 <p>You can manipulate historical data by creating features. Features are called by specifying config dictionaries. You have to:</p>
 <ol>
 <li>
@@ -237,27 +836,29 @@ Our toolbox is compatible with both Python 2.7( there are currently some issues 
 <p><strong>Example</strong>: If you want to use the moving_sum feature and calculate this for all instruments, your <em><code>getInstrumentFeatureConfigDicts()</code></em> function should be:</p>
 </li>
 </ol>
-<pre><code class="python">  def getInstrumentFeatureConfigDicts(self):
-        msDict = {'featureKey': 'ms_5',
-                'featureId': 'moving_sum',
-                'params': {'period': 5,
-                'featureName': 'basis'}}
-        return [msDict]
-</code></pre>
+<div class="codehilite"><pre><span></span><code>  <span class="k">def</span> <span class="nf">getInstrumentFeatureConfigDicts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">msDict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;featureKey&#39;</span><span class="p">:</span> <span class="s1">&#39;ms_5&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;featureId&#39;</span><span class="p">:</span> <span class="s1">&#39;moving_sum&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;params&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;period&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+                <span class="s1">&#39;featureName&#39;</span><span class="p">:</span> <span class="s1">&#39;basis&#39;</span><span class="p">}}</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">msDict</span><span class="p">]</span>
+</code></pre></div>
+
 
 <p>You can now use this feature by calling it's featureKey, 'ms_5'.    <br />
 Full list of features with featureId and params is available <a href="#">here</a>.</p>
-<p><strong><em>Custom Features - Optional</em></strong></p>
+<h4 id="custom-features-optional">Custom Features - Optional<a class="headerlink" href="#custom-features-optional" title="Permanent link">&para;</a></h4>
 <p>To use your own custom features, you need to create them separately. Follow the example of <a href="https://links.auquan.com/customFeature">this template</a>. Specifically, you'll have to:</p>
 <ul>
 <li>Create a new class for the feature and implement your logic. You can copy the template from <a href="https://links.auquan.com/customFeature">this file</a>.
     Example: If you were implementing a new InstrumentFeature</li>
 </ul>
-<pre><code class="python">class MyCustomFeatureClassName(Feature):
-    @classmethod
-    def computeForInstrument(cls, featureParams, featureKey, currentFeatures, instrument, instrumentManager):
-        return 5
-</code></pre>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span> <span class="nc">MyCustomFeatureClassName</span><span class="p">(</span><span class="n">Feature</span><span class="p">):</span>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">computeForInstrument</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">featureParams</span><span class="p">,</span> <span class="n">featureKey</span><span class="p">,</span> <span class="n">currentFeatures</span><span class="p">,</span> <span class="n">instrument</span><span class="p">,</span> <span class="n">instrumentManager</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mi">5</span>
+</code></pre></div>
+
 
 <ul>
 <li>
@@ -269,49 +870,52 @@ Full list of features with featureId and params is available <a href="#">here</a
 <p>Eg. to use the feature we create above via featureId='my_custom_feature_identifier',  </p>
 </li>
 </ul>
-<pre><code class="python">def getCustomFeatures(self):
-        return {'my_custom_feature_identifier': MyCustomFeatureClassName}
-</code></pre>
+<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">getCustomFeatures</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;my_custom_feature_identifier&#39;</span><span class="p">:</span> <span class="n">MyCustomFeatureClassName</span><span class="p">}</span>
+</code></pre></div>
+
 
 <ul>
 <li>Now you can create a dict for this feature in <code>getInstrumentFeatureConfigDicts()</code>. Dict format is:</li>
 </ul>
-<pre><code class="python">  customFeatureDict = {'featureKey': 'my_custom_feature_key',
-                         'featureId': 'my_custom_feature_identifier',
-                          'params': {'param1': 'value1'}}
-</code></pre>
+<div class="codehilite"><pre><span></span><code>  <span class="n">customFeatureDict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;featureKey&#39;</span><span class="p">:</span> <span class="s1">&#39;my_custom_feature_key&#39;</span><span class="p">,</span>
+                         <span class="s1">&#39;featureId&#39;</span><span class="p">:</span> <span class="s1">&#39;my_custom_feature_identifier&#39;</span><span class="p">,</span>
+                          <span class="s1">&#39;params&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;param1&#39;</span><span class="p">:</span> <span class="s1">&#39;value1&#39;</span><span class="p">}}</span>
+</code></pre></div>
+
 
 <p>Use this feature by calling it's featureKey, 'my_custom_feature_key'</p>
-<h3 id="prediction-function">Prediction Function</h3>
+<h3 id="prediction-function">Prediction Function<a class="headerlink" href="#prediction-function" title="Permanent link">&para;</a></h3>
 <p>Combine all the features to create the desired prediction function. Fill the funtion <code>getPrediction()</code> to return the prediction for instrument you are trading.</p>
 <p>Here you can call your previously created features by referencing their featureId. For example, I can call my moving sum and custom feature as:</p>
-<pre><code class="python">def getPrediction(self, time, currentMarketFeatures, instrumentManager):
+<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">getPrediction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">currentMarketFeatures</span><span class="p">,</span> <span class="n">instrumentManager</span><span class="p">):</span>
 
-        # holder for all the instrument features
-        lookbackInstrumentFeatures = instrumentManager.getLookbackInstrumentFeatures()
+        <span class="c1"># holder for all the instrument features</span>
+        <span class="n">lookbackInstrumentFeatures</span> <span class="o">=</span> <span class="n">instrumentManager</span><span class="o">.</span><span class="n">getLookbackInstrumentFeatures</span><span class="p">()</span>
 
-        ms5Data = lookbackInstrumentFeatures.getFeatureDf('ms_5')
-        # dataframe for a historical instrument feature (ms_5 in this case).   
-        # The index is the timestamps of atmost lookback data points.
-        # The last row of this data frame would contain the features
-        # which are being calculated in this update cycle or for this time.
-        # The second to last row (if exists) would have the features for the previous
-        # time update.
-        # The columns of this dataframe are the stock symbols/instrumentIds.
+        <span class="n">ms5Data</span> <span class="o">=</span> <span class="n">lookbackInstrumentFeatures</span><span class="o">.</span><span class="n">getFeatureDf</span><span class="p">(</span><span class="s1">&#39;ms_5&#39;</span><span class="p">)</span>
+        <span class="c1"># dataframe for a historical instrument feature (ms_5 in this case).   </span>
+        <span class="c1"># The index is the timestamps of atmost lookback data points.</span>
+        <span class="c1"># The last row of this data frame would contain the features</span>
+        <span class="c1"># which are being calculated in this update cycle or for this time.</span>
+        <span class="c1"># The second to last row (if exists) would have the features for the previous</span>
+        <span class="c1"># time update.</span>
+        <span class="c1"># The columns of this dataframe are the stock symbols/instrumentIds.</span>
 
-        ms5 = ms5Data.iloc[-1]
+        <span class="n">ms5</span> <span class="o">=</span> <span class="n">ms5Data</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
-        # This returns the value of the feature at the last time update
-        # Returns a series with index as all the instrumentIds.
+        <span class="c1"># This returns the value of the feature at the last time update</span>
+        <span class="c1"># Returns a series with index as all the instrumentIds.</span>
 
-        customData = lookbackInstrumentFeatures.getFeatureDf('my_custom_feature_key')
-        custom = customData.iloc[-1]
-        predictions = ms5 / custom
-        return predictions
-</code></pre>
+        <span class="n">customData</span> <span class="o">=</span> <span class="n">lookbackInstrumentFeatures</span><span class="o">.</span><span class="n">getFeatureDf</span><span class="p">(</span><span class="s1">&#39;my_custom_feature_key&#39;</span><span class="p">)</span>
+        <span class="n">custom</span> <span class="o">=</span> <span class="n">customData</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">predictions</span> <span class="o">=</span> <span class="n">ms5</span> <span class="o">/</span> <span class="n">custom</span>
+        <span class="k">return</span> <span class="n">predictions</span>
+</code></pre></div>
+
 
 <p>Predictions can be of many types. You can calculate(predict) the <em>FairValue</em> of a parameter, for example price. You can predict the probability that price will increase in the future. You can predict the ratio of price of two securities. You can predict the ranking of a basket of securities. Output of the prediction function is used by the toolbox to make further trading decisions via the <a href="#">execution system</a>. Choice of execution system depends on the type of prediction made.</p>
-<h2 id="final-metrics">Final Metrics</h2>
+<h3 id="final-metrics">Final Metrics<a class="headerlink" href="#final-metrics" title="Permanent link">&para;</a></h3>
 <p>The system returns the following final metrics:</p>
 <ol>
 <li><em>Total PnL:</em> Total Profit(or Loss) from your strategy as a % of initial capital</li>
@@ -325,22 +929,22 @@ Full list of features with featureId and params is available <a href="#">here</a
 <li><em>Return on Capital</em> = Total Profit(or Loss) from your strategy as a % of max capital used</li>
 </ol>
 <p>Other Metrics can be supported if needed.</p>
-<h2 id="importing-a-trained-model">Importing a trained model</h2>
+<h3 id="importing-a-trained-model">Importing a trained model<a class="headerlink" href="#importing-a-trained-model" title="Permanent link">&para;</a></h3>
 <p>If you would like to write your own custom datasource/execution system or you want to import a pre-trained ML model, you can do so in the manner below.
 Here we store a file <code>training_execution_system.py</code> on github. Then we specify the path to file, and the code downloads the file as <code>fileName</code> and imports the required class from it.</p>
-<pre><code class="python">
-import urllib
+<div class="codehilite"><pre><span></span><code><span class="kn">import</span> <span class="nn">urllib</span>
 
-path_to_file = 'https://raw.githubusercontent.com/Auquan/quant-quest-2/master/training_execution_system.py'
-fileName = 'training_execution_system.py'
-if not os.path.isfile(fileName):
-    urllib.urlretrieve (path_to_file, fileName)
+<span class="n">path_to_file</span> <span class="o">=</span> <span class="s1">&#39;https://raw.githubusercontent.com/Auquan/quant-quest-2/master/training_execution_system.py&#39;</span>
+<span class="n">fileName</span> <span class="o">=</span> <span class="s1">&#39;training_execution_system.py&#39;</span>
+<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">fileName</span><span class="p">):</span>
+    <span class="n">urllib</span><span class="o">.</span><span class="n">urlretrieve</span> <span class="p">(</span><span class="n">path_to_file</span><span class="p">,</span> <span class="n">fileName</span><span class="p">)</span>
 
-from training_execution_system import TrainingExecutionSystem
+<span class="kn">from</span> <span class="nn">training_execution_system</span> <span class="kn">import</span> <span class="n">TrainingExecutionSystem</span>
+</code></pre></div>
 
-</code></pre>
 
-<h2 id="under-the-hood-trading-system">Under the Hood - Trading System</h2>
+<h2 id="under-the-hood">Under the Hood<a class="headerlink" href="#under-the-hood" title="Permanent link">&para;</a></h2>
+<h3 id="trading-system">Trading System<a class="headerlink" href="#trading-system" title="Permanent link">&para;</a></h3>
 <p>This is the main system that runs your backtest. All the parameters for the trading system are supplied in class <code>MyTradingParams()</code></p>
 <p>Raw data (intraday tick data or end of day data) is read from the datasource for all instruments and sent to the trading system. At every such update of data, the trading system does the following things and then updates the state of that instrument in the system :  </p>
 <ul>
@@ -354,27 +958,27 @@ from training_execution_system import TrainingExecutionSystem
 </ul>
 <p>Trading System also keeps checking for confirmation of orders which are placed. It updates instrument positions for trades that are confirmed.</p>
 <p>For trading system to work, following need to be specified:</p>
-<h3 id="datasource">DataSource</h3>
+<h3 id="datasource">DataSource<a class="headerlink" href="#datasource" title="Permanent link">&para;</a></h3>
 <p><a href="#">Read Above</a></p>
-<h3 id="benchmark">Benchmark</h3>
+<h3 id="benchmark">Benchmark<a class="headerlink" href="#benchmark" title="Permanent link">&para;</a></h3>
 <p>The market instrument to benchmark your strategy's perfromancy. Strategies that perform better than the benchmark are considered successful.
 <em>Make sure that you specify the benchmark instrumentID in list of instruments to get data for.</em></p>
-<h3 id="starting-capital">Starting Capital</h3>
+<h3 id="starting-capital">Starting Capital<a class="headerlink" href="#starting-capital" title="Permanent link">&para;</a></h3>
 <p>The initial amount of money you're putting into your trading system. This is set to 1 million notional by default.</p>
-<h3 id="frequency-of-feature-updates">Frequency Of Feature Updates</h3>
+<h3 id="frequency-of-feature-updates">Frequency Of Feature Updates<a class="headerlink" href="#frequency-of-feature-updates" title="Permanent link">&para;</a></h3>
 <p>Frequency of updates to features. Any updates within this frequncy to instruments do not trigger feature updates.
 Consequently any trading decisions that need to take place happen with the same frequency
 This is important when you are working with frequently updating data - for example intraday tick data</p>
-<h3 id="pricefeaturekey">PriceFeatureKey</h3>
+<h3 id="pricefeaturekey">PriceFeatureKey<a class="headerlink" href="#pricefeaturekey" title="Permanent link">&para;</a></h3>
 <p>You may have multiple measures of price for an instrument at the same time, for example open price, close price etc. Specify which price to use for pnl calculations. By default, this is set to <em>'close'</em> for daily calculations.</p>
-<h3 id="lookback-size">Lookback Size</h3>
+<h3 id="lookback-size">Lookback Size<a class="headerlink" href="#lookback-size" title="Permanent link">&para;</a></h3>
 <p>How far back do you want the historical data for your calculations.
 The historical market features and instrument features are only stored upto this amount. The more data you request, the slower your system will be.</p>
-<h3 id="instrument-features-market-features-and-custom-features">Instrument Features, Market Features and Custom Features</h3>
+<h3 id="instrument-features-market-features-and-custom-features">Instrument Features, Market Features and Custom Features<a class="headerlink" href="#instrument-features-market-features-and-custom-features" title="Permanent link">&para;</a></h3>
 <p><a href="#">Read Above</a></p>
-<h3 id="prediction-function_1">Prediction Function</h3>
+<h3 id="prediction-function_1">Prediction Function<a class="headerlink" href="#prediction-function_1" title="Permanent link">&para;</a></h3>
 <p><a href="#">Read Above</a></p>
-<h3 id="executionsystem">ExecutionSystem</h3>
+<h2 id="executionsystem">ExecutionSystem<a class="headerlink" href="#executionsystem" title="Permanent link">&para;</a></h2>
 <p>Takes a prediction value and converts it into possible trades for each instrument. It takes into account current positions, risk limits, current capital and value of the prediction.</p>
 <p>All execution systems take the following arguments:</p>
 <ul>
@@ -416,200 +1020,223 @@ The historical market features and instrument features are only stored upto this
 </tr>
 </tbody>
 </table>
-<h3 id="orderplacer">OrderPlacer</h3>
+<h3 id="orderplacer">OrderPlacer<a class="headerlink" href="#orderplacer" title="Permanent link">&para;</a></h3>
 <p>Execution System decided what trades you want to do, order placer actually makes those trades (place an order), and also reads confirmations of orders being placed.
 For Backtesting, you can just use the BacktestingOrderPlacer, which places the order and automatically trades at 'PriceFeatureKey' price at the same time.</p>
-<h1 id="ml-training-system"><strong>ML Training System</strong></h1>
+<h1 id="ml-training-system"><strong>ML Training System</strong><a class="headerlink" href="#ml-training-system" title="Permanent link">&para;</a></h1>
 <p>To make creation and testing of ML models easy for you, we are providing you with a ML model creation suite. This is a beta feature, so please bear with us while we iron out the bugs!</p>
-<h3 id="installation">Installation</h3>
+<h2 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h2>
 <p>Get the toolbox by typing the following commands in your terminal:</p>
-<pre><code>pip uninstall auquan_toolbox
-pip install -U auquan_toolbox_beta --no-cache-dir
-</code></pre>
+<div class="codehilite"><pre><span></span><code><span class="n">pip</span> <span class="n">uninstall</span> <span class="n">auquan_toolbox</span>
+<span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">U</span> <span class="n">auquan_toolbox_beta</span> <span class="c1">--no-cache-dir</span>
+</code></pre></div>
+
 
 <p>For ML Training system to work, following need to be specified:</p>
-<h3 id="datasource_1">DataSource</h3>
+<h3 id="datasource_1">DataSource<a class="headerlink" href="#datasource_1" title="Permanent link">&para;</a></h3>
 <p>Similar to Trading System above.</p>
-<h3 id="datasplit-ratio">DataSplit Ratio</h3>
+<h3 id="datasplit-ratio">DataSplit Ratio<a class="headerlink" href="#datasplit-ratio" title="Permanent link">&para;</a></h3>
 <p>A list specifying the percentage of Training, Validation and Test Data. Eg [6,2,2]. The model is trained and validated on Training and Validation data respectively and then backtested for trading on Test Data.</p>
-<h3 id="instrumentfeatureconfigdicts">InstrumentFeatureConfigDicts</h3>
+<h3 id="instrumentfeatureconfigdicts">InstrumentFeatureConfigDicts<a class="headerlink" href="#instrumentfeatureconfigdicts" title="Permanent link">&para;</a></h3>
 <p>Similar to Trading System above.</p>
-<h3 id="customfeatures">CustomFeatures</h3>
+<h3 id="customfeatures">CustomFeatures<a class="headerlink" href="#customfeatures" title="Permanent link">&para;</a></h3>
 <p>Similar to Trading System above.</p>
-<h3 id="target-variable">Target Variable</h3>
+<h3 id="target-variable">Target Variable<a class="headerlink" href="#target-variable" title="Permanent link">&para;</a></h3>
 <p>The Variable you want to predict. This can be one or many variables. They can be specified as one of the features created above (with a shift) or loaded from a file as below:</p>
-<pre><code class="python">getTargetVariableConfigDicts(self):
-        Y = {'featureKey' : 'Y', #Use a feature loaded from datasource
-             'featureId' : '',
-             'params' : {}}
-        tv = {'featureKey' : 'direction_tv',  ##Create a target variable from a feature
-                  'featureId' : 'direction',
-                  'params' : {'period' : 5,
-                              'featureName' : 'ma_5',
-                              'shift' : 5}}
-        return {INSTRUMENT_TYPE_STOCK : [tv]}
-</code></pre>
+<div class="codehilite"><pre><span></span><code><span class="n">getTargetVariableConfigDicts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">Y</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;featureKey&#39;</span> <span class="p">:</span> <span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="c1">#Use a feature loaded from datasource</span>
+             <span class="s1">&#39;featureId&#39;</span> <span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+             <span class="s1">&#39;params&#39;</span> <span class="p">:</span> <span class="p">{}}</span>
+        <span class="n">tv</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;featureKey&#39;</span> <span class="p">:</span> <span class="s1">&#39;direction_tv&#39;</span><span class="p">,</span>  <span class="c1">##Create a target variable from a feature</span>
+                  <span class="s1">&#39;featureId&#39;</span> <span class="p">:</span> <span class="s1">&#39;direction&#39;</span><span class="p">,</span>
+                  <span class="s1">&#39;params&#39;</span> <span class="p">:</span> <span class="p">{</span><span class="s1">&#39;period&#39;</span> <span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+                              <span class="s1">&#39;featureName&#39;</span> <span class="p">:</span> <span class="s1">&#39;ma_5&#39;</span><span class="p">,</span>
+                              <span class="s1">&#39;shift&#39;</span> <span class="p">:</span> <span class="mi">5</span><span class="p">}}</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">INSTRUMENT_TYPE_STOCK</span> <span class="p">:</span> <span class="p">[</span><span class="n">tv</span><span class="p">]}</span>
+</code></pre></div>
 
-<h3 id="featureselectionconfigdicts">FeatureSelectionConfigDicts</h3>
+
+<h3 id="featureselectionconfigdicts">FeatureSelectionConfigDicts<a class="headerlink" href="#featureselectionconfigdicts" title="Permanent link">&para;</a></h3>
 <p>Use this to specify the methods to be used for feature engineering. For example, you can choose to reduce the overall set of features by keeping only those features which display a certain minimum correlation to target Variable. Current Available methods are:</p>
-<pre><code class="python">def getFeatureSelectionConfigDicts(self):
-        corr = {'featureSelectionKey': 'corr',
-                'featureSelectionId' : 'pearson_correlation',
-                'params' : {'startPeriod' : 0,
-                            'endPeriod' : 60,
-                            'steps' : 10,
-                            'threshold' : 0.1,
-                            'topK' : 2}}
+<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">getFeatureSelectionConfigDicts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">corr</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;featureSelectionKey&#39;</span><span class="p">:</span> <span class="s1">&#39;corr&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;featureSelectionId&#39;</span> <span class="p">:</span> <span class="s1">&#39;pearson_correlation&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;params&#39;</span> <span class="p">:</span> <span class="p">{</span><span class="s1">&#39;startPeriod&#39;</span> <span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                            <span class="s1">&#39;endPeriod&#39;</span> <span class="p">:</span> <span class="mi">60</span><span class="p">,</span>
+                            <span class="s1">&#39;steps&#39;</span> <span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+                            <span class="s1">&#39;threshold&#39;</span> <span class="p">:</span> <span class="mf">0.1</span><span class="p">,</span>
+                            <span class="s1">&#39;topK&#39;</span> <span class="p">:</span> <span class="mi">2</span><span class="p">}}</span>
 
-        genericSelect = {'featureSelectionKey' : 'gus',
-                         'featureSelectionId' : 'generic_univariate_select',
-                         'params' : {'scoreFunction' : 'f_classif',
-                                     'mode' : 'k_best',
-                                     'modeParam' : 'all'}}
+        <span class="n">genericSelect</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;featureSelectionKey&#39;</span> <span class="p">:</span> <span class="s1">&#39;gus&#39;</span><span class="p">,</span>
+                         <span class="s1">&#39;featureSelectionId&#39;</span> <span class="p">:</span> <span class="s1">&#39;generic_univariate_select&#39;</span><span class="p">,</span>
+                         <span class="s1">&#39;params&#39;</span> <span class="p">:</span> <span class="p">{</span><span class="s1">&#39;scoreFunction&#39;</span> <span class="p">:</span> <span class="s1">&#39;f_classif&#39;</span><span class="p">,</span>
+                                     <span class="s1">&#39;mode&#39;</span> <span class="p">:</span> <span class="s1">&#39;k_best&#39;</span><span class="p">,</span>
+                                     <span class="s1">&#39;modeParam&#39;</span> <span class="p">:</span> <span class="s1">&#39;all&#39;</span><span class="p">}}</span>
 
-        rfecvSelect = {'featureSelectionKey': 'rfecv',
-                       'featureSelectionId': 'rfecv_selection',
-                       'params' : {'estimator' : 'LinearRegression',
-                       'estimator_params' : {},
-                       'step' : 1,
-                       'cv' : None,
-                       'scoring' : None,
-                       'n_jobs' : 2}}
+        <span class="n">rfecvSelect</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;featureSelectionKey&#39;</span><span class="p">:</span> <span class="s1">&#39;rfecv&#39;</span><span class="p">,</span>
+                       <span class="s1">&#39;featureSelectionId&#39;</span><span class="p">:</span> <span class="s1">&#39;rfecv_selection&#39;</span><span class="p">,</span>
+                       <span class="s1">&#39;params&#39;</span> <span class="p">:</span> <span class="p">{</span><span class="s1">&#39;estimator&#39;</span> <span class="p">:</span> <span class="s1">&#39;LinearRegression&#39;</span><span class="p">,</span>
+                       <span class="s1">&#39;estimator_params&#39;</span> <span class="p">:</span> <span class="p">{},</span>
+                       <span class="s1">&#39;step&#39;</span> <span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                       <span class="s1">&#39;cv&#39;</span> <span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+                       <span class="s1">&#39;scoring&#39;</span> <span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+                       <span class="s1">&#39;n_jobs&#39;</span> <span class="p">:</span> <span class="mi">2</span><span class="p">}}</span>
 
-        return {INSTRUMENT_TYPE_STOCK : [genericSelect]}
-</code></pre>
+        <span class="k">return</span> <span class="p">{</span><span class="n">INSTRUMENT_TYPE_STOCK</span> <span class="p">:</span> <span class="p">[</span><span class="n">genericSelect</span><span class="p">]}</span>
+</code></pre></div>
 
-<h3 id="featuretransformationconfigdicts">FeatureTransformationConfigDicts</h3>
+
+<h3 id="featuretransformationconfigdicts">FeatureTransformationConfigDicts<a class="headerlink" href="#featuretransformationconfigdicts" title="Permanent link">&para;</a></h3>
 <p>The methods you want to use to normalize or transform features. Current available methods are:</p>
-<pre><code class="python">def getFeatureTransformationConfigDicts(self):
-        stdScaler = {'featureTransformKey': 'stdScaler',
-                     'featureTransformId' : 'standard_transform',
-                     'params' : {}}
+<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">getFeatureTransformationConfigDicts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">stdScaler</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;featureTransformKey&#39;</span><span class="p">:</span> <span class="s1">&#39;stdScaler&#39;</span><span class="p">,</span>
+                     <span class="s1">&#39;featureTransformId&#39;</span> <span class="p">:</span> <span class="s1">&#39;standard_transform&#39;</span><span class="p">,</span>
+                     <span class="s1">&#39;params&#39;</span> <span class="p">:</span> <span class="p">{}}</span>
 
-        minmaxScaler = {'featureTransformKey' : 'minmaxScaler',
-                        'featureTransformId' : 'minmax_transform',
-                        'params' : {'low' : -1,
-                                    'high' : 1}}
-        pcaScaler = {'featureTransformKey' : 'pcaScaler',
-                      'featureTransformId' : 'pca_transform',
-                      'params' : {'n_comp' : 6,
-                                  'copy' : True,
-                                  'whiten' : False,
-                                  'svd' : 'full',
-                                  'itr_power' : 'auto',
-                                  'random_state' : None}}
-        return {INSTRUMENT_TYPE_STOCK : [stdScaler]}
-</code></pre>
+        <span class="n">minmaxScaler</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;featureTransformKey&#39;</span> <span class="p">:</span> <span class="s1">&#39;minmaxScaler&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;featureTransformId&#39;</span> <span class="p">:</span> <span class="s1">&#39;minmax_transform&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;params&#39;</span> <span class="p">:</span> <span class="p">{</span><span class="s1">&#39;low&#39;</span> <span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
+                                    <span class="s1">&#39;high&#39;</span> <span class="p">:</span> <span class="mi">1</span><span class="p">}}</span>
+        <span class="n">pcaScaler</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;featureTransformKey&#39;</span> <span class="p">:</span> <span class="s1">&#39;pcaScaler&#39;</span><span class="p">,</span>
+                      <span class="s1">&#39;featureTransformId&#39;</span> <span class="p">:</span> <span class="s1">&#39;pca_transform&#39;</span><span class="p">,</span>
+                      <span class="s1">&#39;params&#39;</span> <span class="p">:</span> <span class="p">{</span><span class="s1">&#39;n_comp&#39;</span> <span class="p">:</span> <span class="mi">6</span><span class="p">,</span>
+                                  <span class="s1">&#39;copy&#39;</span> <span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+                                  <span class="s1">&#39;whiten&#39;</span> <span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+                                  <span class="s1">&#39;svd&#39;</span> <span class="p">:</span> <span class="s1">&#39;full&#39;</span><span class="p">,</span>
+                                  <span class="s1">&#39;itr_power&#39;</span> <span class="p">:</span> <span class="s1">&#39;auto&#39;</span><span class="p">,</span>
+                                  <span class="s1">&#39;random_state&#39;</span> <span class="p">:</span> <span class="bp">None</span><span class="p">}}</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">INSTRUMENT_TYPE_STOCK</span> <span class="p">:</span> <span class="p">[</span><span class="n">stdScaler</span><span class="p">]}</span>
+</code></pre></div>
 
-<h3 id="model-config-dicts">Model Config Dicts</h3>
+
+<h3 id="model-config-dicts">Model Config Dicts<a class="headerlink" href="#model-config-dicts" title="Permanent link">&para;</a></h3>
 <p>The ML models you want to train. Current available models are:</p>
-<pre><code class="python">def getModelConfigDicts(self):
-        regression_model = {'modelKey': 'linear_regression',
-                     'modelId' : 'linear_regression',
-                     'params' : {}}
+<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">getModelConfigDicts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">regression_model</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;modelKey&#39;</span><span class="p">:</span> <span class="s1">&#39;linear_regression&#39;</span><span class="p">,</span>
+                     <span class="s1">&#39;modelId&#39;</span> <span class="p">:</span> <span class="s1">&#39;linear_regression&#39;</span><span class="p">,</span>
+                     <span class="s1">&#39;params&#39;</span> <span class="p">:</span> <span class="p">{}}</span>
 
-        mlp_regression_model = {'modelKey': 'mlp_regression',
-                     'modelId' : 'mlp_regression',
-                     'params' : {}}
+        <span class="n">mlp_regression_model</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;modelKey&#39;</span><span class="p">:</span> <span class="s1">&#39;mlp_regression&#39;</span><span class="p">,</span>
+                     <span class="s1">&#39;modelId&#39;</span> <span class="p">:</span> <span class="s1">&#39;mlp_regression&#39;</span><span class="p">,</span>
+                     <span class="s1">&#39;params&#39;</span> <span class="p">:</span> <span class="p">{}}</span>
 
-        classification_model = {'modelKey': 'logistic_regression',
-                     'modelId' : 'logistic_regression',
-                     'params' : {}}
+        <span class="n">classification_model</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;modelKey&#39;</span><span class="p">:</span> <span class="s1">&#39;logistic_regression&#39;</span><span class="p">,</span>
+                     <span class="s1">&#39;modelId&#39;</span> <span class="p">:</span> <span class="s1">&#39;logistic_regression&#39;</span><span class="p">,</span>
+                     <span class="s1">&#39;params&#39;</span> <span class="p">:</span> <span class="p">{}}</span>
 
-        mlp_classification_model = {'modelKey': 'mlp_classification',
-                     'modelId' : 'mlp_classification',
-                     'params' : {}}
+        <span class="n">mlp_classification_model</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;modelKey&#39;</span><span class="p">:</span> <span class="s1">&#39;mlp_classification&#39;</span><span class="p">,</span>
+                     <span class="s1">&#39;modelId&#39;</span> <span class="p">:</span> <span class="s1">&#39;mlp_classification&#39;</span><span class="p">,</span>
+                     <span class="s1">&#39;params&#39;</span> <span class="p">:</span> <span class="p">{}}</span>
 
-        svm_model = {'modelKey': 'svm_model',
-                     'modelId' : 'support_vector_machine',
-                     'params' : {}}
-        return {INSTRUMENT_TYPE_STOCK : [classification_model]}
-</code></pre>
+        <span class="n">svm_model</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;modelKey&#39;</span><span class="p">:</span> <span class="s1">&#39;svm_model&#39;</span><span class="p">,</span>
+                     <span class="s1">&#39;modelId&#39;</span> <span class="p">:</span> <span class="s1">&#39;support_vector_machine&#39;</span><span class="p">,</span>
+                     <span class="s1">&#39;params&#39;</span> <span class="p">:</span> <span class="p">{}}</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">INSTRUMENT_TYPE_STOCK</span> <span class="p">:</span> <span class="p">[</span><span class="n">classification_model</span><span class="p">]}</span>
+</code></pre></div>
 
-<h3 id="prediction-function_2">Prediction Function</h3>
-<p>You do not have to specify a prediction function. The toolbox automatically creates a prediction function using the features and trained model from above.</p></div>
-            </div>
+
+<h3 id="prediction-function_2">Prediction Function<a class="headerlink" href="#prediction-function_2" title="Permanent link">&para;</a></h3>
+<p>You do not have to specify a prediction function. The toolbox automatically creates a prediction function using the features and trained model from above.</p>
+                
+              
+              
+                
+
+
+              
+            </article>
+          </div>
         </div>
-
-        <footer class="col-md-12">
-            <hr>
-            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
-        </footer>
-        <script>
-            var base_url = ".",
-                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
-        </script>
-        <script src="js/base.js" defer></script>
-        <script src="search/main.js" defer></script>
-
-        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title" id="searchModalLabel">Search</h4>
-                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+      </main>
+      
+        
+<footer class="md-footer">
+  
+    <div class="md-footer-nav">
+      <nav class="md-footer-nav__inner md-grid" aria-label="Footer">
+        
+        
+          <a href="Introduction/" title="Installation" class="md-footer-nav__link md-footer-nav__link--next" rel="next">
+            <div class="md-footer-nav__title">
+              <div class="md-ellipsis">
+                <span class="md-footer-nav__direction">
+                  Next
+                </span>
+                Installation
+              </div>
             </div>
-            <div class="modal-body">
-                <p>
-                    From here you can search these documents. Enter
-                    your search terms below.
-                </p>
-                <form>
-                    <div class="form-group">
-                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
-                    </div>
-                </form>
-                <div id="mkdocs-search-results"></div>
+            <div class="md-footer-nav__button md-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg>
             </div>
-            <div class="modal-footer">
-            </div>
-        </div>
+          </a>
+        
+      </nav>
     </div>
-</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
-                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-            </div>
-            <div class="modal-body">
-              <table class="table">
-                <thead>
-                  <tr>
-                    <th style="width: 20%;">Keys</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td class="help shortcut"><kbd>?</kbd></td>
-                    <td>Open this help</td>
-                  </tr>
-                  <tr>
-                    <td class="next shortcut"><kbd>n</kbd></td>
-                    <td>Next page</td>
-                  </tr>
-                  <tr>
-                    <td class="prev shortcut"><kbd>p</kbd></td>
-                    <td>Previous page</td>
-                  </tr>
-                  <tr>
-                    <td class="search shortcut"><kbd>s</kbd></td>
-                    <td>Search</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            <div class="modal-footer">
-            </div>
-        </div>
-    </div>
-</div>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-footer-copyright">
+        
+          <div class="md-footer-copyright__highlight">
+            Copyright &copy; 2017 - 2020 Auquan
+          </div>
+        
+        Made with
+        <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+          Material for MkDocs
+        </a>
+      </div>
+      
+  <div class="md-footer-social">
+    
+      
+      
+        
+        
+      
+      <a href="https://github.com/auquan" target="_blank" rel="noopener" title="github.com" class="md-footer-social__link">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+      </a>
+    
+      
+      
+        
+        
+      
+      <a href="https://twitter.com/auquan_" target="_blank" rel="noopener" title="twitter.com" class="md-footer-social__link">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M459.37 151.716c.325 4.548.325 9.097.325 13.645 0 138.72-105.583 298.558-298.558 298.558-59.452 0-114.68-17.219-161.137-47.106 8.447.974 16.568 1.299 25.34 1.299 49.055 0 94.213-16.568 130.274-44.832-46.132-.975-84.792-31.188-98.112-72.772 6.498.974 12.995 1.624 19.818 1.624 9.421 0 18.843-1.3 27.614-3.573-48.081-9.747-84.143-51.98-84.143-102.985v-1.299c13.969 7.797 30.214 12.67 47.431 13.319-28.264-18.843-46.781-51.005-46.781-87.391 0-19.492 5.197-37.36 14.294-52.954 51.655 63.675 129.3 105.258 216.365 109.807-1.624-7.797-2.599-15.918-2.599-24.04 0-57.828 46.782-104.934 104.934-104.934 30.213 0 57.502 12.67 76.67 33.137 23.715-4.548 46.456-13.32 66.599-25.34-7.798 24.366-24.366 44.833-46.132 57.827 21.117-2.273 41.584-8.122 60.426-16.243-14.292 20.791-32.161 39.308-52.628 54.253z"/></svg>
+      </a>
+    
+      
+      
+        
+        
+      
+      <a href="https://www.linkedin.com/company/auquan/" target="_blank" rel="noopener" title="www.linkedin.com" class="md-footer-social__link">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M416 32H31.9C14.3 32 0 46.5 0 64.3v383.4C0 465.5 14.3 480 31.9 480H416c17.6 0 32-14.5 32-32.3V64.3c0-17.8-14.4-32.3-32-32.3zM135.4 416H69V202.2h66.5V416zm-33.2-243c-21.3 0-38.5-17.3-38.5-38.5S80.9 96 102.2 96c21.2 0 38.5 17.3 38.5 38.5 0 21.3-17.2 38.5-38.5 38.5zm282.1 243h-66.4V312c0-24.8-.5-56.7-34.5-56.7-34.6 0-39.9 27-39.9 54.9V416h-66.4V202.2h63.7v29.2h.9c8.9-16.8 30.6-34.5 62.9-34.5 67.2 0 79.7 44.3 79.7 101.9V416z"/></svg>
+      </a>
+    
+  </div>
 
-    </body>
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    
+      <script src="assets/javascripts/vendor.92ffa368.min.js"></script>
+      <script src="assets/javascripts/bundle.5123e3d4.min.js"></script><script id="__lang" type="application/json">{"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents"}</script>
+      
+      <script>
+        app = initialize({
+          base: ".",
+          features: ["tabs"],
+          search: Object.assign({
+            worker: "assets/javascripts/worker/search.a68abb33.min.js"
+          }, typeof search !== "undefined" && search)
+        })
+      </script>
+      
+    
+  </body>
 </html>
-
-<!--
-MkDocs version : 1.1.2
-Build Date UTC : 2020-07-30 15:53:02.128497+00:00
--->

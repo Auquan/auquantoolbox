@@ -1,0 +1,802 @@
+
+
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Create a branded static site from a set of Markdown files to host the documentation of your Open Source or commercial project – customizable, searchable, mobile-friendly, 40+ languages">
+      
+      
+        <link rel="canonical" href="advanced/prebuilt_feature_guide/">
+      
+      
+        <meta name="author" content="Auquan">
+      
+      <link rel="shortcut icon" href="../../auquan.ico">
+      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-5.5.0">
+    
+    
+      
+        <title>Prebuilt Feature Guide - Auquantoolbox Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.b5d04df8.min.css">
+      
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.9ab2c1f8.min.css">
+      
+      
+        
+        
+        <meta name="theme-color" content="#3f51b5">
+      
+    
+    
+    
+      
+        <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Questrial:300,400,400i,700%7CRoboto+Mono&display=fallback">
+        <style>body,input{font-family:"Questrial",-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Roboto Mono",SFMono-Regular,Consolas,Menlo,monospace}</style>
+      
+    
+    
+    
+    
+      
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="orange">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#prebuilt-feature-guide" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <header class="md-header" data-md-component="header">
+  <nav class="md-header-nav md-grid" aria-label="Header">
+    <a href="httos://toolbox.auquan.com" title="Auquantoolbox Documentation" class="md-header-nav__button md-logo" aria-label="Auquantoolbox Documentation">
+      
+  <img src="../../toolbox.png" alt="logo">
+
+    </a>
+    <label class="md-header-nav__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"/></svg>
+    </label>
+    <div class="md-header-nav__title" data-md-component="header-title">
+      
+        <div class="md-header-nav__ellipsis">
+          <span class="md-header-nav__topic md-ellipsis">
+            Auquantoolbox Documentation
+          </span>
+          <span class="md-header-nav__topic md-ellipsis">
+            
+              Prebuilt Feature Guide
+            
+          </span>
+        </div>
+      
+    </div>
+    
+      <label class="md-header-nav__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0116 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 019.5 16 6.5 6.5 0 013 9.5 6.5 6.5 0 019.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+      </label>
+      
+<div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" data-md-state="active">
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0116 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 019.5 16 6.5 6.5 0 013 9.5 6.5 6.5 0 019.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+      </label>
+      <button type="reset" class="md-search__icon md-icon" aria-label="Clear" data-md-component="search-reset" tabindex="-1">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+      </button>
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header-nav__source">
+        
+<a href="https://github.com/auquan/auquantoolbox" title="Go to repository" class="md-source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05L244 40.45a28.87 28.87 0 00-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 01-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 000 40.81l195.61 195.6a28.86 28.86 0 0040.8 0l194.69-194.69a28.86 28.86 0 000-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    auquan/auquantoolbox
+  </div>
+</a>
+      </div>
+    
+  </nav>
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+        
+      
+      
+        
+          
+
+  
+
+<nav class="md-tabs md-tabs--active" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-tabs__inner md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  <li class="md-tabs__item">
+    
+      <a href="../.." class="md-tabs__link">
+        Home
+      </a>
+    
+  </li>
+
+      
+        
+  
+  
+    <li class="md-tabs__item">
+      
+        <a href="../../Introduction/" class="md-tabs__link">
+          Getting started
+        </a>
+      
+    </li>
+  
+
+      
+        
+  
+  
+    <li class="md-tabs__item">
+      
+        <a href="./" class="md-tabs__link md-tabs__link--active">
+          Advanced
+        </a>
+      
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              <div class="md-sidebar md-sidebar--primary" data-md-component="navigation">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="httos://toolbox.auquan.com" title="Auquantoolbox Documentation" class="md-nav__button md-logo" aria-label="Auquantoolbox Documentation">
+      
+  <img src="../../toolbox.png" alt="logo">
+
+    </a>
+    Auquantoolbox Documentation
+  </label>
+  
+    <div class="md-nav__source">
+      
+<a href="https://github.com/auquan/auquantoolbox" title="Go to repository" class="md-source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05L244 40.45a28.87 28.87 0 00-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 01-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 000 40.81l195.61 195.6a28.86 28.86 0 0040.8 0l194.69-194.69a28.86 28.86 0 000-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    auquan/auquantoolbox
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../.." title="Home" class="md-nav__link">
+      Home
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-2" type="checkbox" id="nav-2">
+    
+    <label class="md-nav__link" for="nav-2">
+      Getting started
+      <span class="md-nav__icon md-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M8.59 16.58L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.42z"/></svg>
+      </span>
+    </label>
+    <nav class="md-nav" aria-label="Getting started" data-md-level="1">
+      <label class="md-nav__title" for="nav-2">
+        <span class="md-nav__icon md-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+        </span>
+        Getting started
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../Introduction/" title="Installation" class="md-nav__link">
+      Installation
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+  
+
+
+  <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-3" type="checkbox" id="nav-3" checked>
+    
+    <label class="md-nav__link" for="nav-3">
+      Advanced
+      <span class="md-nav__icon md-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M8.59 16.58L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.42z"/></svg>
+      </span>
+    </label>
+    <nav class="md-nav" aria-label="Advanced" data-md-level="1">
+      <label class="md-nav__title" for="nav-3">
+        <span class="md-nav__icon md-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+        </span>
+        Advanced
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+  
+
+
+  <li class="md-nav__item md-nav__item--active">
+    
+    <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+    
+      
+    
+    
+    <a href="./" title="Prebuilt Feature Guide" class="md-nav__link md-nav__link--active">
+      Prebuilt Feature Guide
+    </a>
+    
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+    
+  
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content">
+            <article class="md-content__inner md-typeset">
+              
+                
+                
+                  
+                
+                
+                <h1 id="prebuilt-feature-guide">Prebuilt Feature Guide<a class="headerlink" href="#prebuilt-feature-guide" title="Permanent link">&para;</a></h1>
+<p>Features can be called by specifying config dictionaries. Create one dictionary per feature and return them in a dictionary as market features or instrument features.</p>
+<p>Feature config Dictionary has the following keys:</p>
+<div class="codehilite"><pre><span></span><code>    <span class="nv">featureId</span>:  <span class="nv">a</span> <span class="nv">string</span> <span class="nv">representing</span> <span class="nv">the</span> <span class="nv">type</span> <span class="nv">of</span> <span class="nv">feature</span> <span class="nv">you</span> <span class="nv">want</span> <span class="nv">to</span> <span class="nv">use</span>  
+    <span class="nv">featureKey</span>: {<span class="nv">optional</span>} <span class="nv">a</span> <span class="nv">string</span> <span class="nv">representing</span> <span class="nv">the</span> <span class="nv">key</span> <span class="nv">you</span> <span class="nv">will</span> <span class="nv">use</span> <span class="nv">to</span> <span class="nv">access</span> <span class="nv">the</span> <span class="nv">value</span> <span class="nv">of</span> <span class="nv">this</span> <span class="nv">feature</span>  
+                  <span class="k">If</span> <span class="nv">not</span> <span class="nv">present</span>, <span class="nv">will</span> <span class="nv">just</span> <span class="nv">use</span> <span class="nv">featureId</span>  
+    <span class="nb">params</span>: {<span class="nv">optional</span>} <span class="nv">A</span> <span class="nv">dictionary</span> <span class="nv">with</span> <span class="nv">which</span> <span class="nv">contains</span> <span class="nv">other</span> <span class="nv">optional</span> <span class="nb">params</span> <span class="k">if</span> <span class="nv">needed</span> <span class="nv">by</span> <span class="nv">the</span> <span class="nv">feature</span>
+</code></pre></div>
+
+
+<p>Code Snippets for all the features are available below</p>
+<table>
+<thead>
+<tr>
+<th align="center">Feature ID</th>
+<th>Parameters</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center"><em>moving_average</em></td>
+<td>'featureName', 'period'</td>
+<td>calculate rolling average of <em>featureName</em> over <em>period</em></td>
+</tr>
+<tr>
+<td align="center"><em>moving_correlation</em></td>
+<td>'period', 'series1', 'series2'</td>
+<td>calculate rolling correlation of <em>series1</em> and <em>series2</em> over <em>period</em></td>
+</tr>
+<tr>
+<td align="center"><em>moving_max</em></td>
+<td>'featureName', 'period'</td>
+<td>calculate rolling max of <em>featureName</em> over <em>period</em></td>
+</tr>
+<tr>
+<td align="center"><em>moving_min</em></td>
+<td>'featureName', 'period'</td>
+<td>calculate rolling min of <em>featureName</em> over <em>period</em></td>
+</tr>
+<tr>
+<td align="center"><em>moving_sdev</em></td>
+<td>'featureName', 'period'</td>
+<td>calculate moving standard deviation of <em>featureName</em> over <em>period</em></td>
+</tr>
+<tr>
+<td align="center"><em>moving_sum</em></td>
+<td>'featureName', 'period'</td>
+<td>calculate moving sum of <em>featureName</em> over <em>period</em></td>
+</tr>
+<tr>
+<td align="center"><em>exponential_moving_average</em></td>
+<td>'featureName', 'period'</td>
+<td>calculate exp. weighted moving average of <em>featureName</em> with <em>period</em> as half life</td>
+</tr>
+<tr>
+<td align="center"><em>argmax</em></td>
+<td>'featureName', 'period'</td>
+<td>Returns the index where <em>featureName</em> is maximum over <em>period</em></td>
+</tr>
+<tr>
+<td align="center"><em>argmin</em></td>
+<td>'featureName', 'period'</td>
+<td>Returns the index where <em>featureName</em> is minimum over <em>period</em></td>
+</tr>
+<tr>
+<td align="center"><em>delay</em></td>
+<td>'featureName', 'period'</td>
+<td>Returns the value of <em>featureName</em> with a delay of <em>period</em></td>
+</tr>
+<tr>
+<td align="center"><em>difference</em></td>
+<td>'featureName', 'period'</td>
+<td>Returns the difference of <em>featureName</em> with it's value <em>period</em> before</td>
+</tr>
+<tr>
+<td align="center"><em>rank</em></td>
+<td>'featureName', 'period'</td>
+<td>Ranks last <em>period</em> values of <em>featureName</em> on a scale of 0 to 1</td>
+</tr>
+<tr>
+<td align="center"><em>scale</em></td>
+<td>'featureName', 'period', 'scale'</td>
+<td>Resale last <em>period</em> values of <em>featureName</em> on a scale of 0 to <em>scale</em></td>
+</tr>
+<tr>
+<td align="center"><em>ratio</em></td>
+<td>'featureName', 'instrumentId1', 'instrumentId2'</td>
+<td>ratio of feature values of instrumentID1 / instrumentID2</td>
+</tr>
+<tr>
+<td align="center"><em>momentum</em></td>
+<td>'featureName', 'period'</td>
+<td>calculate momentum in <em>featureName</em> over <em>period</em> as featureValue(now) -  featureValue(now - period)</td>
+</tr>
+<tr>
+<td align="center"><em>bollinger_bands</em></td>
+<td>'featureName', 'period'</td>
+<td>upper and lower bollinger bands as average(period) - sdev(period), average(period) + sdev(period)</td>
+</tr>
+<tr>
+<td align="center"><em>bollinger_bands_lower</em></td>
+<td>'featureName', 'period'</td>
+<td>lower bollinger bands as average(period) - sdev(period)</td>
+</tr>
+<tr>
+<td align="center"><em>bollinger_bands_upper</em></td>
+<td>'featureName', 'period'</td>
+<td>upper bollinger bands as average(period) + sdev(period)</td>
+</tr>
+<tr>
+<td align="center"><em>cross_sectional_momentum</em></td>
+<td>'featureName', 'period', 'instrumentIds'</td>
+<td>Returns Cross-Section Momentum of 'instrumentIds' in <em>featureName</em> over <em>period</em></td>
+</tr>
+<tr>
+<td align="center"><em>macd</em></td>
+<td>'featureName', 'period1', 'period2'</td>
+<td>moving average convergence divergence as average(period1) - average(period2)</td>
+</tr>
+<tr>
+<td align="center"><em>rsi</em></td>
+<td>'featureName', 'period'</td>
+<td>Relative Strength Index - ratio of average profits / average losses over period</td>
+</tr>
+<tr>
+<td align="center"><em>vwap</em></td>
+<td>-</td>
+<td>calculated from book data as <em>bid price x ask volume + ask price x bid volume / (ask volume + bid volume)</em></td>
+</tr>
+<tr>
+<td align="center"><strong><em>fees</em></strong></td>
+<td>-</td>
+<td>fees to trade, always calculated</td>
+</tr>
+<tr>
+<td align="center"><strong><em>position</em></strong></td>
+<td>-</td>
+<td>instrument position, always calculated</td>
+</tr>
+<tr>
+<td align="center"><strong><em>pnl</em></strong></td>
+<td>-</td>
+<td>Profit/Loss, always calculated</td>
+</tr>
+<tr>
+<td align="center"><strong><em>capital</em></strong></td>
+<td>-</td>
+<td>Spare capital not in use, always calculated</td>
+</tr>
+<tr>
+<td align="center"><strong><em>portfolio_value</em></strong></td>
+<td>-</td>
+<td>Total value of trading system, always calculated</td>
+</tr>
+</tbody>
+</table>
+<h1 id="examples"><strong>Examples</strong><a class="headerlink" href="#examples" title="Permanent link">&para;</a></h1>
+<div class="codehilite"><pre><span></span><code><span class="n">moving_avg</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;featureKey&#39;</span><span class="p">:</span> <span class="s1">&#39;ma_5&#39;</span><span class="p">,</span>
+                  <span class="s1">&#39;featureId&#39;</span><span class="p">:</span> <span class="s1">&#39;moving_average&#39;</span><span class="p">,</span>
+                  <span class="s1">&#39;params&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;period&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+                             <span class="s1">&#39;featureName&#39;</span><span class="p">:</span> <span class="s1">&#39;stockTopAskPrice&#39;</span><span class="p">}}</span>
+</code></pre></div>
+
+
+<div class="codehilite"><pre><span></span><code><span class="n">moving_max</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;featureKey&#39;</span><span class="p">:</span> <span class="s1">&#39;moving_max&#39;</span><span class="p">,</span>
+                  <span class="s1">&#39;featureId&#39;</span><span class="p">:</span> <span class="s1">&#39;moving_max&#39;</span><span class="p">,</span>
+                  <span class="s1">&#39;params&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;period&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+                             <span class="s1">&#39;featureName&#39;</span><span class="p">:</span> <span class="s1">&#39;stockTopAskPrice&#39;</span><span class="p">}}</span>
+</code></pre></div>
+
+
+<div class="codehilite"><pre><span></span><code><span class="n">moving_min</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;featureKey&#39;</span><span class="p">:</span> <span class="s1">&#39;moving_min&#39;</span><span class="p">,</span>
+                  <span class="s1">&#39;featureId&#39;</span><span class="p">:</span> <span class="s1">&#39;moving_min&#39;</span><span class="p">,</span>
+                  <span class="s1">&#39;params&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;period&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+                             <span class="s1">&#39;featureName&#39;</span><span class="p">:</span> <span class="s1">&#39;basis&#39;</span><span class="p">}}</span>
+</code></pre></div>
+
+
+<div class="codehilite"><pre><span></span><code><span class="n">moving_sdev</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;featureKey&#39;</span><span class="p">:</span> <span class="s1">&#39;moving_sdev&#39;</span><span class="p">,</span>
+                  <span class="s1">&#39;featureId&#39;</span><span class="p">:</span> <span class="s1">&#39;moving_sdev&#39;</span><span class="p">,</span>
+                  <span class="s1">&#39;params&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;period&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+                             <span class="s1">&#39;featureName&#39;</span><span class="p">:</span> <span class="s1">&#39;basis&#39;</span><span class="p">}}</span>
+</code></pre></div>
+
+
+<div class="codehilite"><pre><span></span><code><span class="n">moving_sum</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;featureKey&#39;</span><span class="p">:</span> <span class="s1">&#39;moving_sum&#39;</span><span class="p">,</span>
+                  <span class="s1">&#39;featureId&#39;</span><span class="p">:</span> <span class="s1">&#39;moving_sum&#39;</span><span class="p">,</span>
+                  <span class="s1">&#39;params&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;period&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+                             <span class="s1">&#39;featureName&#39;</span><span class="p">:</span> <span class="s1">&#39;basis&#39;</span><span class="p">}}</span>
+</code></pre></div>
+
+
+<div class="codehilite"><pre><span></span><code><span class="n">ema</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;featureKey&#39;</span><span class="p">:</span> <span class="s1">&#39;exponential_moving_average&#39;</span><span class="p">,</span>
+                  <span class="s1">&#39;featureId&#39;</span><span class="p">:</span> <span class="s1">&#39;exponential_moving_average&#39;</span><span class="p">,</span>
+                  <span class="s1">&#39;params&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;period&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+                             <span class="s1">&#39;featureName&#39;</span><span class="p">:</span> <span class="s1">&#39;basis&#39;</span><span class="p">}}</span>
+</code></pre></div>
+
+
+<div class="codehilite"><pre><span></span><code><span class="n">argmax</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;featureKey&#39;</span><span class="p">:</span> <span class="s1">&#39;argmax&#39;</span><span class="p">,</span>
+                  <span class="s1">&#39;featureId&#39;</span><span class="p">:</span> <span class="s1">&#39;argmax&#39;</span><span class="p">,</span>
+                  <span class="s1">&#39;params&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;period&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+                             <span class="s1">&#39;featureName&#39;</span><span class="p">:</span> <span class="s1">&#39;basis&#39;</span><span class="p">}}</span>
+</code></pre></div>
+
+
+<div class="codehilite"><pre><span></span><code><span class="n">argmin</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;featureKey&#39;</span><span class="p">:</span> <span class="s1">&#39;argmin&#39;</span><span class="p">,</span>
+                  <span class="s1">&#39;featureId&#39;</span><span class="p">:</span> <span class="s1">&#39;argmin&#39;</span><span class="p">,</span>
+                  <span class="s1">&#39;params&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;period&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+                             <span class="s1">&#39;featureName&#39;</span><span class="p">:</span> <span class="s1">&#39;basis&#39;</span><span class="p">}}</span>
+</code></pre></div>
+
+
+<div class="codehilite"><pre><span></span><code><span class="n">delay</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;featureKey&#39;</span><span class="p">:</span> <span class="s1">&#39;delay&#39;</span><span class="p">,</span>
+                  <span class="s1">&#39;featureId&#39;</span><span class="p">:</span> <span class="s1">&#39;delay&#39;</span><span class="p">,</span>
+                  <span class="s1">&#39;params&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;period&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+                             <span class="s1">&#39;featureName&#39;</span><span class="p">:</span> <span class="s1">&#39;basis&#39;</span><span class="p">}}</span>
+</code></pre></div>
+
+
+<div class="codehilite"><pre><span></span><code><span class="n">diff</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;featureKey&#39;</span><span class="p">:</span> <span class="s1">&#39;difference&#39;</span><span class="p">,</span>
+                  <span class="s1">&#39;featureId&#39;</span><span class="p">:</span> <span class="s1">&#39;difference&#39;</span><span class="p">,</span>
+                  <span class="s1">&#39;params&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;period&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+                             <span class="s1">&#39;featureName&#39;</span><span class="p">:</span> <span class="s1">&#39;basis&#39;</span><span class="p">}}</span>
+</code></pre></div>
+
+
+<div class="codehilite"><pre><span></span><code><span class="n">rank</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;featureKey&#39;</span><span class="p">:</span> <span class="s1">&#39;rank&#39;</span><span class="p">,</span>
+                  <span class="s1">&#39;featureId&#39;</span><span class="p">:</span> <span class="s1">&#39;rank&#39;</span><span class="p">,</span>
+                  <span class="s1">&#39;params&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;period&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+                             <span class="s1">&#39;featureName&#39;</span><span class="p">:</span> <span class="s1">&#39;basis&#39;</span><span class="p">}}</span>
+</code></pre></div>
+
+
+<div class="codehilite"><pre><span></span><code><span class="n">scale</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;featureKey&#39;</span><span class="p">:</span> <span class="s1">&#39;scale&#39;</span><span class="p">,</span>
+                  <span class="s1">&#39;featureId&#39;</span><span class="p">:</span> <span class="s1">&#39;scale&#39;</span><span class="p">,</span>
+                  <span class="s1">&#39;params&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;period&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+                             <span class="s1">&#39;featureName&#39;</span><span class="p">:</span> <span class="s1">&#39;basis&#39;</span><span class="p">,</span> <span class="s1">&#39;scale&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">}}</span>
+</code></pre></div>
+
+
+<div class="codehilite"><pre><span></span><code><span class="n">mmt</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;featureKey&#39;</span><span class="p">:</span> <span class="s1">&#39;momentum&#39;</span><span class="p">,</span>
+                  <span class="s1">&#39;featureId&#39;</span><span class="p">:</span> <span class="s1">&#39;momentum&#39;</span><span class="p">,</span>
+                  <span class="s1">&#39;params&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;period&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+                             <span class="s1">&#39;featureName&#39;</span><span class="p">:</span> <span class="s1">&#39;basis&#39;</span><span class="p">}}</span>
+</code></pre></div>
+
+
+<div class="codehilite"><pre><span></span><code><span class="n">rankDict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;featureKey&#39;</span><span class="p">:</span> <span class="s1">&#39;rank&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;featureId&#39;</span><span class="p">:</span> <span class="s1">&#39;rank&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;params&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;period&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+                               <span class="s1">&#39;featureName&#39;</span><span class="p">:</span> <span class="s1">&#39;stockVWAP&#39;</span><span class="p">}}</span>
+</code></pre></div>
+
+
+<div class="codehilite"><pre><span></span><code><span class="n">bbandlowerDict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;featureKey&#39;</span><span class="p">:</span> <span class="s1">&#39;bollinger_bands_lower&#39;</span><span class="p">,</span>
+                     <span class="s1">&#39;featureId&#39;</span><span class="p">:</span> <span class="s1">&#39;bollinger_bands_lower&#39;</span><span class="p">,</span>
+                     <span class="s1">&#39;params&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;period&#39;</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span>
+                               <span class="s1">&#39;featureName&#39;</span><span class="p">:</span> <span class="s1">&#39;stockVWAP&#39;</span><span class="p">}}</span>
+</code></pre></div>
+
+
+<div class="codehilite"><pre><span></span><code><span class="n">bbandupperDict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;featureKey&#39;</span><span class="p">:</span> <span class="s1">&#39;bollinger_bands_upper&#39;</span><span class="p">,</span>
+                     <span class="s1">&#39;featureId&#39;</span><span class="p">:</span> <span class="s1">&#39;bollinger_bands_upper&#39;</span><span class="p">,</span>
+                     <span class="s1">&#39;params&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;period&#39;</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span>
+                               <span class="s1">&#39;featureName&#39;</span><span class="p">:</span> <span class="s1">&#39;stockVWAP&#39;</span><span class="p">}}</span>
+</code></pre></div>
+
+
+<div class="codehilite"><pre><span></span><code><span class="n">rsi</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;featureKey&#39;</span><span class="p">:</span> <span class="s1">&#39;rsi&#39;</span><span class="p">,</span>
+                  <span class="s1">&#39;featureId&#39;</span><span class="p">:</span> <span class="s1">&#39;rsi&#39;</span><span class="p">,</span>
+                  <span class="s1">&#39;params&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;period&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+                             <span class="s1">&#39;featureName&#39;</span><span class="p">:</span> <span class="s1">&#39;basis&#39;</span><span class="p">}}</span>
+</code></pre></div>
+
+
+<div class="codehilite"><pre><span></span><code><span class="n">vwap</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;featureKey&#39;</span><span class="p">:</span> <span class="s1">&#39;vwap&#39;</span><span class="p">,</span>
+                  <span class="s1">&#39;featureId&#39;</span><span class="p">:</span> <span class="s1">&#39;vwap&#39;</span><span class="p">}</span>
+</code></pre></div>
+
+
+<div class="codehilite"><pre><span></span><code><span class="n">fees</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;featureKey&#39;</span><span class="p">:</span> <span class="s1">&#39;fees&#39;</span><span class="p">,</span>
+                  <span class="s1">&#39;featureId&#39;</span><span class="p">:</span> <span class="s1">&#39;fees&#39;</span><span class="p">}</span>
+</code></pre></div>
+
+
+<div class="codehilite"><pre><span></span><code><span class="n">position</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;featureKey&#39;</span><span class="p">:</span> <span class="s1">&#39;position&#39;</span><span class="p">,</span>
+                  <span class="s1">&#39;featureId&#39;</span><span class="p">:</span> <span class="s1">&#39;position&#39;</span><span class="p">}</span>
+</code></pre></div>
+
+
+<div class="codehilite"><pre><span></span><code><span class="n">pnl</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;featureKey&#39;</span><span class="p">:</span> <span class="s1">&#39;pnl&#39;</span><span class="p">,</span>
+                  <span class="s1">&#39;featureId&#39;</span><span class="p">:</span> <span class="s1">&#39;pnl&#39;</span><span class="p">}</span>
+</code></pre></div>
+
+
+<div class="codehilite"><pre><span></span><code><span class="n">capital</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;featureKey&#39;</span><span class="p">:</span> <span class="s1">&#39;capital&#39;</span><span class="p">,</span>
+                  <span class="s1">&#39;featureId&#39;</span><span class="p">:</span> <span class="s1">&#39;capital&#39;</span><span class="p">}</span>
+</code></pre></div>
+
+
+<div class="codehilite"><pre><span></span><code><span class="n">portfolio_value</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;featureKey&#39;</span><span class="p">:</span> <span class="s1">&#39;portfolio_value&#39;</span><span class="p">,</span>
+                  <span class="s1">&#39;featureId&#39;</span><span class="p">:</span> <span class="s1">&#39;portfolio_value&#39;</span><span class="p">}</span>
+</code></pre></div>
+
+
+<div class="codehilite"><pre><span></span><code><span class="n">macd</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;featureKey&#39;</span><span class="p">:</span> <span class="s1">&#39;macd&#39;</span><span class="p">,</span>
+                  <span class="s1">&#39;featureId&#39;</span><span class="p">:</span> <span class="s1">&#39;macd&#39;</span><span class="p">,</span>
+                  <span class="s1">&#39;params&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;period1&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+                     <span class="s1">&#39;period2&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>      
+                             <span class="s1">&#39;featureName&#39;</span><span class="p">:</span> <span class="s1">&#39;basis&#39;</span><span class="p">}}</span>
+</code></pre></div>
+
+
+<div class="codehilite"><pre><span></span><code><span class="n">csm</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;featureKey&#39;</span><span class="p">:</span> <span class="s1">&#39;cross_sectional_momentum&#39;</span><span class="p">,</span>
+                  <span class="s1">&#39;featureId&#39;</span><span class="p">:</span> <span class="s1">&#39;cross_sectional_momentum&#39;</span><span class="p">,</span>
+                  <span class="s1">&#39;params&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;period&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+                             <span class="s1">&#39;featureName&#39;</span><span class="p">:</span> <span class="s1">&#39;basis&#39;</span><span class="p">}}</span>
+</code></pre></div>
+
+
+<div class="codehilite"><pre><span></span><code><span class="n">ratio</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;featureKey&#39;</span><span class="p">:</span> <span class="s1">&#39;ratio&#39;</span><span class="p">,</span>
+                  <span class="s1">&#39;featureId&#39;</span><span class="p">:</span> <span class="s1">&#39;ratio&#39;</span><span class="p">,</span>
+                  <span class="s1">&#39;params&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;instrumentId1&#39;</span><span class="p">:</span> <span class="s2">&quot;IBM&quot;</span><span class="p">,</span> <span class="s1">&#39;instumentId2&#39;</span><span class="p">:</span> <span class="s2">&quot;MSFT&quot;</span>
+                             <span class="s1">&#39;featureName&#39;</span><span class="p">:</span> <span class="s1">&#39;basis&#39;</span><span class="p">}}</span>
+</code></pre></div>
+                
+              
+              
+                
+
+
+              
+            </article>
+          </div>
+        </div>
+      </main>
+      
+        
+<footer class="md-footer">
+  
+    <div class="md-footer-nav">
+      <nav class="md-footer-nav__inner md-grid" aria-label="Footer">
+        
+          <a href="../../Introduction/" title="Installation" class="md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+            <div class="md-footer-nav__button md-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+            </div>
+            <div class="md-footer-nav__title">
+              <div class="md-ellipsis">
+                <span class="md-footer-nav__direction">
+                  Previous
+                </span>
+                Installation
+              </div>
+            </div>
+          </a>
+        
+        
+      </nav>
+    </div>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-footer-copyright">
+        
+          <div class="md-footer-copyright__highlight">
+            Copyright &copy; 2017 - 2020 Auquan
+          </div>
+        
+        Made with
+        <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+          Material for MkDocs
+        </a>
+      </div>
+      
+  <div class="md-footer-social">
+    
+      
+      
+        
+        
+      
+      <a href="https://github.com/auquan" target="_blank" rel="noopener" title="github.com" class="md-footer-social__link">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+      </a>
+    
+      
+      
+        
+        
+      
+      <a href="https://twitter.com/auquan_" target="_blank" rel="noopener" title="twitter.com" class="md-footer-social__link">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M459.37 151.716c.325 4.548.325 9.097.325 13.645 0 138.72-105.583 298.558-298.558 298.558-59.452 0-114.68-17.219-161.137-47.106 8.447.974 16.568 1.299 25.34 1.299 49.055 0 94.213-16.568 130.274-44.832-46.132-.975-84.792-31.188-98.112-72.772 6.498.974 12.995 1.624 19.818 1.624 9.421 0 18.843-1.3 27.614-3.573-48.081-9.747-84.143-51.98-84.143-102.985v-1.299c13.969 7.797 30.214 12.67 47.431 13.319-28.264-18.843-46.781-51.005-46.781-87.391 0-19.492 5.197-37.36 14.294-52.954 51.655 63.675 129.3 105.258 216.365 109.807-1.624-7.797-2.599-15.918-2.599-24.04 0-57.828 46.782-104.934 104.934-104.934 30.213 0 57.502 12.67 76.67 33.137 23.715-4.548 46.456-13.32 66.599-25.34-7.798 24.366-24.366 44.833-46.132 57.827 21.117-2.273 41.584-8.122 60.426-16.243-14.292 20.791-32.161 39.308-52.628 54.253z"/></svg>
+      </a>
+    
+      
+      
+        
+        
+      
+      <a href="https://www.linkedin.com/company/auquan/" target="_blank" rel="noopener" title="www.linkedin.com" class="md-footer-social__link">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M416 32H31.9C14.3 32 0 46.5 0 64.3v383.4C0 465.5 14.3 480 31.9 480H416c17.6 0 32-14.5 32-32.3V64.3c0-17.8-14.4-32.3-32-32.3zM135.4 416H69V202.2h66.5V416zm-33.2-243c-21.3 0-38.5-17.3-38.5-38.5S80.9 96 102.2 96c21.2 0 38.5 17.3 38.5 38.5 0 21.3-17.2 38.5-38.5 38.5zm282.1 243h-66.4V312c0-24.8-.5-56.7-34.5-56.7-34.6 0-39.9 27-39.9 54.9V416h-66.4V202.2h63.7v29.2h.9c8.9-16.8 30.6-34.5 62.9-34.5 67.2 0 79.7 44.3 79.7 101.9V416z"/></svg>
+      </a>
+    
+  </div>
+
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    
+      <script src="../../assets/javascripts/vendor.92ffa368.min.js"></script>
+      <script src="../../assets/javascripts/bundle.5123e3d4.min.js"></script><script id="__lang" type="application/json">{"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents"}</script>
+      
+      <script>
+        app = initialize({
+          base: "../..",
+          features: ["tabs"],
+          search: Object.assign({
+            worker: "../../assets/javascripts/worker/search.a68abb33.min.js"
+          }, typeof search !== "undefined" && search)
+        })
+      </script>
+      
+    
+  </body>
+</html>
