@@ -1,0 +1,78 @@
+
+# Project information
+site_name:  Auquantoolbox Documentation
+site_url: httos://toolbox.auquan.com
+site_author: Auquan
+site_description: >-
+  Auquan Toolbox is the best open source tool for institutional investors to use to build their trading strategies. Built by some of the worlds leading quants, so you can focus on delivering alpha.
+
+
+# Repository
+repo_name: auquan/auquantoolbox
+repo_url: https://github.com/auquan/auquantoolbox
+edit_uri: ""
+
+# Copyright
+copyright: Copyright &copy; 2017 - 2020 Auquan
+
+# Configuration
+theme:
+  name: material
+
+  # 404 page
+  static_templates:
+    - 404.html
+
+  # Don't include MkDocs' JavaScript
+  include_search_page: false
+  search_index_only: true
+
+  # Default values, taken from mkdocs_theme.yml
+  language: en
+  features:
+    - tabs
+    #- instant
+  palette:
+    scheme: default
+    primary: indigo
+    accent: orange
+  font:
+    text: Questrial
+    code: Roboto Mono
+  logo: toolbox.png
+  favicon: auquan.ico
+
+# Plugins
+plugins:
+  - search
+
+# Customization
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/auquan
+    - icon: fontawesome/brands/twitter
+      link: https://twitter.com/auquan_
+    - icon: fontawesome/brands/linkedin
+      link: https://www.linkedin.com/company/auquan/
+
+markdown_extensions:
+  - codehilite
+
+
+# Page tree
+nav:
+  - Home: index.md
+  - Getting Started:
+    - First Steps: index.md
+    - How it works: getting-started.md
+    - Prebuilt Feature Guide: prebuilt-feature-guide.md
+  - Advanced:
+    - Under The Hood: advanced/under-the-hood.md
+    - Machine Learning System: advanced/ml-system.md
+  - Feature Guide: prebuilt-feature-guide.md
+
+#  - Changelog:
+#    - Deprecations: deprecations.md
+
+# Google Analytics
