@@ -75,4 +75,6 @@ nav:
 #  - Changelog:
 #    - Deprecations: deprecations.md
 
-# Google Analytics
+Google Analytics:
+  - UA-106415685-6
+  - auto
