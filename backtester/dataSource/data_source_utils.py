@@ -8,11 +8,17 @@ import re
 from time import mktime as mktime
 from itertools import groupby
 
+def getHeadersForYahoo():
+    return {'Connection': 'keep-alive',
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) \
+              AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.99 Safari/537.36'}
+
 
 def getCookieForYahoo(instrumentId):
     """Returns a tuple pair of cookie and crumb used in the request"""
     url = 'https://finance.yahoo.com/quote/%s/history' % (instrumentId)
-    req = requests.get(url)
+
+    req = requests.get(url, headers=getHeadersForYahoo())
     txt = req.content
     cookie = req.cookies['B']
     pattern = re.compile('.*"CrumbStore":\{"crumb":"(?P<crumb>[^"]+)"\}')
@@ -31,7 +37,7 @@ def downloadFileFromYahoo(startDate, endDate, instrumentId, fileName, event='his
     start = int(mktime(startDate.timetuple()))
     end = int(mktime(endDate.timetuple()))
     url = 'https://query1.finance.yahoo.com/v7/finance/download/%s?period1=%s&period2=%s&interval=1d&events=%s&crumb=%s' % (instrumentId, start, end, event, crumb)
-    data = requests.get(url, cookies={'B': cookie})
+    data = requests.get(url, cookies={'B': cookie}, headers=getHeadersForYahoo())
     with open(fileName, 'wb') as f:
         f.write(data.content)
         return True
