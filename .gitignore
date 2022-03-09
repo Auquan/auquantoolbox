@@ -8,3 +8,4 @@ auquan_toolbox.egg-info/*
 *Data/*
 historicalData/*
 *.json
+.idea

@@ -1,10 +1,11 @@
 # **Quick Startup Guide** #
 
 1. Packages to install. Easiest way is via pip  
-    * numpy  
-    * pandas  
-    * pandas-datareader  
-    * plotly  
+    * numpy
+    * pandas
+    * pandas-datareader
+    * plotly
+    * yfinance
 2. Clone/Download this repository.
 
         git clone https://{your_username}@bitbucket.org/auquan/auquantoolbox.git

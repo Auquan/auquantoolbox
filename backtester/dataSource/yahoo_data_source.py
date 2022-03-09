@@ -130,11 +130,9 @@ class YahooStockDataSource(DataSource):
 
     def downloadAndAdjustData(self, instrumentId, fileName):
         if not os.path.isfile(fileName):
-            if not downloadFileFromYahoo(self._startDate, self._endDate, instrumentId, fileName):
+            if not downloadFileFromYahoo(self._startDate, self._endDate, instrumentId, fileName, adjustPrice=self.__adjustPrice):
                 logError('Skipping %s:' % (instrumentId))
                 return False
-            if(self.__adjustPrice):
-                self.adjustPriceForSplitAndDiv(instrumentId, fileName)
         return True
 
     def processGroupedInstrumentUpdates(self):
@@ -180,16 +178,6 @@ class YahooStockDataSource(DataSource):
 
     def getClosingTime(self):
         return self._allTimes[-1]
-
-    def adjustPriceForSplitAndDiv(self, instrumentId, fileName):
-        multiplier = data_source_utils.getMultipliers(self,instrumentId,fileName,self.__downloadId)
-        temp['close'] = temp['close'] * multiplier[0] * multiplier[1]
-        temp['open'] = temp['open'] * multiplier[0] * multiplier[1]
-        temp['high'] = temp['high'] * multiplier[0] * multiplier[1]
-        temp['low'] = temp['low'] * multiplier[0] * multiplier[1]
-
-        del temp['dividends']
-        temp.to_csv(fileName)
 
 
 if __name__ == "__main__":
