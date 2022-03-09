@@ -1,11 +1,6 @@
 from backtester.instrumentUpdates import *
 from backtester.constants import *
 from backtester.logger import *
-import os
-import os.path
-import requests
-import re
-from time import mktime as mktime
 from itertools import groupby
 import yfinance as yf
 
